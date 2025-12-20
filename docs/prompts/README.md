@@ -1,6 +1,6 @@
-# Setup Prompts
+# Prompts
 
-AI-generated project setup specifications and implementation records.
+AI-generated project specifications and implementation records.
 
 ## Contents
 
@@ -8,6 +8,10 @@ AI-generated project setup specifications and implementation records.
   - [README.md](./setup/README.md) - Original v1 prompt
   - [v2.md](./setup/v2.md) - Updated specification with design decisions
   - [clarifications.md](./setup/clarifications.md) - Implementation decisions
+
+- [vision/](./vision/) - Product vision and feature scope
+  - [README.md](./vision/README.md) - Product vision, demo context, feature priorities
+  - [clarifications.md](./vision/clarifications.md) - Vision implementation decisions
 
 ## Purpose
 

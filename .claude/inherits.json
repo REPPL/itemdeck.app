@@ -1,0 +1,10 @@
+{
+  "from": [
+    "~/.claude",
+    "~/Development/.claude",
+    "~/Development/Sandboxed/.claude"
+  ],
+  "profiles": [
+    "typescript"
+  ]
+}

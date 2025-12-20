@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="currentColor">
+  <!-- Card deck icon as placeholder logo -->
+  <g opacity="0.9">
+    <!-- Back card (offset) -->
+    <rect x="18" y="12" width="50" height="70" rx="6" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.4"/>
+
+    <!-- Middle card (offset) -->
+    <rect x="24" y="18" width="50" height="70" rx="6" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.6"/>
+
+    <!-- Front card -->
+    <rect x="30" y="24" width="50" height="70" rx="6" fill="none" stroke="currentColor" stroke-width="3"/>
+
+    <!-- Diamond symbol on front card -->
+    <path d="M55 44 L65 59 L55 74 L45 59 Z" fill="currentColor" opacity="0.8"/>
+  </g>
+</svg>

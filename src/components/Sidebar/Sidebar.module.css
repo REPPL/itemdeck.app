@@ -1,0 +1,72 @@
+/* Backdrop for closing sidebar */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  pointer-events: none;
+  transition: background 300ms ease, backdrop-filter 300ms ease;
+}
+
+.backdrop.open {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+}
+
+/* Sidebar panel - grows from button position to full-height sidebar */
+.sidebar {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 95;
+
+  /* Start as button size, grow to full sidebar */
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+
+  /* White semi-transparent with blur */
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+
+  /* Animation - animate all position and size properties */
+  transition:
+    top 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    left 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    width 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    height 350ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-radius 350ms cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Hide content when closed */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.sidebar.open {
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  border-radius: 0;
+  pointer-events: auto;
+}
+
+/* Navigation content */
+.nav {
+  padding: 4.5rem 1.5rem 1.5rem;
+  opacity: 0;
+  transition: opacity 200ms ease 0ms;
+}
+
+.sidebar.open .nav {
+  opacity: 1;
+  transition: opacity 200ms ease 200ms;
+}
+
+.placeholder {
+  color: var(--colour-text-muted);
+  font-size: 0.875rem;
+}

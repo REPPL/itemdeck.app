@@ -1,0 +1,77 @@
+/*
+ * Card component styles
+ * Uses standard poker card ratio (2.5:3.5 = 5:7)
+ * Cards have fixed dimensions and do not stretch
+ * Logo is always centred; text positioned below (or above) logo
+ */
+
+.card {
+  /* Dimensions set via inline style from settings context */
+  flex-shrink: 0;
+  position: relative;
+
+  /* Card appearance */
+  background: var(--card-back-background);
+  border-radius: var(--card-border-radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--transition-normal);
+
+  /* For layout animation - don't interfere with FLIP transforms */
+  will-change: transform;
+}
+
+.card:hover {
+  /* Glow effect instead of movement */
+  box-shadow:
+    0 0 20px rgba(100, 150, 255, 0.4),
+    0 0 40px rgba(100, 150, 255, 0.2),
+    var(--shadow-card-hover);
+}
+
+/* Logo container - always centred */
+.logoContainer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60%;
+  max-height: 50%;
+  color: var(--card-back-logo-colour);
+}
+
+.logo {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  /* For inline SVGs, inherit colour from parent */
+  fill: currentColor;
+}
+
+/* Text field (year by default) - positioned below logo */
+.textField {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-family-heading);
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--card-back-text);
+  text-align: center;
+  margin: 0;
+  padding: 0.5rem 1.25rem;
+  background: var(--card-back-text-background);
+  border-radius: calc(var(--card-border-radius) * 0.6);
+  min-width: 4rem;
+}
+
+/* Optional: text positioned above logo */
+.textFieldAbove {
+  bottom: auto;
+  top: 12%;
+}

@@ -386,4 +386,4 @@ export function LoadingSkeleton({ type }: LoadingSkeletonProps) {
 ## Related Documentation
 
 - [Performance & Virtualisation Research](../../../../research/performance-virtualisation.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.md)
+- [v0.4.0 Milestone](../../milestones/v0.4.0.md)

@@ -397,4 +397,4 @@ export async function importData(jsonString: string): Promise<void> {
 
 - [State Persistence Research](../../../../research/state-persistence.md)
 - [ADR-004: Zustand for State Management](../../../decisions/adrs/ADR-004-state-management.md)
-- [v0.3.0 Milestone](../../milestones/v0.3.md)
+- [v0.3.0 Milestone](../../milestones/v0.3.0.md)

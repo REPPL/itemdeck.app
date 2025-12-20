@@ -97,3 +97,6 @@ Use **CSS custom properties** (CSS variables) for theming.
 
 - [Customisation Options Research](../../../research/customisation-options.md)
 - [F-010: Theme System](../../roadmap/features/planned/F-010-theme-system.md)
+- [F-011: Layout Presets](../../roadmap/features/planned/F-011-layout-presets.md)
+- [F-012: State Persistence](../../roadmap/features/planned/F-012-state-persistence.md)
+- [F-013: Settings Panel](../../roadmap/features/planned/F-013-settings-panel.md)

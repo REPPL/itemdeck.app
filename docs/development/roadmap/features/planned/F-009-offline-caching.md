@@ -242,4 +242,4 @@ export function useCardsWithOfflineSupport(sourceId: string, fetchFn: () => Prom
 
 - [External Data Sources Research](../../../../research/external-data-sources.md)
 - [State Persistence Research](../../../../research/state-persistence.md)
-- [v0.2.0 Milestone](../../milestones/v0.2.md)
+- [v0.2.0 Milestone](../../milestones/v0.2.0.md)

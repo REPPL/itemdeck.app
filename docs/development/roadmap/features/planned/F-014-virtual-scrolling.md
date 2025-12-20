@@ -404,4 +404,4 @@ export function useScrollRestoration<T extends HTMLElement>(
 
 - [Performance & Virtualisation Research](../../../../research/performance-virtualisation.md)
 - [ADR-006: TanStack Virtual for Large Lists](../../../decisions/adrs/ADR-006-virtualisation.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.md)
+- [v0.4.0 Milestone](../../milestones/v0.4.0.md)

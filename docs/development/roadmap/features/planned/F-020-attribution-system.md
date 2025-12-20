@@ -525,4 +525,4 @@ export function CreditsPage() {
 
 - [Ethical Image Sourcing Research](../../../../research/ethical-image-sourcing.md)
 - [ADR-012: Wikimedia Commons for Ethical Sourcing](../../../decisions/adrs/ADR-012-ethical-sourcing.md)
-- [v0.5.0 Milestone](../../milestones/v0.5.md)
+- [v0.5.0 Milestone](../../milestones/v0.5.0.md)

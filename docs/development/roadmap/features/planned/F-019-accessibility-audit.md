@@ -427,4 +427,4 @@ export function AccessibilityChecklist() {
 
 - [Accessibility Research](../../../../research/accessibility.md)
 - [ADR-011: WCAG 2.2 AA Compliance](../../../decisions/adrs/ADR-011-accessibility-standard.md)
-- [v0.5.0 Milestone](../../milestones/v0.5.md)
+- [v0.5.0 Milestone](../../milestones/v0.5.0.md)

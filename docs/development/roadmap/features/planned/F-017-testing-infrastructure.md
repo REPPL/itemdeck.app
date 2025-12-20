@@ -417,4 +417,4 @@ jobs:
 - [Testing Strategies Research](../../../../research/testing-strategies.md)
 - [ADR-007: Vitest for Unit Testing](../../../decisions/adrs/ADR-007-unit-testing.md)
 - [ADR-008: Playwright for E2E Testing](../../../decisions/adrs/ADR-008-e2e-testing.md)
-- [v0.5.0 Milestone](../../milestones/v0.5.md)
+- [v0.5.0 Milestone](../../milestones/v0.5.0.md)

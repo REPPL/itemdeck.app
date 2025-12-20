@@ -181,4 +181,4 @@ Example `cards.json` file:
 - [External Data Sources Research](../../../../research/external-data-sources.md)
 - [Configuration Hierarchy Research](../../../../research/configuration-hierarchy.md)
 - [ADR-002: Schema Validation](../../../decisions/adrs/ADR-002-schema-validation.md)
-- [v0.2.0 Milestone](../../milestones/v0.2.md)
+- [v0.2.0 Milestone](../../milestones/v0.2.0.md)

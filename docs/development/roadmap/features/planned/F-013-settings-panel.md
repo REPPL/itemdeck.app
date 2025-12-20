@@ -460,4 +460,4 @@ function SettingsIcon() {
 - [Customisation Options Research](../../../../research/customisation-options.md)
 - [State Persistence Research](../../../../research/state-persistence.md)
 - [Accessibility Research](../../../../research/accessibility.md)
-- [v0.3.0 Milestone](../../milestones/v0.3.md)
+- [v0.3.0 Milestone](../../milestones/v0.3.0.md)

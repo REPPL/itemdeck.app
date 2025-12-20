@@ -155,4 +155,4 @@ function deepMerge<T extends object>(...sources: Array<Partial<T> | undefined>):
 
 - [Configuration Hierarchy Research](../../../../research/configuration-hierarchy.md)
 - [ADR-002: Schema Validation](../../../decisions/adrs/ADR-002-schema-validation.md)
-- [v0.1.0 Milestone](../../milestones/v0.1.md)
+- [v0.1.0 Milestone](../../milestones/v0.1.0.md)

@@ -206,4 +206,4 @@ export function GitHubSourceConfig({ onSubmit }: { onSubmit: (data: GitHubSource
 ## Related Documentation
 
 - [External Data Sources Research](../../../../research/external-data-sources.md)
-- [v0.2.0 Milestone](../../milestones/v0.2.md)
+- [v0.2.0 Milestone](../../milestones/v0.2.0.md)

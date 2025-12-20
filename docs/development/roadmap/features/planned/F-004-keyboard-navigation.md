@@ -189,4 +189,4 @@ function CardGrid({ cards, onCardFlip }: CardGridProps) {
 
 - [Accessibility Research](../../../../research/accessibility.md)
 - [ADR-011: Accessibility Standard](../../../decisions/adrs/ADR-011-accessibility-standard.md)
-- [v0.1.0 Milestone](../../milestones/v0.1.md)
+- [v0.1.0 Milestone](../../milestones/v0.1.0.md)

@@ -349,4 +349,4 @@ jobs:
 - [System Security Research](../../../../research/system-security.md)
 - [Image Handling Security Research](../../../../research/image-handling-security.md)
 - [ADR-009: CSP and DOMPurify for Security](../../../decisions/adrs/ADR-009-security.md)
-- [v0.5.0 Milestone](../../milestones/v0.5.md)
+- [v0.5.0 Milestone](../../milestones/v0.5.0.md)

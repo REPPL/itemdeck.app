@@ -163,4 +163,4 @@ export function useMotionPreference() {
 - [Accessibility Research](../../../../research/accessibility.md)
 - [Card Layouts Research - Accessibility Section](../../../../research/card-layouts-animations.md)
 - [ADR-011: Accessibility Standard](../../../decisions/adrs/ADR-011-accessibility-standard.md)
-- [v0.1.0 Milestone](../../milestones/v0.1.md)
+- [v0.1.0 Milestone](../../milestones/v0.1.0.md)

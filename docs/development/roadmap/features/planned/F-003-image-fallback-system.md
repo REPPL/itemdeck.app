@@ -195,4 +195,4 @@ export function ImageSkeleton({ className }: { className?: string }) {
 
 - [Asset Management Research](../../../../research/asset-management.md)
 - [Image Handling Research](../../../../research/image-handling-security.md)
-- [v0.1.0 Milestone](../../milestones/v0.1.md)
+- [v0.1.0 Milestone](../../milestones/v0.1.0.md)

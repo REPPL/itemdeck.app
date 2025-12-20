@@ -159,4 +159,4 @@ export function QueryErrorBoundary({ children }: { children: React.ReactNode }) 
 
 - [External Data Sources Research](../../../../research/external-data-sources.md)
 - [ADR-003: Data Fetching](../../../decisions/adrs/ADR-003-data-fetching.md)
-- [v0.2.0 Milestone](../../milestones/v0.2.md)
+- [v0.2.0 Milestone](../../milestones/v0.2.0.md)

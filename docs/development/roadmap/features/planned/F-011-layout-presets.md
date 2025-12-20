@@ -350,4 +350,4 @@ export function ListView({ cards, onCardClick }: ListViewProps) {
 
 - [Customisation Options Research](../../../../research/customisation-options.md)
 - [Card Layouts & Animations Research](../../../../research/card-layouts-animations.md)
-- [v0.3.0 Milestone](../../milestones/v0.3.md)
+- [v0.3.0 Milestone](../../milestones/v0.3.0.md)

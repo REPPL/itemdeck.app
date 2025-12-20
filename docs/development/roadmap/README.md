@@ -6,11 +6,11 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 
 | Milestone | Theme | Status |
 |-----------|-------|--------|
-| [v0.1.0](./milestones/v0.1.md) | Animation Foundation | 📋 Planned |
-| [v0.2.0](./milestones/v0.2.md) | External Data | 📋 Planned |
-| [v0.3.0](./milestones/v0.3.md) | Customisation | 📋 Planned |
-| [v0.4.0](./milestones/v0.4.md) | Performance | 📋 Planned |
-| [v0.5.0](./milestones/v0.5.md) | Quality & Security | 📋 Planned |
+| [v0.1.0](./milestones/v0.1.0.md) | Animation Foundation | 📋 Planned |
+| [v0.2.0](./milestones/v0.2.0.md) | External Data | 📋 Planned |
+| [v0.3.0](./milestones/v0.3.0.md) | Customisation | 📋 Planned |
+| [v0.4.0](./milestones/v0.4.0.md) | Performance | 📋 Planned |
+| [v0.5.0](./milestones/v0.5.0.md) | Quality & Security | 📋 Planned |
 
 ## Feature Summary
 

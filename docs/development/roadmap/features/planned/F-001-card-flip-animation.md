@@ -134,4 +134,4 @@ function FlippableCard({ isFlipped, onFlip, children }) {
 - [Card Layouts & Animations Research](../../../../research/card-layouts-animations.md)
 - [ADR-001: Animation Library](../../../decisions/adrs/ADR-001-animation-library.md)
 - [Accessibility Research](../../../../research/accessibility.md)
-- [v0.1.0 Milestone](../../milestones/v0.1.md)
+- [v0.1.0 Milestone](../../milestones/v0.1.0.md)

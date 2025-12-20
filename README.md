@@ -10,10 +10,9 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-in_development-yellow" alt="Status: In Development">
+  <img src="https://img.shields.io/badge/status-foundation-yellow" alt="Status: Foundation">
   <img src="https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen" alt="Node.js >= 20.0.0">
   <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript Strict">
-  <img src="https://img.shields.io/badge/licence-GPL--3.0-blue" alt="Licence: GPL-3.0">
   <br>
   <a href="https://claude.ai/claude-code"><img src="https://img.shields.io/badge/Built_with-Claude_Code-6B5CE7?logo=anthropic" alt="Built with Claude Code"></a>
 </p>
@@ -23,6 +22,10 @@
 ## Overview
 
 Cards are arranged in a responsive grid with smooth repositioning animation. Each card maintains fixed dimensions and displays a card-back design with centred logo and optional year text. This is the foundation scaffold for a larger card-based application.
+
+<p align="center">
+  <img src="docs/assets/img/screenshot.gif" alt="Itemdeck Demo" width="600">
+</p>
 
 ## Prerequisites
 

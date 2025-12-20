@@ -1,6 +1,6 @@
 {
   "name": "itemdeck",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "Adaptive Card Grid Application - Reference implementation for AI-assisted development",
   "type": "module",
   "private": true,

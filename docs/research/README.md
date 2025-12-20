@@ -1,0 +1,101 @@
+# Research Documentation
+
+This directory contains comprehensive research reports informing the next phase of Itemdeck development.
+
+## Purpose
+
+These reports provide:
+- State-of-the-art analysis of relevant technologies and patterns
+- React/TypeScript-specific implementations and library comparisons
+- Actionable recommendations tailored to Itemdeck's architecture
+- Code examples ready for adaptation
+
+## Research Parameters
+
+| Parameter | Value |
+|-----------|-------|
+| **Depth** | Comprehensive (deep dive with code examples, library comparisons) |
+| **Stack Focus** | React 18 / TypeScript 5 (strict mode) |
+| **Use Case** | General collection viewer (cards from various sources) |
+| **Current Version** | v0.0.0-foundation |
+
+## Research Reports
+
+### Core Topics
+
+| # | Topic | File | Status |
+|---|-------|------|--------|
+| 1 | Card Layouts & Animations | [card-layouts-animations.md](./card-layouts-animations.md) | ✅ Complete |
+| 2 | External Data Sources | [external-data-sources.md](./external-data-sources.md) | ✅ Complete |
+| 3 | Configuration Hierarchy | [configuration-hierarchy.md](./configuration-hierarchy.md) | ✅ Complete |
+| 4 | Modular Architecture | [modular-architecture.md](./modular-architecture.md) | ✅ Complete |
+| 5 | Customisation Options | [customisation-options.md](./customisation-options.md) | ✅ Complete |
+| 6 | Image Handling & Security | [image-handling-security.md](./image-handling-security.md) | ✅ Complete |
+| 7 | System Security | [system-security.md](./system-security.md) | ✅ Complete |
+| 8 | Asset Management | [asset-management.md](./asset-management.md) | ✅ Complete |
+
+### Additional Topics
+
+| # | Topic | File | Status |
+|---|-------|------|--------|
+| 9 | Accessibility (a11y) | [accessibility.md](./accessibility.md) | ✅ Complete |
+| 10 | Performance & Virtualisation | [performance-virtualisation.md](./performance-virtualisation.md) | ✅ Complete |
+| 11 | Testing Strategies | [testing-strategies.md](./testing-strategies.md) | ✅ Complete |
+| 12 | State Persistence | [state-persistence.md](./state-persistence.md) | ✅ Complete |
+| 13 | Ethical Image Sourcing | [ethical-image-sourcing.md](./ethical-image-sourcing.md) | ✅ Complete |
+
+## Report Structure
+
+Each report follows a consistent template:
+
+```markdown
+# [Topic Title]
+
+## Executive Summary
+Brief overview of findings and key recommendations.
+
+## Current State in Itemdeck
+What exists now and how it relates to this topic.
+
+## Research Findings
+### Approaches & Patterns
+### Library Comparison (React/TypeScript)
+### Code Examples
+
+## Recommendations for Itemdeck
+Specific, actionable recommendations ranked by priority.
+
+## Implementation Considerations
+- Dependencies
+- Breaking changes
+- Migration path
+
+## References
+Links to documentation, articles, examples.
+```
+
+## Methodology
+
+For each topic:
+1. Web search for current best practices (2024-2025)
+2. Review React/TypeScript-specific implementations
+3. Evaluate libraries (npm trends, GitHub stars, maintenance status)
+4. Create code examples relevant to Itemdeck
+5. Formulate specific recommendations
+
+## How to Use These Reports
+
+1. **Before implementing a feature**: Read the relevant report for context
+2. **When choosing libraries**: Refer to the library comparison tables
+3. **For code patterns**: Adapt the provided examples to your needs
+4. **For architecture decisions**: Consider the recommendations and trade-offs
+
+## Related Documentation
+
+- [Project Standards](../../.claude/CLAUDE.md)
+- [Design Specification](../prompts/setup/v2.md)
+- [Documentation Hub](../README.md)
+
+---
+
+**Applies to**: Itemdeck v0.1.0+

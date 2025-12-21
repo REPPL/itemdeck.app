@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/Card/Card";
-import { useCardData } from "@/hooks/useCardData";
+import { useDefaultCollection } from "@/hooks/useCollection";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import styles from "./CardGrid.module.css";
 
 const GAP = 16; // var(--grid-gap) = 1rem = 16px
@@ -16,7 +17,8 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
  * Supports keyboard navigation with roving tabindex.
  */
 export function CardGrid() {
-  const { cards, loading, error } = useCardData();
+  const { data, isLoading, error } = useDefaultCollection();
+  const cards = data?.cards ?? [];
   const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +70,7 @@ export function CardGrid() {
     totalItems: cards.length,
     columns,
     onSelect: handleSelect,
-    enabled: !loading && !error && cards.length > 0,
+    enabled: !isLoading && !error && cards.length > 0,
   });
 
   // Sync refs (containerRef for resize, gridRef for navigation)
@@ -134,12 +136,12 @@ export function CardGrid() {
   // Render loading/error/empty states inside the grid container
   // so the ref is always attached
   const renderContent = () => {
-    if (loading) {
-      return <div className={styles.loading}>Loading cards...</div>;
+    if (isLoading) {
+      return <LoadingSkeleton count={8} />;
     }
 
     if (error) {
-      return <div className={styles.error}>Error: {error}</div>;
+      return <div className={styles.error}>Error: {error.message}</div>;
     }
 
     if (cards.length === 0 || positions.length === 0) {

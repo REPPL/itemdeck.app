@@ -18,10 +18,10 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-006](./planned/F-006-tanstack-query-setup.md) | TanStack Query Setup | 📋 Planned |
-| [F-007](./planned/F-007-github-data-source.md) | GitHub Data Source | 📋 Planned |
-| [F-008](./planned/F-008-card-data-schema.md) | Card Data Schema | 📋 Planned |
-| [F-009](./planned/F-009-offline-caching.md) | Offline Caching | 📋 Planned |
+| [F-006](./completed/F-006-tanstack-query-setup.md) | TanStack Query Setup | ✅ Complete |
+| [F-007](./completed/F-007-github-data-source.md) | GitHub Data Source | ✅ Complete |
+| [F-008](./completed/F-008-card-data-schema.md) | Card Data Schema | ✅ Complete |
+| [F-009](./completed/F-009-offline-caching.md) | Offline Caching | ✅ Complete |
 
 ### v0.3.0 - Customisation
 

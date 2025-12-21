@@ -331,28 +331,28 @@ Categories JSON (from `data/collections/retro-games/categories.json`):
 
 ## Implementation Tasks
 
-- [ ] Create `src/schemas/registry.ts` with schema registry
-- [ ] Create `src/schemas/cardData.schema.ts` (CardData format)
-- [ ] Create `src/schemas/category.schema.ts` (Category format)
-- [ ] Create `src/schemas/index.ts` barrel export
-- [ ] Create `src/errors/SchemaNotSupportedError.ts`
-- [ ] Create `src/utils/validation.ts` utilities
-- [ ] Create `src/types/collection.ts` type definitions
-- [ ] Update data fetching hooks to use registry
-- [ ] Write unit tests for CardData schema
-- [ ] Test with actual MyPlausibleMe data (CardData format)
+- [x] Create `src/schemas/registry.ts` with schema registry
+- [x] Create `src/schemas/cardData.schema.ts` (CardData format)
+- [x] Create `src/schemas/category.schema.ts` (Category format)
+- [x] Create `src/schemas/index.ts` barrel export
+- [x] Create `src/errors/SchemaNotSupportedError.ts`
+- [x] Create `src/utils/validation.ts` utilities
+- [x] Create `src/types/collection.ts` type definitions
+- [x] Update data fetching hooks to use registry
+- [x] Write unit tests for CardData schema
+- [x] Test with actual MyPlausibleMe data (CardData format)
 
 ## Success Criteria
 
-- [ ] Schema registry correctly identifies supported schemas
-- [ ] Unsupported schemas rejected with clear error message
-- [ ] All external data validated before use
-- [ ] Invalid data rejected with field-level errors
-- [ ] TypeScript types match runtime validation
-- [ ] Items correctly joined with categories (when applicable)
-- [ ] Empty URL strings handled (legacy data)
-- [ ] Display mapping correctly extracts fields for cards
-- [ ] Tests cover all three schemas
+- [x] Schema registry correctly identifies supported schemas
+- [x] Unsupported schemas rejected with clear error message
+- [x] All external data validated before use
+- [x] Invalid data rejected with field-level errors
+- [x] TypeScript types match runtime validation
+- [x] Items correctly joined with categories (when applicable)
+- [x] Empty URL strings handled (legacy data)
+- [x] Display mapping correctly extracts fields for cards
+- [x] Tests cover all three schemas
 
 ## Dependencies
 

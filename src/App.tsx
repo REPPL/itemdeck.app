@@ -2,6 +2,8 @@ import { useState } from "react";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { MenuButton } from "@/components/MenuButton/MenuButton";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
+import { OfflineIndicator } from "@/components/OfflineIndicator";
+import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -29,8 +31,11 @@ function App() {
             <Sidebar isOpen={menuOpen} onClose={handleMenuClose} />
             <MenuButton isOpen={menuOpen} onClick={handleMenuToggle} />
             <main className={styles.main}>
-              <CardGrid />
+              <QueryErrorBoundary>
+                <CardGrid />
+              </QueryErrorBoundary>
             </main>
+            <OfflineIndicator />
           </div>
         </MotionProvider>
       </SettingsProvider>

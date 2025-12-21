@@ -167,25 +167,25 @@ export function useGitHubRateLimit() {
 
 ## Implementation Tasks
 
-- [ ] Create `src/hooks/useGitHubCollection.ts` with raw URL fetching
-- [ ] Create `src/hooks/useGitHubManifest.ts` for collection discovery
-- [ ] Create `src/config/dataSource.ts` with default configuration
-- [ ] Add Zod validation for fetched data (use collection schema)
-- [ ] Implement error handling for 404, network errors
-- [ ] Create loading and error states in UI
+- [x] Create `src/hooks/useGitHubCollection.ts` with raw URL fetching
+- [x] Create `src/hooks/useGitHubManifest.ts` for collection discovery
+- [x] Create `src/config/dataSource.ts` with default configuration
+- [x] Add Zod validation for fetched data (use collection schema)
+- [x] Implement error handling for 404, network errors
+- [x] Create loading and error states in UI
 - [ ] (Optional) Install Octokit for API strategy: `npm install octokit`
 - [ ] (Optional) Implement rate limit checking for API strategy
-- [ ] Write integration tests with mocked responses
+- [x] Write integration tests with mocked responses
 
 ## Success Criteria
 
-- [ ] Can fetch items.json and categories.json from GitHub raw URLs
-- [ ] Data validated against collection schema
-- [ ] 404 errors handled gracefully with user feedback
-- [ ] Network errors handled with retry option
-- [ ] Default data source loads on app start
-- [ ] (Optional) Manifest discovery works for collection switching
-- [ ] Tests pass
+- [x] Can fetch items.json and categories.json from GitHub raw URLs
+- [x] Data validated against collection schema
+- [x] 404 errors handled gracefully with user feedback
+- [x] Network errors handled with retry option
+- [x] Default data source loads on app start
+- [x] (Optional) Manifest discovery works for collection switching
+- [x] Tests pass
 
 ## Dependencies
 

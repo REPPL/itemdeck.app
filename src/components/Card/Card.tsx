@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { type CardData } from "@/types/card";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { CardBack } from "./CardBack";
@@ -7,9 +6,23 @@ import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
 import styles from "./Card.module.css";
 
+/**
+ * Props for card display.
+ * Accepts any object with the required card fields.
+ */
+interface CardDisplayData {
+  id: string;
+  title: string;
+  year?: string;
+  imageUrl: string;
+  logoUrl?: string;
+  summary?: string;
+  detailUrl?: string;
+}
+
 interface CardProps {
   /** Card data to display */
-  card: CardData;
+  card: CardDisplayData;
   /** Whether the card is flipped to show front */
   isFlipped?: boolean;
   /** Callback when card is clicked */

@@ -205,27 +205,27 @@ export function useCardsWithOfflineSupport(sourceId: string, fetchFn: () => Prom
 
 ## Implementation Tasks
 
-- [ ] Install Vite PWA plugin: `npm install -D vite-plugin-pwa`
-- [ ] Configure Workbox in vite.config.ts
-- [ ] Create `useOnlineStatus` hook
-- [ ] Create `OfflineIndicator` component
-- [ ] Create `cardCache.ts` with IndexedDB caching
-- [ ] Update query hooks to use offline fallback
-- [ ] Add cache invalidation on data refresh
-- [ ] Create manual refresh button
-- [ ] Test offline functionality
-- [ ] Write E2E tests for offline mode
+- [x] Install Vite PWA plugin: `npm install -D vite-plugin-pwa`
+- [x] Configure Workbox in vite.config.ts
+- [x] Create `useOnlineStatus` hook
+- [x] Create `OfflineIndicator` component
+- [x] Create `cardCache.ts` with IndexedDB caching
+- [x] Update query hooks to use offline fallback
+- [x] Add cache invalidation on data refresh
+- [ ] Create manual refresh button (deferred to v0.3.0)
+- [x] Test offline functionality
+- [ ] Write E2E tests for offline mode (deferred - unit tests cover core behaviour)
 
 ## Success Criteria
 
-- [ ] Service worker registered and active
-- [ ] Static assets cached for offline use
-- [ ] Images cached after first view
-- [ ] Card data available offline (from IndexedDB)
-- [ ] Offline indicator shown when disconnected
-- [ ] Fresh data fetched when online
-- [ ] Cache can be manually refreshed
-- [ ] Tests verify offline behaviour
+- [x] Service worker registered and active
+- [x] Static assets cached for offline use
+- [x] Images cached after first view
+- [x] Card data available offline (from IndexedDB)
+- [x] Offline indicator shown when disconnected
+- [x] Fresh data fetched when online
+- [ ] Cache can be manually refreshed (deferred to v0.3.0)
+- [x] Tests verify offline behaviour
 
 ## Dependencies
 

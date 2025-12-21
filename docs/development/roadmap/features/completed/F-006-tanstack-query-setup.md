@@ -122,27 +122,27 @@ export function QueryErrorBoundary({ children }: { children: React.ReactNode }) 
 
 ## Implementation Tasks
 
-- [ ] Install TanStack Query: `npm install @tanstack/react-query`
-- [ ] Install DevTools: `npm install -D @tanstack/react-query-devtools`
-- [ ] Create `src/lib/queryClient.ts` with default config
-- [ ] Add QueryClientProvider to main.tsx
-- [ ] Add DevTools (dev mode only)
-- [ ] Create query key factory pattern
-- [ ] Create base `useCards` hook
-- [ ] Create `QueryErrorBoundary` component
-- [ ] Add loading skeleton components
-- [ ] Migrate mock data to use query hook
-- [ ] Write tests for query hooks
+- [x] Install TanStack Query: `npm install @tanstack/react-query`
+- [x] Install DevTools: `npm install -D @tanstack/react-query-devtools`
+- [x] Create `src/lib/queryClient.ts` with default config
+- [x] Add QueryClientProvider to main.tsx
+- [x] Add DevTools (dev mode only)
+- [x] Create query key factory pattern
+- [x] Create base `useCards` hook
+- [x] Create `QueryErrorBoundary` component
+- [x] Add loading skeleton components
+- [x] Migrate mock data to use query hook
+- [x] Write tests for query hooks
 
 ## Success Criteria
 
-- [ ] QueryClientProvider wraps application
-- [ ] DevTools available in development
-- [ ] Query hooks return loading/error/data states
-- [ ] Cache prevents duplicate requests
-- [ ] Error states handled gracefully
-- [ ] TypeScript types complete
-- [ ] Tests pass
+- [x] QueryClientProvider wraps application
+- [x] DevTools available in development
+- [x] Query hooks return loading/error/data states
+- [x] Cache prevents duplicate requests
+- [x] Error states handled gracefully
+- [x] TypeScript types complete
+- [x] Tests pass
 
 ## Dependencies
 

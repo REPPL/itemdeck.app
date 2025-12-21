@@ -95,12 +95,14 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     shuffleOnLoad,
     overlayStyle,
     titleDisplayMode,
+    dragModeEnabled,
     setLayout,
     setCardDimensions,
     setGap,
     setShuffleOnLoad,
     setOverlayStyle,
     setTitleDisplayMode,
+    setDragModeEnabled,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -343,6 +345,19 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
                   checked={shuffleOnLoad}
                   onChange={(e) => {
                     setShuffleOnLoad(e.target.checked);
+                  }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Drag to reorder</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={dragModeEnabled}
+                  onChange={(e) => {
+                    setDragModeEnabled(e.target.checked);
                   }}
                 />
                 <span className={styles.toggleSlider} />

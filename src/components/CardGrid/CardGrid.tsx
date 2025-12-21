@@ -1,10 +1,12 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/Card/Card";
+import { DraggableCardGrid } from "@/components/DraggableCardGrid";
 import { useDefaultCollection } from "@/hooks/useCollection";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import styles from "./CardGrid.module.css";
 
@@ -23,14 +25,30 @@ export function CardGrid() {
   const collection = data?.collection;
   const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
+  const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+  const [customOrder, setCustomOrder] = useState<string[] | null>(null);
 
   // Shuffle cards by default (F-027)
-  const { cards } = useShuffledCards(sourceCards, {
+  const { cards: shuffledCards } = useShuffledCards(sourceCards, {
     enabled: true,
     shuffleOnLoad: true,
   });
+
+  // Apply custom order if set (from drag and drop)
+  const cards = useMemo(() => {
+    if (!customOrder) return shuffledCards;
+    const cardMap = new Map(shuffledCards.map((c) => [c.id, c]));
+    return customOrder
+      .map((id) => cardMap.get(id))
+      .filter((c): c is NonNullable<typeof c> => c !== undefined);
+  }, [shuffledCards, customOrder]);
+
+  // Handle reorder from drag and drop
+  const handleReorder = useCallback((newOrder: string[]) => {
+    setCustomOrder(newOrder);
+  }, []);
 
   // Track flipped card IDs in order (oldest first)
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
@@ -184,6 +202,20 @@ export function CardGrid() {
       );
     });
   };
+
+  // Render draggable grid when drag mode is enabled
+  if (dragModeEnabled && !isLoading && !error && cards.length > 0) {
+    return (
+      <DraggableCardGrid
+        cards={cards}
+        onReorder={handleReorder}
+        cardWidth={cardDimensions.width}
+        gap={GAP}
+        flippedCardIds={flippedCardIds}
+        onFlip={handleFlip}
+      />
+    );
+  }
 
   return (
     <section

@@ -29,6 +29,11 @@ export type OverlayStyle = "dark" | "light";
 export type TitleDisplayMode = "truncate" | "wrap";
 
 /**
+ * Whether drag-to-reorder mode is enabled.
+ */
+export type DragModeEnabled = boolean;
+
+/**
  * Settings store state.
  */
 interface SettingsState {
@@ -57,6 +62,9 @@ interface SettingsState {
   /** Title display mode (truncate/wrap) */
   titleDisplayMode: TitleDisplayMode;
 
+  /** Whether drag-to-reorder mode is enabled */
+  dragModeEnabled: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardDimensions: (width: number, height: number) => void;
@@ -66,6 +74,7 @@ interface SettingsState {
   setHighContrast: (enabled: boolean) => void;
   setOverlayStyle: (style: OverlayStyle) => void;
   setTitleDisplayMode: (mode: TitleDisplayMode) => void;
+  setDragModeEnabled: (enabled: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -82,6 +91,7 @@ const DEFAULT_SETTINGS = {
   highContrast: false,
   overlayStyle: "dark" as OverlayStyle,
   titleDisplayMode: "truncate" as TitleDisplayMode,
+  dragModeEnabled: false,
 };
 
 /**
@@ -124,6 +134,10 @@ export const useSettingsStore = create<SettingsState>()(
         set({ titleDisplayMode });
       },
 
+      setDragModeEnabled: (dragModeEnabled) => {
+        set({ dragModeEnabled });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
@@ -142,6 +156,7 @@ export const useSettingsStore = create<SettingsState>()(
         highContrast: state.highContrast,
         overlayStyle: state.overlayStyle,
         titleDisplayMode: state.titleDisplayMode,
+        dragModeEnabled: state.dragModeEnabled,
       }),
     }
   )

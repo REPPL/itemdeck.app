@@ -1,0 +1,69 @@
+/**
+ * CardQuickActions component styles.
+ */
+
+.container {
+  position: absolute;
+  top: var(--spacing-xs);
+  right: var(--spacing-xs);
+  display: flex;
+  gap: var(--spacing-xs);
+  z-index: 10;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.15s ease;
+  text-decoration: none;
+}
+
+.actionButton:hover {
+  background: rgba(0, 0, 0, 0.8);
+  transform: scale(1.1);
+}
+
+.actionButton:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 2px;
+}
+
+.actionButton.active {
+  color: var(--colour-primary);
+}
+
+.actionButton.active:hover {
+  color: var(--colour-primary-light);
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .actionButton {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .actionButton:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .actionButton {
+    transition: none;
+  }
+}

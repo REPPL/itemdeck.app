@@ -1,0 +1,57 @@
+/**
+ * DraggableCardGrid component styles.
+ *
+ * Entire card is draggable - no separate drag handle.
+ * Uses long-press on touch devices, click-drag on desktop.
+ */
+
+.grid {
+  display: grid;
+  justify-content: center;
+  padding: var(--spacing-md);
+  min-height: 100%;
+}
+
+/* Card wrapper - entire card is draggable */
+.cardWrapper {
+  position: relative;
+  transition: transform 0.2s ease;
+  cursor: grab;
+  touch-action: none; /* Prevent scroll during drag on touch devices */
+  user-select: none; /* Prevent text selection during drag */
+}
+
+/* Ensure touch-action propagates to all children for touch drag to work */
+.cardWrapper * {
+  touch-action: none;
+}
+
+.cardWrapper:active {
+  cursor: grabbing;
+}
+
+.cardWrapper.dragging {
+  z-index: 100;
+  cursor: grabbing;
+}
+
+/* Drag overlay (ghost card) */
+.overlay {
+  transform: rotate(3deg) scale(1.05);
+  opacity: 0.9;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  cursor: grabbing;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cardWrapper {
+    transition: none;
+  }
+
+  .overlay {
+    transform: none;
+  }
+}

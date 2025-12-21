@@ -1,0 +1,96 @@
+/**
+ * LazyImage component styles.
+ *
+ * Provides shimmer loading animation and smooth image reveal.
+ */
+
+.container {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+/* Shimmer placeholder animation */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* Image positioning and transitions */
+.image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    opacity 0.3s ease,
+    filter 0.3s ease,
+    transform 0.3s ease;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.visible {
+  opacity: 1;
+}
+
+.blur {
+  filter: blur(10px);
+  transform: scale(1.1);
+}
+
+/* Error state */
+.errorState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colour-surface);
+  color: var(--colour-text-muted);
+}
+
+.errorIcon {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .placeholder {
+    animation: none;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .image {
+    transition: none;
+  }
+
+  .blur {
+    filter: none;
+    transform: none;
+  }
+}

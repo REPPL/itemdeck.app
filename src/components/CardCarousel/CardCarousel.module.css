@@ -1,0 +1,175 @@
+/**
+ * CardCarousel component styles.
+ */
+
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  position: relative;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+  overflow: hidden;
+}
+
+.container:focus {
+  outline: none;
+}
+
+.container:focus-visible {
+  outline: 2px solid var(--colour-primary);
+  outline-offset: -2px;
+}
+
+/* Navigation buttons */
+.navButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: 1px solid var(--colour-border);
+  border-radius: 50%;
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease;
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.navButton:hover:not(:disabled) {
+  background: var(--colour-surface-elevated);
+  border-color: var(--colour-primary);
+}
+
+.navButton:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.navButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.prevButton {
+  position: absolute;
+  left: var(--spacing-md);
+}
+
+.nextButton {
+  position: absolute;
+  right: var(--spacing-md);
+}
+
+/* Card container */
+.cardContainer {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 400px;
+  max-height: 560px;
+  position: relative;
+}
+
+.cardWrapper {
+  transform-origin: center center;
+}
+
+/* Scale cards larger in carousel */
+.cardWrapper > * {
+  transform: scale(1.5);
+}
+
+/* Dot indicators */
+.indicators {
+  position: absolute;
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--colour-border);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.dot:hover {
+  background: var(--colour-text-muted);
+}
+
+.dot.active {
+  background: var(--colour-primary);
+  transform: scale(1.25);
+}
+
+.counter {
+  color: var(--colour-text-muted);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--colour-text-muted);
+  font-size: var(--font-size-lg);
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .container {
+    padding: var(--spacing-sm);
+  }
+
+  .navButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .navButton svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .prevButton {
+    left: var(--spacing-xs);
+  }
+
+  .nextButton {
+    right: var(--spacing-xs);
+  }
+
+  .cardWrapper > * {
+    transform: scale(1.2);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .navButton,
+  .dot {
+    transition: none;
+  }
+}

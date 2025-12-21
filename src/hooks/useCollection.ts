@@ -31,6 +31,9 @@ interface LocalSourceConfig {
 export interface DisplayCard extends Omit<CardWithCategory, "imageUrl"> {
   /** Image URL (always present - placeholder used if not in source) */
   imageUrl: string;
+
+  /** Flattened category title for display */
+  categoryTitle?: string;
 }
 
 /**
@@ -68,16 +71,16 @@ async function fetchLocalCollection(basePath: string): Promise<Collection> {
   }
 
   const [items, categories] = await Promise.all([
-    itemsResponse.json(),
-    categoriesResponse.json(),
+    itemsResponse.json() as Promise<unknown[]>,
+    categoriesResponse.json() as Promise<unknown[]>,
   ]);
 
   // Optionally fetch collection metadata
-  let meta;
+  let meta: unknown;
   try {
     const metaResponse = await fetch(`${basePath}/collection.json`);
     if (metaResponse.ok) {
-      meta = await metaResponse.json();
+      meta = await metaResponse.json() as unknown;
     }
   } catch {
     // Collection metadata is optional
@@ -106,7 +109,7 @@ async function fetchLocalCollection(basePath: string): Promise<Collection> {
 export function useLocalCollection(
   config: LocalSourceConfig,
   options?: Omit<
-    UseQueryOptions<CollectionResult, Error>,
+    UseQueryOptions<CollectionResult>,
     "queryKey" | "queryFn"
   >
 ) {
@@ -121,11 +124,12 @@ export function useLocalCollection(
         collection.categories
       );
 
-      // Add placeholder images for cards without imageUrl
+      // Add placeholder images for cards without imageUrl and flatten category
       const cardsWithImages: DisplayCard[] = cards.map((card) => ({
         ...card,
         imageUrl:
           card.imageUrl ?? `https://picsum.photos/seed/${card.id}/400/300`,
+        categoryTitle: card.category?.title,
       }));
 
       return { cards: cardsWithImages, collection };
@@ -160,7 +164,7 @@ const DEFAULT_LOCAL_PATH = "/data/collections/retro-games";
  */
 export function useDefaultCollection(
   options?: Omit<
-    UseQueryOptions<CollectionResult, Error>,
+    UseQueryOptions<CollectionResult>,
     "queryKey" | "queryFn"
   >
 ) {

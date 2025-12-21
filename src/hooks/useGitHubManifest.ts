@@ -98,7 +98,7 @@ export function useGitHubManifest(
   owner: string,
   repo: string,
   branch?: string,
-  options?: Omit<UseQueryOptions<Manifest, Error>, "queryKey" | "queryFn">
+  options?: Omit<UseQueryOptions<Manifest>, "queryKey" | "queryFn">
 ) {
   return useQuery({
     queryKey: githubKeys.manifest(owner, repo, branch),

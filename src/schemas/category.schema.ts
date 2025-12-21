@@ -27,7 +27,7 @@ export const categorySchema = z.object({
   summary: z.string().optional(),
 
   /** External reference URL for more details */
-  detailUrl: z.string().url().optional(),
+  detailUrl: z.url().optional(),
 });
 
 /**

@@ -1,0 +1,86 @@
+/**
+ * RefreshButton component styles.
+ */
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  color: var(--colour-text);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast);
+}
+
+.button:hover:not(:disabled) {
+  background: var(--colour-border-light);
+  border-color: var(--colour-primary);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--focus-colour);
+  outline-offset: 2px;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* Size variants */
+.small {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-size: var(--text-xs);
+}
+
+.medium {
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+/* Icon styles */
+.icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.small .icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Spinning animation when refreshing */
+.refreshing .icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hide label on small screens */
+@media (max-width: 480px) {
+  .label {
+    display: none;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .refreshing .icon {
+    animation: none;
+  }
+}

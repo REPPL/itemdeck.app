@@ -29,6 +29,11 @@ const mockCard: CardData = {
 };
 
 describe("Card", () => {
+  // Helper to get the main card element (article with role="button")
+  // Uses name filter to distinguish from the info button
+  const getCardElement = () =>
+    screen.getByRole("button", { name: /showing (back|front)/ });
+
   it("renders card with title", () => {
     render(
       <TestWrapper>
@@ -37,8 +42,8 @@ describe("Card", () => {
     );
 
     // Card should have aria-label with title
-    const card = screen.getByRole("button", { name: /Test Card/ });
-    expect(card).toBeInTheDocument();
+    const card = getCardElement();
+    expect(card).toHaveAttribute("aria-label", "Test Card (showing back)");
   });
 
   it("shows back face by default", () => {
@@ -48,7 +53,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     expect(card).toHaveAttribute("data-flipped", "false");
     expect(card).toHaveAttribute("aria-pressed", "false");
   });
@@ -60,7 +65,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     expect(card).toHaveAttribute("data-flipped", "true");
     expect(card).toHaveAttribute("aria-pressed", "true");
   });
@@ -74,7 +79,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     fireEvent.click(card);
 
     expect(onFlip).toHaveBeenCalledTimes(1);
@@ -89,7 +94,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     fireEvent.keyDown(card, { key: "Enter" });
 
     expect(onFlip).toHaveBeenCalledTimes(1);
@@ -104,7 +109,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     fireEvent.keyDown(card, { key: " " });
 
     expect(onFlip).toHaveBeenCalledTimes(1);
@@ -119,7 +124,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     fireEvent.keyDown(card, { key: "a" });
     fireEvent.keyDown(card, { key: "Tab" });
     fireEvent.keyDown(card, { key: "Escape" });
@@ -135,7 +140,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     fireEvent.click(card); // Should not throw
 
     expect(card).toBeInTheDocument();
@@ -148,7 +153,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
 
     expect(card).toHaveAttribute("tabIndex", "0");
     expect(card).toHaveAttribute("aria-pressed", "false");
@@ -162,7 +167,7 @@ describe("Card", () => {
       </TestWrapper>
     );
 
-    const card = screen.getByRole("button");
+    const card = getCardElement();
     expect(card).toHaveAttribute("aria-label", "Test Card (showing front)");
   });
 

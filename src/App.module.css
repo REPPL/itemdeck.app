@@ -5,6 +5,16 @@
   flex-direction: column;
 }
 
+/* Header with theme toggle */
+.header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: var(--colour-surface);
+  border-bottom: 1px solid var(--colour-border);
+}
+
 /* Main content - full width for card grid */
 .main {
   flex: 1;

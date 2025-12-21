@@ -1,0 +1,136 @@
+/**
+ * CardDetailModal component styles.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.imageContainer {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--colour-border-light);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--colour-text);
+  line-height: 1.2;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--text-sm);
+  color: var(--colour-text-secondary);
+}
+
+.year {
+  font-weight: 500;
+}
+
+.separator {
+  color: var(--colour-text-muted);
+}
+
+.category {
+  color: var(--colour-primary);
+}
+
+.summary {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--colour-text-secondary);
+  line-height: 1.6;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--colour-primary);
+  color: var(--colour-primary-text);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color var(--transition-fast);
+  width: fit-content;
+}
+
+.link:hover {
+  background: var(--colour-primary-hover);
+  text-decoration: none;
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--focus-colour);
+  outline-offset: 2px;
+}
+
+.link svg {
+  width: 14px;
+  height: 14px;
+}
+
+.metadata {
+  border-top: 1px solid var(--colour-border);
+  padding-top: var(--spacing-md);
+}
+
+.metadataTitle {
+  margin: 0 0 var(--spacing-sm);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--colour-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metadataList {
+  display: grid;
+  gap: var(--spacing-xs);
+  margin: 0;
+}
+
+.metadataItem {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+}
+
+.metadataKey {
+  font-size: var(--text-sm);
+  color: var(--colour-text-muted);
+  text-transform: capitalize;
+}
+
+.metadataKey::after {
+  content: ":";
+}
+
+.metadataValue {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--colour-text);
+}

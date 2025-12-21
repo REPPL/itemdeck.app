@@ -1,0 +1,193 @@
+/**
+ * Badge component styles.
+ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: 0.25em 0.75em;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  line-height: 1;
+  border-radius: var(--radius-full);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* Size variants */
+.small {
+  font-size: 0.65rem;
+  padding: 0.2em 0.5em;
+}
+
+.medium {
+  font-size: var(--text-xs);
+}
+
+/* Icon styling */
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Solid variant */
+.solid.neutral {
+  background: var(--colour-secondary);
+  color: var(--colour-secondary-text);
+}
+
+.solid.primary {
+  background: var(--colour-primary);
+  color: var(--colour-primary-text);
+}
+
+.solid.success {
+  background: var(--colour-success);
+  color: white;
+}
+
+.solid.warning {
+  background: var(--colour-warning);
+  color: #1a1a1a;
+}
+
+.solid.danger {
+  background: var(--colour-error);
+  color: white;
+}
+
+.solid.info {
+  background: var(--colour-info);
+  color: white;
+}
+
+/* Outline variant */
+.outline {
+  background: transparent;
+  border: 1px solid currentColor;
+}
+
+.outline.neutral {
+  color: var(--colour-secondary);
+}
+
+.outline.primary {
+  color: var(--colour-primary);
+}
+
+.outline.success {
+  color: var(--colour-success);
+}
+
+.outline.warning {
+  color: var(--colour-warning);
+}
+
+.outline.danger {
+  color: var(--colour-error);
+}
+
+.outline.info {
+  color: var(--colour-info);
+}
+
+/* Subtle variant */
+.subtle {
+  background: transparent;
+  border: none;
+}
+
+.subtle.neutral {
+  background: rgba(128, 128, 128, 0.15);
+  color: var(--colour-text-secondary);
+}
+
+.subtle.primary {
+  background: rgba(37, 99, 235, 0.15);
+  color: var(--colour-primary);
+}
+
+.subtle.success {
+  background: rgba(34, 197, 94, 0.15);
+  color: var(--colour-success);
+}
+
+.subtle.warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--colour-warning);
+}
+
+.subtle.danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--colour-error);
+}
+
+.subtle.info {
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--colour-info);
+}
+
+/* Dot variant */
+.dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.dot.neutral {
+  background: var(--colour-secondary);
+}
+
+.dot.primary {
+  background: var(--colour-primary);
+}
+
+.dot.success {
+  background: var(--colour-success);
+}
+
+.dot.warning {
+  background: var(--colour-warning);
+}
+
+.dot.danger {
+  background: var(--colour-error);
+}
+
+.dot.info {
+  background: var(--colour-info);
+}
+
+/* Animation for badge appearance */
+@keyframes badgeAppear {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.badge {
+  animation: badgeAppear var(--transition-fast) ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    animation: none;
+  }
+}

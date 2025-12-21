@@ -28,8 +28,7 @@ export class SchemaNotSupportedError extends Error {
     this.supportedSchemas = supportedSchemas;
 
     // Maintain proper stack trace in V8 environments
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, SchemaNotSupportedError);
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- captureStackTrace may not exist in all environments
+    Error.captureStackTrace?.(this, SchemaNotSupportedError);
   }
 }

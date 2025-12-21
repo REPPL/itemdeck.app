@@ -24,16 +24,16 @@ export const cardDataSchema = z.object({
   year: z.string().optional(),
 
   /** URL to the card's front image */
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.url().optional(),
 
   /** URL to custom logo for card back */
-  logoUrl: z.string().url().optional(),
+  logoUrl: z.url().optional(),
 
   /** Short description or personal notes */
   summary: z.string().optional(),
 
   /** External reference URL for more details */
-  detailUrl: z.string().url().optional(),
+  detailUrl: z.url().optional(),
 
   /** Additional key-value metadata (e.g., category, rank) */
   metadata: z.record(z.string(), z.string()).optional(),

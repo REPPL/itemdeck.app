@@ -101,7 +101,7 @@ async function fetchGitHubCollection(
 export function useGitHubCollection(
   config: GitHubRawConfig,
   options?: Omit<
-    UseQueryOptions<GitHubCollectionResult, Error>,
+    UseQueryOptions<GitHubCollectionResult>,
     "queryKey" | "queryFn"
   >
 ) {
@@ -140,7 +140,7 @@ export function useGitHubCollection(
  */
 export function useDefaultGitHubCollection(
   options?: Omit<
-    UseQueryOptions<GitHubCollectionResult, Error>,
+    UseQueryOptions<GitHubCollectionResult>,
     "queryKey" | "queryFn"
   >
 ) {

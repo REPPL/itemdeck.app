@@ -1,0 +1,49 @@
+/**
+ * SettingsButton component styles.
+ */
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  color: var(--colour-text-secondary);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    color var(--transition-fast),
+    transform var(--transition-fast);
+}
+
+.button:hover {
+  background: var(--colour-border-light);
+  border-color: var(--colour-primary);
+  color: var(--colour-text);
+}
+
+.button:hover svg {
+  transform: rotate(45deg);
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--focus-colour);
+  outline-offset: 2px;
+}
+
+.button svg {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--transition-normal);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .button:hover svg {
+    transform: none;
+  }
+}

@@ -4,6 +4,8 @@
  * Re-exports schema types and provides additional UI-specific types.
  */
 
+import type { CardWithCategory, Collection as SchemaCollection } from "@/schemas";
+
 // Re-export schema types for convenience
 export type {
   CardData,
@@ -20,7 +22,7 @@ export type {
  */
 export interface CardState {
   /** The card data with optional category */
-  card: import("@/schemas").CardWithCategory;
+  card: CardWithCategory;
 
   /** Whether the card is currently flipped (face up) */
   isFlipped: boolean;
@@ -59,7 +61,7 @@ export interface DataSourceConfig {
  */
 export interface CollectionState {
   /** Current collection data (if loaded) */
-  collection: import("@/schemas").Collection | null;
+  collection: SchemaCollection | null;
 
   /** Whether collection is currently loading */
   isLoading: boolean;

@@ -12,7 +12,7 @@ import {
 import {
   getInitials,
   generateColour,
-} from "@/components/ImageWithFallback/SVGPlaceholder";
+} from "@/components/ImageWithFallback/placeholderUtils";
 
 describe("getInitials", () => {
   it("returns first letters of first two words", () => {

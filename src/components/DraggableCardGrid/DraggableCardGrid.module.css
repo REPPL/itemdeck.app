@@ -1,5 +1,8 @@
 /**
  * DraggableCardGrid component styles.
+ *
+ * Entire card is draggable - no separate drag handle.
+ * Uses long-press on touch devices, click-drag on desktop.
  */
 
 .grid {
@@ -9,50 +12,27 @@
   min-height: 100%;
 }
 
-/* Card wrapper with drag handle */
+/* Card wrapper - entire card is draggable */
 .cardWrapper {
   position: relative;
   transition: transform 0.2s ease;
+  cursor: grab;
+  touch-action: none; /* Prevent scroll during drag on touch devices */
+  user-select: none; /* Prevent text selection during drag */
 }
 
-.cardWrapper:hover .dragHandle {
-  opacity: 1;
+/* Ensure touch-action propagates to all children for touch drag to work */
+.cardWrapper * {
+  touch-action: none;
+}
+
+.cardWrapper:active {
+  cursor: grabbing;
 }
 
 .cardWrapper.dragging {
   z-index: 100;
-}
-
-/* Drag handle */
-.dragHandle {
-  position: absolute;
-  top: var(--spacing-xs);
-  left: var(--spacing-xs);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-sm);
-  background: rgba(0, 0, 0, 0.6);
-  color: white;
-  cursor: grab;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  z-index: 10;
-}
-
-.dragHandle:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-.dragHandle:active {
   cursor: grabbing;
-}
-
-.dragIcon {
-  width: 14px;
-  height: 14px;
 }
 
 /* Drag overlay (ghost card) */
@@ -65,29 +45,9 @@
   cursor: grabbing;
 }
 
-/* Dark theme adjustments */
-[data-theme="dark"] .dragHandle {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-[data-theme="dark"] .dragHandle:hover {
-  background: rgba(255, 255, 255, 0.3);
-}
-
-/* Touch device - always show drag handle */
-@media (pointer: coarse) {
-  .dragHandle {
-    opacity: 0.7;
-  }
-}
-
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .cardWrapper {
-    transition: none;
-  }
-
-  .dragHandle {
     transition: none;
   }
 

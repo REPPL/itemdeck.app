@@ -10,6 +10,7 @@ import {
   closestCenter,
   KeyboardSensor,
   PointerSensor,
+  TouchSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -70,11 +71,13 @@ function SortableCard({
     isDragging: isSorting,
   } = useSortable({ id: card.id });
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isSorting ? 0.5 : 1,
     zIndex: isSorting ? 100 : "auto",
+    // Critical for touch devices - must be inline for highest specificity
+    touchAction: "none",
   };
 
   return (
@@ -83,11 +86,8 @@ function SortableCard({
       style={style}
       className={`${styles.cardWrapper ?? ""} ${isDragging ? (styles.dragging ?? "") : ""}`}
       {...attributes}
+      {...listeners}
     >
-      {/* Drag handle */}
-      <div className={styles.dragHandle} {...listeners} aria-label="Drag to reorder">
-        <DragHandleIcon />
-      </div>
       <Card
         card={card}
         isFlipped={isFlipped}
@@ -102,11 +102,12 @@ function SortableCard({
  * Drag and drop card grid for custom ordering.
  *
  * Features:
- * - Drag handle on each card
+ * - Entire card is draggable (no separate handle)
  * - Smooth reorder animations
  * - Keyboard reordering support
  * - Ghost card during drag
- * - Touch device support via long-press
+ * - Touch device support via long-press (250ms)
+ * - Desktop drag via click-and-move (8px threshold)
  *
  * @example
  * ```tsx
@@ -131,10 +132,17 @@ export function DraggableCardGrid({
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Configure sensors for drag detection
+  // TouchSensor enables drag on iPad/touch devices with long-press activation
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
         distance: 8, // Minimum drag distance
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250, // Long-press delay for touch activation
+        tolerance: 5, // Allowed movement during delay
       },
     }),
     useSensor(KeyboardSensor, {
@@ -218,25 +226,6 @@ export function DraggableCardGrid({
         )}
       </DragOverlay>
     </DndContext>
-  );
-}
-
-// Drag handle icon
-function DragHandleIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="currentColor"
-      className={styles.dragIcon}
-      aria-hidden="true"
-    >
-      <circle cx="9" cy="6" r="1.5" />
-      <circle cx="15" cy="6" r="1.5" />
-      <circle cx="9" cy="12" r="1.5" />
-      <circle cx="15" cy="12" r="1.5" />
-      <circle cx="9" cy="18" r="1.5" />
-      <circle cx="15" cy="18" r="1.5" />
-    </svg>
   );
 }
 

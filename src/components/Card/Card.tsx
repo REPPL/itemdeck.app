@@ -1,9 +1,12 @@
+import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
+import { CardDetailModal } from "./CardDetailModal";
+import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./Card.module.css";
 
 /**
@@ -18,6 +21,8 @@ interface CardDisplayData {
   logoUrl?: string;
   summary?: string;
   detailUrl?: string;
+  categoryTitle?: string;
+  metadata?: Record<string, string>;
 }
 
 interface CardProps {
@@ -29,6 +34,8 @@ interface CardProps {
   onFlip?: () => void;
   /** Tab index for keyboard navigation (roving tabindex) */
   tabIndex?: 0 | -1;
+  /** Whether to show year on card back (from collection config) */
+  showYear?: boolean;
 }
 
 /**
@@ -47,9 +54,10 @@ interface CardProps {
  * Flip state is controlled externally via isFlipped prop.
  * CardGrid manages which cards are flipped.
  */
-export function Card({ card, isFlipped = false, onFlip, tabIndex = 0 }: CardProps) {
+export function Card({ card, isFlipped = false, onFlip, tabIndex = 0, showYear }: CardProps) {
   const { cardDimensions, settings } = useSettingsContext();
   const { config } = useConfig();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const cardStyle = {
     width: `${String(cardDimensions.width)}px`,
@@ -67,41 +75,63 @@ export function Card({ card, isFlipped = false, onFlip, tabIndex = 0 }: CardProp
     }
   };
 
+  const handleInfoClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
+
+  // Cast to DisplayCard for modal (includes optional fields)
+  const displayCard = card as DisplayCard;
+
   return (
-    <motion.article
-      className={styles.card}
-      style={cardStyle}
-      title={card.title}
-      data-card-id={card.id}
-      data-flipped={isFlipped}
-      onClick={handleClick}
-      onKeyDown={handleKeyDown}
-      role="button"
-      tabIndex={tabIndex}
-      aria-pressed={isFlipped}
-      aria-label={`${card.title}${isFlipped ? " (showing front)" : " (showing back)"}`}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 25 }}
-    >
-      <CardInner
-        isFlipped={isFlipped}
-        flipDuration={config.animation.flipDuration}
-        back={
-          <CardBack
-            logoUrl={card.logoUrl ?? settings.card.logoUrl}
-            year={card.year}
-          />
-        }
-        front={
-          <CardFront
-            imageUrl={card.imageUrl}
-            title={card.title}
-            year={card.year}
-          />
-        }
+    <>
+      <motion.article
+        className={styles.card}
+        style={cardStyle}
+        title={card.title}
+        data-card-id={card.id}
+        data-flipped={isFlipped}
+        onClick={handleClick}
+        onKeyDown={handleKeyDown}
+        role="button"
+        tabIndex={tabIndex}
+        aria-pressed={isFlipped}
+        aria-label={`${card.title}${isFlipped ? " (showing front)" : " (showing back)"}`}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <CardInner
+          isFlipped={isFlipped}
+          flipDuration={config.animation.flipDuration}
+          back={
+            <CardBack
+              logoUrl={card.logoUrl ?? settings.card.logoUrl}
+              year={card.year}
+              showYear={showYear}
+            />
+          }
+          front={
+            <CardFront
+              imageUrl={card.imageUrl}
+              title={card.title}
+              year={card.year}
+              categoryTitle={card.categoryTitle}
+              onInfoClick={handleInfoClick}
+            />
+          }
+        />
+      </motion.article>
+      <CardDetailModal
+        card={displayCard}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
       />
-    </motion.article>
+    </>
   );
 }
 

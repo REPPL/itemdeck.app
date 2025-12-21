@@ -4,6 +4,7 @@ import { useDefaultCollection } from "@/hooks/useCollection";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
+import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import styles from "./CardGrid.module.css";
 
@@ -18,11 +19,18 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
  */
 export function CardGrid() {
   const { data, isLoading, error } = useDefaultCollection();
-  const cards = data?.cards ?? [];
+  const sourceCards = useMemo(() => data?.cards ?? [], [data?.cards]);
+  const collection = data?.collection;
   const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+
+  // Shuffle cards by default (F-027)
+  const { cards } = useShuffledCards(sourceCards, {
+    enabled: true,
+    shuffleOnLoad: true,
+  });
 
   // Track flipped card IDs in order (oldest first)
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
@@ -170,6 +178,7 @@ export function CardGrid() {
             isFlipped={isFlipped}
             onFlip={() => { handleFlip(card.id); }}
             tabIndex={tabIndex}
+            showYear={collection?.meta?.display?.cardBack?.showYear}
           />
         </div>
       );

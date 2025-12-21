@@ -6,15 +6,17 @@ interface CardBackProps {
   logoUrl?: string;
   /** Year to display below logo */
   year?: string;
+  /** Whether to show the year (from collection config, defaults to true) */
+  showYear?: boolean;
 }
 
 /**
  * Card back face component.
  * Displays centred logo with optional year below.
  */
-export function CardBack({ logoUrl, year }: CardBackProps) {
+export function CardBack({ logoUrl, year, showYear = true }: CardBackProps) {
   const logoSrc = logoUrl ?? placeholderLogo;
-  const hasYear = Boolean(year);
+  const shouldShowYear = showYear && Boolean(year);
 
   return (
     <div className={[styles.cardFace, styles.cardBack].join(" ")}>
@@ -26,7 +28,7 @@ export function CardBack({ logoUrl, year }: CardBackProps) {
           aria-hidden="true"
         />
       </div>
-      {hasYear && (
+      {shouldShowYear && (
         <p className={styles.textField}>
           {year}
         </p>

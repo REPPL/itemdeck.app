@@ -11,11 +11,16 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import { RefreshButton } from "@/components/RefreshButton";
 import {
   useSettingsStore,
-  type LayoutType,
+  // type LayoutType, // Not yet implemented
   type OverlayStyle,
   type TitleDisplayMode,
   type VisualTheme,
-  type CardBackStyle,
+  // type CardBackStyle, // Not yet implemented
+  type ReduceMotionPreference,
+  type DragFace,
+  type CardSizePreset,
+  type CardAspectRatio,
+  type CardBackDisplay,
 } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 
@@ -99,42 +104,43 @@ function CloseIcon() {
   );
 }
 
-function GridIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7" rx="1" />
-      <rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" />
-      <rect x="14" y="14" width="7" height="7" rx="1" />
-    </svg>
-  );
-}
-
-function ListIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <rect x="3" y="4" width="18" height="4" rx="1" />
-      <rect x="3" y="10" width="18" height="4" rx="1" />
-      <rect x="3" y="16" width="18" height="4" rx="1" />
-    </svg>
-  );
-}
-
-function CompactIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <rect x="3" y="3" width="5" height="5" rx="0.5" />
-      <rect x="9.5" y="3" width="5" height="5" rx="0.5" />
-      <rect x="16" y="3" width="5" height="5" rx="0.5" />
-      <rect x="3" y="9.5" width="5" height="5" rx="0.5" />
-      <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" />
-      <rect x="16" y="9.5" width="5" height="5" rx="0.5" />
-      <rect x="3" y="16" width="5" height="5" rx="0.5" />
-      <rect x="9.5" y="16" width="5" height="5" rx="0.5" />
-      <rect x="16" y="16" width="5" height="5" rx="0.5" />
-    </svg>
-  );
-}
+// Layout Mode icons - not yet implemented
+// function GridIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+//       <rect x="3" y="3" width="7" height="7" rx="1" />
+//       <rect x="14" y="3" width="7" height="7" rx="1" />
+//       <rect x="3" y="14" width="7" height="7" rx="1" />
+//       <rect x="14" y="14" width="7" height="7" rx="1" />
+//     </svg>
+//   );
+// }
+//
+// function ListIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+//       <rect x="3" y="4" width="18" height="4" rx="1" />
+//       <rect x="3" y="10" width="18" height="4" rx="1" />
+//       <rect x="3" y="16" width="18" height="4" rx="1" />
+//     </svg>
+//   );
+// }
+//
+// function CompactIcon() {
+//   return (
+//     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+//       <rect x="3" y="3" width="5" height="5" rx="0.5" />
+//       <rect x="9.5" y="3" width="5" height="5" rx="0.5" />
+//       <rect x="16" y="3" width="5" height="5" rx="0.5" />
+//       <rect x="3" y="9.5" width="5" height="5" rx="0.5" />
+//       <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" />
+//       <rect x="16" y="9.5" width="5" height="5" rx="0.5" />
+//       <rect x="3" y="16" width="5" height="5" rx="0.5" />
+//       <rect x="9.5" y="16" width="5" height="5" rx="0.5" />
+//       <rect x="16" y="16" width="5" height="5" rx="0.5" />
+//     </svg>
+//   );
+// }
 
 const tabs: Tab[] = [
   { id: "system", label: "System", icon: <SystemIcon /> },
@@ -143,11 +149,12 @@ const tabs: Tab[] = [
   { id: "card", label: "Card", icon: <CardIcon /> },
 ];
 
-const layoutOptions: { type: LayoutType; icon: React.ReactNode; label: string }[] = [
-  { type: "grid", icon: <GridIcon />, label: "Grid" },
-  { type: "list", icon: <ListIcon />, label: "List" },
-  { type: "compact", icon: <CompactIcon />, label: "Compact" },
-];
+// Layout Mode - not yet implemented
+// const layoutOptions: { type: LayoutType; icon: React.ReactNode; label: string }[] = [
+//   { type: "grid", icon: <GridIcon />, label: "Grid" },
+//   { type: "list", icon: <ListIcon />, label: "List" },
+//   { type: "compact", icon: <CompactIcon />, label: "Compact" },
+// ];
 
 const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
   { value: "dark", label: "Dark" },
@@ -159,16 +166,48 @@ const titleDisplayOptions: { value: TitleDisplayMode; label: string }[] = [
   { value: "wrap", label: "Wrap" },
 ];
 
-const visualThemeOptions: { value: VisualTheme; label: string }[] = [
-  { value: "retro", label: "Retro" },
-  { value: "modern", label: "Modern" },
-  { value: "minimal", label: "Minimal" },
+const visualThemeOptions: { value: VisualTheme; label: string; description: string }[] = [
+  { value: "retro", label: "Retro", description: "Pixel fonts, sharp corners, CRT shadows, neon accents" },
+  { value: "modern", label: "Modern", description: "Rounded corners, soft shadows, smooth animations" },
+  { value: "minimal", label: "Minimal", description: "Subtle styling, reduced shadows, clean typography" },
 ];
 
-const cardBackStyleOptions: { value: CardBackStyle; label: string }[] = [
-  { value: "bitmap", label: "Bitmap" },
-  { value: "svg", label: "SVG" },
-  { value: "colour", label: "Colour" },
+// Card Back Style - not yet implemented
+// const cardBackStyleOptions: { value: CardBackStyle; label: string }[] = [
+//   { value: "bitmap", label: "Bitmap" },
+//   { value: "svg", label: "SVG" },
+//   { value: "colour", label: "Colour" },
+// ];
+
+const reduceMotionOptions: { value: ReduceMotionPreference; label: string }[] = [
+  { value: "system", label: "System" },
+  { value: "on", label: "On" },
+  { value: "off", label: "Off" },
+];
+
+const dragFaceOptions: { value: DragFace; label: string }[] = [
+  { value: "front", label: "Front" },
+  { value: "back", label: "Back" },
+  { value: "both", label: "Both" },
+];
+
+const cardSizeOptions: { value: CardSizePreset; label: string }[] = [
+  { value: "small", label: "Small" },
+  { value: "medium", label: "Medium" },
+  { value: "large", label: "Large" },
+];
+
+const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
+  { value: "3:4", label: "3:4" },
+  { value: "5:7", label: "5:7" },
+  { value: "1:1", label: "1:1" },
+];
+
+const cardBackDisplayOptions: { value: CardBackDisplay; label: string }[] = [
+  { value: "both", label: "Both" },
+  { value: "year", label: "Year" },
+  { value: "logo", label: "Logo" },
+  { value: "none", label: "None" },
 ];
 
 /**
@@ -185,31 +224,40 @@ export function SettingsPanel({
   const [activeTab, setActiveTab] = useState<TabId>("system");
 
   const {
-    layout,
-    cardWidth,
-    cardHeight,
-    gap,
+    // layout, // Not yet implemented
+    cardSizePreset,
+    cardAspectRatio,
+    maxVisibleCards,
+    cardBackDisplay,
     shuffleOnLoad,
+    reduceMotion,
+    highContrast,
     overlayStyle,
     titleDisplayMode,
     dragModeEnabled,
     visualTheme,
-    cardBackStyle,
+    // cardBackStyle, // Not yet implemented
     showRankBadge,
     showDeviceBadge,
     rankPlaceholderText,
-    setLayout,
-    setCardDimensions,
-    setGap,
+    dragFace,
+    // setLayout, // Not yet implemented
+    setCardSizePreset,
+    setCardAspectRatio,
+    setMaxVisibleCards,
+    setCardBackDisplay,
     setShuffleOnLoad,
+    setReduceMotion,
+    setHighContrast,
     setOverlayStyle,
     setTitleDisplayMode,
     setDragModeEnabled,
     setVisualTheme,
-    setCardBackStyle,
+    // setCardBackStyle, // Not yet implemented
     setShowRankBadge,
     setShowDeviceBadge,
     setRankPlaceholderText,
+    setDragFace,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -274,6 +322,37 @@ export function SettingsPanel({
               <span className={styles.label}>Theme</span>
               <ThemeToggle />
             </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Reduce Motion</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Reduce motion">
+                {reduceMotionOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      reduceMotion === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setReduceMotion(value); }}
+                    role="radio"
+                    aria-checked={reduceMotion === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>High Contrast</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={highContrast}
+                  onChange={(e) => { setHighContrast(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
             {onDevtoolsToggle && (
               <div className={styles.row}>
                 <span className={styles.label}>TanStack DevTools</span>
@@ -293,26 +372,31 @@ export function SettingsPanel({
       case "theme":
         return (
           <>
-            <div className={styles.row}>
-              <span className={styles.label}>Visual Theme</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Visual theme">
-                {visualThemeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      visualTheme === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setVisualTheme(value); }}
-                    role="radio"
-                    aria-checked={visualTheme === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+            <h4 className={styles.subsectionTitle}>Visual Theme</h4>
+            <div className={styles.themeCards} role="radiogroup" aria-label="Visual theme">
+              {visualThemeOptions.map(({ value, label, description }) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={[
+                    styles.themeCard,
+                    visualTheme === value ? styles.themeCardActive : "",
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => { setVisualTheme(value); }}
+                  role="radio"
+                  aria-checked={visualTheme === value}
+                >
+                  <span className={styles.themeCardLabel}>{label}</span>
+                  <span className={styles.themeCardDescription}>{description}</span>
+                </button>
+              ))}
             </div>
+
+            <h4 className={styles.subsectionTitle}>Theme Properties</h4>
+            <p className={styles.themeInfo}>
+              Themes control: corner radius, shadows, animations, fonts, accent colours, and card borders.
+            </p>
+            {/* Layout Mode - not yet implemented
             <div className={styles.row}>
               <span className={styles.label}>Layout Mode</span>
               <div className={styles.layoutSwitcher} role="radiogroup" aria-label="Layout options">
@@ -335,6 +419,8 @@ export function SettingsPanel({
                 ))}
               </div>
             </div>
+            */}
+            {/* Card Back Style - not yet implemented
             <div className={styles.row}>
               <span className={styles.label}>Card Back Style</span>
               <div className={styles.segmentedControl} role="radiogroup" aria-label="Card back style">
@@ -355,12 +441,37 @@ export function SettingsPanel({
                 ))}
               </div>
             </div>
+            */}
           </>
         );
 
       case "behaviour":
         return (
           <>
+            <div className={styles.row}>
+              <span className={styles.label}>Max Visible Cards</span>
+              <div className={styles.numberControl}>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
+                  aria-label="Decrease"
+                  disabled={maxVisibleCards <= 1}
+                >
+                  −
+                </button>
+                <span className={styles.numberValue}>{maxVisibleCards}</span>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
+                  aria-label="Increase"
+                  disabled={maxVisibleCards >= 10}
+                >
+                  +
+                </button>
+              </div>
+            </div>
             <div className={styles.row}>
               <span className={styles.label}>Shuffle on load</span>
               <label className={styles.toggle}>
@@ -383,6 +494,28 @@ export function SettingsPanel({
                 <span className={styles.toggleSlider} />
               </label>
             </div>
+            {dragModeEnabled && (
+              <div className={styles.row}>
+                <span className={styles.label}>Drag Face</span>
+                <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag face">
+                  {dragFaceOptions.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      type="button"
+                      className={[
+                        styles.segmentButton,
+                        dragFace === value ? styles.segmentButtonActive : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => { setDragFace(value); }}
+                      role="radio"
+                      aria-checked={dragFace === value}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </>
         );
 
@@ -391,40 +524,44 @@ export function SettingsPanel({
           <>
             <h4 className={styles.subsectionTitle}>General</h4>
             <div className={styles.row}>
-              <span className={styles.label}>Width: {cardWidth}px</span>
-              <input
-                type="range"
-                min={100}
-                max={300}
-                value={cardWidth}
-                onChange={(e) => { setCardDimensions(Number(e.target.value), cardHeight); }}
-                className={styles.slider}
-                aria-label="Card width"
-              />
+              <span className={styles.label}>Size</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card size">
+                {cardSizeOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      cardSizePreset === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setCardSizePreset(value); }}
+                    role="radio"
+                    aria-checked={cardSizePreset === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
             <div className={styles.row}>
-              <span className={styles.label}>Height: {cardHeight}px</span>
-              <input
-                type="range"
-                min={140}
-                max={420}
-                value={cardHeight}
-                onChange={(e) => { setCardDimensions(cardWidth, Number(e.target.value)); }}
-                className={styles.slider}
-                aria-label="Card height"
-              />
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Gap: {gap}px</span>
-              <input
-                type="range"
-                min={4}
-                max={32}
-                value={gap}
-                onChange={(e) => { setGap(Number(e.target.value)); }}
-                className={styles.slider}
-                aria-label="Card gap"
-              />
+              <span className={styles.label}>Aspect Ratio</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card aspect ratio">
+                {cardAspectRatioOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      cardAspectRatio === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setCardAspectRatio(value); }}
+                    role="radio"
+                    aria-checked={cardAspectRatio === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <h4 className={styles.subsectionTitle}>Front</h4>
@@ -501,6 +638,28 @@ export function SettingsPanel({
                 aria-label="Rank placeholder text"
               />
             </div>
+
+            <h4 className={styles.subsectionTitle}>Back</h4>
+            <div className={styles.row}>
+              <span className={styles.label}>Display</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card back display">
+                {cardBackDisplayOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      cardBackDisplay === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setCardBackDisplay(value); }}
+                    role="radio"
+                    aria-checked={cardBackDisplay === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </>
         );
     }
@@ -561,9 +720,19 @@ export function SettingsPanel({
         </div>
 
         <footer className={styles.footer}>
-          <button type="button" className={styles.resetButton} onClick={resetToDefaults}>
-            Reset to Defaults
-          </button>
+          <div className={styles.footerButtons}>
+            <button type="button" className={styles.resetButton} onClick={resetToDefaults}>
+              Reset
+            </button>
+            <div className={styles.footerRight}>
+              <button type="button" className={styles.cancelButton} onClick={onClose}>
+                Cancel
+              </button>
+              <button type="button" className={styles.acceptButton} onClick={onClose}>
+                Accept
+              </button>
+            </div>
+          </div>
         </footer>
       </div>
     </div>

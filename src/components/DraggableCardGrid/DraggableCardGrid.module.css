@@ -12,18 +12,12 @@
   min-height: 100%;
 }
 
-/* Card wrapper - entire card is draggable */
+/* Card wrapper - entire card is draggable via long-press */
 .cardWrapper {
   position: relative;
   transition: transform 0.2s ease;
-  cursor: grab;
-  touch-action: none; /* Prevent scroll during drag on touch devices */
   user-select: none; /* Prevent text selection during drag */
-}
-
-/* Ensure touch-action propagates to all children for touch drag to work */
-.cardWrapper * {
-  touch-action: none;
+  cursor: grab;
 }
 
 .cardWrapper:active {
@@ -33,6 +27,16 @@
 .cardWrapper.dragging {
   z-index: 100;
   cursor: grabbing;
+}
+
+/* Apply grabbing cursor during sort operation */
+.cardWrapper.sorting {
+  cursor: grabbing;
+}
+
+/* Scale effect when hovering over drop target */
+.cardWrapper.isOver {
+  transform: scale(1.02);
 }
 
 /* Drag overlay (ghost card) */

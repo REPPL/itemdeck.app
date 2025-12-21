@@ -39,18 +39,61 @@ export type VisualTheme = "retro" | "modern" | "minimal";
 export type CardBackStyle = "bitmap" | "svg" | "colour";
 
 /**
+ * Which card face allows dragging.
+ */
+export type DragFace = "front" | "back" | "both";
+
+/**
+ * Card size preset options.
+ */
+export type CardSizePreset = "small" | "medium" | "large";
+
+/**
+ * Card aspect ratio options.
+ */
+export type CardAspectRatio = "3:4" | "5:7" | "1:1";
+
+/**
+ * Card size preset pixel widths.
+ */
+export const CARD_SIZE_WIDTHS: Record<CardSizePreset, number> = {
+  small: 180,
+  medium: 280,
+  large: 400,
+};
+
+/**
+ * Card aspect ratio values (height/width).
+ */
+export const CARD_ASPECT_RATIOS: Record<CardAspectRatio, number> = {
+  "3:4": 4 / 3,      // ~1.33
+  "5:7": 7 / 5,      // 1.4
+  "1:1": 1,          // Square
+};
+
+/**
+ * Card back display options.
+ */
+export type CardBackDisplay = "year" | "logo" | "both" | "none";
+
+/**
  * Settings store state.
  */
 interface SettingsState {
   /** Current layout type */
   layout: LayoutType;
 
-  /** Card dimensions */
-  cardWidth: number;
-  cardHeight: number;
+  /** Card size preset */
+  cardSizePreset: CardSizePreset;
 
-  /** Grid gap in pixels */
-  gap: number;
+  /** Card aspect ratio */
+  cardAspectRatio: CardAspectRatio;
+
+  /** Maximum number of face-up cards at once */
+  maxVisibleCards: number;
+
+  /** What to show on card back */
+  cardBackDisplay: CardBackDisplay;
 
   /** Whether to shuffle cards on load */
   shuffleOnLoad: boolean;
@@ -85,10 +128,15 @@ interface SettingsState {
   /** Placeholder text for unranked cards */
   rankPlaceholderText: string;
 
+  /** Which card face allows dragging */
+  dragFace: DragFace;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
-  setCardDimensions: (width: number, height: number) => void;
-  setGap: (gap: number) => void;
+  setCardSizePreset: (preset: CardSizePreset) => void;
+  setCardAspectRatio: (ratio: CardAspectRatio) => void;
+  setMaxVisibleCards: (count: number) => void;
+  setCardBackDisplay: (display: CardBackDisplay) => void;
   setShuffleOnLoad: (shuffle: boolean) => void;
   setReduceMotion: (preference: ReduceMotionPreference) => void;
   setHighContrast: (enabled: boolean) => void;
@@ -100,6 +148,7 @@ interface SettingsState {
   setShowRankBadge: (show: boolean) => void;
   setShowDeviceBadge: (show: boolean) => void;
   setRankPlaceholderText: (text: string) => void;
+  setDragFace: (face: DragFace) => void;
   resetToDefaults: () => void;
 }
 
@@ -108,9 +157,10 @@ interface SettingsState {
  */
 const DEFAULT_SETTINGS = {
   layout: "grid" as LayoutType,
-  cardWidth: 140,
-  cardHeight: 196,
-  gap: 16,
+  cardSizePreset: "medium" as CardSizePreset,
+  cardAspectRatio: "5:7" as CardAspectRatio,
+  maxVisibleCards: 2,
+  cardBackDisplay: "year" as CardBackDisplay,
   shuffleOnLoad: true,
   reduceMotion: "system" as ReduceMotionPreference,
   highContrast: false,
@@ -122,6 +172,7 @@ const DEFAULT_SETTINGS = {
   showRankBadge: true,
   showDeviceBadge: true,
   rankPlaceholderText: "The one that got away!",
+  dragFace: "back" as DragFace,
 };
 
 /**
@@ -136,12 +187,20 @@ export const useSettingsStore = create<SettingsState>()(
         set({ layout });
       },
 
-      setCardDimensions: (cardWidth, cardHeight) => {
-        set({ cardWidth, cardHeight });
+      setCardSizePreset: (cardSizePreset) => {
+        set({ cardSizePreset });
       },
 
-      setGap: (gap) => {
-        set({ gap });
+      setCardAspectRatio: (cardAspectRatio) => {
+        set({ cardAspectRatio });
+      },
+
+      setMaxVisibleCards: (maxVisibleCards) => {
+        set({ maxVisibleCards });
+      },
+
+      setCardBackDisplay: (cardBackDisplay) => {
+        set({ cardBackDisplay });
       },
 
       setShuffleOnLoad: (shuffleOnLoad) => {
@@ -188,19 +247,24 @@ export const useSettingsStore = create<SettingsState>()(
         set({ rankPlaceholderText });
       },
 
+      setDragFace: (dragFace) => {
+        set({ dragFace });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
     }),
     {
       name: "itemdeck-settings",
-      version: 2,
+      version: 4,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
-        cardWidth: state.cardWidth,
-        cardHeight: state.cardHeight,
-        gap: state.gap,
+        cardSizePreset: state.cardSizePreset,
+        cardAspectRatio: state.cardAspectRatio,
+        maxVisibleCards: state.maxVisibleCards,
+        cardBackDisplay: state.cardBackDisplay,
         shuffleOnLoad: state.shuffleOnLoad,
         reduceMotion: state.reduceMotion,
         highContrast: state.highContrast,
@@ -212,12 +276,14 @@ export const useSettingsStore = create<SettingsState>()(
         showRankBadge: state.showRankBadge,
         showDeviceBadge: state.showDeviceBadge,
         rankPlaceholderText: state.rankPlaceholderText,
+        dragFace: state.dragFace,
       }),
       migrate: (persistedState: unknown, version: number) => {
+        let state = persistedState as Record<string, unknown>;
+
         // Handle migration from version 1 to 2
-        if (version === 1) {
-          const state = persistedState as Record<string, unknown>;
-          return {
+        if (version < 2) {
+          state = {
             ...state,
             dragModeEnabled: DEFAULT_SETTINGS.dragModeEnabled,
             visualTheme: DEFAULT_SETTINGS.visualTheme,
@@ -227,7 +293,29 @@ export const useSettingsStore = create<SettingsState>()(
             rankPlaceholderText: DEFAULT_SETTINGS.rankPlaceholderText,
           };
         }
-        return persistedState as SettingsState;
+
+        // Handle migration from version 2 to 3
+        if (version < 3) {
+          state = {
+            ...state,
+            dragFace: DEFAULT_SETTINGS.dragFace,
+          };
+        }
+
+        // Handle migration from version 3 to 4 (size presets + new settings)
+        if (version < 4) {
+          // Remove old cardWidth/cardHeight/gap, use presets
+          const { cardWidth: _w, cardHeight: _h, gap: _g, ...rest } = state;
+          state = {
+            ...rest,
+            cardSizePreset: DEFAULT_SETTINGS.cardSizePreset,
+            cardAspectRatio: DEFAULT_SETTINGS.cardAspectRatio,
+            maxVisibleCards: DEFAULT_SETTINGS.maxVisibleCards,
+            cardBackDisplay: DEFAULT_SETTINGS.cardBackDisplay,
+          };
+        }
+
+        return state as unknown as SettingsState;
       },
     }
   )

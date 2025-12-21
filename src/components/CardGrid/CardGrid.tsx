@@ -3,7 +3,6 @@ import { Card } from "@/components/Card/Card";
 import { DraggableCardGrid } from "@/components/DraggableCardGrid";
 import { useDefaultCollection } from "@/hooks/useCollection";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
-import { useConfig } from "@/hooks/useConfig";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -22,10 +21,14 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
 export function CardGrid() {
   const { data, isLoading, error } = useDefaultCollection();
   const sourceCards = useMemo(() => data?.cards ?? [], [data?.cards]);
-  const collection = data?.collection;
   const { cardDimensions } = useSettingsContext();
-  const { config } = useConfig();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
+  const showRankBadge = useSettingsStore((state) => state.showRankBadge);
+  const showDeviceBadge = useSettingsStore((state) => state.showDeviceBadge);
+  const rankPlaceholderText = useSettingsStore((state) => state.rankPlaceholderText);
+  const dragFace = useSettingsStore((state) => state.dragFace);
+  const maxVisibleCards = useSettingsStore((state) => state.maxVisibleCards);
+  const cardBackDisplay = useSettingsStore((state) => state.cardBackDisplay);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
@@ -73,15 +76,14 @@ export function CardGrid() {
         const newList = [...prev, cardId];
 
         // Remove oldest cards if we exceed the limit
-        const maxVisible = config.behaviour.maxVisibleCards;
-        while (newList.length > maxVisible) {
+        while (newList.length > maxVisibleCards) {
           newList.shift(); // Remove oldest (first)
         }
 
         return newList;
       }
     });
-  }, [config.behaviour.maxVisibleCards]);
+  }, [maxVisibleCards]);
 
   // Handle selection from keyboard navigation
   const handleSelect = useCallback((index: number) => {
@@ -107,6 +109,7 @@ export function CardGrid() {
   }, [gridRef]);
 
   // Track container width
+  // Re-run when dragModeEnabled changes so we measure when switching back to regular grid
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -124,7 +127,7 @@ export function CardGrid() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, []);
+  }, [dragModeEnabled]);
 
   // Calculate grid layout
   const calculateLayout = () => {
@@ -196,7 +199,10 @@ export function CardGrid() {
             isFlipped={isFlipped}
             onFlip={() => { handleFlip(card.id); }}
             tabIndex={tabIndex}
-            showYear={collection?.meta?.display?.cardBack?.showYear}
+            cardBackDisplay={cardBackDisplay}
+            showRankBadge={showRankBadge}
+            showDeviceBadge={showDeviceBadge}
+            rankPlaceholderText={rankPlaceholderText}
           />
         </div>
       );
@@ -213,6 +219,11 @@ export function CardGrid() {
         gap={GAP}
         flippedCardIds={flippedCardIds}
         onFlip={handleFlip}
+        showRankBadge={showRankBadge}
+        showDeviceBadge={showDeviceBadge}
+        rankPlaceholderText={rankPlaceholderText}
+        dragFace={dragFace}
+        cardBackDisplay={cardBackDisplay}
       />
     );
   }

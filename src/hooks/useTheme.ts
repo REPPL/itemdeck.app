@@ -73,9 +73,9 @@ export function useTheme(): UseThemeReturn {
     };
   }, [updateResolvedTheme]);
 
-  // Apply theme to document
+  // Apply colour scheme to document (separate from visual theme)
   useEffect(() => {
-    document.documentElement.setAttribute("data-theme", resolvedTheme);
+    document.documentElement.setAttribute("data-colour-scheme", resolvedTheme);
   }, [resolvedTheme]);
 
   return {

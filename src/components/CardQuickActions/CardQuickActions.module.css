@@ -53,11 +53,11 @@
 }
 
 /* Dark theme adjustments */
-[data-theme="dark"] .actionButton {
+[data-colour-scheme="dark"] .actionButton {
   background: rgba(255, 255, 255, 0.2);
 }
 
-[data-theme="dark"] .actionButton:hover {
+[data-colour-scheme="dark"] .actionButton:hover {
   background: rgba(255, 255, 255, 0.3);
 }
 

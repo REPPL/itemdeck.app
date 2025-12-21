@@ -5,7 +5,7 @@
  * and additional metadata.
  */
 
-import { useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
@@ -35,9 +35,9 @@ function ExternalLinkIcon() {
 }
 
 /**
- * More details icon.
+ * Chevron icon for expanding/collapsing.
  */
-function MoreIcon() {
+function ChevronIcon({ expanded }: { expanded: boolean }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -47,10 +47,12 @@ function MoreIcon() {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      style={{
+        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
+        transition: "transform 0.2s ease",
+      }}
     >
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="19" r="1" />
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
@@ -71,6 +73,27 @@ function CloseIcon() {
     >
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+/**
+ * Info icon for acknowledgement button.
+ */
+function InfoIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="16" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12.01" y2="8" />
     </svg>
   );
 }
@@ -122,6 +145,8 @@ export function CardExpanded({
 }: CardExpandedProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [showAttribution, setShowAttribution] = useState(false);
 
   // Focus management
   useEffect(() => {
@@ -225,15 +250,20 @@ export function CardExpanded({
               e.stopPropagation();
             }}
           >
-            {/* Close button */}
-            <button
-              type="button"
-              className={styles.closeButton}
-              onClick={onClose}
-              aria-label="Close"
-            >
-              <CloseIcon />
-            </button>
+            {/* Header row: Rank badge (left) and Close button (right) */}
+            <div className={styles.headerRow}>
+              <div className={styles.rankBadge}>
+                <RankBadge rank={card.rank} size="large" />
+              </div>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close"
+              >
+                <CloseIcon />
+              </button>
+            </div>
 
             {/* Image gallery */}
             <div className={styles.galleryContainer}>
@@ -247,7 +277,7 @@ export function CardExpanded({
 
             {/* Card info */}
             <div className={styles.info}>
-              {/* Title and year */}
+              {/* Title and year row */}
               <header className={styles.header}>
                 <h2 id="expanded-card-title" className={styles.title}>
                   {card.title}
@@ -255,10 +285,8 @@ export function CardExpanded({
                 {card.year && <span className={styles.year}>{card.year}</span>}
               </header>
 
-              {/* Rank badge */}
-              <div className={styles.rankContainer}>
-                <RankBadge rank={card.rank} size="large" />
-              </div>
+              {/* Divider */}
+              <div className={styles.divider} />
 
               {/* Summary */}
               {card.summary && (
@@ -273,29 +301,117 @@ export function CardExpanded({
                 </div>
               )}
 
-              {/* Action buttons */}
-              <div className={styles.actions}>
-                {/* View more (external link) */}
+              {/* Expandable metadata section */}
+              {hasMetadata && (
+                <>
+                  <button
+                    type="button"
+                    className={styles.moreButton}
+                    onClick={() => { setDetailsExpanded(!detailsExpanded); }}
+                    aria-expanded={detailsExpanded}
+                  >
+                    <ChevronIcon expanded={detailsExpanded} />
+                    <span>More</span>
+                  </button>
+
+                  <AnimatePresence>
+                    {detailsExpanded && (
+                      <motion.div
+                        className={styles.metadataSection}
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <dl className={styles.metadataList}>
+                          {Object.entries(card.metadata ?? {})
+                            .filter(([key]) => !["category", "rank", "device"].includes(key))
+                            .map(([key, value]) => (
+                              <div key={key} className={styles.metadataItem}>
+                                <dt className={styles.metadataKey}>{key}</dt>
+                                <dd className={styles.metadataValue}>{value}</dd>
+                              </div>
+                            ))}
+                        </dl>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </>
+              )}
+
+              {/* Footer row: Acknowledgement (left) and Source button (right) */}
+              <div className={styles.footer}>
+                {card.imageAttribution ? (
+                  <button
+                    type="button"
+                    className={styles.acknowledgementButton}
+                    onClick={() => { setShowAttribution(!showAttribution); }}
+                    aria-expanded={showAttribution}
+                    aria-controls="attribution-overlay"
+                  >
+                    <InfoIcon />
+                    <span>Acknowledgement</span>
+                  </button>
+                ) : (
+                  <div />
+                )}
                 {card.detailUrl && (
                   <a
                     href={card.detailUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className={styles.viewMoreButton}
+                    className={styles.sourceButton}
                   >
-                    <span>View More</span>
+                    <span>Source</span>
                     <ExternalLinkIcon />
                   </a>
                 )}
-
-                {/* More details (if metadata exists) */}
-                {hasMetadata && (
-                  <button type="button" className={styles.moreDetailsButton}>
-                    <MoreIcon />
-                    <span>Details</span>
-                  </button>
-                )}
               </div>
+
+              {/* Attribution overlay */}
+              <AnimatePresence>
+                {showAttribution && card.imageAttribution && (
+                  <motion.div
+                    id="attribution-overlay"
+                    className={styles.attributionOverlay}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className={styles.attributionHeader}>
+                      <button
+                        type="button"
+                        className={styles.attributionContent}
+                        onClick={() => { setShowAttribution(false); }}
+                        aria-label="Close attribution"
+                      >
+                        <span className={styles.attributionLabel}>Image Source</span>
+                        <p className={styles.attributionText}>{card.imageAttribution}</p>
+                      </button>
+                      {(() => {
+                        const match = /File:(.+)$/.exec(card.imageAttribution);
+                        if (match?.[1]) {
+                          const fileName = match[1].trim();
+                          const wikipediaUrl = `https://en.wikipedia.org/wiki/File:${encodeURIComponent(fileName)}`;
+                          return (
+                            <a
+                              href={wikipediaUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.attributionLink}
+                            >
+                              <span>View</span>
+                              <ExternalLinkIcon />
+                            </a>
+                          );
+                        }
+                        return null;
+                      })()}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         </motion.div>

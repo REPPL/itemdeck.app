@@ -1,4 +1,5 @@
 import placeholderLogo from "@/assets/placeholder-logo.svg";
+import type { CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
 
 interface CardBackProps {
@@ -6,29 +7,32 @@ interface CardBackProps {
   logoUrl?: string;
   /** Year to display below logo */
   year?: string;
-  /** Whether to show the year (from collection config, defaults to true) */
-  showYear?: boolean;
+  /** What to display on back (year, logo, both, none) */
+  display?: CardBackDisplay;
 }
 
 /**
  * Card back face component.
  * Displays centred logo with optional year below.
  */
-export function CardBack({ logoUrl, year, showYear = true }: CardBackProps) {
+export function CardBack({ logoUrl, year, display = "year" }: CardBackProps) {
   const logoSrc = logoUrl ?? placeholderLogo;
-  const shouldShowYear = showYear && Boolean(year);
+  const showLogo = display === "logo" || display === "both";
+  const showYear = (display === "year" || display === "both") && Boolean(year);
 
   return (
     <div className={[styles.cardFace, styles.cardBack].join(" ")}>
-      <div className={styles.logoContainer}>
-        <img
-          className={styles.logo}
-          src={logoSrc}
-          alt=""
-          aria-hidden="true"
-        />
-      </div>
-      {shouldShowYear && (
+      {showLogo && (
+        <div className={styles.logoContainer}>
+          <img
+            className={styles.logo}
+            src={logoSrc}
+            alt=""
+            aria-hidden="true"
+          />
+        </div>
+      )}
+      {showYear && (
         <p className={styles.textField}>
           {year}
         </p>

@@ -101,16 +101,16 @@ export function CardFront({
         </button>
       )}
 
-      {/* Device badge in bottom-right */}
-      {showDeviceBadge && device && (
-        <div className={styles.deviceBadge}>
-          <DeviceBadge device={device} size="small" />
-        </div>
-      )}
-
       <div className={styles.overlay}>
         <h3 className={styles.overlayTitle}>{title}</h3>
-        {year && <span className={styles.overlayYear}>{year}</span>}
+        <div className={styles.overlayFooter}>
+          {year && <span className={styles.overlayYear}>{year}</span>}
+          {showDeviceBadge && device && (
+            <div className={styles.overlayDeviceBadge}>
+              <DeviceBadge device={device} size="small" />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

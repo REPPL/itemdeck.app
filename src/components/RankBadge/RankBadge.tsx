@@ -1,25 +1,46 @@
 /**
  * Rank badge component for displaying card rankings.
  *
- * Shows a prominent badge in the top-left corner with special styling
- * for top 3 positions (gold, silver, bronze) and a crown icon for #1.
+ * Shows a prominent badge in the top-left corner with star indicators:
+ * - Rank 1: ★★★ (three stars)
+ * - Rank 2: ★★ (two stars)
+ * - Rank 3: ★ (one star)
+ * - Rank 4+: no stars, just number
+ * - Unranked: placeholder text
  */
 
 import styles from "./RankBadge.module.css";
 
 /**
- * Crown icon SVG for rank #1.
+ * Star icon component.
  */
-function CrownIcon() {
+function StarIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="currentColor"
-      className={styles.crownIcon}
+      className={styles.starIcon}
       aria-hidden="true"
     >
-      <path d="M12 1L15.5 8L23 9.5L17.5 15L19 23L12 19L5 23L6.5 15L1 9.5L8.5 8L12 1Z" />
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
     </svg>
+  );
+}
+
+/**
+ * Render stars based on rank.
+ */
+function RankStars({ rank }: { rank: number }) {
+  // Rank 1 = 3 stars, Rank 2 = 2 stars, Rank 3 = 1 star
+  const starCount = Math.max(0, 4 - rank);
+  if (starCount === 0) return null;
+
+  return (
+    <span className={styles.stars} aria-hidden="true">
+      {Array.from({ length: starCount }, (_, i) => (
+        <StarIcon key={i} />
+      ))}
+    </span>
   );
 }
 
@@ -65,8 +86,9 @@ export function RankBadge({
   size = "medium",
 }: RankBadgeProps) {
   // Determine variant based on rank
+  // Treat null, 0, and negative values as unranked
   const getVariant = (): string => {
-    if (rank === null) return "unranked";
+    if (rank === null || rank <= 0) return "unranked";
     if (rank === 1) return "gold";
     if (rank === 2) return "silver";
     if (rank === 3) return "bronze";
@@ -74,7 +96,6 @@ export function RankBadge({
   };
 
   const variant = getVariant();
-  const showCrown = rank === 1;
 
   const className = [
     styles.badge,
@@ -84,10 +105,13 @@ export function RankBadge({
     .filter(Boolean)
     .join(" ");
 
-  // Display content
-  const content = rank !== null ? (
+  // Display content: stars for ranks 1-3, number + ordinal for all ranked
+  // Use explicit check for valid positive rank to avoid issues with 0 or falsy values
+  const isValidRank = rank !== null && rank > 0;
+
+  const content = isValidRank ? (
     <>
-      {showCrown && <CrownIcon />}
+      <RankStars rank={rank} />
       <span className={styles.rankNumber}>{rank}</span>
       <span className={styles.ordinal}>{getOrdinalSuffix(rank)}</span>
     </>
@@ -99,7 +123,7 @@ export function RankBadge({
     <div
       className={className}
       role="status"
-      aria-label={rank !== null ? `Rank ${String(rank)}` : "Unranked"}
+      aria-label={isValidRank ? `Rank ${String(rank)}` : "Unranked"}
     >
       {content}
     </div>

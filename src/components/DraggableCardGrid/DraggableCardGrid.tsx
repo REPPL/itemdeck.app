@@ -26,6 +26,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/Card/Card";
 import type { DisplayCard } from "@/hooks/useCollection";
+import type { DragFace, CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./DraggableCardGrid.module.css";
 
 /**
@@ -44,6 +45,16 @@ interface DraggableCardGridProps {
   flippedCardIds: string[];
   /** Callback when a card is flipped */
   onFlip: (cardId: string) => void;
+  /** Whether to show the rank badge */
+  showRankBadge?: boolean;
+  /** Whether to show the device badge */
+  showDeviceBadge?: boolean;
+  /** Placeholder text for unranked items */
+  rankPlaceholderText?: string;
+  /** Which card face allows dragging */
+  dragFace?: DragFace;
+  /** What to display on card back */
+  cardBackDisplay?: CardBackDisplay;
 }
 
 /**
@@ -54,14 +65,24 @@ interface SortableCardProps {
   isFlipped: boolean;
   onFlip: () => void;
   isDragging?: boolean;
+  showRankBadge?: boolean;
+  showDeviceBadge?: boolean;
+  rankPlaceholderText?: string;
+  canDrag: boolean;
+  cardBackDisplay?: CardBackDisplay;
 }
 
 function SortableCard({
   card,
   isFlipped,
   onFlip,
-  isDragging,
-}: SortableCardProps) {
+  isAnyDragging,
+  showRankBadge,
+  showDeviceBadge,
+  rankPlaceholderText,
+  canDrag,
+  cardBackDisplay,
+}: SortableCardProps & { isAnyDragging: boolean }) {
   const {
     attributes,
     listeners,
@@ -69,30 +90,39 @@ function SortableCard({
     transform,
     transition,
     isDragging: isSorting,
-  } = useSortable({ id: card.id });
+  } = useSortable({ id: card.id, disabled: !canDrag });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isSorting ? 0.5 : 1,
     zIndex: isSorting ? 100 : "auto",
-    // Critical for touch devices - must be inline for highest specificity
-    touchAction: "none",
+    cursor: canDrag ? (isSorting ? "grabbing" : "grab") : "pointer",
+    // Only apply touch-action: none when actively dragging
+    // This allows normal scrolling until a drag starts
+    touchAction: isAnyDragging ? "none" : "manipulation",
   };
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`${styles.cardWrapper ?? ""} ${isDragging ? (styles.dragging ?? "") : ""}`}
+      className={[
+        styles.cardWrapper,
+        isSorting ? styles.sorting : "",
+      ].filter(Boolean).join(" ")}
       {...attributes}
-      {...listeners}
+      {...(canDrag ? listeners : {})}
     >
       <Card
         card={card}
         isFlipped={isFlipped}
         onFlip={onFlip}
         tabIndex={-1}
+        showRankBadge={showRankBadge}
+        showDeviceBadge={showDeviceBadge}
+        rankPlaceholderText={rankPlaceholderText}
+        cardBackDisplay={cardBackDisplay}
       />
     </div>
   );
@@ -128,21 +158,27 @@ export function DraggableCardGrid({
   gap,
   flippedCardIds,
   onFlip,
+  showRankBadge,
+  showDeviceBadge,
+  rankPlaceholderText,
+  dragFace = "back",
+  cardBackDisplay,
 }: DraggableCardGridProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
   // Configure sensors for drag detection
-  // TouchSensor enables drag on iPad/touch devices with long-press activation
+  // Desktop: small distance threshold for immediate drag
+  // Touch: short delay to distinguish from scroll
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Minimum drag distance
+        distance: 8, // Start drag after 8px movement
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250, // Long-press delay for touch activation
-        tolerance: 5, // Allowed movement during delay
+        delay: 150, // Short delay for touch
+        tolerance: 5,
       },
     }),
     useSensor(KeyboardSensor, {
@@ -201,15 +237,30 @@ export function DraggableCardGrid({
           role="grid"
           aria-label="Draggable card collection"
         >
-          {cards.map((card) => (
-            <SortableCard
-              key={card.id}
-              card={card}
-              isFlipped={flippedCardIds.includes(card.id)}
-              onFlip={() => { onFlip(card.id); }}
-              isDragging={card.id === activeId}
-            />
-          ))}
+          {cards.map((card) => {
+            const isFlipped = flippedCardIds.includes(card.id);
+            // Determine if dragging is allowed based on dragFace setting
+            // isFlipped means front is showing (card has been clicked)
+            // !isFlipped means back is showing (default state)
+            const canDrag =
+              dragFace === "both" ||
+              (dragFace === "front" && isFlipped) ||
+              (dragFace === "back" && !isFlipped);
+            return (
+              <SortableCard
+                key={card.id}
+                card={card}
+                isFlipped={isFlipped}
+                onFlip={() => { onFlip(card.id); }}
+                isAnyDragging={activeId !== null}
+                showRankBadge={showRankBadge}
+                showDeviceBadge={showDeviceBadge}
+                rankPlaceholderText={rankPlaceholderText}
+                canDrag={canDrag}
+                cardBackDisplay={cardBackDisplay}
+              />
+            );
+          })}
         </div>
       </SortableContext>
 
@@ -221,6 +272,9 @@ export function DraggableCardGrid({
               card={activeCard}
               isFlipped={flippedCardIds.includes(activeCard.id)}
               tabIndex={-1}
+              showRankBadge={showRankBadge}
+              showDeviceBadge={showDeviceBadge}
+              rankPlaceholderText={rankPlaceholderText}
             />
           </div>
         )}

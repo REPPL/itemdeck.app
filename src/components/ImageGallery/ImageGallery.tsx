@@ -267,12 +267,6 @@ export function ImageGallery({
         </div>
       )}
 
-      {/* Image counter */}
-      {hasMultipleImages && (
-        <div className={styles.counter} aria-hidden="true">
-          {String(currentIndex + 1)} / {String(images.length)}
-        </div>
-      )}
     </div>
   );
 }

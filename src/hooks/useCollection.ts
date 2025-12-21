@@ -43,6 +43,9 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
 
   /** Device/platform from metadata */
   device?: string;
+
+  /** Image attribution/source information (e.g., Wikimedia Commons) */
+  imageAttribution?: string;
 }
 
 /**

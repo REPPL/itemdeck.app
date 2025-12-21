@@ -40,6 +40,9 @@ export const cardDataSchema = z.object({
 
   /** Additional key-value metadata (e.g., category, rank, device) */
   metadata: z.record(z.string(), z.string()).optional(),
+
+  /** Image attribution/source information (e.g., Wikimedia Commons) */
+  imageAttribution: z.string().optional(),
 });
 
 /**

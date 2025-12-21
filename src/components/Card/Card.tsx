@@ -7,6 +7,7 @@ import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
 import { CardExpanded } from "@/components/CardExpanded";
 import type { DisplayCard } from "@/hooks/useCollection";
+import type { CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
 
 /**
@@ -37,8 +38,8 @@ interface CardProps {
   onFlip?: () => void;
   /** Tab index for keyboard navigation (roving tabindex) */
   tabIndex?: 0 | -1;
-  /** Whether to show year on card back (from collection config) */
-  showYear?: boolean;
+  /** What to display on card back */
+  cardBackDisplay?: CardBackDisplay;
   /** Whether to show the rank badge */
   showRankBadge?: boolean;
   /** Whether to show the device badge */
@@ -68,7 +69,7 @@ export function Card({
   isFlipped = false,
   onFlip,
   tabIndex = 0,
-  showYear,
+  cardBackDisplay = "year",
   showRankBadge = true,
   showDeviceBadge = true,
   rankPlaceholderText,
@@ -137,7 +138,7 @@ export function Card({
             <CardBack
               logoUrl={card.logoUrl ?? settings.card.logoUrl}
               year={card.year}
-              showYear={showYear}
+              display={cardBackDisplay}
             />
           }
           front={

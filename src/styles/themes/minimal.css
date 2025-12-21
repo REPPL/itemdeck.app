@@ -4,7 +4,7 @@
  * Features no borders, subtle colours, and clean typography.
  */
 
-[data-theme="minimal"] {
+[data-visual-theme="minimal"] {
   /* Font families - clean, readable */
   --font-family-heading: "Helvetica Neue", "Arial", sans-serif;
   --font-family-body: "Helvetica Neue", "Arial", sans-serif;
@@ -16,30 +16,45 @@
   --radius-lg: 8px;
   --radius-xl: 8px;
   --radius-full: 9999px;
+  --card-border-radius: 4px;
 
   /* Shadows - nearly invisible */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 2px 6px rgba(0, 0, 0, 0.08);
+
+  /* Elevations - minimal shadows */
+  --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.03);
+  --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.04);
+  --elevation-3: 0 4px 8px rgba(0, 0, 0, 0.05);
+  --elevation-4: 0 6px 12px rgba(0, 0, 0, 0.05);
+  --elevation-5: 0 8px 16px rgba(0, 0, 0, 0.06);
 
   /* Animation curves - subtle, quick */
   --transition-fast: 100ms;
+  --transition-normal: 200ms;
   --transition-medium: 200ms;
   --transition-slow: 300ms;
   --easing-default: ease-out;
   --easing-bounce: ease-out;
 
-  /* Colour accents - muted */
-  --colour-primary: #64748b;
-  --colour-primary-hover: #475569;
-  --colour-secondary: #94a3b8;
-  --colour-accent: #e2e8f0;
+  /* Colour accents - subtle but visible */
+  --colour-primary: #475569;
+  --colour-primary-hover: #334155;
+  --colour-secondary: #64748b;
+  --colour-accent: #cbd5e1;
 
-  /* Card styling - borderless */
-  --card-border-width: 0;
-  --card-border-style: none;
-  --card-border-colour: transparent;
+  /* Border visibility - subtle but present */
+  --colour-border: #cbd5e1;
+  --colour-border-light: #e2e8f0;
+
+  /* Card styling - subtle border for visibility */
+  --card-border-width: 1px;
+  --card-border-style: solid;
+  --card-border-colour: rgba(0, 0, 0, 0.08);
 
   /* Badge styling */
   --badge-font-weight: 500;
@@ -51,29 +66,29 @@
 }
 
 /* Hide decorative elements */
-[data-theme="minimal"] .decorative,
-[data-theme="minimal"] .ornament {
+[data-visual-theme="minimal"] .decorative,
+[data-visual-theme="minimal"] .ornament {
   display: none;
 }
 
 /* Subtle card hover effect */
-[data-theme="minimal"] .card:hover {
+[data-visual-theme="minimal"] .card:hover {
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Focus on content */
-[data-theme="minimal"] button {
+/* Focus on content - ensure buttons remain visible */
+[data-visual-theme="minimal"] button {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--colour-border, rgba(0, 0, 0, 0.1));
 }
 
-[data-theme="minimal"] button:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-colour: rgba(255, 255, 255, 0.2);
+[data-visual-theme="minimal"] button:hover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: var(--colour-primary, #475569);
 }
 
 /* Minimal badge styling */
-[data-theme="minimal"] .badge {
+[data-visual-theme="minimal"] .badge {
   background: rgba(255, 255, 255, 0.08);
   border: none;
 }

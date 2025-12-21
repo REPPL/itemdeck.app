@@ -1,10 +1,14 @@
 import { useMemo } from "react";
-import { useConfig } from "@/hooks/useConfig";
 import {
   type AppSettings,
   type CardSettings,
   DEFAULT_APP_SETTINGS,
 } from "@/types/settings";
+import {
+  useSettingsStore,
+  CARD_SIZE_WIDTHS,
+  CARD_ASPECT_RATIOS,
+} from "@/stores/settingsStore";
 
 interface UseSettingsResult {
   settings: AppSettings;
@@ -15,53 +19,38 @@ interface UseSettingsResult {
 /**
  * Hook to manage application settings.
  *
- * Settings are now derived from ConfigContext.
- * This hook provides backwards compatibility with the existing SettingsContext API.
+ * Settings are now derived from settingsStore (Zustand).
+ * This hook provides the existing SettingsContext API.
  */
 export function useSettings(): UseSettingsResult {
-  const { config, updateConfig } = useConfig();
+  const cardSizePreset = useSettingsStore((state) => state.cardSizePreset);
+  const cardAspectRatio = useSettingsStore((state) => state.cardAspectRatio);
 
-  // Derive settings from config
+  // Calculate dimensions from size preset and aspect ratio
+  const cardDimensions = useMemo(() => {
+    const width = CARD_SIZE_WIDTHS[cardSizePreset];
+    const aspectRatio = CARD_ASPECT_RATIOS[cardAspectRatio];
+    return {
+      width,
+      height: Math.round(width * aspectRatio),
+    };
+  }, [cardSizePreset, cardAspectRatio]);
+
+  // Derive settings for backwards compatibility
   const settings = useMemo<AppSettings>(() => {
+    const aspectRatio = CARD_ASPECT_RATIOS[cardAspectRatio];
     return {
       card: {
-        width: config.card.width,
-        // Convert aspectRatio number to ratio tuple (approximate)
-        ratio: [1, config.card.aspectRatio] as [number, number],
-        logoUrl: config.card.logoUrl,
+        width: cardDimensions.width,
+        ratio: [1, aspectRatio] as [number, number],
+        logoUrl: undefined,
       },
     };
-  }, [config.card]);
+  }, [cardDimensions.width, cardAspectRatio]);
 
-  // Calculate dimensions from config
-  const cardDimensions = useMemo(() => {
-    return {
-      width: config.card.width,
-      height: Math.round(config.card.width * config.card.aspectRatio),
-    };
-  }, [config.card.width, config.card.aspectRatio]);
-
-  // Update config when card settings change
-  const updateCardSettings = (updates: Partial<CardSettings>) => {
-    const cardUpdates: Partial<typeof config.card> = {};
-
-    if (updates.width !== undefined) {
-      cardUpdates.width = updates.width;
-    }
-
-    if (updates.ratio !== undefined) {
-      // Convert ratio tuple to aspectRatio number
-      const [w, h] = updates.ratio;
-      cardUpdates.aspectRatio = h / w;
-    }
-
-    if (updates.logoUrl !== undefined) {
-      cardUpdates.logoUrl = updates.logoUrl;
-    }
-
-    if (Object.keys(cardUpdates).length > 0) {
-      updateConfig({ card: cardUpdates });
-    }
+  // No-op - settings are managed via settingsStore now
+  const updateCardSettings = (_updates: Partial<CardSettings>) => {
+    // Deprecated: use setCardSizePreset/setCardAspectRatio directly
   };
 
   return {

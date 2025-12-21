@@ -25,19 +25,19 @@
   transition: opacity var(--transition-fast, 150ms);
 }
 
-/* Size variants */
+/* Size variants - small matches overlay year text height */
 .small {
-  padding: 2px 6px;
-  font-size: 0.65rem;
+  padding: 4px 10px;
+  font-size: var(--text-fluid-small, 0.8rem);
   border-radius: var(--radius-sm, 4px);
 }
 
 .medium {
-  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
-  font-size: 0.75rem;
+  padding: 6px 12px;
+  font-size: 0.875rem;
 }
 
 .large {
-  padding: var(--spacing-sm, 8px) var(--spacing-md, 12px);
-  font-size: 0.875rem;
+  padding: 8px 16px;
+  font-size: 1rem;
 }

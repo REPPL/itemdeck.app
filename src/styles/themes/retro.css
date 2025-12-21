@@ -4,7 +4,7 @@
  * Features sharp corners, pixel fonts, and subtle CRT effects.
  */
 
-[data-theme="retro"] {
+[data-visual-theme="retro"] {
   /* Font families - pixel/retro style */
   --font-family-heading: "Press Start 2P", "VT323", "Courier New", monospace;
   --font-family-body: "VT323", "Courier New", monospace;
@@ -16,15 +16,26 @@
   --radius-lg: 4px;
   --radius-xl: 4px;
   --radius-full: 4px;
+  --card-border-radius: 2px;
 
   /* Shadows - harsh, pixelated */
   --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.5);
   --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.5);
   --shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.5);
   --shadow-xl: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  --shadow-card: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 5px 5px 0 rgba(0, 255, 0, 0.3);
+
+  /* Elevations - pixelated offset shadows */
+  --elevation-1: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  --elevation-2: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --elevation-3: 6px 6px 0 rgba(0, 0, 0, 0.5);
+  --elevation-4: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  --elevation-5: 10px 10px 0 rgba(0, 0, 0, 0.5);
 
   /* Animation curves - stepped/abrupt */
   --transition-fast: 50ms;
+  --transition-normal: 100ms;
   --transition-medium: 100ms;
   --transition-slow: 200ms;
   --easing-default: steps(4, end);
@@ -52,7 +63,7 @@
 }
 
 /* CRT scanline overlay effect */
-[data-theme="retro"] .crt-effect::after {
+[data-visual-theme="retro"] .crt-effect::after {
   content: "";
   position: absolute;
   top: 0;
@@ -71,7 +82,7 @@
 }
 
 /* Retro glow effect for interactive elements */
-[data-theme="retro"] button:hover,
-[data-theme="retro"] a:hover {
+[data-visual-theme="retro"] button:hover,
+[data-visual-theme="retro"] a:hover {
   text-shadow: 0 0 10px var(--colour-primary);
 }

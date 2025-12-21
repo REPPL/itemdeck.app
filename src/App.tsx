@@ -1,16 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
-import { ThemeToggle } from "@/components/ThemeToggle";
-import { RefreshButton } from "@/components/RefreshButton";
-import { SettingsButton } from "@/components/SettingsButton";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AdminButton } from "@/components/AdminButton";
-import { SearchButton } from "@/components/SearchButton";
-import { SearchBar } from "@/components/SearchBar";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -27,15 +22,14 @@ import styles from "./App.module.css";
 function AppContent() {
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [adminModeVisible, setAdminModeVisible] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [searchExpanded, setSearchExpanded] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
 
   // Settings from store
   const overlayStyle = useSettingsStore((state) => state.overlayStyle);
   const titleDisplayMode = useSettingsStore((state) => state.titleDisplayMode);
+  const reduceMotion = useSettingsStore((state) => state.reduceMotion);
+  const highContrast = useSettingsStore((state) => state.highContrast);
 
   // Initialise theme (applies data-theme to document for light/dark mode)
   useTheme();
@@ -43,18 +37,20 @@ function AppContent() {
   // Apply visual theme (retro/modern/minimal)
   useVisualTheme();
 
-  // Ctrl+A toggles admin mode visibility
-  const handleAdminToggle = useCallback(() => {
-    setAdminModeVisible((prev) => !prev);
+  // Ctrl+A toggles settings panel
+  const handleSettingsToggle = useCallback(() => {
+    setSettingsOpen((prev) => !prev);
   }, []);
 
-  useAdminModeShortcut(handleAdminToggle);
+  useAdminModeShortcut(handleSettingsToggle);
 
-  // Apply overlay style and title display mode to document
+  // Apply settings as data attributes to document
   useEffect(() => {
     document.documentElement.dataset.overlayStyle = overlayStyle;
     document.documentElement.dataset.titleDisplay = titleDisplayMode;
-  }, [overlayStyle, titleDisplayMode]);
+    document.documentElement.dataset.reduceMotion = reduceMotion;
+    document.documentElement.dataset.highContrast = String(highContrast);
+  }, [overlayStyle, titleDisplayMode, reduceMotion, highContrast]);
 
   // Handlers
   const handleSidebarClose = useCallback(() => {
@@ -69,19 +65,6 @@ function AppContent() {
     setSettingsOpen(false);
   }, []);
 
-  const handleSearchExpand = useCallback(() => {
-    setSearchExpanded(true);
-  }, []);
-
-  const handleSearchCollapse = useCallback(() => {
-    setSearchExpanded(false);
-  }, []);
-
-  const handleExplorerOpen = useCallback(() => {
-    setSidebarOpen(true);
-    setSearchExpanded(false);
-  }, []);
-
   const handleDevtoolsToggle = useCallback(() => {
     setDevtoolsEnabled((prev) => !prev);
   }, []);
@@ -91,35 +74,6 @@ function AppContent() {
       {/* Sidebar (Explorer) */}
       <Sidebar isOpen={sidebarOpen} onClose={handleSidebarClose} />
 
-      {/* Search button (replaces red MenuButton) */}
-      <SearchButton onClick={handleSearchExpand} isExpanded={searchExpanded} />
-
-      {/* Expandable search bar */}
-      <SearchBar
-        isExpanded={searchExpanded}
-        query={searchQuery}
-        onQueryChange={setSearchQuery}
-        onClose={handleSearchCollapse}
-        onExplorerClick={handleExplorerOpen}
-      />
-
-      {/* Header - slides down when admin mode visible */}
-      <AnimatePresence>
-        {adminModeVisible && (
-          <motion.header
-            className={styles.header}
-            initial={{ y: -60, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -60, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          >
-            <RefreshButton size="small" />
-            <ThemeToggle />
-            <SettingsButton onClick={handleSettingsOpen} />
-          </motion.header>
-        )}
-      </AnimatePresence>
-
       {/* Main content */}
       <main className={styles.main}>
         <QueryErrorBoundary>
@@ -127,11 +81,8 @@ function AppContent() {
         </QueryErrorBoundary>
       </main>
 
-      {/* Floating admin button (bottom-right) */}
-      <AdminButton
-        isVisible={adminModeVisible}
-        onClick={handleSettingsOpen}
-      />
+      {/* Floating admin button (bottom-right) - always visible */}
+      <AdminButton onClick={handleSettingsOpen} />
 
       {/* Settings panel */}
       <SettingsPanel
@@ -142,6 +93,11 @@ function AppContent() {
       />
 
       <OfflineIndicator />
+
+      {/* TanStack Query DevTools (dev mode only, controlled by setting) */}
+      {import.meta.env.DEV && devtoolsEnabled && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
     </div>
   );
 }

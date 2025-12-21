@@ -24,10 +24,25 @@
   /* Focus styles */
   outline: none;
 
+  /* Prevent text/image selection during drag */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Prevent image dragging (browser default) */
+  -webkit-user-drag: none;
+
   /* Elevation transitions */
   transition:
     transform var(--transition-normal),
     box-shadow var(--transition-normal);
+}
+
+/* Prevent image dragging within cards */
+.card img {
+  -webkit-user-drag: none;
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: none;
 }
 
 /* Elevation states */
@@ -175,7 +190,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--spacing-sm) var(--spacing-md);
+  /* Increased vertical padding for more breathing room */
+  padding: var(--spacing-md) var(--spacing-md);
   background: var(--card-overlay-background);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -211,11 +227,21 @@
   -webkit-box-orient: vertical;
 }
 
+/* Footer row: year on left, device badge on right */
+.overlayFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-height: 24px;
+}
+
 .overlayYear {
   font-size: var(--text-fluid-small);
-  font-weight: 500;
-  opacity: 0.9;
+  font-weight: 600;
+  opacity: 0.95;
   text-shadow: var(--card-overlay-text-shadow);
+  line-height: 1;
 }
 
 /* ============================================
@@ -244,14 +270,12 @@
 }
 
 /* ============================================
-   Device Badge (bottom-right)
+   Device Badge (in overlay footer)
    ============================================ */
 
-.deviceBadge {
-  position: absolute;
-  bottom: 55px; /* Above the overlay */
-  right: var(--spacing-sm);
-  z-index: 5;
+.overlayDeviceBadge {
+  /* No absolute positioning - part of flex row */
+  flex-shrink: 0;
 }
 
 /* ============================================

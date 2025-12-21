@@ -5,7 +5,7 @@
  * Visibility controlled via Ctrl+A keyboard shortcut.
  */
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import styles from "./AdminButton.module.css";
 
 /**
@@ -29,9 +29,6 @@ function GearIcon() {
 }
 
 interface AdminButtonProps {
-  /** Whether the button is visible */
-  isVisible: boolean;
-
   /** Callback when button is clicked */
   onClick: () => void;
 
@@ -42,22 +39,19 @@ interface AdminButtonProps {
 /**
  * Floating admin button component.
  *
+ * Always visible gear icon in the corner for accessing settings.
+ *
  * Features:
  * - Gear/cog icon
- * - Animate in/out (fade + scale)
  * - Configurable position
  * - Opens SettingsPanel when clicked
  *
  * @example
  * ```tsx
- * <AdminButton
- *   isVisible={adminModeVisible}
- *   onClick={() => setSettingsOpen(true)}
- * />
+ * <AdminButton onClick={() => setSettingsOpen(true)} />
  * ```
  */
 export function AdminButton({
-  isVisible,
   onClick,
   position = "bottom-right",
 }: AdminButtonProps) {
@@ -70,24 +64,19 @@ export function AdminButton({
   const positionClass = positionStyles[position] ?? positionStyles["bottom-right"];
 
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.button
-          type="button"
-          className={[styles.button, positionClass].filter(Boolean).join(" ")}
-          onClick={onClick}
-          aria-label="Open settings"
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.5 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <GearIcon />
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <motion.button
+      type="button"
+      className={[styles.button, positionClass].filter(Boolean).join(" ")}
+      onClick={onClick}
+      aria-label="Open settings"
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      whileHover={{ scale: 1.1 }}
+      whileTap={{ scale: 0.95 }}
+    >
+      <GearIcon />
+    </motion.button>
   );
 }
 

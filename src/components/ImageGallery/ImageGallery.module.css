@@ -138,26 +138,6 @@
 }
 
 /* ============================================
-   Image Counter
-   ============================================ */
-
-.counter {
-  position: absolute;
-  top: var(--spacing-md, 16px);
-  right: var(--spacing-md, 16px);
-  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: var(--radius-sm, 4px);
-  font-size: 0.875rem;
-  font-weight: 500;
-  colour: white;
-  color: white;
-  z-index: 10;
-}
-
-/* ============================================
    Touch Devices
    ============================================ */
 

@@ -31,7 +31,11 @@
 
 | Drift Type | Files Affected | Root Cause |
 |------------|----------------|------------|
-| None detected | - | Feature specs accurately described implementation |
+| Feature location | 14 feature specs | Features remained in `planned/` after implementation |
+| Milestone status | v0.3.0.md | Status showed "Planned" instead of "Complete" |
+| Feature links | v0.3.0.md, index files | Links pointed to `planned/` instead of `completed/` |
+
+**Resolution:** Ran `/sync-docs` verification, moved all 14 feature specs to `completed/`, updated milestone document and index files.
 
 ---
 
@@ -102,11 +106,13 @@ Some new component directories required manual index.ts creation. This could be 
 1. **Consolidate work on single branch** - Avoid fragmentation
 2. **Write tests alongside features** - Not after all implementation
 3. **Check for index file updates** - Add to implementation checklist
+4. **Run /sync-docs before tagging** - Catch documentation drift before release
 
 ### What to Stop Doing
 
 1. **Multiple parallel branches** - Keep work consolidated
 2. **Delayed test updates** - Update tests as API changes
+3. **Skipping documentation sync** - Always verify docs match implementation
 
 ---
 
@@ -118,6 +124,8 @@ Some new component directories required manual index.ts creation. This could be 
 | CSS custom properties for theming | Native browser support, no runtime overhead |
 | Fisher-Yates shuffle | O(n) complexity, uniform distribution |
 | Settings panel as modal | Cleaner UI, focus trap for accessibility |
+| Data attributes for style variants | CSS responds to JS state changes without re-render |
+| Wikipedia for year verification | Authoritative source for game publication dates |
 
 ---
 
@@ -133,6 +141,8 @@ Some new component directories required manual index.ts creation. This could be 
 | Tests passing | 211 |
 | Lint errors | 0 |
 | TypeScript errors | 0 |
+| Game years corrected | 40+ |
+| Docs files moved | 14 |
 
 ---
 

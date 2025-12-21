@@ -54,6 +54,22 @@ Built the settings infrastructure:
 - **F-012: State Persistence** - Created Zustand stores with persist middleware
 - **F-013: Settings Panel** - Built comprehensive settings UI with all preferences
 
+### Phase 7: Card Layout Enhancements
+
+Added configurable card appearance options:
+
+- **Title Display Mode** - Single-line with ellipsis truncation or multi-line wrap (2 lines max)
+- **Footer Contrast** - Configurable dark (black with white text) or light (white with dark text) overlay
+- Both settings persist via Zustand store and are accessible in Settings Panel
+
+### Phase 8: Data Quality
+
+Corrected collection metadata:
+
+- **Year Inference** - Updated 40+ game publication years from Wikipedia
+- Fixed incorrect years that were device/console years rather than actual game release dates
+- Examples: Pitfall 1981→1982, Street Fighter II 1985→1991, Civilization 1983→1991
+
 ## Challenges Encountered
 
 ### Multiple Button Elements in Card
@@ -79,6 +95,28 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl"> {
 ### Branch Merging
 
 Work spanned multiple feature branches that needed to be consolidated. Used git merge to combine `feature/card-year-enhancement` into `feature/v0.3.0-customisation`.
+
+### CSS Custom Properties for Dynamic Styling
+
+Implemented CSS custom properties controlled by data attributes for the title display and overlay style settings:
+
+```css
+[data-overlay-style="light"] {
+  --card-overlay-background: rgba(255, 255, 255, 0.85);
+  --card-overlay-text: #1a1a1a;
+}
+
+[data-title-display="wrap"] {
+  --card-title-white-space: normal;
+  --card-title-line-clamp: 2;
+}
+```
+
+This pattern allows JavaScript to set `document.documentElement.dataset.overlayStyle` and have CSS respond automatically.
+
+### Documentation Sync
+
+After implementation, ran `/sync-docs` verification and found 14 feature specs still in `planned/` directory. Moved all completed features to `completed/` and updated milestone status.
 
 ## Code Highlights
 

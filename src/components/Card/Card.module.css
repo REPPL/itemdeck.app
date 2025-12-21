@@ -175,8 +175,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  padding: var(--spacing-md);
-  background: var(--glass-background);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--card-overlay-background);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-top: 1px solid var(--glass-border);
@@ -197,14 +197,25 @@
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--card-overlay-text-shadow);
+  max-width: 100%;
+
+  /* Single line with truncation (default) */
+  white-space: var(--card-title-white-space, nowrap);
+  overflow: var(--card-title-overflow, hidden);
+  text-overflow: var(--card-title-text-overflow, ellipsis);
+
+  /* Multi-line clamp for wrap mode */
+  display: -webkit-box;
+  -webkit-line-clamp: var(--card-title-line-clamp, 1);
+  -webkit-box-orient: vertical;
 }
 
 .overlayYear {
   font-size: var(--text-fluid-small);
   font-weight: 500;
   opacity: 0.9;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: var(--card-overlay-text-shadow);
 }
 
 /* ============================================

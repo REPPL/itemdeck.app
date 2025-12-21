@@ -8,7 +8,12 @@
 import { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useSettingsStore, type LayoutType } from "@/stores/settingsStore";
+import {
+  useSettingsStore,
+  type LayoutType,
+  type OverlayStyle,
+  type TitleDisplayMode,
+} from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 
 interface SettingsPanelProps {
@@ -65,6 +70,16 @@ const layoutOptions: { type: LayoutType; icon: React.ReactNode; label: string }[
   { type: "compact", icon: <CompactIcon />, label: "Compact" },
 ];
 
+const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
+  { value: "dark", label: "Dark" },
+  { value: "light", label: "Light" },
+];
+
+const titleDisplayOptions: { value: TitleDisplayMode; label: string }[] = [
+  { value: "truncate", label: "Single line" },
+  { value: "wrap", label: "Wrap" },
+];
+
 /**
  * Settings panel with grouped configuration sections.
  */
@@ -78,10 +93,14 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
     cardHeight,
     gap,
     shuffleOnLoad,
+    overlayStyle,
+    titleDisplayMode,
     setLayout,
     setCardDimensions,
     setGap,
     setShuffleOnLoad,
+    setOverlayStyle,
+    setTitleDisplayMode,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -171,6 +190,62 @@ export function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
               <span className={styles.label}>Theme</span>
               <div className={styles.control}>
                 <ThemeToggle />
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Card Footer</span>
+              <div
+                className={styles.segmentedControl}
+                role="radiogroup"
+                aria-label="Card overlay style"
+              >
+                {overlayStyleOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      overlayStyle === value ? styles.segmentButtonActive : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => {
+                      setOverlayStyle(value);
+                    }}
+                    role="radio"
+                    aria-checked={overlayStyle === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Title Display</span>
+              <div
+                className={styles.segmentedControl}
+                role="radiogroup"
+                aria-label="Title display mode"
+              >
+                {titleDisplayOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      titleDisplayMode === value ? styles.segmentButtonActive : "",
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => {
+                      setTitleDisplayMode(value);
+                    }}
+                    role="radio"
+                    aria-checked={titleDisplayMode === value}
+                  >
+                    {label}
+                  </button>
+                ))}
               </div>
             </div>
           </section>

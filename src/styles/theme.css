@@ -109,14 +109,10 @@
   --card-back-text-background: rgba(255, 255, 255, 0.15);
   --card-back-logo-colour: rgba(255, 255, 255, 0.85);
 
-  /* Card front overlay */
-  --card-overlay-background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.85) 0%,
-    rgba(0, 0, 0, 0.6) 50%,
-    transparent 100%
-  );
+  /* Card front overlay - dark variant (default) */
+  --card-overlay-background: rgba(0, 0, 0, 0.75);
   --card-overlay-text: #ffffff;
+  --card-overlay-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 
   /* Shadows */
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -170,14 +166,10 @@
   --card-back-text-background: rgba(255, 255, 255, 0.15);
   --card-back-logo-colour: rgba(255, 255, 255, 0.85);
 
-  /* Card front overlay */
-  --card-overlay-background: linear-gradient(
-    to top,
-    rgba(0, 0, 0, 0.9) 0%,
-    rgba(0, 0, 0, 0.7) 50%,
-    transparent 100%
-  );
+  /* Card front overlay - dark variant (default) */
+  --card-overlay-background: rgba(0, 0, 0, 0.8);
   --card-overlay-text: #ffffff;
+  --card-overlay-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 
   /* Shadows - lighter for dark mode */
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.3);
@@ -251,6 +243,36 @@ html.theme-switching * {
     --colour-background: #000000;
     --colour-border: #ffffff;
   }
+}
+
+/* ============================================
+   Card Overlay Variants
+   ============================================ */
+
+/* Light overlay variant - white background with dark text */
+[data-overlay-style="light"] {
+  --card-overlay-background: rgba(255, 255, 255, 0.85);
+  --card-overlay-text: #1a1a1a;
+  --card-overlay-text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Dark overlay variant (default) - black background with white text */
+[data-overlay-style="dark"] {
+  --card-overlay-background: rgba(0, 0, 0, 0.75);
+  --card-overlay-text: #ffffff;
+  --card-overlay-text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* ============================================
+   Title Display Modes
+   ============================================ */
+
+/* Wrap mode - allow multi-line titles */
+[data-title-display="wrap"] {
+  --card-title-white-space: normal;
+  --card-title-overflow: visible;
+  --card-title-text-overflow: clip;
+  --card-title-line-clamp: 2;
 }
 
 /* ============================================

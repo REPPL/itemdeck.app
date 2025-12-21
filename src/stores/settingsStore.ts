@@ -19,6 +19,16 @@ export type LayoutType = "grid" | "list" | "compact";
 export type ReduceMotionPreference = "system" | "on" | "off";
 
 /**
+ * Card overlay style - controls contrast of the title footer.
+ */
+export type OverlayStyle = "dark" | "light";
+
+/**
+ * Title display mode - how to handle long titles.
+ */
+export type TitleDisplayMode = "truncate" | "wrap";
+
+/**
  * Settings store state.
  */
 interface SettingsState {
@@ -41,6 +51,12 @@ interface SettingsState {
   /** High contrast mode */
   highContrast: boolean;
 
+  /** Card overlay style (dark/light) */
+  overlayStyle: OverlayStyle;
+
+  /** Title display mode (truncate/wrap) */
+  titleDisplayMode: TitleDisplayMode;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardDimensions: (width: number, height: number) => void;
@@ -48,6 +64,8 @@ interface SettingsState {
   setShuffleOnLoad: (shuffle: boolean) => void;
   setReduceMotion: (preference: ReduceMotionPreference) => void;
   setHighContrast: (enabled: boolean) => void;
+  setOverlayStyle: (style: OverlayStyle) => void;
+  setTitleDisplayMode: (mode: TitleDisplayMode) => void;
   resetToDefaults: () => void;
 }
 
@@ -62,6 +80,8 @@ const DEFAULT_SETTINGS = {
   shuffleOnLoad: true,
   reduceMotion: "system" as ReduceMotionPreference,
   highContrast: false,
+  overlayStyle: "dark" as OverlayStyle,
+  titleDisplayMode: "truncate" as TitleDisplayMode,
 };
 
 /**
@@ -96,6 +116,14 @@ export const useSettingsStore = create<SettingsState>()(
         set({ highContrast });
       },
 
+      setOverlayStyle: (overlayStyle) => {
+        set({ overlayStyle });
+      },
+
+      setTitleDisplayMode: (titleDisplayMode) => {
+        set({ titleDisplayMode });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
@@ -112,6 +140,8 @@ export const useSettingsStore = create<SettingsState>()(
         shuffleOnLoad: state.shuffleOnLoad,
         reduceMotion: state.reduceMotion,
         highContrast: state.highContrast,
+        overlayStyle: state.overlayStyle,
+        titleDisplayMode: state.titleDisplayMode,
       }),
     }
   )

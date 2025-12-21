@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { MenuButton } from "@/components/MenuButton/MenuButton";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
@@ -11,6 +11,7 @@ import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
 import { useTheme } from "@/hooks/useTheme";
+import { useSettingsStore } from "@/stores/settingsStore";
 import styles from "./App.module.css";
 
 /**
@@ -18,9 +19,17 @@ import styles from "./App.module.css";
  */
 function AppContent() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const overlayStyle = useSettingsStore((state) => state.overlayStyle);
+  const titleDisplayMode = useSettingsStore((state) => state.titleDisplayMode);
 
   // Initialise theme (applies data-theme to document)
   useTheme();
+
+  // Apply overlay style and title display mode to document
+  useEffect(() => {
+    document.documentElement.dataset.overlayStyle = overlayStyle;
+    document.documentElement.dataset.titleDisplay = titleDisplayMode;
+  }, [overlayStyle, titleDisplayMode]);
 
   const handleMenuToggle = () => {
     setMenuOpen((prev) => !prev);

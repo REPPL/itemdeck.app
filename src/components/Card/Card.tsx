@@ -1,11 +1,11 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
-import { CardDetailModal } from "./CardDetailModal";
+import { CardExpanded } from "@/components/CardExpanded";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./Card.module.css";
 
@@ -18,10 +18,13 @@ interface CardDisplayData {
   title: string;
   year?: string;
   imageUrl: string;
+  imageUrls?: string[];
   logoUrl?: string;
   summary?: string;
   detailUrl?: string;
   categoryTitle?: string;
+  rank?: number | null;
+  device?: string;
   metadata?: Record<string, string>;
 }
 
@@ -36,6 +39,12 @@ interface CardProps {
   tabIndex?: 0 | -1;
   /** Whether to show year on card back (from collection config) */
   showYear?: boolean;
+  /** Whether to show the rank badge */
+  showRankBadge?: boolean;
+  /** Whether to show the device badge */
+  showDeviceBadge?: boolean;
+  /** Placeholder text for unranked items */
+  rankPlaceholderText?: string;
 }
 
 /**
@@ -54,10 +63,21 @@ interface CardProps {
  * Flip state is controlled externally via isFlipped prop.
  * CardGrid manages which cards are flipped.
  */
-export function Card({ card, isFlipped = false, onFlip, tabIndex = 0, showYear }: CardProps) {
+export function Card({
+  card,
+  isFlipped = false,
+  onFlip,
+  tabIndex = 0,
+  showYear,
+  showRankBadge = true,
+  showDeviceBadge = true,
+  rankPlaceholderText,
+}: CardProps) {
   const { cardDimensions, settings } = useSettingsContext();
   const { config } = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const cardRef = useRef<HTMLElement>(null);
 
   const cardStyle = {
     width: `${String(cardDimensions.width)}px`,
@@ -77,6 +97,10 @@ export function Card({ card, isFlipped = false, onFlip, tabIndex = 0, showYear }
 
   const handleInfoClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
+    // Capture card position for animation origin
+    if (cardRef.current) {
+      setOriginRect(cardRef.current.getBoundingClientRect());
+    }
     setIsModalOpen(true);
   }, []);
 
@@ -90,6 +114,7 @@ export function Card({ card, isFlipped = false, onFlip, tabIndex = 0, showYear }
   return (
     <>
       <motion.article
+        ref={cardRef}
         className={styles.card}
         style={cardStyle}
         title={card.title}
@@ -120,16 +145,21 @@ export function Card({ card, isFlipped = false, onFlip, tabIndex = 0, showYear }
               imageUrl={card.imageUrl}
               title={card.title}
               year={card.year}
-              categoryTitle={card.categoryTitle}
+              rank={card.rank}
+              device={card.device}
+              showRankBadge={showRankBadge}
+              showDeviceBadge={showDeviceBadge}
+              rankPlaceholderText={rankPlaceholderText}
               onInfoClick={handleInfoClick}
             />
           }
         />
       </motion.article>
-      <CardDetailModal
+      <CardExpanded
         card={displayCard}
         isOpen={isModalOpen}
         onClose={handleCloseModal}
+        originRect={originRect}
       />
     </>
   );

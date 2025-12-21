@@ -169,5 +169,5 @@ The `@storybook/addon-a11y` addon runs axe-core checks on each story:
 
 ## Related Documentation
 
-- [v0.5.0 Milestone](../../milestones/v0.5.0.md)
+- [v0.6.0 Milestone](../../milestones/v0.6.0.md)
 - [F-019: Accessibility Audit](./F-019-accessibility-audit.md)

@@ -1,0 +1,100 @@
+/**
+ * Admin button styles.
+ *
+ * Floating button with gear icon for accessing settings.
+ */
+
+.button {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colour-primary, #4f9eff);
+  border: none;
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  box-shadow: var(--elevation-3, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
+  z-index: 100;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    box-shadow var(--transition-fast, 150ms);
+}
+
+.button:hover {
+  background: var(--colour-primary-hover, #3b8bef);
+  box-shadow: var(--elevation-4, 0 20px 25px -5px rgba(0, 0, 0, 0.35));
+}
+
+.button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+.button svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* ============================================
+   Position Variants
+   ============================================ */
+
+.bottom-right {
+  bottom: var(--spacing-lg, 24px);
+  right: var(--spacing-lg, 24px);
+}
+
+.bottom-left {
+  bottom: var(--spacing-lg, 24px);
+  left: var(--spacing-lg, 24px);
+}
+
+.top-right {
+  top: var(--spacing-lg, 24px);
+  right: var(--spacing-lg, 24px);
+}
+
+.top-left {
+  top: var(--spacing-lg, 24px);
+  left: var(--spacing-lg, 24px);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+  .button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .button svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .bottom-right {
+    bottom: var(--spacing-md, 16px);
+    right: var(--spacing-md, 16px);
+  }
+
+  .bottom-left {
+    bottom: var(--spacing-md, 16px);
+    left: var(--spacing-md, 16px);
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+}

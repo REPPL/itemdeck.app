@@ -23,8 +23,11 @@ export const cardDataSchema = z.object({
   /** Year associated with the item (displayed on card back) */
   year: z.string().optional(),
 
-  /** URL to the card's front image */
+  /** URL to the card's front image (deprecated, use imageUrls) */
   imageUrl: z.url().optional(),
+
+  /** Array of image URLs for gallery support */
+  imageUrls: z.array(z.url()).optional(),
 
   /** URL to custom logo for card back */
   logoUrl: z.url().optional(),
@@ -35,7 +38,7 @@ export const cardDataSchema = z.object({
   /** External reference URL for more details */
   detailUrl: z.url().optional(),
 
-  /** Additional key-value metadata (e.g., category, rank) */
+  /** Additional key-value metadata (e.g., category, rank, device) */
   metadata: z.record(z.string(), z.string()).optional(),
 });
 

@@ -6,11 +6,11 @@ Decisions and clarifications made during vision implementation.
 
 ### 1. Testing Scope
 
-**Question**: The vision mentions 'Unit/integration tests' as out of scope, but the existing roadmap has F-017 Testing Infrastructure planned for v0.5.0. Should we remove F-017 from the roadmap?
+**Question**: The vision mentions 'Unit/integration tests' as out of scope, but the existing roadmap has F-017 Testing Infrastructure planned for v0.6.0. Should we remove F-017 from the roadmap?
 
 **Answer**: Keep for Phase 2+
 
-**Action**: Move F-017 (Testing Infrastructure) out of v0.5.0. The vision's "out of scope" items apply to Phase 1 (the demo). Testing infrastructure will be implemented after the Phase 1 demo is complete.
+**Action**: Keep F-017 (Testing Infrastructure) in v0.6.0. The vision's "out of scope" items apply to Phase 1 (the demo). Testing infrastructure will be implemented after the Phase 1 demo is complete.
 
 ### 2. Theme Colours
 

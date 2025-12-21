@@ -1,0 +1,274 @@
+/**
+ * Expanded card view styles.
+ *
+ * Full-screen modal with card details and image gallery.
+ */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 1000;
+  padding: var(--spacing-lg, 24px);
+}
+
+.panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  background: var(--surface-elevated, #1a1a2e);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--elevation-5, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  overflow: hidden;
+  outline: none;
+}
+
+/* ============================================
+   Close Button
+   ============================================ */
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-sm, 12px);
+  right: var(--spacing-sm, 12px);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  z-index: 10;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.closeButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.closeButton svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* ============================================
+   Gallery Container
+   ============================================ */
+
+.galleryContainer {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  min-height: 200px;
+  background: #000;
+}
+
+/* ============================================
+   Info Section
+   ============================================ */
+
+.info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg, 24px);
+  overflow-y: auto;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+  line-height: 1.2;
+}
+
+.year {
+  font-size: 1rem;
+  font-weight: 500;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* ============================================
+   Rank Container
+   ============================================ */
+
+.rankContainer {
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+/* ============================================
+   Summary
+   ============================================ */
+
+.summary {
+  margin: 0 0 var(--spacing-md, 16px);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+}
+
+/* ============================================
+   Device Info
+   ============================================ */
+
+.device {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-md, 16px);
+  font-size: 0.875rem;
+}
+
+.deviceLabel {
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.deviceValue {
+  font-weight: 500;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ============================================
+   Actions
+   ============================================ */
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm, 12px);
+  margin-top: auto;
+  padding-top: var(--spacing-md, 16px);
+}
+
+.viewMoreButton,
+.moreDetailsButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.viewMoreButton {
+  background: var(--colour-primary, #4f9eff);
+  color: white;
+  border: none;
+  text-decoration: none;
+}
+
+.viewMoreButton:hover {
+  background: var(--colour-primary-hover, #3b8bef);
+  transform: translateY(-2px);
+}
+
+.viewMoreButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.viewMoreButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.moreDetailsButton {
+  background: transparent;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.moreDetailsButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.moreDetailsButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.moreDetailsButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+  .backdrop {
+    padding: 0;
+  }
+
+  .panel {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .galleryContainer {
+    aspect-ratio: 16 / 9;
+  }
+
+  .title {
+    font-size: 1.25rem;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton,
+  .viewMoreButton,
+  .moreDetailsButton {
+    transition: none;
+  }
+}

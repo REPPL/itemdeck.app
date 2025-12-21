@@ -23,17 +23,26 @@ interface LocalSourceConfig {
 }
 
 /**
- * Card ready for display with guaranteed imageUrl.
+ * Card ready for display with guaranteed imageUrl and imageUrls.
  *
- * Extends CardWithCategory but ensures imageUrl is always present
+ * Extends CardWithCategory but ensures imageUrl and imageUrls are always present
  * (placeholder is used for cards without images).
  */
-export interface DisplayCard extends Omit<CardWithCategory, "imageUrl"> {
-  /** Image URL (always present - placeholder used if not in source) */
+export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageUrls"> {
+  /** Primary image URL (always present - placeholder used if not in source) */
   imageUrl: string;
+
+  /** Array of image URLs for gallery (always present - at least primary image) */
+  imageUrls: string[];
 
   /** Flattened category title for display */
   categoryTitle?: string;
+
+  /** Rank from metadata (parsed as number or null) */
+  rank: number | null;
+
+  /** Device/platform from metadata */
+  device?: string;
 }
 
 /**
@@ -124,13 +133,36 @@ export function useLocalCollection(
         collection.categories
       );
 
-      // Add placeholder images for cards without imageUrl and flatten category
-      const cardsWithImages: DisplayCard[] = cards.map((card) => ({
-        ...card,
-        imageUrl:
-          card.imageUrl ?? `https://picsum.photos/seed/${card.id}/400/300`,
-        categoryTitle: card.category?.title,
-      }));
+      // Process cards with placeholder images, image arrays, and metadata extraction
+      const cardsWithImages: DisplayCard[] = cards.map((card) => {
+        // Build imageUrls array: prefer imageUrls, fallback to imageUrl, then placeholder
+        const placeholder = `https://picsum.photos/seed/${card.id}/400/300`;
+        let imageUrls: string[];
+
+        if (card.imageUrls && card.imageUrls.length > 0) {
+          imageUrls = card.imageUrls;
+        } else if (card.imageUrl) {
+          imageUrls = [card.imageUrl];
+        } else {
+          imageUrls = [placeholder];
+        }
+
+        // Parse rank from metadata
+        const rankStr = card.metadata?.rank;
+        const rank = rankStr ? parseInt(rankStr, 10) : null;
+
+        // Extract device from metadata or category
+        const device = card.metadata?.device ?? card.category?.title;
+
+        return {
+          ...card,
+          imageUrl: imageUrls[0] ?? placeholder,
+          imageUrls,
+          categoryTitle: card.category?.title,
+          rank: Number.isNaN(rank) ? null : rank,
+          device,
+        };
+      });
 
       return { cards: cardsWithImages, collection };
     },

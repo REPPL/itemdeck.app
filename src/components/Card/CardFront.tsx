@@ -1,5 +1,6 @@
 import { ImageWithFallback } from "@/components/ImageWithFallback";
-import { Badge } from "@/components/Badge";
+import { RankBadge } from "@/components/RankBadge";
+import { DeviceBadge } from "@/components/DeviceBadge";
 import styles from "./Card.module.css";
 
 /**
@@ -30,20 +31,43 @@ interface CardFrontProps {
   title: string;
   /** Optional year to display in overlay */
   year?: string;
-  /** Optional category title to display as badge */
+  /** Optional category title (legacy, use device instead) */
   categoryTitle?: string;
+  /** Rank number (1-based) or null for unranked */
+  rank?: number | null;
+  /** Device/platform name */
+  device?: string;
+  /** Placeholder text for unranked items */
+  rankPlaceholderText?: string;
+  /** Whether to show the rank badge */
+  showRankBadge?: boolean;
+  /** Whether to show the device badge */
+  showDeviceBadge?: boolean;
   /** Callback when info button is clicked */
   onInfoClick?: (event: React.MouseEvent) => void;
 }
 
 /**
  * Card front face component.
- * Displays image with title/year overlay at bottom.
- * Includes info button for opening detail modal.
- * Shows category badge when available.
- * Uses ImageWithFallback for graceful degradation.
+ *
+ * Features:
+ * - RankBadge in top-left (gold/silver/bronze for top 3)
+ * - Info button in top-right (always visible, prominent)
+ * - DeviceBadge in bottom-right
+ * - Image with title/year overlay at bottom
+ * - ImageWithFallback for graceful degradation
  */
-export function CardFront({ imageUrl, title, year, categoryTitle, onInfoClick }: CardFrontProps) {
+export function CardFront({
+  imageUrl,
+  title,
+  year,
+  rank,
+  device,
+  rankPlaceholderText,
+  showRankBadge = true,
+  showDeviceBadge = true,
+  onInfoClick,
+}: CardFrontProps) {
   return (
     <div className={[styles.cardFace, styles.cardFront].join(" ")}>
       <ImageWithFallback
@@ -54,14 +78,18 @@ export function CardFront({ imageUrl, title, year, categoryTitle, onInfoClick }:
         loading="lazy"
       />
 
-      {/* Category badge in top-left */}
-      {categoryTitle && (
+      {/* Rank badge in top-left */}
+      {showRankBadge && (
         <div className={styles.badges}>
-          <Badge label={categoryTitle} variant="subtle" colour="primary" size="small" />
+          <RankBadge
+            rank={rank ?? null}
+            placeholderText={rankPlaceholderText}
+            size="small"
+          />
         </div>
       )}
 
-      {/* Info button in top-right */}
+      {/* Info button in top-right - always visible */}
       {onInfoClick && (
         <button
           type="button"
@@ -71,6 +99,13 @@ export function CardFront({ imageUrl, title, year, categoryTitle, onInfoClick }:
         >
           <InfoIcon />
         </button>
+      )}
+
+      {/* Device badge in bottom-right */}
+      {showDeviceBadge && device && (
+        <div className={styles.deviceBadge}>
+          <DeviceBadge device={device} size="small" />
+        </div>
       )}
 
       <div className={styles.overlay}>

@@ -404,7 +404,7 @@ jobs:
 ## Dependencies
 
 - **Requires**: v0.4.0 complete
-- **Blocks**: None (enables other v0.5.0 features)
+- **Blocks**: None (enables other v0.6.0 features)
 
 ## Complexity
 
@@ -417,4 +417,4 @@ jobs:
 - [Testing Strategies Research](../../../../research/testing-strategies.md)
 - [ADR-007: Vitest for Unit Testing](../../../decisions/adrs/ADR-007-unit-testing.md)
 - [ADR-008: Playwright for E2E Testing](../../../decisions/adrs/ADR-008-e2e-testing.md)
-- [v0.5.0 Milestone](../../milestones/v0.5.0.md)
+- [v0.6.0 Milestone](../../milestones/v0.6.0.md)

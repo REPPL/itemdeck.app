@@ -1,6 +1,6 @@
 # Roadmap
 
-Development roadmap for Itemdeck v0.1.0 through v0.5.0.
+Development roadmap for Itemdeck v0.1.0 through v0.6.0.
 
 ## Overview
 
@@ -10,7 +10,8 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 | [v0.2.0](./milestones/v0.2.0.md) | External Data | ✅ Complete |
 | [v0.3.0](./milestones/v0.3.0.md) | Customisation | ✅ Complete |
 | [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | 🔄 In Progress |
-| [v0.5.0](./milestones/v0.5.0.md) | Quality & Security | 📋 Planned |
+| [v0.5.0](./milestones/v0.5.0.md) | Visual Overhaul & Navigation | 📋 Planned |
+| [v0.6.0](./milestones/v0.6.0.md) | Quality & Security | 📋 Planned |
 
 ## Feature Summary
 
@@ -32,16 +33,16 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 | F-014 | Virtual Scrolling | v0.4.0 | 📋 Planned |
 | F-015 | Image Lazy Loading | v0.4.0 | 📋 Planned |
 | F-016 | Bundle Optimisation | v0.4.0 | 📋 Planned |
-| F-017 | Testing Infrastructure | v0.5.0 | 📋 Planned |
-| F-018 | Security Hardening | v0.5.0 | 📋 Planned |
-| F-019 | Accessibility Audit | v0.5.0 | 📋 Planned |
-| F-020 | Attribution System | v0.5.0 | 📋 Planned |
+| F-017 | Testing Infrastructure | v0.6.0 | 📋 Planned |
+| F-018 | Security Hardening | v0.6.0 | 📋 Planned |
+| F-019 | Accessibility Audit | v0.6.0 | 📋 Planned |
+| F-020 | Attribution System | v0.6.0 | 📋 Planned |
 | F-021 | ESLint/TypeScript Fixes | v0.3.0 | ✅ Complete |
 | F-022 | Test Coverage Reporting | v0.3.0 | ✅ Complete |
 | F-023 | Manual Refresh Button | v0.3.0 | ✅ Complete |
 | F-024 | ARIA Live Regions | v0.3.0 | ✅ Complete |
 | F-025 | Bundle Size Monitoring | v0.4.0 | 📋 Planned |
-| F-026 | Component Storybook | v0.5.0 | 📋 Planned |
+| F-026 | Component Storybook | v0.6.0 | 📋 Planned |
 | F-027 | Shuffle by Default | v0.3.0 | ✅ Complete |
 | F-028 | Card Drag and Drop | v0.4.0 | 📋 Planned |
 | F-029 | Card Info Button | v0.3.0 | ✅ Complete |
@@ -56,7 +57,7 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 | F-038 | Card Carousel Mode | v0.4.0 | 📋 Planned |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | 📋 Planned |
-| F-041 | Card Animation Polish | v0.5.0 | 📋 Planned |
+| F-041 | Card Animation Polish | v0.6.0 | 📋 Planned |
 
 ## Contents
 

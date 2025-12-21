@@ -29,6 +29,16 @@ export type OverlayStyle = "dark" | "light";
 export type TitleDisplayMode = "truncate" | "wrap";
 
 /**
+ * Visual theme options.
+ */
+export type VisualTheme = "retro" | "modern" | "minimal";
+
+/**
+ * Card back style options.
+ */
+export type CardBackStyle = "bitmap" | "svg" | "colour";
+
+/**
  * Settings store state.
  */
 interface SettingsState {
@@ -57,6 +67,24 @@ interface SettingsState {
   /** Title display mode (truncate/wrap) */
   titleDisplayMode: TitleDisplayMode;
 
+  /** Whether drag mode is enabled */
+  dragModeEnabled: boolean;
+
+  /** Visual theme */
+  visualTheme: VisualTheme;
+
+  /** Card back style */
+  cardBackStyle: CardBackStyle;
+
+  /** Whether to show rank badge on cards */
+  showRankBadge: boolean;
+
+  /** Whether to show device badge on cards */
+  showDeviceBadge: boolean;
+
+  /** Placeholder text for unranked cards */
+  rankPlaceholderText: string;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardDimensions: (width: number, height: number) => void;
@@ -66,6 +94,12 @@ interface SettingsState {
   setHighContrast: (enabled: boolean) => void;
   setOverlayStyle: (style: OverlayStyle) => void;
   setTitleDisplayMode: (mode: TitleDisplayMode) => void;
+  setDragModeEnabled: (enabled: boolean) => void;
+  setVisualTheme: (theme: VisualTheme) => void;
+  setCardBackStyle: (style: CardBackStyle) => void;
+  setShowRankBadge: (show: boolean) => void;
+  setShowDeviceBadge: (show: boolean) => void;
+  setRankPlaceholderText: (text: string) => void;
   resetToDefaults: () => void;
 }
 
@@ -82,6 +116,12 @@ const DEFAULT_SETTINGS = {
   highContrast: false,
   overlayStyle: "dark" as OverlayStyle,
   titleDisplayMode: "truncate" as TitleDisplayMode,
+  dragModeEnabled: true,
+  visualTheme: "retro" as VisualTheme,
+  cardBackStyle: "bitmap" as CardBackStyle,
+  showRankBadge: true,
+  showDeviceBadge: true,
+  rankPlaceholderText: "The one that got away!",
 };
 
 /**
@@ -124,13 +164,37 @@ export const useSettingsStore = create<SettingsState>()(
         set({ titleDisplayMode });
       },
 
+      setDragModeEnabled: (dragModeEnabled) => {
+        set({ dragModeEnabled });
+      },
+
+      setVisualTheme: (visualTheme) => {
+        set({ visualTheme });
+      },
+
+      setCardBackStyle: (cardBackStyle) => {
+        set({ cardBackStyle });
+      },
+
+      setShowRankBadge: (showRankBadge) => {
+        set({ showRankBadge });
+      },
+
+      setShowDeviceBadge: (showDeviceBadge) => {
+        set({ showDeviceBadge });
+      },
+
+      setRankPlaceholderText: (rankPlaceholderText) => {
+        set({ rankPlaceholderText });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
     }),
     {
       name: "itemdeck-settings",
-      version: 1,
+      version: 2,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -142,7 +206,29 @@ export const useSettingsStore = create<SettingsState>()(
         highContrast: state.highContrast,
         overlayStyle: state.overlayStyle,
         titleDisplayMode: state.titleDisplayMode,
+        dragModeEnabled: state.dragModeEnabled,
+        visualTheme: state.visualTheme,
+        cardBackStyle: state.cardBackStyle,
+        showRankBadge: state.showRankBadge,
+        showDeviceBadge: state.showDeviceBadge,
+        rankPlaceholderText: state.rankPlaceholderText,
       }),
+      migrate: (persistedState: unknown, version: number) => {
+        // Handle migration from version 1 to 2
+        if (version === 1) {
+          const state = persistedState as Record<string, unknown>;
+          return {
+            ...state,
+            dragModeEnabled: DEFAULT_SETTINGS.dragModeEnabled,
+            visualTheme: DEFAULT_SETTINGS.visualTheme,
+            cardBackStyle: DEFAULT_SETTINGS.cardBackStyle,
+            showRankBadge: DEFAULT_SETTINGS.showRankBadge,
+            showDeviceBadge: DEFAULT_SETTINGS.showDeviceBadge,
+            rankPlaceholderText: DEFAULT_SETTINGS.rankPlaceholderText,
+          };
+        }
+        return persistedState as SettingsState;
+      },
     }
   )
 );

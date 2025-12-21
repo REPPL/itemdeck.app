@@ -10,7 +10,10 @@ Features queued for future development.
 - [F-016-bundle-optimisation.md](./F-016-bundle-optimisation.md)
 - [F-025-bundle-size-monitoring.md](./F-025-bundle-size-monitoring.md)
 
-### v0.5.0 - Quality & Security
+### v0.5.0 - Visual Overhaul & Navigation
+- TBD
+
+### v0.6.0 - Quality & Security
 - [F-017-testing-infrastructure.md](./F-017-testing-infrastructure.md)
 - [F-018-security-hardening.md](./F-018-security-hardening.md)
 - [F-019-accessibility-audit.md](./F-019-accessibility-audit.md)

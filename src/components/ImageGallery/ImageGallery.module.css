@@ -1,0 +1,179 @@
+/**
+ * Image gallery styles.
+ *
+ * Carousel-style gallery with navigation arrows and dot indicators.
+ */
+
+.gallery {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: var(--radius-lg, 12px);
+  background: var(--surface-elevated, #1a1a2e);
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  touch-action: pan-y pinch-zoom;
+}
+
+.image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+/* ============================================
+   Navigation Buttons
+   ============================================ */
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  opacity: 0;
+  transition:
+    opacity var(--transition-fast, 150ms),
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+  z-index: 10;
+}
+
+.gallery:hover .navButton,
+.gallery:focus-within .navButton {
+  opacity: 1;
+}
+
+.navButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.navButton:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.navButton svg {
+  width: 24px;
+  height: 24px;
+}
+
+.navButtonPrev {
+  left: var(--spacing-md, 16px);
+}
+
+.navButtonNext {
+  right: var(--spacing-md, 16px);
+}
+
+/* ============================================
+   Dot Indicators
+   ============================================ */
+
+.dots {
+  position: absolute;
+  bottom: var(--spacing-md, 16px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-full, 20px);
+  z-index: 10;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.4);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.dot:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: scale(1.2);
+}
+
+.dot:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.dotActive {
+  background: white;
+  transform: scale(1.2);
+}
+
+/* ============================================
+   Image Counter
+   ============================================ */
+
+.counter {
+  position: absolute;
+  top: var(--spacing-md, 16px);
+  right: var(--spacing-md, 16px);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-sm, 4px);
+  font-size: 0.875rem;
+  font-weight: 500;
+  colour: white;
+  color: white;
+  z-index: 10;
+}
+
+/* ============================================
+   Touch Devices
+   ============================================ */
+
+@media (hover: none) {
+  .navButton {
+    opacity: 0.7;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .navButton,
+  .dot {
+    transition: none;
+  }
+}

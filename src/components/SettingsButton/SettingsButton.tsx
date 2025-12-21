@@ -28,11 +28,34 @@ function SettingsIcon() {
   );
 }
 
+interface SettingsButtonProps {
+  /** Optional external click handler (for centralised settings control) */
+  onClick?: () => void;
+}
+
 /**
  * Settings button that opens the settings panel.
+ *
+ * If onClick prop is provided, uses external state management.
+ * Otherwise manages its own panel state.
  */
-export function SettingsButton() {
+export function SettingsButton({ onClick }: SettingsButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
+
+  // If external onClick provided, don't manage own panel
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        className={styles.button}
+        onClick={onClick}
+        aria-label="Open settings"
+        aria-haspopup="dialog"
+      >
+        <SettingsIcon />
+      </button>
+    );
+  }
 
   return (
     <>

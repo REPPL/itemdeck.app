@@ -27,20 +27,20 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-021](./planned/F-021-eslint-typescript-fixes.md) | ESLint/TypeScript Fixes | 📋 Planned |
-| [F-022](./planned/F-022-test-coverage-reporting.md) | Test Coverage Reporting | 📋 Planned |
-| [F-023](./planned/F-023-manual-refresh-button.md) | Manual Refresh Button | 📋 Planned |
-| [F-024](./planned/F-024-aria-live-regions.md) | ARIA Live Regions | 📋 Planned |
-| [F-027](./planned/F-027-shuffle-by-default.md) | Shuffle by Default | 📋 Planned |
-| [F-029](./planned/F-029-card-info-button.md) | Card Info Button | 📋 Planned |
-| [F-030](./planned/F-030-enhanced-card-front-design.md) | Enhanced Card Front Design | 📋 Planned |
-| [F-033](./planned/F-033-card-elevation-system.md) | Card Elevation System | 📋 Planned |
-| [F-034](./planned/F-034-card-badges.md) | Card Badges | 📋 Planned |
-| [F-039](./planned/F-039-responsive-typography.md) | Responsive Typography | 📋 Planned |
-| [F-010](./planned/F-010-theme-system.md) | Theme System | 📋 Planned |
-| [F-011](./planned/F-011-layout-presets.md) | Layout Presets | 📋 Planned |
-| [F-012](./planned/F-012-state-persistence.md) | State Persistence | 📋 Planned |
-| [F-013](./planned/F-013-settings-panel.md) | Settings Panel | 📋 Planned |
+| [F-010](./completed/F-010-theme-system.md) | Theme System | ✅ Complete |
+| [F-011](./completed/F-011-layout-presets.md) | Layout Presets | ✅ Complete |
+| [F-012](./completed/F-012-state-persistence.md) | State Persistence | ✅ Complete |
+| [F-013](./completed/F-013-settings-panel.md) | Settings Panel | ✅ Complete |
+| [F-021](./completed/F-021-eslint-typescript-fixes.md) | ESLint/TypeScript Fixes | ✅ Complete |
+| [F-022](./completed/F-022-test-coverage-reporting.md) | Test Coverage Reporting | ✅ Complete |
+| [F-023](./completed/F-023-manual-refresh-button.md) | Manual Refresh Button | ✅ Complete |
+| [F-024](./completed/F-024-aria-live-regions.md) | ARIA Live Regions | ✅ Complete |
+| [F-027](./completed/F-027-shuffle-by-default.md) | Shuffle by Default | ✅ Complete |
+| [F-029](./completed/F-029-card-info-button.md) | Card Info Button | ✅ Complete |
+| [F-030](./completed/F-030-enhanced-card-front-design.md) | Enhanced Card Front Design | ✅ Complete |
+| [F-033](./completed/F-033-card-elevation-system.md) | Card Elevation System | ✅ Complete |
+| [F-034](./completed/F-034-card-badges.md) | Card Badges | ✅ Complete |
+| [F-039](./completed/F-039-responsive-typography.md) | Responsive Typography | ✅ Complete |
 
 ### v0.4.0 - Performance & Interaction
 
@@ -59,7 +59,13 @@ Feature specifications for Itemdeck development.
 | [F-015](./planned/F-015-image-lazy-loading.md) | Image Lazy Loading | 📋 Planned |
 | [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
 
-### v0.5.0 - Quality & Security
+### v0.5.0 - Visual Overhaul & Navigation
+
+| ID | Feature | Status |
+|----|---------|--------|
+| TBD | To be determined | 📋 Planned |
+
+### v0.6.0 - Quality & Security
 
 | ID | Feature | Status |
 |----|---------|--------|

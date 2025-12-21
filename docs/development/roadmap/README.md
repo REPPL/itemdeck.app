@@ -6,7 +6,7 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 
 | Milestone | Theme | Status |
 |-----------|-------|--------|
-| [v0.1.0](./milestones/v0.1.0.md) | Animation Foundation | 📋 Planned |
+| [v0.1.0](./milestones/v0.1.0.md) | Animation Foundation | ✅ Complete |
 | [v0.2.0](./milestones/v0.2.0.md) | External Data | 📋 Planned |
 | [v0.3.0](./milestones/v0.3.0.md) | Customisation | 📋 Planned |
 | [v0.4.0](./milestones/v0.4.0.md) | Performance | 📋 Planned |
@@ -16,11 +16,11 @@ Development roadmap for Itemdeck v0.1.0 through v0.5.0.
 
 | ID | Feature | Milestone | Status |
 |----|---------|-----------|--------|
-| F-001 | Card Flip Animation | v0.1.0 | 📋 Planned |
-| F-002 | Configuration System | v0.1.0 | 📋 Planned |
-| F-003 | Image Fallback System | v0.1.0 | 📋 Planned |
-| F-004 | Keyboard Navigation | v0.1.0 | 📋 Planned |
-| F-005 | Reduced Motion Support | v0.1.0 | 📋 Planned |
+| F-001 | Card Flip Animation | v0.1.0 | ✅ Complete |
+| F-002 | Configuration System | v0.1.0 | ✅ Complete |
+| F-003 | Image Fallback System | v0.1.0 | ✅ Complete |
+| F-004 | Keyboard Navigation | v0.1.0 | ✅ Complete |
+| F-005 | Reduced Motion Support | v0.1.0 | ✅ Complete |
 | F-006 | TanStack Query Setup | v0.2.0 | 📋 Planned |
 | F-007 | GitHub Data Source | v0.2.0 | 📋 Planned |
 | F-008 | Card Data Schema | v0.2.0 | 📋 Planned |

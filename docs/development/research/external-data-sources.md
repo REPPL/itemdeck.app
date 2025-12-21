@@ -579,3 +579,509 @@ None - additive features to existing mock data system.
 ---
 
 **Applies to**: Itemdeck v0.1.0+
+
+---
+
+# Part 2: CDN Proxies and CORS (December 2025 Research)
+
+## The CORS Problem
+
+When fetching from `raw.githubusercontent.com` in a client-side SPA, browsers block requests:
+
+```
+Access to fetch at 'https://raw.githubusercontent.com/...'
+from origin 'https://itemdeck.example.com' has been blocked by CORS policy
+```
+
+GitHub's raw content service:
+- Does not set `Access-Control-Allow-Origin` headers
+- Blocks preflight requests (OPTIONS)
+- Only allows simple GET/HEAD requests without custom headers
+
+This means **direct fetching from GitHub raw URLs does not work** in browser JavaScript.
+
+## Solution: CDN Proxies
+
+### Recommended: jsDelivr
+
+[jsDelivr](https://www.jsdelivr.com/) is a free, production-ready CDN that serves GitHub files with proper CORS headers.
+
+**URL Format**:
+```
+https://cdn.jsdelivr.net/gh/{user}/{repo}@{branch}/{path}
+```
+
+**Example**:
+```
+https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games/items.json
+```
+
+**Key Benefits**:
+- CORS-friendly (`Access-Control-Allow-Origin: *`)
+- Multi-CDN infrastructure (Cloudflare, Fastly, Bunny, GCore)
+- 99.99%+ uptime with automatic failover
+- Permanent caching (files remain even if deleted from source)
+- Version pinning with `@tag` or `@commit`
+
+**Caching Behaviour**:
+| Reference Type | Cache Duration |
+|----------------|----------------|
+| Commit SHA | Permanent |
+| Tag | Permanent |
+| `@latest` | 7 days (purgeable) |
+| Branch | 12 hours |
+
+### Alternative: Statically (Multi-Provider)
+
+[Statically](https://statically.io/) supports multiple Git providers with a unified URL pattern.
+
+**URL Formats**:
+```
+GitHub:    https://cdn.statically.io/gh/{user}/{repo}@{tag}/{file}
+GitLab:    https://cdn.statically.io/gl/{user}/{repo}@{tag}/{file}
+Bitbucket: https://cdn.statically.io/bb/{user}/{repo}@{tag}/{file}
+```
+
+**Use case**: When GitLab support is needed alongside GitHub.
+
+### Comparison Table
+
+| Feature | jsDelivr | Statically | raw.githubusercontent.com |
+|---------|----------|------------|---------------------------|
+| CORS Support | Yes | Yes | **No** |
+| Multi-CDN | Yes (4 providers) | Yes (2 providers) | No |
+| Uptime SLA | 99.99%+ | ~99.9% | No SLA |
+| Permanent Cache | Yes | No | No |
+| GitLab Support | No | Yes | N/A |
+| Production Ready | Yes | Yes | No |
+
+## URL Structure Design
+
+itemdeck supports two URL patterns for different use cases:
+
+| Pattern | Use Case | Example |
+|---------|----------|---------|
+| **Short form** | Sharing, bookmarks, clean links | `/gh/REPPL/retro-games` |
+| **Query param** | Power users, arbitrary repos, debugging | `/view?url=https://raw.githubusercontent.com/...` |
+
+---
+
+### Option 1: Short Form (Recommended for Sharing)
+
+```
+https://itemdeck.example.com/gh/{user}/{collection}
+https://itemdeck.example.com/gl/{user}/{collection}
+```
+
+**Examples**:
+```
+/gh/REPPL/retro-games           → GitHub user REPPL, collection retro-games
+/gl/username/favourite-books    → GitLab user username, collection favourite-books
+```
+
+**How it works**:
+- Repository name is inferred by convention (e.g., always `MyPlausibleMe` or `collections`)
+- Path within repo follows standard structure: `data/collections/{collection}/`
+- Shortest possible URL for easy sharing
+
+**With explicit repository** (when user has multiple data repos):
+```
+/gh/REPPL/other-repo/my-collection
+```
+
+**Pros**:
+- Clean, memorable URLs
+- Easy to share verbally ("go to itemdeck.com/gh/REPPL/retro-games")
+- Minimal cognitive load for end users
+
+**Cons**:
+- Assumes convention-based repository structure
+- Less flexible for non-standard setups
+
+---
+
+### Option 2: Query Parameter (Power User Escape Hatch)
+
+```
+https://itemdeck.example.com/view?url={encoded-github-url}
+```
+
+**Examples**:
+```
+/view?url=https://raw.githubusercontent.com/REPPL/MyPlausibleMe/main/data/collections/retro-games/items.json
+/view?url=https://github.com/REPPL/MyPlausibleMe/blob/main/data/collections/retro-games/items.json
+```
+
+**How it works**:
+1. User copies any GitHub URL (raw or blob view)
+2. App parses the URL to extract: owner, repo, branch, path
+3. Converts to CDN URL: `raw.githubusercontent.com` → `cdn.jsdelivr.net`
+4. Validates against domain allowlist
+5. Fetches and displays collection
+
+**Supported input URL formats**:
+```
+# Raw content URL
+https://raw.githubusercontent.com/{user}/{repo}/{branch}/{path}
+
+# GitHub blob view URL
+https://github.com/{user}/{repo}/blob/{branch}/{path}
+
+# jsDelivr CDN URL (passed through)
+https://cdn.jsdelivr.net/gh/{user}/{repo}@{branch}/{path}
+```
+
+**Pros**:
+- Users can copy URLs directly from GitHub
+- No need to understand itemdeck's URL structure
+- Works with any repository path structure
+- Useful for debugging and testing
+
+**Cons**:
+- Long URLs (typically hidden behind share button)
+- Requires URL encoding for special characters
+
+---
+
+### URL Parsing Implementation
+
+```typescript
+type Provider = 'github' | 'gitlab';
+
+interface DataSourceConfig {
+  provider: Provider;
+  user: string;
+  repo: string;
+  collection: string;
+  branch?: string;
+}
+
+// Default repository name when not specified
+const DEFAULT_REPO = 'MyPlausibleMe';
+
+/**
+ * Parse short-form URL: /gh/REPPL/retro-games or /gh/REPPL/other-repo/collection
+ */
+function parseShortUrl(path: string): DataSourceConfig | null {
+  // Match: /gh/user/collection or /gh/user/repo/collection
+  const match = path.match(/^\/(gh|gl)\/([^/]+)\/([^/]+)(?:\/([^/]+))?$/);
+  if (!match) return null;
+
+  const [, providerCode, user, second, third] = match;
+  const provider = providerCode === 'gh' ? 'github' : 'gitlab';
+
+  // If third segment exists: /gh/user/repo/collection
+  // Otherwise: /gh/user/collection (infer repo)
+  if (third) {
+    return { provider, user, repo: second, collection: third };
+  } else {
+    return { provider, user, repo: DEFAULT_REPO, collection: second };
+  }
+}
+
+/**
+ * Parse GitHub URL from query parameter
+ */
+function parseGitHubUrl(url: string): DataSourceConfig | null {
+  try {
+    const parsed = new URL(url);
+
+    // raw.githubusercontent.com/{user}/{repo}/{branch}/{path}
+    if (parsed.hostname === 'raw.githubusercontent.com') {
+      const [, user, repo, branch, ...pathParts] = parsed.pathname.split('/');
+      const collection = extractCollectionFromPath(pathParts.join('/'));
+      return { provider: 'github', user, repo, collection, branch };
+    }
+
+    // github.com/{user}/{repo}/blob/{branch}/{path}
+    if (parsed.hostname === 'github.com') {
+      const match = parsed.pathname.match(/^\/([^/]+)\/([^/]+)\/blob\/([^/]+)\/(.+)/);
+      if (match) {
+        const [, user, repo, branch, path] = match;
+        const collection = extractCollectionFromPath(path);
+        return { provider: 'github', user, repo, collection, branch };
+      }
+    }
+
+    // cdn.jsdelivr.net/gh/{user}/{repo}@{branch}/{path}
+    if (parsed.hostname === 'cdn.jsdelivr.net') {
+      const match = parsed.pathname.match(/^\/gh\/([^/]+)\/([^@]+)@([^/]+)\/(.+)/);
+      if (match) {
+        const [, user, repo, branch, path] = match;
+        const collection = extractCollectionFromPath(path);
+        return { provider: 'github', user, repo, collection, branch };
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Extract collection name from path like "data/collections/retro-games/items.json"
+ */
+function extractCollectionFromPath(path: string): string {
+  const match = path.match(/data\/collections\/([^/]+)/);
+  return match ? match[1] : path.split('/').pop()?.replace('.json', '') ?? '';
+}
+
+/**
+ * Build CDN URL from config
+ */
+function buildCdnUrl(config: DataSourceConfig): string {
+  const { provider, user, repo, collection, branch = 'main' } = config;
+  const path = `data/collections/${collection}`;
+
+  switch (provider) {
+    case 'github':
+      return `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/${path}`;
+    case 'gitlab':
+      return `https://cdn.statically.io/gl/${user}/${repo}@${branch}/${path}`;
+  }
+}
+```
+
+### React Router Configuration
+
+```typescript
+import { Routes, Route, useParams, useSearchParams } from 'react-router-dom';
+
+function App() {
+  return (
+    <Routes>
+      {/* Short form: /gh/user/collection or /gh/user/repo/collection */}
+      <Route path="/:provider/:user/:collection" element={<CollectionView />} />
+      <Route path="/:provider/:user/:repo/:collection" element={<CollectionView />} />
+
+      {/* Query param form: /view?url=... */}
+      <Route path="/view" element={<CollectionViewFromUrl />} />
+
+      {/* Home/demo */}
+      <Route path="/" element={<Home />} />
+    </Routes>
+  );
+}
+
+function CollectionView() {
+  const { provider, user, repo, collection } = useParams();
+  const config = {
+    provider: provider === 'gh' ? 'github' : 'gitlab',
+    user: user!,
+    repo: repo ?? DEFAULT_REPO,
+    collection: collection!,
+  };
+  return <CollectionDisplay config={config} />;
+}
+
+function CollectionViewFromUrl() {
+  const [searchParams] = useSearchParams();
+  const url = searchParams.get('url');
+
+  if (!url) {
+    return <Error message="Missing url parameter" />;
+  }
+
+  const config = parseGitHubUrl(url);
+  if (!config) {
+    return <Error message="Could not parse URL" />;
+  }
+
+  return <CollectionDisplay config={config} />;
+}
+```
+
+### URL Conversion Examples
+
+| User Input | Resolved CDN URL |
+|------------|------------------|
+| `/gh/REPPL/retro-games` | `cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games/items.json` |
+| `/gh/REPPL/other-repo/games` | `cdn.jsdelivr.net/gh/REPPL/other-repo@main/data/collections/games/items.json` |
+| `/view?url=https://raw.githubusercontent.com/REPPL/MyPlausibleMe/main/data/collections/retro-games/items.json` | `cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games/items.json` |
+| `/view?url=https://github.com/REPPL/MyPlausibleMe/blob/main/data/collections/retro-games/items.json` | `cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games/items.json` |
+
+## Security: Domain Allowlisting
+
+### Application-Level Allowlist
+
+Since CSP headers cannot be configured on static hosting without build-time decisions, implement allowlisting in application code:
+
+```typescript
+// src/config/allowedSources.ts
+export const ALLOWED_CDN_DOMAINS = [
+  'cdn.jsdelivr.net',
+  'cdn.statically.io',
+] as const;
+
+export const ALLOWED_PROVIDERS = ['github', 'gitlab'] as const;
+
+export function isAllowedSource(url: string): boolean {
+  try {
+    const { hostname } = new URL(url);
+    return ALLOWED_CDN_DOMAINS.some(domain => hostname === domain);
+  } catch {
+    return false;
+  }
+}
+```
+
+### Error Handling for Unauthorised Sources
+
+```typescript
+class UnsupportedSourceError extends Error {
+  constructor(provider: string) {
+    super(
+      `Data source "${provider}" is not yet supported. ` +
+      `Supported providers: ${ALLOWED_PROVIDERS.join(', ')}. ` +
+      `Request new providers at: https://github.com/REPPL/itemdeck/issues`
+    );
+    this.name = 'UnsupportedSourceError';
+  }
+}
+```
+
+**Best Practice**: Show clear error message with:
+1. What went wrong
+2. List of supported providers
+3. Link to request new providers
+
+### Future: Content Security Policy
+
+When hosting on a platform with header control (Netlify, Vercel), add CSP:
+
+```
+Content-Security-Policy:
+  default-src 'self';
+  connect-src 'self' https://cdn.jsdelivr.net https://cdn.statically.io;
+  img-src 'self' https: data:;
+```
+
+## Authentication: Public vs Private Repos
+
+### Current Scope: Public Only
+
+For public repositories, no authentication is needed. CDN proxies (jsDelivr, Statically) work directly.
+
+### Future: Private Repository Support
+
+**Challenge**: SPAs cannot securely store secrets (OAuth client secrets, access tokens).
+
+**Recommended Approach: Backend for Frontend (BFF)**
+
+Add a lightweight backend proxy (Cloudflare Worker, Vercel Edge Function):
+- Backend handles OAuth flow and token storage
+- SPA uses HTTP-only cookies
+- Tokens never exposed to JavaScript
+
+**Alternative for Personal Use: User-Provided PAT**
+- User pastes their Personal Access Token into settings
+- Token stored in localStorage (with clear security warnings)
+- Only suitable for personal/trusted deployments
+
+**Recommendation**: Start with public repos only. Implement BFF pattern when private repo support is needed.
+
+## Complete Fetch Implementation
+
+```typescript
+import { z } from 'zod';
+
+// Schemas
+const cardDataSchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  year: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  summary: z.string().optional(),
+  detailUrl: z.string().url().optional(),
+  metadata: z.record(z.string()).optional(),
+});
+
+const categorySchema = z.object({
+  id: z.string().min(1),
+  title: z.string().min(1),
+  year: z.string().optional(),
+  summary: z.string().optional(),
+  detailUrl: z.string().url().optional(),
+});
+
+// Fetch with validation
+async function fetchCollection(config: DataSourceConfig) {
+  // 1. Validate provider
+  if (!ALLOWED_PROVIDERS.includes(config.provider)) {
+    throw new UnsupportedSourceError(config.provider);
+  }
+
+  // 2. Build CDN URL
+  const baseUrl = buildCdnUrl(config);
+  const itemsUrl = `${baseUrl}/items.json`;
+  const categoriesUrl = `${baseUrl}/categories.json`;
+
+  // 3. Validate allowlist
+  if (!isAllowedSource(itemsUrl)) {
+    throw new Error('Data source not on allowlist');
+  }
+
+  // 4. Fetch with error handling
+  const [itemsRes, categoriesRes] = await Promise.all([
+    fetch(itemsUrl),
+    fetch(categoriesUrl).catch(() => null),
+  ]);
+
+  if (!itemsRes.ok) {
+    throw new Error(`Collection not found: ${itemsRes.status}`);
+  }
+
+  // 5. Parse and validate
+  const items = z.array(cardDataSchema).parse(await itemsRes.json());
+  const categories = categoriesRes?.ok
+    ? z.array(categorySchema).parse(await categoriesRes.json())
+    : [];
+
+  return { items, categories };
+}
+```
+
+## Error Handling Matrix
+
+| Error Type | User Message | Action |
+|------------|--------------|--------|
+| Network error | "Unable to reach data source" | Retry button |
+| 404 Not Found | "Collection not found" | Check URL guidance |
+| Invalid JSON | "Data format error" | Link to schema docs |
+| Schema validation | "Data doesn't match expected format" | Show field errors |
+| Unsupported provider | "Provider not yet supported" | List alternatives |
+
+## Implementation Recommendations
+
+### Immediate (v0.2.0)
+
+1. **Use jsDelivr for GitHub** - Best reliability and caching
+2. **Application-level allowlist** - Validate URLs before fetching
+3. **Clear error messages** - Guide users to supported providers
+4. **Pin to branches** - Use `@main` for development flexibility
+
+### Near-term
+
+1. **Add Statically for GitLab** - Unified multi-provider approach
+2. **TanStack Query caching** - Reduce CDN hits
+3. **Offline support** - Service worker for cached collections
+
+### Future
+
+1. **Private repo support via BFF** - Cloudflare Worker or Vercel Edge
+2. **Custom domain allowlist** - Let users add their own CDN sources
+3. **Collection discovery** - Fetch manifest.json for available collections
+
+## Sources
+
+- [CORS and raw.githubusercontent.com - GitHub Community](https://github.com/orgs/community/discussions/69281)
+- [jsDelivr - Migrate from GitHub](https://www.jsdelivr.com/github)
+- [jsDelivr GitHub Repository](https://github.com/jsdelivr/jsdelivr)
+- [Statically CDN](https://statically.io/)
+- [Content Security Policy - MDN](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/CSP)
+- [Content Security Policy - OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Content_Security_Policy_Cheat_Sheet.html)
+- [GitLab Repository Files API](https://docs.gitlab.com/api/repository_files/)
+- [OAuth for SPAs - Curity](https://curity.io/resources/learn/spa-best-practices/)
+- [React Router Dynamic Segments](https://reactrouter.com/how-to/spa)
+- [jsDelivr CDN Performance](https://www.cdnperf.com/cdn-provider/jsdelivr-cdn/)

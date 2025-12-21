@@ -6,7 +6,7 @@ Post-milestone reflections and lessons learned.
 
 | Version | Retrospective | Status |
 |---------|---------------|--------|
-| v0.1.0 | *Not yet created* | 📋 Planned |
+| [v0.1.0](./v0.1.0/README.md) | Animation Foundation | ✅ Complete |
 
 ## Structure
 

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { type CardData } from "@/types/card";
-import { mockCards } from "@/data/cards.mock";
 
 interface UseCardDataResult {
   cards: CardData[];
@@ -8,11 +7,12 @@ interface UseCardDataResult {
   error: string | null;
 }
 
+const DATA_BASE_URL = "/data/collections/retro-games";
+
 /**
- * Hook to fetch and manage card data.
+ * Hook to fetch and manage card data from local JSON files.
  *
- * Currently returns mock data immediately.
- * TODO: Replace with fetch from JSON URL in Phase 2.
+ * Fetches items.json which is already in CardData format.
  */
 export function useCardData(): UseCardDataResult {
   const [cards, setCards] = useState<CardData[]>([]);
@@ -20,20 +20,33 @@ export function useCardData(): UseCardDataResult {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate async data loading for realistic behaviour
-    const timer = setTimeout(() => {
+    async function fetchData() {
       try {
-        setCards(mockCards);
+        const response = await fetch(`${DATA_BASE_URL}/items.json`);
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch items: ${String(response.status)}`);
+        }
+
+        const items = (await response.json()) as CardData[];
+
+        // Add placeholder images for items without imageUrl
+        const cardsWithImages: CardData[] = items.map((item) => ({
+          ...item,
+          imageUrl:
+            item.imageUrl ||
+            `https://picsum.photos/seed/${item.id}/400/300`,
+        }));
+
+        setCards(cardsWithImages);
         setLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load cards");
         setLoading(false);
       }
-    }, 100);
+    }
 
-    return () => {
-      clearTimeout(timer);
-    };
+    void fetchData();
   }, []);
 
   return { cards, loading, error };

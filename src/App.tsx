@@ -2,7 +2,9 @@ import { useState } from "react";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { MenuButton } from "@/components/MenuButton/MenuButton";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
+import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { MotionProvider } from "@/context/MotionContext";
 import styles from "./App.module.css";
 
 /**
@@ -20,15 +22,19 @@ function App() {
   };
 
   return (
-    <SettingsProvider>
-      <div className={styles.app}>
-        <Sidebar isOpen={menuOpen} onClose={handleMenuClose} />
-        <MenuButton isOpen={menuOpen} onClick={handleMenuToggle} />
-        <main className={styles.main}>
-          <CardGrid />
-        </main>
-      </div>
-    </SettingsProvider>
+    <ConfigProvider>
+      <SettingsProvider>
+        <MotionProvider>
+          <div className={styles.app}>
+            <Sidebar isOpen={menuOpen} onClose={handleMenuClose} />
+            <MenuButton isOpen={menuOpen} onClick={handleMenuToggle} />
+            <main className={styles.main}>
+              <CardGrid />
+            </main>
+          </div>
+        </MotionProvider>
+      </SettingsProvider>
+    </ConfigProvider>
   );
 }
 

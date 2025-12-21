@@ -1,7 +1,9 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/Card/Card";
 import { useCardData } from "@/hooks/useCardData";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
+import { useConfig } from "@/hooks/useConfig";
+import { useGridNavigation } from "@/hooks/useGridNavigation";
 import styles from "./CardGrid.module.css";
 
 const GAP = 16; // var(--grid-gap) = 1rem = 16px
@@ -10,17 +12,75 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
  * Grid component that displays cards in a responsive layout.
  * Uses absolute positioning with JS-calculated positions.
  * CSS transitions handle smooth animation on resize.
- * Handles loading, error, and empty states.
+ * Manages flip state with maxVisibleCards enforcement.
+ * Supports keyboard navigation with roving tabindex.
  */
 export function CardGrid() {
   const { cards, loading, error } = useCardData();
   const { cardDimensions } = useSettingsContext();
-  const gridRef = useRef<HTMLDivElement>(null);
+  const { config } = useConfig();
+  const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
+
+  // Track flipped card IDs in order (oldest first)
+  const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
+
+  // Calculate number of columns for keyboard navigation
+  const columns = useMemo(() => {
+    if (containerWidth === 0) return 1;
+    const cardWidth = cardDimensions.width;
+    return Math.max(1, Math.floor((containerWidth + GAP) / (cardWidth + GAP)));
+  }, [containerWidth, cardDimensions.width]);
+
+  // Handle card flip with maxVisibleCards enforcement
+  const handleFlip = useCallback((cardId: string) => {
+    setFlippedCardIds(prev => {
+      const isCurrentlyFlipped = prev.includes(cardId);
+
+      if (isCurrentlyFlipped) {
+        // Unflip: remove from list
+        return prev.filter(id => id !== cardId);
+      } else {
+        // Flip: add to list, enforce maxVisibleCards
+        const newList = [...prev, cardId];
+
+        // Remove oldest cards if we exceed the limit
+        const maxVisible = config.behaviour.maxVisibleCards;
+        while (newList.length > maxVisible) {
+          newList.shift(); // Remove oldest (first)
+        }
+
+        return newList;
+      }
+    });
+  }, [config.behaviour.maxVisibleCards]);
+
+  // Handle selection from keyboard navigation
+  const handleSelect = useCallback((index: number) => {
+    const card = cards[index];
+    if (card) {
+      handleFlip(card.id);
+    }
+  }, [cards, handleFlip]);
+
+  // Grid keyboard navigation
+  const { handleKeyDown, getTabIndex, gridRef } = useGridNavigation({
+    totalItems: cards.length,
+    columns,
+    onSelect: handleSelect,
+    enabled: !loading && !error && cards.length > 0,
+  });
+
+  // Sync refs (containerRef for resize, gridRef for navigation)
+  useEffect(() => {
+    if (containerRef.current) {
+      (gridRef as React.MutableRefObject<HTMLElement | null>).current = containerRef.current;
+    }
+  }, [gridRef]);
 
   // Track container width
   useEffect(() => {
-    const container = gridRef.current;
+    const container = containerRef.current;
     if (!container) return;
 
     const updateWidth = () => {
@@ -46,9 +106,6 @@ export function CardGrid() {
 
     const cardWidth = cardDimensions.width;
     const cardHeight = cardDimensions.height;
-
-    // Calculate how many columns fit
-    const columns = Math.max(1, Math.floor((containerWidth + GAP) / (cardWidth + GAP)));
 
     // Calculate total grid width and offset to centre
     const totalGridWidth = columns * cardWidth + (columns - 1) * GAP;
@@ -93,6 +150,9 @@ export function CardGrid() {
       const pos = positions[index];
       if (!pos) return null;
 
+      const isFlipped = flippedCardIds.includes(card.id);
+      const tabIndex = getTabIndex(index);
+
       return (
         <div
           key={card.id}
@@ -101,8 +161,14 @@ export function CardGrid() {
             left: `${String(pos.left)}px`,
             top: `${String(pos.top)}px`,
           }}
+          role="gridcell"
         >
-          <Card card={card} />
+          <Card
+            card={card}
+            isFlipped={isFlipped}
+            onFlip={() => { handleFlip(card.id); }}
+            tabIndex={tabIndex}
+          />
         </div>
       );
     });
@@ -110,9 +176,12 @@ export function CardGrid() {
 
   return (
     <section
-      ref={gridRef}
+      ref={containerRef}
       className={styles.grid}
       style={{ minHeight: `${String(containerHeight)}px` }}
+      role="grid"
+      aria-label="Card collection"
+      onKeyDown={handleKeyDown}
     >
       {renderContent()}
     </section>

@@ -4,16 +4,82 @@
 
 Users want to display card collections from GitHub repositories. This requires:
 
-1. Fetching data from GitHub API
-2. Parsing repository content (JSON/YAML files)
-3. Handling rate limits and authentication
-4. Mapping repository data to card schema
+1. Fetching data from GitHub (raw URLs or API)
+2. Parsing repository content (JSON files)
+3. Handling rate limits (for API approach)
+4. Supporting collection-based data structure from external repositories
 
 ## Design Approach
 
-Implement a **GitHub data source adapter** using **Octokit** (official GitHub SDK):
+Support two fetching strategies for GitHub-hosted data:
 
-### Octokit Setup
+### Strategy 1: Raw URL (Recommended)
+
+For public repositories, fetch JSON directly via raw URLs. This avoids API rate limits and is simpler.
+
+```typescript
+// src/hooks/useGitHubRawData.ts
+import { useQuery } from '@tanstack/react-query';
+import { collectionSchema } from '../schemas/collection';
+import type { Collection } from '../types/collection';
+
+interface GitHubRawConfig {
+  owner: string;
+  repo: string;
+  collection: string;
+  branch?: string;
+}
+
+function buildRawUrl(config: GitHubRawConfig, file: string): string {
+  const { owner, repo, collection, branch = 'main' } = config;
+  return `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/data/collections/${collection}/${file}`;
+}
+
+async function fetchGitHubRaw(config: GitHubRawConfig): Promise<Collection> {
+  // 1. Fetch collection.json to get schema info
+  const collectionMetaResponse = await fetch(buildRawUrl(config, 'collection.json'));
+  if (!collectionMetaResponse.ok) {
+    throw new Error(`Failed to fetch collection metadata: ${collectionMetaResponse.status}`);
+  }
+  const collectionMeta = await collectionMetaResponse.json();
+
+  // 2. Fetch data files (discovered by convention based on schema)
+  const [itemsResponse, categoriesResponse] = await Promise.all([
+    fetch(buildRawUrl(config, 'items.json')),
+    fetch(buildRawUrl(config, 'categories.json')),
+  ]);
+
+  if (!itemsResponse.ok) {
+    throw new Error(`Failed to fetch items: ${itemsResponse.status}`);
+  }
+  if (!categoriesResponse.ok) {
+    throw new Error(`Failed to fetch categories: ${categoriesResponse.status}`);
+  }
+
+  const [items, categories] = await Promise.all([
+    itemsResponse.json(),
+    categoriesResponse.json(),
+  ]);
+
+  return collectionSchema.parse({ items, categories, meta: collectionMeta });
+}
+
+export function useGitHubCollection(
+  config: GitHubRawConfig,
+  options?: { enabled?: boolean }
+) {
+  return useQuery({
+    queryKey: ['github', 'raw', config.owner, config.repo, config.collection, config.branch],
+    queryFn: () => fetchGitHubRaw(config),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    ...options,
+  });
+}
+```
+
+### Strategy 2: Octokit API
+
+For private repositories or when needing additional GitHub features (e.g., file metadata):
 
 ```typescript
 // src/lib/github.ts
@@ -28,58 +94,59 @@ export function createAuthenticatedClient(token: string) {
 }
 ```
 
-### GitHub Data Source Hook
+### Collection Discovery
+
+Fetch the repository manifest to discover available collections:
 
 ```typescript
-// src/hooks/useGitHubCards.ts
-import { useQuery } from '@tanstack/react-query';
-import { octokit } from '../lib/github';
-import { CardDataSchema } from '../schemas/card';
-import type { CardData } from '../types/card';
-
-interface GitHubSourceConfig {
-  owner: string;
-  repo: string;
-  path: string;  // e.g., 'data/cards.json'
-  branch?: string;
+// src/hooks/useGitHubManifest.ts
+interface ManifestCollection {
+  path: string;
+  name: string;
+  description: string;
+  schema: string;
+  schemaVersion: string;
+  itemCount: number;
+  categoryCount: number;
+  featured: boolean;
 }
 
-async function fetchGitHubCards(config: GitHubSourceConfig): Promise<CardData[]> {
-  const { owner, repo, path, branch = 'main' } = config;
-
-  const response = await octokit.rest.repos.getContent({
-    owner,
-    repo,
-    path,
-    ref: branch,
-  });
-
-  if (Array.isArray(response.data) || response.data.type !== 'file') {
-    throw new Error('Expected a file, got directory');
-  }
-
-  const content = Buffer.from(response.data.content, 'base64').toString('utf-8');
-  const parsed = JSON.parse(content);
-
-  // Validate each card
-  const cards = Array.isArray(parsed) ? parsed : parsed.cards;
-  return cards.map((card: unknown) => CardDataSchema.parse(card));
+interface Manifest {
+  version: string;
+  collections: ManifestCollection[];
 }
 
-export function useGitHubCards(
-  config: GitHubSourceConfig,
-  options?: { enabled?: boolean }
-) {
+async function fetchManifest(owner: string, repo: string, branch = 'main'): Promise<Manifest> {
+  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/manifest.json`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error('Manifest not found');
+  return response.json();
+}
+
+export function useGitHubManifest(owner: string, repo: string, branch?: string) {
   return useQuery({
-    queryKey: ['github', config.owner, config.repo, config.path, config.branch],
-    queryFn: () => fetchGitHubCards(config),
-    staleTime: 10 * 60 * 1000, // 10 minutes
-    ...options,
+    queryKey: ['github', 'manifest', owner, repo, branch],
+    queryFn: () => fetchManifest(owner, repo, branch),
+    staleTime: 60 * 60 * 1000, // 1 hour
   });
 }
 ```
 
-### Rate Limit Handling
+### Default Data Source
+
+Configure the default data source for the demo:
+
+```typescript
+// src/config/dataSource.ts
+export const defaultDataSource: GitHubRawConfig = {
+  owner: 'REPPL',
+  repo: 'MyPlausibleMe',
+  collection: 'retro-games',
+  branch: 'main',
+};
+```
+
+### Rate Limit Handling (API Strategy)
 
 ```typescript
 // src/lib/githubRateLimit.ts
@@ -96,100 +163,28 @@ export function useGitHubRateLimit() {
     staleTime: 60 * 1000, // 1 minute
   });
 }
-
-export function RateLimitIndicator() {
-  const { data: rateLimit } = useGitHubRateLimit();
-
-  if (!rateLimit) return null;
-
-  const percentUsed = ((rateLimit.limit - rateLimit.remaining) / rateLimit.limit) * 100;
-
-  if (percentUsed < 50) return null;
-
-  return (
-    <div role="status" aria-live="polite">
-      GitHub API: {rateLimit.remaining}/{rateLimit.limit} requests remaining
-    </div>
-  );
-}
-```
-
-### Repository Configuration UI
-
-```tsx
-// src/components/GitHubSourceConfig.tsx
-interface GitHubSourceFormData {
-  owner: string;
-  repo: string;
-  path: string;
-  branch: string;
-}
-
-export function GitHubSourceConfig({ onSubmit }: { onSubmit: (data: GitHubSourceFormData) => void }) {
-  const [formData, setFormData] = useState<GitHubSourceFormData>({
-    owner: '',
-    repo: '',
-    path: 'cards.json',
-    branch: 'main',
-  });
-
-  return (
-    <form onSubmit={(e) => { e.preventDefault(); onSubmit(formData); }}>
-      <label>
-        Owner:
-        <input
-          value={formData.owner}
-          onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-          placeholder="username or org"
-          required
-        />
-      </label>
-      <label>
-        Repository:
-        <input
-          value={formData.repo}
-          onChange={(e) => setFormData({ ...formData, repo: e.target.value })}
-          placeholder="repository-name"
-          required
-        />
-      </label>
-      <label>
-        Path:
-        <input
-          value={formData.path}
-          onChange={(e) => setFormData({ ...formData, path: e.target.value })}
-          placeholder="path/to/cards.json"
-        />
-      </label>
-      <button type="submit">Load Cards</button>
-    </form>
-  );
-}
 ```
 
 ## Implementation Tasks
 
-- [ ] Install Octokit: `npm install octokit`
-- [ ] Create `src/lib/github.ts` with Octokit setup
-- [ ] Create `useGitHubCards` hook
-- [ ] Implement base64 content decoding
-- [ ] Add Zod validation for fetched data
-- [ ] Implement rate limit checking
-- [ ] Create rate limit indicator component
-- [ ] Create repository configuration UI
-- [ ] Add error handling for 404, rate limits
-- [ ] Support optional authentication token
+- [ ] Create `src/hooks/useGitHubCollection.ts` with raw URL fetching
+- [ ] Create `src/hooks/useGitHubManifest.ts` for collection discovery
+- [ ] Create `src/config/dataSource.ts` with default configuration
+- [ ] Add Zod validation for fetched data (use collection schema)
+- [ ] Implement error handling for 404, network errors
+- [ ] Create loading and error states in UI
+- [ ] (Optional) Install Octokit for API strategy: `npm install octokit`
+- [ ] (Optional) Implement rate limit checking for API strategy
 - [ ] Write integration tests with mocked responses
 
 ## Success Criteria
 
-- [ ] Can fetch cards.json from public GitHub repo
-- [ ] Data validated against card schema
-- [ ] Rate limits displayed when low
-- [ ] 404 errors handled gracefully
-- [ ] Rate limit errors handled with retry guidance
-- [ ] Works without authentication (limited)
-- [ ] Works with authentication (higher limits)
+- [ ] Can fetch items.json and categories.json from GitHub raw URLs
+- [ ] Data validated against collection schema
+- [ ] 404 errors handled gracefully with user feedback
+- [ ] Network errors handled with retry option
+- [ ] Default data source loads on app start
+- [ ] (Optional) Manifest discovery works for collection switching
 - [ ] Tests pass
 
 ## Dependencies
@@ -199,11 +194,12 @@ export function GitHubSourceConfig({ onSubmit }: { onSubmit: (data: GitHubSource
 
 ## Complexity
 
-**Medium** - External API integration with error handling.
+**Medium** - External data fetching with error handling and validation.
 
 ---
 
 ## Related Documentation
 
-- [External Data Sources Research](../../../../research/external-data-sources.md)
-- [v0.2.0 Milestone](../../milestones/v0.2.0.md)
+- [Data Repository Architecture](../../research/data-repository-architecture.md)
+- [External Data Sources Research](../../research/external-data-sources.md)
+- [v0.2.0 Milestone](../milestones/v0.2.0.md)

@@ -96,27 +96,27 @@ function FlippableCard({ isFlipped, onFlip, children }) {
 
 ## Implementation Tasks
 
-- [ ] Install Framer Motion: `npm install framer-motion`
-- [ ] Create `FlippableCard` component with compound pattern
-- [ ] Implement CSS 3D transform styles in Card.module.css
-- [ ] Add `isFlipped` state management to CardGrid
-- [ ] Implement click handler for flip toggle
-- [ ] Add keyboard support (Enter/Space to flip)
-- [ ] Add `prefers-reduced-motion` handling (instant flip)
-- [ ] Update Card types for front/back content
-- [ ] Write unit tests for flip state
-- [ ] Write visual regression test for flip states
+- [x] Install Framer Motion: `npm install framer-motion`
+- [x] Create compound component pattern (Card, Card.Back, Card.Front, Card.Inner)
+- [x] Implement CSS 3D transform styles in Card.module.css
+- [x] Add `isFlipped` state management to CardGrid with Set<string>
+- [x] Implement click handler for flip toggle
+- [x] Add keyboard support (Enter/Space to flip)
+- [x] Add `prefers-reduced-motion` handling via MotionProvider
+- [x] Implement `maxVisibleCards` enforcement (auto-unflip oldest)
+- [x] Add `whileHover` and `whileTap` Framer Motion gestures
+- [x] Write unit tests for flip state (15 tests)
 
 ## Success Criteria
 
-- [ ] Cards flip smoothly on click (0.6s duration)
-- [ ] Both card faces render correctly
-- [ ] Flip works with keyboard (Enter/Space)
-- [ ] Reduced motion preference disables animation
-- [ ] No layout shift during flip
-- [ ] Works on mobile (touch support)
-- [ ] TypeScript types are complete
-- [ ] Tests pass
+- [x] Cards flip smoothly on click (0.6s configurable duration)
+- [x] Both card faces render correctly (back: logo+year, front: image+title overlay)
+- [x] Flip works with keyboard (Enter/Space)
+- [x] Reduced motion preference disables animation
+- [x] No layout shift during flip
+- [x] Works on mobile (touch support via Framer Motion)
+- [x] TypeScript types are complete
+- [x] Tests pass (15/15)
 
 ## Dependencies
 

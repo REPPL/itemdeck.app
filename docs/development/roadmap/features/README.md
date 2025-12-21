@@ -8,11 +8,11 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-001](./planned/F-001-card-flip-animation.md) | Card Flip Animation | 📋 Planned |
-| [F-002](./planned/F-002-configuration-system.md) | Configuration System | 📋 Planned |
-| [F-003](./planned/F-003-image-fallback-system.md) | Image Fallback System | 📋 Planned |
-| [F-004](./planned/F-004-keyboard-navigation.md) | Keyboard Navigation | 📋 Planned |
-| [F-005](./planned/F-005-reduced-motion-support.md) | Reduced Motion Support | 📋 Planned |
+| [F-001](./completed/F-001-card-flip-animation.md) | Card Flip Animation | ✅ Complete |
+| [F-002](./completed/F-002-configuration-system.md) | Configuration System | ✅ Complete |
+| [F-003](./completed/F-003-image-fallback-system.md) | Image Fallback System | ✅ Complete |
+| [F-004](./completed/F-004-keyboard-navigation.md) | Keyboard Navigation | ✅ Complete |
+| [F-005](./completed/F-005-reduced-motion-support.md) | Reduced Motion Support | ✅ Complete |
 
 ### v0.2.0 - External Data
 

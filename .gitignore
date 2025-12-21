@@ -38,3 +38,6 @@ npm-debug.log*
 
 # Testing
 coverage/
+
+# Local test data (source of truth: MyPlausibleMe repo)
+public/data/

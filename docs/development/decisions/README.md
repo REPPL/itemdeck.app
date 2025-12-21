@@ -30,6 +30,7 @@ This directory captures **why** we made technical choices:
 | [ADR-010](./adrs/ADR-010-component-patterns.md) | Compound Components | Accepted |
 | [ADR-011](./adrs/ADR-011-accessibility-standard.md) | WCAG 2.2 AA | Accepted |
 | [ADR-012](./adrs/ADR-012-ethical-sourcing.md) | Wikimedia Commons | Accepted |
+| [ADR-013](./adrs/ADR-013-external-data-repository.md) | External Data Repository | Accepted |
 
 ---
 

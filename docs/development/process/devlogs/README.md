@@ -6,7 +6,7 @@ Development narratives documenting how each milestone was built.
 
 | Version | Devlog | Status |
 |---------|--------|--------|
-| v0.1.0 | *Not yet created* | 📋 Planned |
+| [v0.1.0](./v0.1.0/README.md) | Animation Foundation | ✅ Complete |
 
 ## Structure
 

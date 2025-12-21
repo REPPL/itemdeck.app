@@ -43,6 +43,7 @@ These reports provide:
 | 11 | Testing Strategies | [testing-strategies.md](./testing-strategies.md) | ✅ Complete |
 | 12 | State Persistence | [state-persistence.md](./state-persistence.md) | ✅ Complete |
 | 13 | Ethical Image Sourcing | [ethical-image-sourcing.md](./ethical-image-sourcing.md) | ✅ Complete |
+| 14 | Data Repository Architecture | [data-repository-architecture.md](./data-repository-architecture.md) | ✅ Complete |
 
 ## Report Structure
 

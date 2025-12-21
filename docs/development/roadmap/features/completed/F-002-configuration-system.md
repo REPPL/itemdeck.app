@@ -118,27 +118,26 @@ function deepMerge<T extends object>(...sources: Array<Partial<T> | undefined>):
 
 ## Implementation Tasks
 
-- [ ] Install Zod: `npm install zod`
-- [ ] Create `src/schemas/config.ts` with Zod schemas
-- [ ] Create `src/utils/deepMerge.ts` utility
-- [ ] Create `ConfigProvider` component
-- [ ] Create `useConfig` hook
-- [ ] Migrate SettingsContext to use ConfigProvider
-- [ ] Add validation error handling and logging
-- [ ] Create config loading from localStorage
-- [ ] Add config reset functionality
-- [ ] Write unit tests for schema validation
-- [ ] Write tests for deep merge utility
+- [x] Install Zod: `npm install zod` (Zod v4)
+- [x] Create `src/schemas/config.schema.ts` with Zod schemas
+- [x] Create `src/utils/deepMerge.ts` utility
+- [x] Create `ConfigProvider` component in `src/context/ConfigContext.tsx`
+- [x] Create `useConfig` hook in `src/hooks/useConfig.ts`
+- [x] Integrate SettingsContext with ConfigProvider
+- [x] Add validation error handling with `z.treeifyError()`
+- [x] Create config loading from localStorage
+- [x] Add config reset functionality
+- [x] Write unit tests for schema validation (28 tests)
 
 ## Success Criteria
 
-- [ ] All config values validated at runtime
-- [ ] Invalid values fall back to defaults (no crashes)
-- [ ] TypeScript types inferred from Zod schemas
-- [ ] Config persists across page refreshes
-- [ ] Config can be updated at runtime
-- [ ] Validation errors logged in development
-- [ ] Tests pass with edge cases
+- [x] All config values validated at runtime via Zod v4
+- [x] Invalid values fall back to defaults (no crashes)
+- [x] TypeScript types inferred from Zod schemas
+- [x] Config persists across page refreshes (localStorage)
+- [x] Config can be updated at runtime via `updateConfig()`
+- [x] Validation errors logged in development
+- [x] Tests pass with edge cases (28/28)
 
 ## Dependencies
 

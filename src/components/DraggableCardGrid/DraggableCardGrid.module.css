@@ -1,0 +1,97 @@
+/**
+ * DraggableCardGrid component styles.
+ */
+
+.grid {
+  display: grid;
+  justify-content: center;
+  padding: var(--spacing-md);
+  min-height: 100%;
+}
+
+/* Card wrapper with drag handle */
+.cardWrapper {
+  position: relative;
+  transition: transform 0.2s ease;
+}
+
+.cardWrapper:hover .dragHandle {
+  opacity: 1;
+}
+
+.cardWrapper.dragging {
+  z-index: 100;
+}
+
+/* Drag handle */
+.dragHandle {
+  position: absolute;
+  top: var(--spacing-xs);
+  left: var(--spacing-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.6);
+  color: white;
+  cursor: grab;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 10;
+}
+
+.dragHandle:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragIcon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Drag overlay (ghost card) */
+.overlay {
+  transform: rotate(3deg) scale(1.05);
+  opacity: 0.9;
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.2);
+  cursor: grabbing;
+}
+
+/* Dark theme adjustments */
+[data-theme="dark"] .dragHandle {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] .dragHandle:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Touch device - always show drag handle */
+@media (pointer: coarse) {
+  .dragHandle {
+    opacity: 0.7;
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .cardWrapper {
+    transition: none;
+  }
+
+  .dragHandle {
+    transition: none;
+  }
+
+  .overlay {
+    transform: none;
+  }
+}

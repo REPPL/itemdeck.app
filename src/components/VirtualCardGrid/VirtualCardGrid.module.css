@@ -1,0 +1,53 @@
+/**
+ * VirtualCardGrid component styles.
+ */
+
+.container {
+  height: 100%;
+  overflow: auto;
+  padding: var(--spacing-md);
+
+  /* Hide scrollbar in virtual mode for cleaner look */
+  scrollbar-width: thin;
+  scrollbar-color: var(--colour-border) transparent;
+}
+
+.container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.container::-webkit-scrollbar-thumb {
+  background-color: var(--colour-border);
+  border-radius: 4px;
+}
+
+.container:focus {
+  outline: none;
+}
+
+.container:focus-visible {
+  outline: 2px solid var(--colour-primary);
+  outline-offset: -2px;
+}
+
+.virtualList {
+  position: relative;
+}
+
+.row {
+  display: flex;
+  align-items: flex-start;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: var(--colour-text-muted);
+  font-size: var(--font-size-lg);
+}

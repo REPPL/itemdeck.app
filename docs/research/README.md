@@ -6,6 +6,17 @@ This directory contains research documents exploring design patterns, technical 
 
 ## Available Research
 
+### [Wikipedia Image Extraction](./wikipedia-image-extraction.md)
+
+Research into extracting images and attribution from Wikipedia/Wikimedia Commons:
+
+- **PageImages API** - Getting article thumbnails automatically
+- **CommonsMetadata** - Extracting license, artist, and attribution data
+- **Schema options** - Simple imageUrl vs full attribution objects
+- **Acknowledgement page** - Aggregated credits display design
+- **Implementation approach** - Two-step extraction process
+- **Non-Wikipedia sources** - Handling MobyGames and other URLs
+
 ### [Card UI/UX Design Patterns](./card-ui-design-patterns.md)
 
 Comprehensive research on modern card-based interface design, covering:

@@ -31,8 +31,7 @@ interface LocalSourceConfig {
 export interface DisplayCard extends Omit<CardWithCategory, "imageUrl"> {
   /** Image URL (always present - placeholder used if not in source) */
   imageUrl: string;
-
-  /** Flattened category title for display */
+  /** Category title for display */
   categoryTitle?: string;
 }
 
@@ -124,7 +123,7 @@ export function useLocalCollection(
         collection.categories
       );
 
-      // Add placeholder images for cards without imageUrl and flatten category
+      // Add placeholder images for cards without imageUrl and extract categoryTitle
       const cardsWithImages: DisplayCard[] = cards.map((card) => ({
         ...card,
         imageUrl:

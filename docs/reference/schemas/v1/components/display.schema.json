@@ -1,0 +1,204 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://itemdeck.app/schemas/v1/components/display.json",
+  "title": "Itemdeck Display Configuration Schema",
+  "description": "Schema for display and layout configuration.",
+  "version": "1.0.0",
+
+  "definitions": {
+    "displayConfig": {
+      "type": "object",
+      "description": "Display configuration for the collection.",
+      "properties": {
+        "primaryEntity": {
+          "type": "string",
+          "description": "Entity type to display as cards (overrides 'primary' flag)."
+        },
+        "groupBy": {
+          "type": "string",
+          "description": "Field or relationship to group cards by."
+        },
+        "sortBy": {
+          "$ref": "#/definitions/sortSpec",
+          "description": "Field to sort by, optionally with direction."
+        },
+        "sortWithinGroup": {
+          "$ref": "#/definitions/sortSpec",
+          "description": "Sort order within groups."
+        },
+        "card": {
+          "$ref": "#/definitions/cardDisplayConfig"
+        },
+        "expanded": {
+          "$ref": "#/definitions/expandedDisplayConfig"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme identifier."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "sortSpec": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "maxItems": 2,
+          "description": "Tuple of [field, direction] where direction is 'asc' or 'desc'."
+        }
+      ]
+    },
+
+    "cardDisplayConfig": {
+      "type": "object",
+      "description": "Configuration for card display.",
+      "properties": {
+        "front": {
+          "$ref": "#/definitions/cardFaceConfig"
+        },
+        "back": {
+          "$ref": "#/definitions/cardFaceConfig"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "cardFaceConfig": {
+      "type": "object",
+      "description": "Configuration for a card face (front or back).",
+      "properties": {
+        "title": {
+          "$ref": "#/definitions/fieldMapping"
+        },
+        "subtitle": {
+          "$ref": "#/definitions/fieldMapping"
+        },
+        "image": {
+          "$ref": "#/definitions/imageMapping"
+        },
+        "logo": {
+          "$ref": "#/definitions/fieldMapping"
+        },
+        "badge": {
+          "$ref": "#/definitions/fieldMapping"
+        },
+        "text": {
+          "$ref": "#/definitions/fieldMapping"
+        },
+        "show": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of elements to show on this face."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "expandedDisplayConfig": {
+      "type": "object",
+      "description": "Configuration for expanded/detail view.",
+      "properties": {
+        "hero": {
+          "$ref": "#/definitions/imageMapping"
+        },
+        "gallery": {
+          "$ref": "#/definitions/galleryConfig"
+        },
+        "sections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/displaySection"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "galleryConfig": {
+      "type": "object",
+      "description": "Configuration for image gallery display.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Field path to images array."
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["carousel", "grid", "lightbox"],
+          "default": "carousel"
+        },
+        "showAttribution": {
+          "type": "boolean",
+          "default": true
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "displaySection": {
+      "type": "object",
+      "description": "A section in the expanded view.",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["list", "grid", "prose"]
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "fieldMapping": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "source": { "type": "string" },
+            "fallback": { "type": "string" },
+            "format": { "type": "string" }
+          },
+          "required": ["source"],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Mapping from entity field(s) to display element."
+    },
+
+    "imageMapping": {
+      "oneOf": [
+        { "type": "string" },
+        {
+          "type": "object",
+          "properties": {
+            "source": {
+              "type": "string",
+              "description": "Field path to image(s), supports expressions like 'images[0]' or 'images[type=cover][0]'."
+            },
+            "fallback": {
+              "type": "string",
+              "description": "Fallback expression if source yields no result."
+            },
+            "showAttribution": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": ["source"],
+          "additionalProperties": false
+        }
+      ],
+      "description": "Mapping for image display."
+    }
+  }
+}

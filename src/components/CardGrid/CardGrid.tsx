@@ -196,6 +196,7 @@ export function CardGrid() {
         >
           <Card
             card={card}
+            cardNumber={index + 1}
             isFlipped={isFlipped}
             onFlip={() => { handleFlip(card.id); }}
             tabIndex={tabIndex}

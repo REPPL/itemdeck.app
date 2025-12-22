@@ -10,6 +10,7 @@ Development narratives documenting how each milestone was built.
 | [v0.2.0](./v0.2.0/README.md) | External Data | Complete |
 | [v0.3.0](./v0.3.0/README.md) | Customisation | Complete |
 | [v0.4.1](./v0.4.1/README.md) | Settings & Themes | Complete |
+| [v0.5.0](./v0.5.0/README.md) | Schema Design | Complete |
 
 ## Structure
 

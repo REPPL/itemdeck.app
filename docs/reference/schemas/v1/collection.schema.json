@@ -1,0 +1,172 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://itemdeck.app/schemas/v1/collection.json",
+  "title": "Itemdeck Collection Schema",
+  "description": "A flexible schema for defining collections with typed entities and relationships.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["$schema", "id", "name", "entityTypes"],
+  "additionalProperties": false,
+
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "const": "https://itemdeck.app/schemas/v1/collection.json",
+      "description": "Schema identifier for validation."
+    },
+
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique collection identifier (kebab-case)."
+    },
+
+    "name": {
+      "type": "string",
+      "description": "Human-readable collection name."
+    },
+
+    "description": {
+      "type": "string",
+      "description": "Brief description of the collection."
+    },
+
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$",
+      "description": "Semantic version of the collection data."
+    },
+
+    "metadata": {
+      "$ref": "#/definitions/collectionMetadata"
+    },
+
+    "entityTypes": {
+      "type": "object",
+      "description": "Definitions of entity types in this collection.",
+      "additionalProperties": {
+        "$ref": "#/definitions/entityType"
+      },
+      "minProperties": 1
+    },
+
+    "relationships": {
+      "type": "object",
+      "description": "Definitions of relationships between entities.",
+      "additionalProperties": {
+        "$ref": "#/definitions/relationship"
+      }
+    },
+
+    "display": {
+      "$ref": "components/display.json#/definitions/displayConfig"
+    }
+  },
+
+  "definitions": {
+    "collectionMetadata": {
+      "type": "object",
+      "description": "Collection-level metadata.",
+      "properties": {
+        "author": {
+          "type": "string",
+          "description": "Collection author or maintainer."
+        },
+        "licence": {
+          "type": "string",
+          "description": "Licence for the collection data (e.g., CC0-1.0, MIT)."
+        },
+        "homepage": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to collection homepage or repository."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags for categorising the collection."
+        }
+      },
+      "additionalProperties": true
+    },
+
+    "entityType": {
+      "type": "object",
+      "description": "Definition of an entity type.",
+      "required": ["fields"],
+      "properties": {
+        "primary": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this is the primary entity type (displayed as cards)."
+        },
+        "label": {
+          "type": "string",
+          "description": "Singular display label (e.g., 'Game')."
+        },
+        "labelPlural": {
+          "type": "string",
+          "description": "Plural display label (e.g., 'Games')."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of this entity type."
+        },
+        "fields": {
+          "type": "object",
+          "description": "Field definitions for this entity type.",
+          "additionalProperties": {
+            "$ref": "components/fields.json#/definitions/fieldDefinition"
+          },
+          "minProperties": 1
+        },
+        "computed": {
+          "type": "object",
+          "description": "Computed/virtual fields derived from other fields.",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Expression for computing the field value."
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "relationship": {
+      "type": "object",
+      "description": "Definition of a relationship between entities.",
+      "properties": {
+        "target": {
+          "type": "string",
+          "description": "Target entity type ID."
+        },
+        "cardinality": {
+          "type": "string",
+          "enum": ["one-to-one", "many-to-one", "one-to-many", "many-to-many"],
+          "default": "many-to-one",
+          "description": "Relationship cardinality."
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the relationship is required."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["reference", "ordinal"],
+          "default": "reference",
+          "description": "Relationship type: reference (FK) or ordinal (ordering)."
+        },
+        "scope": {
+          "type": "string",
+          "description": "For ordinal relationships, the entity type that defines the scope."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the relationship."
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

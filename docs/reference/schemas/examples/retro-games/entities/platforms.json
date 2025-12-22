@@ -1,0 +1,93 @@
+[
+  {
+    "id": "vcs2600",
+    "title": "VCS2600",
+    "year": 1981,
+    "summary": "I never owned a VCS, but it was the first video game console I ever saw at a friend's house.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Atari_2600"
+  },
+  {
+    "id": "vic20",
+    "title": "VIC20",
+    "year": 1983,
+    "summary": "My first computer. Very exciting.",
+    "detailUrl": "https://en.wikipedia.org/wiki/VIC-20"
+  },
+  {
+    "id": "ms-dos",
+    "title": "MS-DOS",
+    "year": 1983,
+    "summary": "Tried to play games on the IBM XT—not great. All changed once I'd discovered the original (text-based) Tetris.",
+    "detailUrl": "https://en.wikipedia.org/wiki/DOS"
+  },
+  {
+    "id": "arcade",
+    "title": "ARCADE",
+    "year": 1985,
+    "summary": "Played some early games while on holiday in Italy. Some later games were fun, although I was never a big fan of arcade games.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Arcade_video_game"
+  },
+  {
+    "id": "c64",
+    "title": "C64",
+    "year": 1986,
+    "summary": "A great machine. Loved it.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Commodore_64"
+  },
+  {
+    "id": "amiga",
+    "title": "Amiga",
+    "year": 1988,
+    "summary": "Amazing graphics and brilliant sound. But it crashed a lot and most games weren't all that good. Still very proud when I first got it.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Amiga"
+  },
+  {
+    "id": "nes",
+    "title": "NES",
+    "year": 1989,
+    "summary": "Less powerful than the Amiga, yet a much better gaming experience.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Nintendo_Entertainment_System"
+  },
+  {
+    "id": "gameboy",
+    "title": "Gameboy",
+    "year": 1990,
+    "summary": "Nintendo's handheld revolution; gaming on the go changed everything … now I didn't have to be at home to avoid talking to people!",
+    "detailUrl": "https://en.wikipedia.org/wiki/Game_Boy"
+  },
+  {
+    "id": "snes",
+    "title": "SNES",
+    "year": 1992,
+    "summary": "My personal 16-bit golden age; Mode 7 and incredible soundtracks compared to the PC's much more expensive setup.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Super_Nintendo_Entertainment_System"
+  },
+  {
+    "id": "mac",
+    "title": "Mac",
+    "year": 1994,
+    "summary": "A few good games, but the Multimedia CDs were unique.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Macintosh"
+  },
+  {
+    "id": "n64",
+    "title": "N64",
+    "year": 1997,
+    "summary": "First Nintendo console I didn't actually like that much.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Nintendo_64"
+  },
+  {
+    "id": "gba",
+    "title": "GBA",
+    "year": 2000,
+    "summary": "A lot better than the original Gameboy with some incredible games.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Game_Boy_Advance"
+  },
+  {
+    "id": "switch",
+    "title": "Switch",
+    "year": 2018,
+    "summary": "Probably the best allrounder console.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Nintendo_Switch"
+  }
+]

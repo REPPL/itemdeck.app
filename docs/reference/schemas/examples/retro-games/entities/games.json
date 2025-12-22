@@ -1,0 +1,263 @@
+[
+  {
+    "id": "demon-attack",
+    "title": "Demon Attack",
+    "platform": "vcs2600",
+    "rank": 0,
+    "year": 1981,
+    "summary": "Fast-paced fixed shooter with colourful splitting demons; Imagic's best-seller.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Demon_Attack",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/6/67/Demon_Attack_box_art.jpg",
+        "type": "cover",
+        "alt": "Demon Attack box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Imagic",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Demon_Attack_box_art.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "cosmic-ark",
+    "title": "Cosmic Ark",
+    "platform": "vcs2600",
+    "rank": 1,
+    "year": 1981,
+    "summary": "Space rescue game with stunning starfield effect; save creatures from planets before meteors destroy your ark.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Cosmic_Ark",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/6/65/Cosmic_Ark_%28Cover%29.jpg",
+        "type": "cover",
+        "alt": "Cosmic Ark box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Imagic",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Cosmic_Ark_(Cover).jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "pitfall",
+    "title": "Pitfall",
+    "platform": "vcs2600",
+    "rank": 2,
+    "year": 1982,
+    "summary": "Iconic jungle platformer starring Pitfall Harry; swing on vines and dodge crocodiles to collect treasure.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Pitfall!",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/0/0c/Pitfall-cover.jpg",
+        "type": "cover",
+        "alt": "Pitfall box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Activision",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Pitfall-cover.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "sword-of-fargoal",
+    "title": "Sword Of Fargoal",
+    "platform": "vic20",
+    "rank": 0,
+    "year": 1982,
+    "summary": "Pioneering roguelike dungeon crawler; randomly generated levels and permadeath before it was cool.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Sword_of_Fargoal",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/1/10/Sword_of_Fargoal.jpg",
+        "type": "cover",
+        "alt": "Sword of Fargoal box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Epyx",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Sword_of_Fargoal.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "black-max",
+    "title": "Black Max",
+    "platform": "vic20",
+    "rank": 1,
+    "year": 1983,
+    "summary": "Still one of my favourite games of all time.",
+    "detailUrl": "https://www.myabandonware.com/game/black-max-pxr",
+    "images": []
+  },
+  {
+    "id": "slot",
+    "title": "Slot",
+    "platform": "vic20",
+    "rank": 2,
+    "year": 1983,
+    "summary": "Classic slot machine simulation; simple gambling fun on limited hardware.",
+    "images": []
+  },
+  {
+    "id": "super-metroid",
+    "title": "Super Metroid",
+    "platform": "snes",
+    "rank": 0,
+    "year": 1994,
+    "summary": "Atmospheric masterpiece; explore planet Zebes in gaming's finest adventure.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Super_Metroid",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/e/e4/Smetroidbox.jpg",
+        "type": "cover",
+        "alt": "Super Metroid box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Smetroidbox.jpg"
+        }
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/7/71/Super_Metroid_gameplay.png",
+        "type": "screenshot",
+        "alt": "Super Metroid gameplay showing Samus in Brinstar",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Super_Metroid_gameplay.png"
+        }
+      },
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/9/93/Metroid2_boxart.jpg",
+        "type": "promotional",
+        "alt": "Metroid II box art for comparison",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Metroid2_boxart.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "street-fighter-ii-snes",
+    "title": "Street Fighter II",
+    "platform": "snes",
+    "rank": 1,
+    "year": 1992,
+    "summary": "The definitive home version of the arcade phenomenon; tournament fighter.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Street_Fighter_II",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/4/46/Street_Fighter_II_%28arcade%29_screenshot.png",
+        "type": "screenshot",
+        "alt": "Street Fighter II gameplay",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Capcom",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Street_Fighter_II_(arcade)_screenshot.png"
+        }
+      }
+    ]
+  },
+  {
+    "id": "super-mario-kart",
+    "title": "Super Mario Kart",
+    "platform": "snes",
+    "rank": 2,
+    "year": 1992,
+    "summary": "Racing revolution with items and Mode 7; multiplayer mayhem began here.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Super_Mario_Kart",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/3/38/Supermariokart_box.JPG",
+        "type": "cover",
+        "alt": "Super Mario Kart box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Supermariokart_box.JPG"
+        }
+      }
+    ]
+  },
+  {
+    "id": "legend-of-zelda-lttp",
+    "title": "Legend of Zelda",
+    "platform": "snes",
+    "rank": 3,
+    "year": 1991,
+    "summary": "A Link to the Past - the pinnacle of 2D Zelda; Dark World awaits.",
+    "detailUrl": "https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_A_Link_to_the_Past",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/2/21/The_Legend_of_Zelda_A_Link_to_the_Past_SNES_Game_Cover.jpg",
+        "type": "cover",
+        "alt": "The Legend of Zelda: A Link to the Past box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:The_Legend_of_Zelda_A_Link_to_the_Past_SNES_Game_Cover.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "zelda-ocarina-of-time",
+    "title": "The Legend of Zelda: Ocarina of Time",
+    "platform": "n64",
+    "rank": 0,
+    "year": 1998,
+    "summary": "3D adventure that changed everything; Hyrule never looked so grand.",
+    "detailUrl": "https://en.wikipedia.org/wiki/The_Legend_of_Zelda:_Ocarina_of_Time",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/5/57/The_Legend_of_Zelda_Ocarina_of_Time.jpg",
+        "type": "cover",
+        "alt": "Ocarina of Time box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:The_Legend_of_Zelda_Ocarina_of_Time.jpg"
+        }
+      }
+    ]
+  },
+  {
+    "id": "fire-emblem-sacred-stones",
+    "title": "Fire Emblem: The Sacred Stones",
+    "platform": "gba",
+    "rank": 0,
+    "year": 2004,
+    "summary": "Tactical RPG with branching classes; dramatic fantasy warfare.",
+    "detailUrl": "https://en.wikipedia.org/wiki/Fire_Emblem:_The_Sacred_Stones",
+    "images": [
+      {
+        "url": "https://upload.wikimedia.org/wikipedia/en/1/1e/Fire_Emblem_The_Sacred_Stones.JPG",
+        "type": "cover",
+        "alt": "Fire Emblem: The Sacred Stones box art",
+        "attribution": {
+          "source": "Wikimedia Commons",
+          "author": "Nintendo",
+          "licence": "Fair use",
+          "url": "https://commons.wikimedia.org/wiki/File:Fire_Emblem_The_Sacred_Stones.JPG"
+        }
+      }
+    ]
+  }
+]

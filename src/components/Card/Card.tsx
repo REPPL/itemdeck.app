@@ -32,6 +32,8 @@ interface CardDisplayData {
 interface CardProps {
   /** Card data to display */
   card: CardDisplayData;
+  /** Card number for display (1-indexed) */
+  cardNumber?: number;
   /** Whether the card is flipped to show front */
   isFlipped?: boolean;
   /** Callback when card is clicked */
@@ -66,6 +68,7 @@ interface CardProps {
  */
 export function Card({
   card,
+  cardNumber,
   isFlipped = false,
   onFlip,
   tabIndex = 0,
@@ -118,7 +121,7 @@ export function Card({
         ref={cardRef}
         className={styles.card}
         style={cardStyle}
-        title={card.title}
+        title={cardNumber !== undefined ? `Card #${cardNumber}` : undefined}
         data-card-id={card.id}
         data-flipped={isFlipped}
         onClick={handleClick}

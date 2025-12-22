@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://itemdeck.app/schemas/v1/entity.json",
+  "title": "Itemdeck Entity Schema",
+  "description": "Schema for individual entity files within a collection.",
+  "version": "1.0.0",
+  "type": "object",
+  "required": ["id"],
+  "additionalProperties": true,
+
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$",
+      "description": "Unique entity identifier (kebab-case)."
+    },
+
+    "images": {
+      "$ref": "components/image.json#/definitions/imageArray"
+    }
+  }
+}

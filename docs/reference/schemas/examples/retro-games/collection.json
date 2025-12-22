@@ -1,0 +1,129 @@
+{
+  "$schema": "https://itemdeck.app/schemas/v1/collection.json",
+  "id": "retro-games",
+  "name": "My Top Computer & Video Games",
+  "description": "A personal ranking of computer and video games across platforms.",
+  "version": "1.0.0",
+
+  "metadata": {
+    "author": "REPPL",
+    "licence": "CC0-1.0"
+  },
+
+  "entityTypes": {
+    "game": {
+      "primary": true,
+      "label": "Game",
+      "labelPlural": "Games",
+      "description": "A video game entry in the collection.",
+      "fields": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Game title."
+        },
+        "year": {
+          "type": "number",
+          "description": "Release year."
+        },
+        "summary": {
+          "type": "text",
+          "description": "Personal description or review."
+        },
+        "detailUrl": {
+          "type": "url",
+          "description": "Link to more information (e.g., Wikipedia)."
+        },
+        "images": {
+          "type": "images",
+          "description": "Ordered list of images; first is primary."
+        }
+      }
+    },
+    "platform": {
+      "label": "Platform",
+      "labelPlural": "Platforms",
+      "description": "A gaming platform (console, computer, or arcade).",
+      "fields": {
+        "title": {
+          "type": "string",
+          "required": true,
+          "description": "Platform display name."
+        },
+        "year": {
+          "type": "number",
+          "description": "Year the platform was first used by the collection author."
+        },
+        "summary": {
+          "type": "text",
+          "description": "Personal notes about the platform."
+        },
+        "detailUrl": {
+          "type": "url",
+          "description": "Link to more information."
+        },
+        "logoUrl": {
+          "type": "url",
+          "description": "Platform logo image."
+        }
+      }
+    }
+  },
+
+  "relationships": {
+    "game.platform": {
+      "target": "platform",
+      "cardinality": "many-to-one",
+      "required": true,
+      "description": "The platform this game belongs to."
+    },
+    "game.rank": {
+      "type": "ordinal",
+      "scope": "platform",
+      "description": "Rank within the platform (0 = top ranked)."
+    }
+  },
+
+  "display": {
+    "primaryEntity": "game",
+    "groupBy": "platform",
+    "sortWithinGroup": ["rank", "asc"],
+
+    "card": {
+      "front": {
+        "image": {
+          "source": "images[0]",
+          "fallback": "images[type=screenshot][0]"
+        },
+        "title": "title",
+        "subtitle": "year",
+        "badge": "rank"
+      },
+      "back": {
+        "logo": "platform.logoUrl",
+        "text": "year"
+      }
+    },
+
+    "expanded": {
+      "hero": {
+        "source": "images[type=cover][0] ?? images[0]",
+        "showAttribution": true
+      },
+      "gallery": {
+        "source": "images",
+        "layout": "carousel",
+        "showAttribution": true
+      },
+      "sections": [
+        {
+          "title": "Details",
+          "fields": ["summary", "year", "platform.title"],
+          "layout": "list"
+        }
+      ]
+    },
+
+    "theme": "retro"
+  }
+}

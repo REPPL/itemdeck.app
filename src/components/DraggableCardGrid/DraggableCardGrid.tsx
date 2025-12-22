@@ -62,6 +62,7 @@ interface DraggableCardGridProps {
  */
 interface SortableCardProps {
   card: DisplayCard;
+  cardNumber: number;
   isFlipped: boolean;
   onFlip: () => void;
   isDragging?: boolean;
@@ -74,6 +75,7 @@ interface SortableCardProps {
 
 function SortableCard({
   card,
+  cardNumber,
   isFlipped,
   onFlip,
   isAnyDragging,
@@ -116,6 +118,7 @@ function SortableCard({
     >
       <Card
         card={card}
+        cardNumber={cardNumber}
         isFlipped={isFlipped}
         onFlip={onFlip}
         tabIndex={-1}
@@ -237,7 +240,7 @@ export function DraggableCardGrid({
           role="grid"
           aria-label="Draggable card collection"
         >
-          {cards.map((card) => {
+          {cards.map((card, index) => {
             const isFlipped = flippedCardIds.includes(card.id);
             // Determine if dragging is allowed based on dragFace setting
             // isFlipped means front is showing (card has been clicked)
@@ -250,6 +253,7 @@ export function DraggableCardGrid({
               <SortableCard
                 key={card.id}
                 card={card}
+                cardNumber={index + 1}
                 isFlipped={isFlipped}
                 onFlip={() => { onFlip(card.id); }}
                 isAnyDragging={activeId !== null}
@@ -275,6 +279,7 @@ export function DraggableCardGrid({
               showRankBadge={showRankBadge}
               showDeviceBadge={showDeviceBadge}
               rankPlaceholderText={rankPlaceholderText}
+              cardBackDisplay={cardBackDisplay}
             />
           </div>
         )}

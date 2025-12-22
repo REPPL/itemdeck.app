@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://itemdeck.app/schemas/v1/components/fields.json",
+  "title": "Itemdeck Field Types Schema",
+  "description": "Schema for entity field definitions and types.",
+  "version": "1.0.0",
+
+  "definitions": {
+    "fieldDefinition": {
+      "type": "object",
+      "description": "Definition of an entity field.",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/fieldType"
+        },
+        "required": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether this field is required."
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the field."
+        },
+        "default": {
+          "description": "Default value for the field."
+        },
+        "enum": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Allowed values for enum type."
+        },
+        "items": {
+          "$ref": "#/definitions/fieldDefinition",
+          "description": "Item definition for array type."
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/definitions/fieldDefinition"
+          },
+          "description": "Property definitions for object type."
+        },
+        "format": {
+          "type": "string",
+          "description": "Format hint (e.g., 'email', 'uri', 'date-time')."
+        },
+        "min": {
+          "type": "number",
+          "description": "Minimum value for number type."
+        },
+        "max": {
+          "type": "number",
+          "description": "Maximum value for number type."
+        },
+        "minLength": {
+          "type": "integer",
+          "description": "Minimum length for string type."
+        },
+        "maxLength": {
+          "type": "integer",
+          "description": "Maximum length for string type."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "fieldType": {
+      "type": "string",
+      "enum": ["string", "text", "number", "boolean", "date", "url", "enum", "array", "object", "images"],
+      "description": "Data type of the field."
+    }
+  }
+}

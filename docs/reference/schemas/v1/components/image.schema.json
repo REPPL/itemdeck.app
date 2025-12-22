@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://itemdeck.app/schemas/v1/components/image.json",
+  "title": "Itemdeck Image Schema",
+  "description": "Schema for images with metadata and attribution.",
+  "version": "1.0.0",
+
+  "definitions": {
+    "image": {
+      "type": "object",
+      "description": "An image with metadata and attribution.",
+      "required": ["url"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Image URL (absolute or relative to collection root)."
+        },
+        "type": {
+          "type": "string",
+          "description": "Image type/category.",
+          "examples": ["cover", "screenshot", "title-screen", "logo", "promotional", "fan-art", "photo", "artwork"]
+        },
+        "alt": {
+          "type": "string",
+          "description": "Alternative text for accessibility."
+        },
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Image width in pixels."
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Image height in pixels."
+        },
+        "attribution": {
+          "$ref": "#/definitions/attribution"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "attribution": {
+      "type": "object",
+      "description": "Attribution information for an image or other asset.",
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Source name (e.g., 'Wikimedia Commons', 'MobyGames').",
+          "examples": ["Wikimedia Commons", "MobyGames", "IGDB", "Steam"]
+        },
+        "author": {
+          "type": "string",
+          "description": "Creator or copyright holder."
+        },
+        "licence": {
+          "type": "string",
+          "description": "Licence identifier.",
+          "examples": ["CC BY-SA 4.0", "CC0-1.0", "Fair use", "Public domain"]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Link to original source or attribution page."
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "imageArray": {
+      "type": "array",
+      "description": "Ordered list of images; first is primary.",
+      "items": {
+        "$ref": "#/definitions/image"
+      }
+    }
+  }
+}

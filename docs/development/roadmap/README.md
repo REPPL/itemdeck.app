@@ -1,6 +1,6 @@
 # Roadmap
 
-Development roadmap for Itemdeck v0.1.0 through v0.6.0.
+Development roadmap for Itemdeck v0.1.0 through v0.7.0.
 
 ## Overview
 
@@ -9,9 +9,10 @@ Development roadmap for Itemdeck v0.1.0 through v0.6.0.
 | [v0.1.0](./milestones/v0.1.0.md) | Animation Foundation | ✅ Complete |
 | [v0.2.0](./milestones/v0.2.0.md) | External Data | ✅ Complete |
 | [v0.3.0](./milestones/v0.3.0.md) | Customisation | ✅ Complete |
-| [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | 🔄 In Progress |
-| [v0.5.0](./milestones/v0.5.0.md) | Visual Overhaul & Navigation | 📋 Planned |
-| [v0.6.0](./milestones/v0.6.0.md) | Quality & Security | 📋 Planned |
+| [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | ✅ Complete |
+| [v0.5.0](./milestones/v0.5.0.md) | Schema Design | ✅ Complete |
+| [v0.6.0](./milestones/v0.6.0.md) | Schema Loader | ✅ Complete |
+| v0.7.0 | Visual Overhaul | 📋 Planned |
 
 ## Feature Summary
 

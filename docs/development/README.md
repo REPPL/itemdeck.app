@@ -20,9 +20,10 @@ Central hub for Itemdeck development planning, roadmap, and process documentatio
 | [v0.1.0 Animation](./roadmap/milestones/v0.1.0.md) | ✅ Complete | Card flip, config, assets, a11y |
 | [v0.2.0 Data](./roadmap/milestones/v0.2.0.md) | ✅ Complete | TanStack Query, GitHub, caching |
 | [v0.3.0 Customisation](./roadmap/milestones/v0.3.0.md) | ✅ Complete | Themes, layouts, persistence |
-| [v0.4.0 Performance](./roadmap/milestones/v0.4.0.md) | 🔄 In Progress | Virtualisation, lazy loading |
-| [v0.5.0 Visual](./roadmap/milestones/v0.5.0.md) | 📋 Planned | UI overhaul, navigation |
-| [v0.6.0 Quality](./roadmap/milestones/v0.6.0.md) | 📋 Planned | Testing, security, full a11y |
+| [v0.4.0 Performance](./roadmap/milestones/v0.4.0.md) | ✅ Complete | Virtualisation, lazy loading, drag |
+| [v0.5.0 Schema Design](./roadmap/milestones/v0.5.0.md) | ✅ Complete | JSON Schema, Entity-Relationship |
+| [v0.6.0 Schema Loader](./roadmap/milestones/v0.6.0.md) | ✅ Complete | Loaders, resolvers, migration |
+| v0.7.0 Visual Overhaul | 📋 Planned | UI overhaul, navigation |
 
 ## Directory Structure
 

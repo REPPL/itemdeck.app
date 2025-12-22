@@ -11,6 +11,7 @@ Post-milestone reflections and lessons learned.
 | [v0.3.0](./v0.3.0/README.md) | Customisation | Complete |
 | [v0.4.1](./v0.4.1/README.md) | Settings & Themes | Complete |
 | [v0.5.0](./v0.5.0/README.md) | Schema Design | Complete |
+| [v0.6.0](./v0.6.0/README.md) | Schema Loader | Complete |
 
 ## Structure
 

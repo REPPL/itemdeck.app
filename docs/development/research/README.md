@@ -45,6 +45,12 @@ These reports provide:
 | 13 | Ethical Image Sourcing | [ethical-image-sourcing.md](./ethical-image-sourcing.md) | ✅ Complete |
 | 14 | Data Repository Architecture | [data-repository-architecture.md](./data-repository-architecture.md) | ✅ Complete |
 
+### Numbered Research
+
+| ID | Topic | File | Status |
+|----|-------|------|--------|
+| R-003 | External Scores Integration | [R-003-external-scores.md](./R-003-external-scores.md) | ✅ Complete |
+
 ## Report Structure
 
 Each report follows a consistent template:

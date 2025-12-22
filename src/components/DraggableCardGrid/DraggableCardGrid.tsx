@@ -27,6 +27,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { Card } from "@/components/Card/Card";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { DragFace, CardBackDisplay } from "@/stores/settingsStore";
+import type { CardDisplayConfig } from "@/types/display";
 import styles from "./DraggableCardGrid.module.css";
 
 /**
@@ -55,6 +56,8 @@ interface DraggableCardGridProps {
   dragFace?: DragFace;
   /** What to display on card back */
   cardBackDisplay?: CardBackDisplay;
+  /** Display configuration for dynamic field resolution */
+  displayConfig?: CardDisplayConfig;
 }
 
 /**
@@ -71,6 +74,7 @@ interface SortableCardProps {
   rankPlaceholderText?: string;
   canDrag: boolean;
   cardBackDisplay?: CardBackDisplay;
+  displayConfig?: CardDisplayConfig;
 }
 
 function SortableCard({
@@ -84,6 +88,7 @@ function SortableCard({
   rankPlaceholderText,
   canDrag,
   cardBackDisplay,
+  displayConfig,
 }: SortableCardProps & { isAnyDragging: boolean }) {
   const {
     attributes,
@@ -126,6 +131,7 @@ function SortableCard({
         showDeviceBadge={showDeviceBadge}
         rankPlaceholderText={rankPlaceholderText}
         cardBackDisplay={cardBackDisplay}
+        displayConfig={displayConfig}
       />
     </div>
   );
@@ -166,6 +172,7 @@ export function DraggableCardGrid({
   rankPlaceholderText,
   dragFace = "back",
   cardBackDisplay,
+  displayConfig,
 }: DraggableCardGridProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -262,6 +269,7 @@ export function DraggableCardGrid({
                 rankPlaceholderText={rankPlaceholderText}
                 canDrag={canDrag}
                 cardBackDisplay={cardBackDisplay}
+                displayConfig={displayConfig}
               />
             );
           })}
@@ -280,6 +288,7 @@ export function DraggableCardGrid({
               showDeviceBadge={showDeviceBadge}
               rankPlaceholderText={rankPlaceholderText}
               cardBackDisplay={cardBackDisplay}
+              displayConfig={displayConfig}
             />
           </div>
         )}

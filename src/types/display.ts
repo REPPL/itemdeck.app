@@ -21,7 +21,45 @@ export interface ImageMapping {
 }
 
 /**
+ * Card front face configuration.
+ */
+export interface CardFrontConfig {
+  /** Field path for title */
+  title?: string;
+
+  /** Field path for subtitle (displayed below title) */
+  subtitle?: string;
+
+  /** Image mapping configuration */
+  image?: ImageMapping | string;
+
+  /** Field path for primary badge (e.g., rank) */
+  badge?: string;
+
+  /** Field path for secondary badge (e.g., rating) */
+  secondaryBadge?: string;
+
+  /** Field paths for footer elements */
+  footer?: string[];
+}
+
+/**
+ * Card back face configuration.
+ */
+export interface CardBackConfig {
+  /** Field path for logo image */
+  logo?: string;
+
+  /** Field path for title text (e.g., verdict) */
+  title?: string;
+
+  /** Field path for secondary text (e.g., year) */
+  text?: string;
+}
+
+/**
  * Card face configuration (front or back).
+ * @deprecated Use CardFrontConfig or CardBackConfig instead
  */
 export interface CardFaceConfig {
   /** Field mapping for title */
@@ -48,10 +86,10 @@ export interface CardFaceConfig {
  */
 export interface CardDisplayConfig {
   /** Front face configuration */
-  front?: CardFaceConfig;
+  front?: CardFrontConfig;
 
   /** Back face configuration */
-  back?: CardFaceConfig;
+  back?: CardBackConfig;
 }
 
 /**

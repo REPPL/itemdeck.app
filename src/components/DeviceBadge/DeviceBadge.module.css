@@ -9,15 +9,19 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
-  background: var(--glass-background, rgba(0, 0, 0, 0.5));
+  /* Ensure dark background for consistent contrast regardless of theme */
+  background: var(--device-badge-background, rgba(0, 0, 0, 0.65));
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.15));
+  border: 1px solid var(--glass-border, rgba(255, 255, 255, 0.2));
   border-radius: var(--radius-md, 8px);
   font-family: var(--font-family-mono, monospace);
-  font-weight: 500;
-  colour: var(--text-primary, white);
-  color: var(--text-primary, white);
+  font-weight: 600;
+  /* Always use white text for contrast against dark background */
+  colour: white;
+  color: white;
+  /* Add text shadow for additional contrast */
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   line-height: 1;
   white-space: nowrap;
   text-transform: uppercase;

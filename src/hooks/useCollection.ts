@@ -24,6 +24,7 @@ import {
 } from "@/loaders";
 import type { Image } from "@/types/image";
 import type { ResolvedEntity } from "@/types/schema";
+import type { DisplayConfig } from "@/types/display";
 
 /**
  * Local data source configuration.
@@ -60,6 +61,12 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
 
   /** Logo URL for card back (from platform) */
   logoUrl?: string;
+
+  /** Resolved entity data for dynamic field path resolution */
+  _resolved?: Record<string, unknown>;
+
+  /** Additional entity fields for field path resolution */
+  [key: string]: unknown;
 }
 
 /**
@@ -71,6 +78,9 @@ interface CollectionResult {
 
   /** Raw collection data (legacy format for backward compatibility) */
   collection: Collection;
+
+  /** Display configuration from collection definition */
+  displayConfig?: DisplayConfig;
 }
 
 /**
@@ -164,7 +174,7 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
     `https://picsum.photos/seed/${id}/400/300`;
 
   const cards: DisplayCard[] = resolvedEntities.map((entity: ResolvedEntity) => {
-    const images = entity.images as Image[] | undefined;
+    const images = entity.images;
     const imageUrls = getImageUrls(images);
     const primaryImageUrl = getPrimaryImageUrl(
       images,
@@ -178,10 +188,31 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
     // Get rank
     const rank = getEntityRank(entity, loaded.primaryType, context);
 
-    return {
+    // Get title - entity.title should be a string, but we handle edge cases
+    const entityTitle = entity.title;
+    const title = typeof entityTitle === "string"
+      ? entityTitle
+      : typeof entityTitle === "number" ? String(entityTitle) : "";
+
+    // Get year - convert to string if present, handle various types safely
+    const entityYear = entity.year;
+    let year: string | undefined;
+    if (entityYear === undefined) {
+      year = undefined;
+    } else if (typeof entityYear === "string") {
+      year = entityYear;
+    } else if (typeof entityYear === "number") {
+      year = String(entityYear);
+    } else {
+      year = undefined;
+    }
+
+    // Build DisplayCard with all entity fields for field path resolution
+    const displayCard: DisplayCard = {
+      // Core required fields
       id: entity.id,
-      title: String(entity.title ?? ""),
-      year: entity.year !== undefined ? String(entity.year) : undefined,
+      title,
+      year,
       summary: entity.summary as string | undefined,
       detailUrl: entity.detailUrl as string | undefined,
       imageUrl: primaryImageUrl,
@@ -197,7 +228,19 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
           rank: rank !== null ? String(rank) : undefined,
         }).filter((entry): entry is [string, string] => entry[1] !== undefined)
       ),
+      // Include resolved relationships for field path resolution
+      _resolved: entity._resolved,
     };
+
+    // Copy all additional entity fields for field path resolution
+    // This includes personal fields like verdict, rating, playedSince, status
+    for (const [key, value] of Object.entries(entity)) {
+      if (!(key in displayCard) && key !== "_resolved") {
+        displayCard[key] = value;
+      }
+    }
+
+    return displayCard;
   });
 
   // Create minimal legacy Collection for backward compatibility
@@ -212,13 +255,22 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
       imageUrls: c.imageUrls,
       metadata: c.metadata,
     })),
-    categories: Object.values(loaded.entities.platform ?? []).map((p) => ({
-      id: p.id,
-      title: String(p.title ?? ""),
-    })),
+    categories: Object.values(loaded.entities.platform ?? []).map((p) => {
+      const pTitle = p.title;
+      return {
+        id: p.id,
+        title: typeof pTitle === "string"
+          ? pTitle
+          : typeof pTitle === "number" ? String(pTitle) : "",
+      };
+    }),
   };
 
-  return { cards, collection: legacyCollection };
+  return {
+    cards,
+    collection: legacyCollection,
+    displayConfig: loaded.definition.display,
+  };
 }
 
 /**
@@ -310,7 +362,7 @@ export function useLocalCollection(
 /**
  * Default local data path.
  */
-const DEFAULT_LOCAL_PATH = "/data/collections/retro-games";
+const DEFAULT_LOCAL_PATH = "/data/demo";
 
 /**
  * Hook for fetching the default local collection.

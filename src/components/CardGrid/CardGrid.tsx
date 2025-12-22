@@ -21,6 +21,7 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
 export function CardGrid() {
   const { data, isLoading, error } = useDefaultCollection();
   const sourceCards = useMemo(() => data?.cards ?? [], [data?.cards]);
+  const displayConfig = data?.displayConfig?.card;
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
   const showRankBadge = useSettingsStore((state) => state.showRankBadge);
@@ -204,6 +205,7 @@ export function CardGrid() {
             showRankBadge={showRankBadge}
             showDeviceBadge={showDeviceBadge}
             rankPlaceholderText={rankPlaceholderText}
+            displayConfig={displayConfig}
           />
         </div>
       );
@@ -225,6 +227,7 @@ export function CardGrid() {
         rankPlaceholderText={rankPlaceholderText}
         dragFace={dragFace}
         cardBackDisplay={cardBackDisplay}
+        displayConfig={displayConfig}
       />
     );
   }

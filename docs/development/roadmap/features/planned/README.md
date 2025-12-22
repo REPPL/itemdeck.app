@@ -20,6 +20,11 @@ Features queued for future development.
 - [F-020-attribution-system.md](./F-020-attribution-system.md)
 - [F-026-component-storybook.md](./F-026-component-storybook.md)
 
+### v0.6.1 - UI Configuration & Settings Enhancement
+- [F-042-collection-display-driver.md](./F-042-collection-display-driver.md)
+- [F-043-settings-panel-subtabs.md](./F-043-settings-panel-subtabs.md)
+- [F-044-random-card-sampling.md](./F-044-random-card-sampling.md)
+
 ### Future
 - [F-028-card-drag-and-drop.md](./F-028-card-drag-and-drop.md)
 - [F-031-fit-to-viewport.md](./F-031-fit-to-viewport.md)

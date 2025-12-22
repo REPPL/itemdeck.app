@@ -137,7 +137,7 @@ function applyTokens(images: Image[], tokens: SelectToken[]): Image[] {
  * ```
  */
 export function selectImages(images: Image[], expression: string): Image[] {
-  if (!images || images.length === 0) {
+  if (images.length === 0) {
     return [];
   }
 

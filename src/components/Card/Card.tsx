@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
@@ -6,8 +6,11 @@ import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
 import { CardExpanded } from "@/components/CardExpanded";
+import { resolveFieldPathAsString, resolveFieldPathAsNumber } from "@/loaders/fieldPath";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { CardBackDisplay } from "@/stores/settingsStore";
+import type { CardDisplayConfig } from "@/types/display";
+import type { ResolvedEntity } from "@/types/schema";
 import styles from "./Card.module.css";
 
 /**
@@ -48,6 +51,8 @@ interface CardProps {
   showDeviceBadge?: boolean;
   /** Placeholder text for unranked items */
   rankPlaceholderText?: string;
+  /** Display configuration for dynamic field resolution */
+  displayConfig?: CardDisplayConfig;
 }
 
 /**
@@ -76,12 +81,70 @@ export function Card({
   showRankBadge = true,
   showDeviceBadge = true,
   rankPlaceholderText,
+  displayConfig,
 }: CardProps) {
   const { cardDimensions, settings } = useSettingsContext();
   const { config } = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const cardRef = useRef<HTMLElement>(null);
+
+  // Resolve field values using display configuration
+  // Cast card to ResolvedEntity for field path resolution
+  const entity = card as unknown as ResolvedEntity;
+  const frontConfig = displayConfig?.front;
+  const backConfig = displayConfig?.back;
+
+  // Resolve front face values with fallbacks to direct props
+  const resolvedTitle = useMemo(() => {
+    if (frontConfig?.title) {
+      return resolveFieldPathAsString(entity, frontConfig.title, card.title);
+    }
+    return card.title;
+  }, [entity, frontConfig?.title, card.title]);
+
+  const resolvedSubtitle = useMemo(() => {
+    if (frontConfig?.subtitle) {
+      return resolveFieldPathAsString(entity, frontConfig.subtitle, card.year ?? "");
+    }
+    return card.year;
+  }, [entity, frontConfig?.subtitle, card.year]);
+
+  const resolvedRank = useMemo(() => {
+    if (frontConfig?.badge) {
+      return resolveFieldPathAsNumber(entity, frontConfig.badge);
+    }
+    return card.rank ?? null;
+  }, [entity, frontConfig?.badge, card.rank]);
+
+  const resolvedSecondaryBadge = useMemo(() => {
+    if (frontConfig?.secondaryBadge) {
+      return resolveFieldPathAsString(entity, frontConfig.secondaryBadge);
+    }
+    return undefined;
+  }, [entity, frontConfig?.secondaryBadge]);
+
+  // Resolve back face values
+  const resolvedLogoUrl = useMemo(() => {
+    if (backConfig?.logo) {
+      return resolveFieldPathAsString(entity, backConfig.logo) || card.logoUrl;
+    }
+    return card.logoUrl;
+  }, [entity, backConfig?.logo, card.logoUrl]);
+
+  const resolvedBackTitle = useMemo(() => {
+    if (backConfig?.title) {
+      return resolveFieldPathAsString(entity, backConfig.title);
+    }
+    return undefined;
+  }, [entity, backConfig?.title]);
+
+  const resolvedBackText = useMemo(() => {
+    if (backConfig?.text) {
+      return resolveFieldPathAsString(entity, backConfig.text, card.year ?? "");
+    }
+    return card.year;
+  }, [entity, backConfig?.text, card.year]);
 
   const cardStyle = {
     width: `${String(cardDimensions.width)}px`,
@@ -121,7 +184,7 @@ export function Card({
         ref={cardRef}
         className={styles.card}
         style={cardStyle}
-        title={cardNumber !== undefined ? `Card #${cardNumber}` : undefined}
+        title={cardNumber !== undefined ? `Card #${String(cardNumber)}` : undefined}
         data-card-id={card.id}
         data-flipped={isFlipped}
         onClick={handleClick}
@@ -139,17 +202,19 @@ export function Card({
           flipDuration={config.animation.flipDuration}
           back={
             <CardBack
-              logoUrl={card.logoUrl ?? settings.card.logoUrl}
-              year={card.year}
+              logoUrl={resolvedLogoUrl ?? settings.card.logoUrl}
+              year={resolvedBackText}
+              title={resolvedBackTitle}
               display={cardBackDisplay}
             />
           }
           front={
             <CardFront
               imageUrl={card.imageUrl}
-              title={card.title}
-              year={card.year}
-              rank={card.rank}
+              title={resolvedTitle}
+              subtitle={resolvedSubtitle}
+              rank={resolvedRank}
+              secondaryBadge={resolvedSecondaryBadge}
               device={card.device}
               showRankBadge={showRankBadge}
               showDeviceBadge={showDeviceBadge}

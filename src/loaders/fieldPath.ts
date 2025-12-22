@@ -1,7 +1,14 @@
 /**
  * Field path parser for v1 schema format.
  *
- * Parses and evaluates dot-notation field paths.
+ * Parses and evaluates dot-notation field paths with optional fallback support.
+ *
+ * Supports:
+ * - Simple field access: "title"
+ * - Nested via resolved relationships: "platform.title"
+ * - Array index access: "images[0].url"
+ * - Array filter expressions: "images[type=cover][0].url"
+ * - Fallback chains: "verdict ?? summary ?? title"
  */
 
 import type { Entity, ResolvedEntity } from "@/types/schema";
@@ -67,8 +74,8 @@ function parsePath(path: string): PathSegment[] {
     }
 
     // Find next separator (. or [)
-    let nextDot = current.indexOf(".");
-    let nextBracket = current.indexOf("[");
+    const nextDot = current.indexOf(".");
+    const nextBracket = current.indexOf("[");
 
     let endIdx: number;
     if (nextDot === -1 && nextBracket === -1) {
@@ -138,13 +145,12 @@ export function getFieldValue(
 
     switch (segment.type) {
       case "property": {
-        const prop = segment.value as string;
+        const prop = segment.value;
 
         // Check resolved relationships first
-        if (
-          typeof current === "object" &&
-          "_resolved" in (current as object)
-        ) {
+        // Note: The null check is technically unnecessary after line 142, but kept for safety
+        // as current is reassigned in the loop and TypeScript's narrowing is conservative
+        if (typeof current === "object" && "_resolved" in current) {
           const resolved = (current as ResolvedEntity)._resolved;
           if (resolved && prop in resolved) {
             current = resolved[prop];
@@ -153,7 +159,7 @@ export function getFieldValue(
         }
 
         // Regular property access
-        if (typeof current === "object" && current !== null) {
+        if (typeof current === "object") {
           current = (current as Record<string, unknown>)[prop];
         } else {
           return undefined;
@@ -203,7 +209,7 @@ export function getFieldValue(
 export function getStringValue(
   entity: Entity | ResolvedEntity,
   path: string,
-  fallback: string = ""
+  fallback = ""
 ): string {
   const value = getFieldValue(entity, path);
 
@@ -254,7 +260,7 @@ export function getNumberValue(
  */
 export function getImagesValue(
   entity: Entity | ResolvedEntity,
-  path: string = "images"
+  path = "images"
 ): Image[] {
   const value = getFieldValue(entity, path);
 
@@ -266,4 +272,112 @@ export function getImagesValue(
   }
 
   return [];
+}
+
+/**
+ * Parse a field path expression that may contain fallback operators.
+ *
+ * @param expression - Path expression with optional fallbacks (e.g., "verdict ?? summary ?? title")
+ * @returns Array of individual path strings to try in order
+ */
+function parseFallbackExpression(expression: string): string[] {
+  return expression
+    .split("??")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+}
+
+/**
+ * Resolve a field path expression with fallback support.
+ *
+ * Tries each path in a fallback chain until one returns a non-null/undefined value.
+ *
+ * @param entity - Entity to get value from
+ * @param expression - Path expression with optional fallbacks (e.g., "verdict ?? summary")
+ * @returns Value from first matching path or undefined
+ *
+ * @example
+ * ```ts
+ * const entity = { title: "Zelda", year: 1991 };
+ *
+ * resolveFieldPath(entity, "verdict ?? summary ?? title"); // "Zelda"
+ * resolveFieldPath(entity, "playedSince ?? year"); // 1991
+ * ```
+ */
+export function resolveFieldPath(
+  entity: Entity | ResolvedEntity,
+  expression: string
+): unknown {
+  const paths = parseFallbackExpression(expression);
+
+  for (const path of paths) {
+    const value = getFieldValue(entity, path);
+    if (value !== undefined && value !== null) {
+      return value;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolve a field path expression as a string with fallback support.
+ *
+ * @param entity - Entity to get value from
+ * @param expression - Path expression with optional fallbacks
+ * @param fallback - Final fallback if no path matches
+ * @returns String value or fallback
+ *
+ * @example
+ * ```ts
+ * const entity = { title: "Zelda", year: 1991 };
+ *
+ * resolveFieldPathAsString(entity, "verdict ?? title"); // "Zelda"
+ * resolveFieldPathAsString(entity, "playedSince ?? year"); // "1991"
+ * resolveFieldPathAsString(entity, "rating", "N/A"); // "N/A"
+ * ```
+ */
+export function resolveFieldPathAsString(
+  entity: Entity | ResolvedEntity,
+  expression: string,
+  fallback = ""
+): string {
+  const value = resolveFieldPath(entity, expression);
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    return String(value);
+  }
+
+  return fallback;
+}
+
+/**
+ * Resolve a field path expression as a number with fallback support.
+ *
+ * @param entity - Entity to get value from
+ * @param expression - Path expression with optional fallbacks
+ * @param fallback - Final fallback if no path matches or value is not numeric
+ * @returns Number value or fallback
+ */
+export function resolveFieldPathAsNumber(
+  entity: Entity | ResolvedEntity,
+  expression: string,
+  fallback: number | null = null
+): number | null {
+  const value = resolveFieldPath(entity, expression);
+
+  if (typeof value === "number") {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const parsed = parseFloat(value);
+    return Number.isNaN(parsed) ? fallback : parsed;
+  }
+
+  return fallback;
 }

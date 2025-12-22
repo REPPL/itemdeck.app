@@ -155,6 +155,29 @@
   fill: currentColor;
 }
 
+/* Back title (e.g., verdict) - positioned above year */
+.backTitle {
+  position: absolute;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-family-heading);
+  font-size: var(--text-fluid-small);
+  font-weight: 700;
+  color: var(--card-back-text);
+  text-align: center;
+  margin: 0;
+  padding: 0.3rem 0.8rem;
+  background: var(--card-back-text-background);
+  border-radius: calc(var(--card-border-radius) * 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  max-width: 80%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Text field (year) - positioned below logo */
 .textField {
   position: absolute;
@@ -242,6 +265,18 @@
   opacity: 0.95;
   text-shadow: var(--card-overlay-text-shadow);
   line-height: 1;
+}
+
+/* Secondary badge (e.g., rating) in overlay footer */
+.overlaySecondaryBadge {
+  font-size: var(--text-fluid-small);
+  font-weight: 700;
+  opacity: 0.95;
+  text-shadow: var(--card-overlay-text-shadow);
+  line-height: 1;
+  padding: 0.2em 0.5em;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-sm);
 }
 
 /* ============================================

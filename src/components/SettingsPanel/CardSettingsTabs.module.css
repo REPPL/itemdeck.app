@@ -1,0 +1,65 @@
+/**
+ * CardSettingsTabs styles.
+ *
+ * Compact sub-tab navigation that replaces section headers.
+ * Designed to be no-scroll on all screen sizes.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* Sub-tab navigation - compact button group style */
+.subTabs {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  margin-bottom: var(--spacing-md);
+  background: var(--colour-border-light);
+  border-radius: var(--radius-md);
+}
+
+.subTab {
+  flex: 1;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.subTab:hover {
+  color: var(--colour-text);
+  background: rgba(var(--colour-primary-rgb, 37, 99, 235), 0.1);
+}
+
+.subTabActive {
+  background: var(--colour-surface);
+  color: var(--colour-primary);
+  box-shadow: var(--elevation-1);
+}
+
+.subTab:focus-visible {
+  outline: 2px solid var(--focus-colour);
+  outline-offset: -2px;
+}
+
+/* Sub-tab content area */
+.subTabContent {
+  flex: 1;
+}
+
+/* Responsive: Ensure sub-tabs work on small screens */
+@media (max-width: 320px) {
+  .subTab {
+    padding: var(--spacing-xs);
+    font-size: 0.65rem;
+  }
+}

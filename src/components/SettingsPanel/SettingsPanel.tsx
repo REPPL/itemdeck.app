@@ -5,22 +5,18 @@
  * organised into System, Theme, Behaviour, and Card tabs.
  */
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RefreshButton } from "@/components/RefreshButton";
+import { CardSettingsTabs } from "./CardSettingsTabs";
 import {
   useSettingsStore,
   // type LayoutType, // Not yet implemented
-  type OverlayStyle,
-  type TitleDisplayMode,
   type VisualTheme,
   // type CardBackStyle, // Not yet implemented
   type ReduceMotionPreference,
   type DragFace,
-  type CardSizePreset,
-  type CardAspectRatio,
-  type CardBackDisplay,
 } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 
@@ -156,16 +152,6 @@ const tabs: Tab[] = [
 //   { type: "compact", icon: <CompactIcon />, label: "Compact" },
 // ];
 
-const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
-  { value: "dark", label: "Dark" },
-  { value: "light", label: "Light" },
-];
-
-const titleDisplayOptions: { value: TitleDisplayMode; label: string }[] = [
-  { value: "truncate", label: "Single line" },
-  { value: "wrap", label: "Wrap" },
-];
-
 const visualThemeOptions: { value: VisualTheme; label: string; description: string }[] = [
   { value: "retro", label: "Retro", description: "Pixel fonts, sharp corners, CRT shadows, neon accents" },
   { value: "modern", label: "Modern", description: "Rounded corners, soft shadows, smooth animations" },
@@ -191,25 +177,6 @@ const dragFaceOptions: { value: DragFace; label: string }[] = [
   { value: "both", label: "Both" },
 ];
 
-const cardSizeOptions: { value: CardSizePreset; label: string }[] = [
-  { value: "small", label: "Small" },
-  { value: "medium", label: "Medium" },
-  { value: "large", label: "Large" },
-];
-
-const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
-  { value: "3:4", label: "3:4" },
-  { value: "5:7", label: "5:7" },
-  { value: "1:1", label: "1:1" },
-];
-
-const cardBackDisplayOptions: { value: CardBackDisplay; label: string }[] = [
-  { value: "both", label: "Both" },
-  { value: "year", label: "Year" },
-  { value: "logo", label: "Logo" },
-  { value: "none", label: "None" },
-];
-
 /**
  * Settings panel with tabbed navigation.
  */
@@ -225,38 +192,22 @@ export function SettingsPanel({
 
   const {
     // layout, // Not yet implemented
-    cardSizePreset,
-    cardAspectRatio,
     maxVisibleCards,
-    cardBackDisplay,
     shuffleOnLoad,
     reduceMotion,
     highContrast,
-    overlayStyle,
-    titleDisplayMode,
     dragModeEnabled,
     visualTheme,
     // cardBackStyle, // Not yet implemented
-    showRankBadge,
-    showDeviceBadge,
-    rankPlaceholderText,
     dragFace,
     // setLayout, // Not yet implemented
-    setCardSizePreset,
-    setCardAspectRatio,
     setMaxVisibleCards,
-    setCardBackDisplay,
     setShuffleOnLoad,
     setReduceMotion,
     setHighContrast,
-    setOverlayStyle,
-    setTitleDisplayMode,
     setDragModeEnabled,
     setVisualTheme,
     // setCardBackStyle, // Not yet implemented
-    setShowRankBadge,
-    setShowDeviceBadge,
-    setRankPlaceholderText,
     setDragFace,
     resetToDefaults,
   } = useSettingsStore();
@@ -298,14 +249,6 @@ export function SettingsPanel({
       document.body.style.overflow = "";
     };
   }, [isOpen]);
-
-  // Handle placeholder text change
-  const handlePlaceholderChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRankPlaceholderText(event.target.value);
-    },
-    [setRankPlaceholderText]
-  );
 
   if (!isOpen) return null;
 
@@ -520,148 +463,7 @@ export function SettingsPanel({
         );
 
       case "card":
-        return (
-          <>
-            <h4 className={styles.subsectionTitle}>General</h4>
-            <div className={styles.row}>
-              <span className={styles.label}>Size</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card size">
-                {cardSizeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      cardSizePreset === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardSizePreset(value); }}
-                    role="radio"
-                    aria-checked={cardSizePreset === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Aspect Ratio</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card aspect ratio">
-                {cardAspectRatioOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      cardAspectRatio === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardAspectRatio(value); }}
-                    role="radio"
-                    aria-checked={cardAspectRatio === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <h4 className={styles.subsectionTitle}>Front</h4>
-            <div className={styles.row}>
-              <span className={styles.label}>Footer Style</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card overlay style">
-                {overlayStyleOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      overlayStyle === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setOverlayStyle(value); }}
-                    role="radio"
-                    aria-checked={overlayStyle === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Title Display</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Title display mode">
-                {titleDisplayOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      titleDisplayMode === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setTitleDisplayMode(value); }}
-                    role="radio"
-                    aria-checked={titleDisplayMode === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Show Rank Badge</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={showRankBadge}
-                  onChange={(e) => { setShowRankBadge(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Show Device Badge</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={showDeviceBadge}
-                  onChange={(e) => { setShowDeviceBadge(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Unranked Text</span>
-              <input
-                type="text"
-                className={styles.textInput}
-                value={rankPlaceholderText}
-                onChange={handlePlaceholderChange}
-                placeholder="The one that got away!"
-                aria-label="Rank placeholder text"
-              />
-            </div>
-
-            <h4 className={styles.subsectionTitle}>Back</h4>
-            <div className={styles.row}>
-              <span className={styles.label}>Display</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card back display">
-                {cardBackDisplayOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      cardBackDisplay === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardBackDisplay(value); }}
-                    role="radio"
-                    aria-checked={cardBackDisplay === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
-        );
+        return <CardSettingsTabs />;
     }
   };
 

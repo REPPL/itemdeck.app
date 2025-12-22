@@ -29,12 +29,14 @@ interface CardFrontProps {
   imageUrl: string;
   /** Card title */
   title: string;
-  /** Optional year to display in overlay */
-  year?: string;
+  /** Subtitle to display in overlay (e.g., year or playedSince) */
+  subtitle?: string;
   /** Optional category title (legacy, use device instead) */
   categoryTitle?: string;
   /** Rank number (1-based) or null for unranked */
   rank?: number | null;
+  /** Secondary badge value (e.g., rating) */
+  secondaryBadge?: string;
   /** Device/platform name */
   device?: string;
   /** Placeholder text for unranked items */
@@ -60,8 +62,9 @@ interface CardFrontProps {
 export function CardFront({
   imageUrl,
   title,
-  year,
+  subtitle,
   rank,
+  secondaryBadge,
   device,
   rankPlaceholderText,
   showRankBadge = true,
@@ -104,7 +107,10 @@ export function CardFront({
       <div className={styles.overlay}>
         <h3 className={styles.overlayTitle}>{title}</h3>
         <div className={styles.overlayFooter}>
-          {year && <span className={styles.overlayYear}>{year}</span>}
+          {subtitle && <span className={styles.overlayYear}>{subtitle}</span>}
+          {secondaryBadge && (
+            <span className={styles.overlaySecondaryBadge}>{secondaryBadge}</span>
+          )}
           {showDeviceBadge && device && (
             <div className={styles.overlayDeviceBadge}>
               <DeviceBadge device={device} size="small" />

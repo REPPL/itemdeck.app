@@ -34,6 +34,13 @@ export async function loadCollectionDefinition(
     );
   }
 
+  const contentType = response.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    throw new Error(
+      `Invalid content type for collection definition: ${contentType ?? "unknown"}`
+    );
+  }
+
   const data = (await response.json()) as unknown;
   return validateCollectionDefinition(data);
 }
@@ -279,6 +286,11 @@ export async function detectCollectionVersion(
     const response = await fetch(`${basePath}/collection.json`);
 
     if (!response.ok) {
+      return undefined;
+    }
+
+    const contentType = response.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
       return undefined;
     }
 

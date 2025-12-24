@@ -141,6 +141,18 @@ async function fetchLegacyCollection(basePath: string): Promise<Collection> {
     );
   }
 
+  // Verify content types before parsing
+  const itemsContentType = itemsResponse.headers.get("content-type");
+  const categoriesContentType = categoriesResponse.headers.get("content-type");
+
+  if (!itemsContentType?.includes("application/json")) {
+    throw new Error(`Invalid content type for items: ${itemsContentType ?? "unknown"}`);
+  }
+
+  if (!categoriesContentType?.includes("application/json")) {
+    throw new Error(`Invalid content type for categories: ${categoriesContentType ?? "unknown"}`);
+  }
+
   const [items, categories] = await Promise.all([
     itemsResponse.json() as Promise<unknown[]>,
     categoriesResponse.json() as Promise<unknown[]>,
@@ -151,7 +163,10 @@ async function fetchLegacyCollection(basePath: string): Promise<Collection> {
   try {
     const metaResponse = await fetch(`${basePath}/collection.json`);
     if (metaResponse.ok) {
-      meta = await metaResponse.json() as unknown;
+      const metaContentType = metaResponse.headers.get("content-type");
+      if (metaContentType?.includes("application/json")) {
+        meta = await metaResponse.json() as unknown;
+      }
     }
   } catch {
     // Collection metadata is optional

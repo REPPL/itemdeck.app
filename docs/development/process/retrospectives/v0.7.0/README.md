@@ -25,6 +25,12 @@ Replacing hardcoded dropdown options with schema introspection means new collect
 ### 5. Clean Attribution Component
 The Attribution component provides consistent credit display across the application with proper accessibility.
 
+### 6. Expandable Platform Section
+The expandable platform row demonstrates how related entities can be explored inline without navigating away. Dynamic field display shows any fields added to the JSON.
+
+### 7. Title Placeholders
+Replacing skeleton loaders with coloured backgrounds showing the item title provides meaningful content during load and graceful degradation when images fail.
+
 ## What Could Improve
 
 ### 1. Index File Overhead
@@ -72,6 +78,7 @@ Using property aliases (`device` → `categoryShort`) allows gradual migration w
 | New components | 1 (Attribution) |
 | New services | 2 (fieldDiscovery, ratingResolver) |
 | Documentation pages | 1 (Schema v2 Reference) |
+| UI improvements | 5 (expandable platform, title placeholders, link deduplication, settings reorganisation, theme integration) |
 
 ## Follow-Up Items
 

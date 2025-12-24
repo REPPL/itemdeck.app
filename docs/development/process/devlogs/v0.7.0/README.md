@@ -88,6 +88,32 @@ Created comprehensive reference documentation:
 - Image and rating structure examples
 - Migration notes from v1
 
+### Phase 9: Settings & UI Polish
+
+Additional improvements made to settings wiring and UI polish:
+
+#### Settings Fixes
+- **Field mapping corrections** - Fixed `getEntityRank()` to check both `rank` and `myRank` fields
+- **Logo extraction** - Added `getLogoUrl()` helper to extract logos from platform `images` array
+- **Settings reorganisation** - Moved Max Visible, Shuffle on Load, and Drag to Reorder from Cards > Layout to Config > Display Order
+
+#### Expandable Platform Section
+- **Platform details** - Made Platform row in CardExpanded clickable to reveal platform info
+- **Dynamic fields** - Platform section now displays any additional fields from JSON (manufacturer, generation, unitsSold, etc.)
+- **Source links** - Added Wikipedia/MobyGames links with deduplication by source
+
+#### Image Loading UX
+- **Title placeholder** - Replaced skeleton loader with coloured background showing item title
+- **Graceful degradation** - Title remains visible if image fails to load
+- **Smooth transition** - Images fade in when loaded
+
+#### Details View Cleanup
+- **Skip list expansion** - Added rating, averageRating, originalPlatform, categoryInfo to skip list
+- **Link deduplication** - Show only one link per source (e.g., one Wikipedia link even if multiple URLs)
+
+#### Theme Integration
+- **Background colour** - Card Background colour setting now applies to detail view panel
+
 ## Key Technical Decisions
 
 1. **Directory-based entities**: Chose individual files per entity for better git diffs and manageable file sizes
@@ -97,6 +123,8 @@ Created comprehensive reference documentation:
 3. **Legacy aliases**: Maintained backward-compatible property names to avoid breaking existing code
 
 4. **Zod validation**: Runtime validation catches schema errors early with helpful messages
+
+5. **Title placeholders**: Show meaningful content during image load rather than abstract skeleton
 
 ## Files Created
 

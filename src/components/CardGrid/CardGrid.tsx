@@ -6,7 +6,9 @@ import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { createFieldSortComparator } from "@/utils/fieldPathResolver";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import type { CardDisplayConfig } from "@/types/display";
 import styles from "./CardGrid.module.css";
 
 const GAP = 16; // var(--grid-gap) = 1rem = 16px
@@ -25,29 +27,66 @@ export function CardGrid() {
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
   const showRankBadge = useSettingsStore((state) => state.showRankBadge);
-  const showDeviceBadge = useSettingsStore((state) => state.showDeviceBadge);
+  const showFooterBadge = useSettingsStore((state) => state.showDeviceBadge);
   const rankPlaceholderText = useSettingsStore((state) => state.rankPlaceholderText);
   const dragFace = useSettingsStore((state) => state.dragFace);
   const maxVisibleCards = useSettingsStore((state) => state.maxVisibleCards);
   const cardBackDisplay = useSettingsStore((state) => state.cardBackDisplay);
+  const shuffleOnLoad = useSettingsStore((state) => state.shuffleOnLoad);
+  const fieldMapping = useSettingsStore((state) => state.fieldMapping);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
 
-  // Shuffle cards by default (F-027)
+  // Merge settings-based field mapping with collection displayConfig
+  // Settings take precedence for user overrides
+  const mergedDisplayConfig = useMemo((): CardDisplayConfig => {
+    const base = displayConfig ?? {};
+    return {
+      front: {
+        title: base.front?.title ?? fieldMapping.titleField,
+        subtitle: fieldMapping.subtitleField !== "none" ? fieldMapping.subtitleField : undefined,
+        badge: base.front?.badge ?? "rank",
+        footerBadge: fieldMapping.footerBadgeField !== "none" ? fieldMapping.footerBadgeField : undefined,
+      },
+      back: {
+        logo: fieldMapping.logoField !== "none" ? fieldMapping.logoField : undefined,
+      },
+    };
+  }, [displayConfig, fieldMapping]);
+
+  // Shuffle or sort cards based on settings
   const { cards: shuffledCards } = useShuffledCards(sourceCards, {
     enabled: true,
-    shuffleOnLoad: true,
+    shuffleOnLoad,
   });
+
+  // Apply sort when shuffle is disabled
+  const sortedCards = useMemo(() => {
+    if (shuffleOnLoad) {
+      return shuffledCards;
+    }
+    // Sort by configured field when not shuffling
+    const comparator = createFieldSortComparator(
+      fieldMapping.sortField,
+      fieldMapping.sortDirection
+    );
+    return [...shuffledCards].sort((a, b) =>
+      comparator(
+        a as unknown as Record<string, unknown>,
+        b as unknown as Record<string, unknown>
+      )
+    );
+  }, [shuffledCards, shuffleOnLoad, fieldMapping.sortField, fieldMapping.sortDirection]);
 
   // Apply custom order if set (from drag and drop)
   const cards = useMemo(() => {
-    if (!customOrder) return shuffledCards;
-    const cardMap = new Map(shuffledCards.map((c) => [c.id, c]));
+    if (!customOrder) return sortedCards;
+    const cardMap = new Map(sortedCards.map((c) => [c.id, c]));
     return customOrder
       .map((id) => cardMap.get(id))
       .filter((c): c is NonNullable<typeof c> => c !== undefined);
-  }, [shuffledCards, customOrder]);
+  }, [sortedCards, customOrder]);
 
   // Handle reorder from drag and drop
   const handleReorder = useCallback((newOrder: string[]) => {
@@ -203,9 +242,9 @@ export function CardGrid() {
             tabIndex={tabIndex}
             cardBackDisplay={cardBackDisplay}
             showRankBadge={showRankBadge}
-            showDeviceBadge={showDeviceBadge}
+            showFooterBadge={showFooterBadge}
             rankPlaceholderText={rankPlaceholderText}
-            displayConfig={displayConfig}
+            displayConfig={mergedDisplayConfig}
           />
         </div>
       );
@@ -223,11 +262,11 @@ export function CardGrid() {
         flippedCardIds={flippedCardIds}
         onFlip={handleFlip}
         showRankBadge={showRankBadge}
-        showDeviceBadge={showDeviceBadge}
+        showFooterBadge={showFooterBadge}
         rankPlaceholderText={rankPlaceholderText}
         dragFace={dragFace}
         cardBackDisplay={cardBackDisplay}
-        displayConfig={displayConfig}
+        displayConfig={mergedDisplayConfig}
       />
     );
   }

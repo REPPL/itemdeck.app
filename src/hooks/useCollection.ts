@@ -219,7 +219,7 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
       imageUrls: imageUrls.length > 0 ? imageUrls : [placeholder(entity.id)],
       categoryTitle: platform?.title as string | undefined,
       rank,
-      device: platform?.title as string | undefined,
+      device: (platform?.shortTitle ?? platform?.title) as string | undefined,
       imageAttribution: formatAttribution(images),
       logoUrl: platform?.logoUrl as string | undefined,
       metadata: Object.fromEntries(

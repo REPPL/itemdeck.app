@@ -2,14 +2,15 @@
  * Expanded card view with animation from card position.
  *
  * Shows a detailed view of a card with image gallery, rank display,
- * and additional metadata.
+ * and auto-discovered entity fields.
  */
 
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
+import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./CardExpanded.module.css";
 
@@ -148,6 +149,14 @@ export function CardExpanded({
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
 
+  // Auto-discover displayable fields from the card entity
+  const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
+    // Cast card to record for field discovery
+    const entity = card as unknown as Record<string, unknown>;
+    const allFields = getDisplayableFields(entity);
+    return categoriseFields(allFields);
+  }, [card]);
+
   // Focus management
   useEffect(() => {
     if (isOpen) {
@@ -196,10 +205,8 @@ export function CardExpanded({
     [onClose]
   );
 
-  // Check if card has additional metadata
-  const hasMetadata =
-    card.metadata &&
-    Object.keys(card.metadata).filter((k) => !["category", "rank", "device"].includes(k)).length > 0;
+  // Check if card has additional fields to display
+  const hasAdditionalFields = additionalFields.length > 0;
 
   // Calculate animation origin
   const getOriginStyles = () => {
@@ -301,70 +308,46 @@ export function CardExpanded({
                 </div>
               )}
 
-              {/* Expandable metadata section */}
-              {hasMetadata && (
-                <>
+              {/* Footer row: Left group (Acknowledgement + Source) | Right (More) */}
+              <div className={styles.footer}>
+                <div className={styles.footerLeft}>
+                  {card.imageAttribution && (
+                    <button
+                      type="button"
+                      className={styles.outlineButton}
+                      onClick={() => { setShowAttribution(!showAttribution); }}
+                      aria-expanded={showAttribution}
+                      aria-controls="attribution-overlay"
+                    >
+                      <InfoIcon />
+                      <span>Acknowledgement</span>
+                    </button>
+                  )}
+                  {card.detailUrl && (
+                    <a
+                      href={card.detailUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.outlineButton}
+                    >
+                      <span>Source</span>
+                      <ExternalLinkIcon />
+                    </a>
+                  )}
+                </div>
+
+                {/* More button - primary style on right */}
+                {hasAdditionalFields && (
                   <button
                     type="button"
-                    className={styles.moreButton}
+                    className={styles.primaryButton}
                     onClick={() => { setDetailsExpanded(!detailsExpanded); }}
                     aria-expanded={detailsExpanded}
+                    aria-controls="more-overlay"
                   >
                     <ChevronIcon expanded={detailsExpanded} />
                     <span>More</span>
                   </button>
-
-                  <AnimatePresence>
-                    {detailsExpanded && (
-                      <motion.div
-                        className={styles.metadataSection}
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <dl className={styles.metadataList}>
-                          {Object.entries(card.metadata ?? {})
-                            .filter(([key]) => !["category", "rank", "device"].includes(key))
-                            .map(([key, value]) => (
-                              <div key={key} className={styles.metadataItem}>
-                                <dt className={styles.metadataKey}>{key}</dt>
-                                <dd className={styles.metadataValue}>{value}</dd>
-                              </div>
-                            ))}
-                        </dl>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </>
-              )}
-
-              {/* Footer row: Acknowledgement (left) and Source button (right) */}
-              <div className={styles.footer}>
-                {card.imageAttribution ? (
-                  <button
-                    type="button"
-                    className={styles.acknowledgementButton}
-                    onClick={() => { setShowAttribution(!showAttribution); }}
-                    aria-expanded={showAttribution}
-                    aria-controls="attribution-overlay"
-                  >
-                    <InfoIcon />
-                    <span>Acknowledgement</span>
-                  </button>
-                ) : (
-                  <div />
-                )}
-                {card.detailUrl && (
-                  <a
-                    href={card.detailUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.sourceButton}
-                  >
-                    <span>Source</span>
-                    <ExternalLinkIcon />
-                  </a>
                 )}
               </div>
 
@@ -380,35 +363,74 @@ export function CardExpanded({
                     transition={{ duration: 0.2 }}
                   >
                     <div className={styles.attributionHeader}>
-                      <button
-                        type="button"
-                        className={styles.attributionContent}
-                        onClick={() => { setShowAttribution(false); }}
-                        aria-label="Close attribution"
-                      >
+                      <div className={styles.attributionContent}>
                         <span className={styles.attributionLabel}>Image Source</span>
                         <p className={styles.attributionText}>{card.imageAttribution}</p>
-                      </button>
-                      {(() => {
-                        const match = /File:(.+)$/.exec(card.imageAttribution);
-                        if (match?.[1]) {
-                          const fileName = match[1].trim();
-                          const wikipediaUrl = `https://en.wikipedia.org/wiki/File:${encodeURIComponent(fileName)}`;
-                          return (
-                            <a
-                              href={wikipediaUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={styles.attributionLink}
-                            >
-                              <span>View</span>
-                              <ExternalLinkIcon />
-                            </a>
-                          );
-                        }
-                        return null;
-                      })()}
+                      </div>
+                      <div className={styles.attributionActions}>
+                        {(() => {
+                          const match = /File:(.+)$/.exec(card.imageAttribution);
+                          if (match?.[1]) {
+                            const fileName = match[1].trim();
+                            const wikipediaUrl = `https://en.wikipedia.org/wiki/File:${encodeURIComponent(fileName)}`;
+                            return (
+                              <a
+                                href={wikipediaUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.attributionLink}
+                              >
+                                <span>Source</span>
+                                <ExternalLinkIcon />
+                              </a>
+                            );
+                          }
+                          return null;
+                        })()}
+                        <button
+                          type="button"
+                          className={styles.attributionCloseButton}
+                          onClick={() => { setShowAttribution(false); }}
+                          aria-label="Close attribution"
+                        >
+                          <CloseIcon />
+                        </button>
+                      </div>
                     </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* More details overlay */}
+              <AnimatePresence>
+                {detailsExpanded && hasAdditionalFields && (
+                  <motion.div
+                    id="more-overlay"
+                    className={styles.moreOverlay}
+                    initial={{ opacity: 0, y: 20, scaleY: 0.8 }}
+                    animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                    exit={{ opacity: 0, y: 20, scaleY: 0.8 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <div className={styles.moreHeader}>
+                      <span className={styles.moreLabel}>Details</span>
+                      <button
+                        type="button"
+                        className={styles.moreCloseButton}
+                        onClick={() => { setDetailsExpanded(false); }}
+                        aria-label="Close details"
+                      >
+                        <CloseIcon />
+                      </button>
+                    </div>
+                    <dl className={styles.metadataList}>
+                      {additionalFields.map(({ key, label, value }) => (
+                        <div key={key} className={styles.metadataItem}>
+                          <dt className={styles.metadataKey}>{label}</dt>
+                          <dd className={styles.metadataValue}>{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
                   </motion.div>
                 )}
               </AnimatePresence>

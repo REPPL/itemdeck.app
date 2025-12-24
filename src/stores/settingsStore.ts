@@ -34,6 +34,74 @@ export type TitleDisplayMode = "truncate" | "wrap";
 export type VisualTheme = "retro" | "modern" | "minimal";
 
 /**
+ * Border radius preset options.
+ */
+export type BorderRadiusPreset = "none" | "small" | "medium" | "large";
+
+/**
+ * Shadow intensity options.
+ */
+export type ShadowIntensity = "none" | "subtle" | "medium" | "strong";
+
+/**
+ * Animation style options.
+ */
+export type AnimationStyle = "none" | "subtle" | "smooth" | "bouncy";
+
+/**
+ * Theme customisation settings per theme.
+ */
+export interface ThemeCustomisation {
+  /** Border radius preset */
+  borderRadius: BorderRadiusPreset;
+  /** Shadow intensity */
+  shadowIntensity: ShadowIntensity;
+  /** Animation style (controls hover lift effect) */
+  animationStyle: AnimationStyle;
+  /** Accent colour (hex) */
+  accentColour: string;
+  /** Hover colour (hex) - used for interactive element hover states */
+  hoverColour: string;
+  /** Card background colour (hex) */
+  cardBackgroundColour: string;
+  /** Detail view background transparency (0-100) */
+  detailTransparency: number;
+}
+
+/**
+ * Default theme customisation values per theme.
+ */
+export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisation> = {
+  retro: {
+    borderRadius: "none",
+    shadowIntensity: "strong",
+    animationStyle: "none",
+    accentColour: "#ff6b6b",
+    hoverColour: "#ff8888",
+    cardBackgroundColour: "#1a1a2e",
+    detailTransparency: 85,
+  },
+  modern: {
+    borderRadius: "medium",
+    shadowIntensity: "medium",
+    animationStyle: "smooth",
+    accentColour: "#4f9eff",
+    hoverColour: "#7ab8ff",
+    cardBackgroundColour: "#1e293b",
+    detailTransparency: 90,
+  },
+  minimal: {
+    borderRadius: "small",
+    shadowIntensity: "subtle",
+    animationStyle: "subtle",
+    accentColour: "#6b7280",
+    hoverColour: "#9ca3af",
+    cardBackgroundColour: "#374151",
+    detailTransparency: 95,
+  },
+};
+
+/**
  * Card back style options.
  */
 export type CardBackStyle = "bitmap" | "svg" | "colour";
@@ -42,6 +110,25 @@ export type CardBackStyle = "bitmap" | "svg" | "colour";
  * Which card face allows dragging.
  */
 export type DragFace = "front" | "back" | "both";
+
+/**
+ * Field mapping configuration for card display.
+ * Maps UI elements to entity field paths.
+ */
+export interface FieldMappingConfig {
+  /** Field path for card title (e.g., "title") */
+  titleField: string;
+  /** Field path for card subtitle (e.g., "year", "playedSince") */
+  subtitleField: string;
+  /** Field path for footer badge (e.g., "platform.shortTitle", "device") */
+  footerBadgeField: string;
+  /** Field path for card back logo (e.g., "platform.logoUrl") */
+  logoField: string;
+  /** Field path for default sort order when shuffle is off (e.g., "rank", "year", "title") */
+  sortField: string;
+  /** Sort direction */
+  sortDirection: "asc" | "desc";
+}
 
 /**
  * Card size preset options.
@@ -57,9 +144,9 @@ export type CardAspectRatio = "3:4" | "5:7" | "1:1";
  * Card size preset pixel widths.
  */
 export const CARD_SIZE_WIDTHS: Record<CardSizePreset, number> = {
-  small: 180,
-  medium: 280,
-  large: 400,
+  small: 160,
+  medium: 220,
+  large: 300,
 };
 
 /**
@@ -131,6 +218,12 @@ interface SettingsState {
   /** Which card face allows dragging */
   dragFace: DragFace;
 
+  /** Field mapping configuration */
+  fieldMapping: FieldMappingConfig;
+
+  /** Theme customisation per theme */
+  themeCustomisations: Record<VisualTheme, ThemeCustomisation>;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -149,6 +242,8 @@ interface SettingsState {
   setShowDeviceBadge: (show: boolean) => void;
   setRankPlaceholderText: (text: string) => void;
   setDragFace: (face: DragFace) => void;
+  setFieldMapping: (mapping: Partial<FieldMappingConfig>) => void;
+  setThemeCustomisation: (theme: VisualTheme, customisation: Partial<ThemeCustomisation>) => void;
   resetToDefaults: () => void;
 }
 
@@ -173,6 +268,15 @@ const DEFAULT_SETTINGS = {
   showDeviceBadge: true,
   rankPlaceholderText: "The one that got away!",
   dragFace: "back" as DragFace,
+  fieldMapping: {
+    titleField: "title",
+    subtitleField: "year",
+    footerBadgeField: "platform.shortTitle",
+    logoField: "platform.logoUrl",
+    sortField: "rank",
+    sortDirection: "asc" as const,
+  },
+  themeCustomisations: { ...DEFAULT_THEME_CUSTOMISATIONS },
 };
 
 /**
@@ -251,13 +355,28 @@ export const useSettingsStore = create<SettingsState>()(
         set({ dragFace });
       },
 
+      setFieldMapping: (mapping) => {
+        set((state) => ({
+          fieldMapping: { ...state.fieldMapping, ...mapping },
+        }));
+      },
+
+      setThemeCustomisation: (theme, customisation) => {
+        set((state) => ({
+          themeCustomisations: {
+            ...state.themeCustomisations,
+            [theme]: { ...state.themeCustomisations[theme], ...customisation },
+          },
+        }));
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
     }),
     {
       name: "itemdeck-settings",
-      version: 4,
+      version: 6,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -277,6 +396,8 @@ export const useSettingsStore = create<SettingsState>()(
         showDeviceBadge: state.showDeviceBadge,
         rankPlaceholderText: state.rankPlaceholderText,
         dragFace: state.dragFace,
+        fieldMapping: state.fieldMapping,
+        themeCustomisations: state.themeCustomisations,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -312,6 +433,22 @@ export const useSettingsStore = create<SettingsState>()(
             cardAspectRatio: DEFAULT_SETTINGS.cardAspectRatio,
             maxVisibleCards: DEFAULT_SETTINGS.maxVisibleCards,
             cardBackDisplay: DEFAULT_SETTINGS.cardBackDisplay,
+          };
+        }
+
+        // Handle migration from version 4 to 5 (field mapping)
+        if (version < 5) {
+          state = {
+            ...state,
+            fieldMapping: DEFAULT_SETTINGS.fieldMapping,
+          };
+        }
+
+        // Handle migration from version 5 to 6 (theme customisations)
+        if (version < 6) {
+          state = {
+            ...state,
+            themeCustomisations: DEFAULT_SETTINGS.themeCustomisations,
           };
         }
 

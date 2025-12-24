@@ -39,6 +39,9 @@ export interface CardFrontConfig {
   /** Field path for secondary badge (e.g., rating) */
   secondaryBadge?: string;
 
+  /** Field path for footer badge (e.g., platform.shortTitle) */
+  footerBadge?: string;
+
   /** Field paths for footer elements */
   footer?: string[];
 }

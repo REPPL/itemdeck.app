@@ -2,9 +2,9 @@
  * Rank badge component for displaying card rankings.
  *
  * Shows a prominent badge in the top-left corner with star indicators:
- * - Rank 1: ★★★ (three stars)
- * - Rank 2: ★★ (two stars)
- * - Rank 3: ★ (one star)
+ * - Rank 1: 1st ★★★ (three filled stars)
+ * - Rank 2: 2nd ★★☆ (two filled, one empty)
+ * - Rank 3: 3rd ★☆☆ (one filled, two empty)
  * - Rank 4+: no stars, just number
  * - Unranked: placeholder text
  */
@@ -12,9 +12,9 @@
 import styles from "./RankBadge.module.css";
 
 /**
- * Star icon component.
+ * Filled star icon component.
  */
-function StarIcon() {
+function FilledStarIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -28,17 +28,45 @@ function StarIcon() {
 }
 
 /**
+ * Empty star icon component.
+ */
+function EmptyStarIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={styles.starIcon}
+      aria-hidden="true"
+    >
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
+  );
+}
+
+/**
  * Render stars based on rank.
+ * All top 3 get 3 stars total, with filled/empty based on rank:
+ * - Rank 1: ★★★ (3 filled)
+ * - Rank 2: ★★☆ (2 filled, 1 empty)
+ * - Rank 3: ★☆☆ (1 filled, 2 empty)
  */
 function RankStars({ rank }: { rank: number }) {
-  // Rank 1 = 3 stars, Rank 2 = 2 stars, Rank 3 = 1 star
-  const starCount = Math.max(0, 4 - rank);
-  if (starCount === 0) return null;
+  // Only show stars for top 3
+  if (rank > 3) return null;
+
+  // Calculate filled and empty stars (always 3 total)
+  const filledCount = 4 - rank; // Rank 1 = 3, Rank 2 = 2, Rank 3 = 1
+  const emptyCount = 3 - filledCount;
 
   return (
     <span className={styles.stars} aria-hidden="true">
-      {Array.from({ length: starCount }, (_, i) => (
-        <StarIcon key={i} />
+      {Array.from({ length: filledCount }, (_, i) => (
+        <FilledStarIcon key={`filled-${String(i)}`} />
+      ))}
+      {Array.from({ length: emptyCount }, (_, i) => (
+        <EmptyStarIcon key={`empty-${String(i)}`} />
       ))}
     </span>
   );
@@ -105,15 +133,16 @@ export function RankBadge({
     .filter(Boolean)
     .join(" ");
 
-  // Display content: stars for ranks 1-3, number + ordinal for all ranked
+  // Display content: number + ordinal + stars for ranks 1-3
   // Use explicit check for valid positive rank to avoid issues with 0 or falsy values
   const isValidRank = rank !== null && rank > 0;
 
+  // Order: "1st ★★★" (text before stars)
   const content = isValidRank ? (
     <>
-      <RankStars rank={rank} />
       <span className={styles.rankNumber}>{rank}</span>
       <span className={styles.ordinal}>{getOrdinalSuffix(rank)}</span>
+      <RankStars rank={rank} />
     </>
   ) : (
     <span className={styles.placeholder}>{placeholderText}</span>

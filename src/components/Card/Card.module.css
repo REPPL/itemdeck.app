@@ -239,15 +239,14 @@
   text-shadow: var(--card-overlay-text-shadow);
   max-width: 100%;
 
-  /* Single line with truncation (default) */
-  white-space: var(--card-title-white-space, nowrap);
-  overflow: var(--card-title-overflow, hidden);
-  text-overflow: var(--card-title-text-overflow, ellipsis);
-
-  /* Multi-line clamp for wrap mode */
+  /* Multi-line with ellipsis - max 2 lines */
   display: -webkit-box;
-  -webkit-line-clamp: var(--card-title-line-clamp, 1);
+  -webkit-line-clamp: var(--card-title-line-clamp, 2);
   -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /* Allow wrapping for multi-line */
+  white-space: normal;
 }
 
 /* Footer row: year on left, device badge on right */
@@ -265,18 +264,6 @@
   opacity: 0.95;
   text-shadow: var(--card-overlay-text-shadow);
   line-height: 1;
-}
-
-/* Secondary badge (e.g., rating) in overlay footer */
-.overlaySecondaryBadge {
-  font-size: var(--text-fluid-small);
-  font-weight: 700;
-  opacity: 0.95;
-  text-shadow: var(--card-overlay-text-shadow);
-  line-height: 1;
-  padding: 0.2em 0.5em;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: var(--radius-sm);
 }
 
 /* ============================================
@@ -366,6 +353,92 @@
 }
 
 /* ============================================
+   Drag Handle Styles
+   ============================================ */
+
+/* Drag handle for card back - full-width bar at bottom, similar to front overlay */
+.dragHandle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Taller padding for easier touch targets */
+  padding: var(--spacing-lg) var(--spacing-md);
+  min-height: 56px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  cursor: grab;
+  transition: background-color var(--transition-fast);
+  touch-action: none;
+}
+
+.dragHandle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+/* Drag grip icon for back */
+.dragGripIcon {
+  width: 20px;
+  height: 24px;
+  color: var(--card-back-text, rgba(255, 255, 255, 0.7));
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.dragHandle:hover .dragGripIcon {
+  opacity: 1;
+}
+
+/* Drag handle for card front - positioned at bottom, above overlay */
+.dragHandleFront {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-lg) var(--spacing-md);
+  min-height: 56px;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  cursor: grab;
+  transition: background-color var(--transition-fast);
+  touch-action: none;
+  z-index: 5; /* Above overlay */
+}
+
+.dragHandleFront:hover {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.dragHandleFront:active {
+  cursor: grabbing;
+}
+
+.dragHandleFront .dragGripIconSmall {
+  width: 20px;
+  height: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.dragHandleFront:hover .dragGripIconSmall {
+  opacity: 1;
+}
+
+/* ============================================
    Reduced Motion Support
    ============================================ */
 
@@ -384,6 +457,12 @@
 
   .infoButton {
     opacity: 1;
+    transition-duration: 0.01ms !important;
+  }
+
+  .dragHandle,
+  .overlayDragIndicator {
+    opacity: 0.8;
     transition-duration: 0.01ms !important;
   }
 }

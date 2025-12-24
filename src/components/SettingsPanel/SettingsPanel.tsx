@@ -2,7 +2,7 @@
  * Settings panel component with tabbed interface.
  *
  * Provides a centralised interface for configuring user preferences
- * organised into System, Theme, Behaviour, and Card tabs.
+ * organised into System, Theme, and Cards tabs.
  */
 
 import { useState, useEffect, useRef } from "react";
@@ -10,13 +10,11 @@ import { createPortal } from "react-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { RefreshButton } from "@/components/RefreshButton";
 import { CardSettingsTabs } from "./CardSettingsTabs";
+import { ThemeSettingsTabs } from "./ThemeSettingsTabs";
+import { ConfigSettingsTabs } from "./ConfigSettingsTabs";
 import {
   useSettingsStore,
-  // type LayoutType, // Not yet implemented
-  type VisualTheme,
-  // type CardBackStyle, // Not yet implemented
   type ReduceMotionPreference,
-  type DragFace,
 } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 
@@ -37,7 +35,7 @@ interface SettingsPanelProps {
 /**
  * Tab configuration.
  */
-type TabId = "system" | "theme" | "behaviour" | "card";
+type TabId = "system" | "theme" | "cards" | "config";
 
 interface Tab {
   id: TabId;
@@ -73,20 +71,28 @@ function ThemeIcon() {
   );
 }
 
-function BehaviourIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-    </svg>
-  );
-}
-
 function CardIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
       <line x1="3" y1="9" x2="21" y2="9" />
       <line x1="9" y1="21" x2="9" y2="9" />
+    </svg>
+  );
+}
+
+function ConfigIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <line x1="4" y1="21" x2="4" y2="14" />
+      <line x1="4" y1="10" x2="4" y2="3" />
+      <line x1="12" y1="21" x2="12" y2="12" />
+      <line x1="12" y1="8" x2="12" y2="3" />
+      <line x1="20" y1="21" x2="20" y2="16" />
+      <line x1="20" y1="12" x2="20" y2="3" />
+      <line x1="1" y1="14" x2="7" y2="14" />
+      <line x1="9" y1="8" x2="15" y2="8" />
+      <line x1="17" y1="16" x2="23" y2="16" />
     </svg>
   );
 }
@@ -141,8 +147,8 @@ function CloseIcon() {
 const tabs: Tab[] = [
   { id: "system", label: "System", icon: <SystemIcon /> },
   { id: "theme", label: "Theme", icon: <ThemeIcon /> },
-  { id: "behaviour", label: "Behaviour", icon: <BehaviourIcon /> },
-  { id: "card", label: "Card", icon: <CardIcon /> },
+  { id: "cards", label: "Cards", icon: <CardIcon /> },
+  { id: "config", label: "Config", icon: <ConfigIcon /> },
 ];
 
 // Layout Mode - not yet implemented
@@ -152,29 +158,10 @@ const tabs: Tab[] = [
 //   { type: "compact", icon: <CompactIcon />, label: "Compact" },
 // ];
 
-const visualThemeOptions: { value: VisualTheme; label: string; description: string }[] = [
-  { value: "retro", label: "Retro", description: "Pixel fonts, sharp corners, CRT shadows, neon accents" },
-  { value: "modern", label: "Modern", description: "Rounded corners, soft shadows, smooth animations" },
-  { value: "minimal", label: "Minimal", description: "Subtle styling, reduced shadows, clean typography" },
-];
-
-// Card Back Style - not yet implemented
-// const cardBackStyleOptions: { value: CardBackStyle; label: string }[] = [
-//   { value: "bitmap", label: "Bitmap" },
-//   { value: "svg", label: "SVG" },
-//   { value: "colour", label: "Colour" },
-// ];
-
 const reduceMotionOptions: { value: ReduceMotionPreference; label: string }[] = [
   { value: "system", label: "System" },
   { value: "on", label: "On" },
   { value: "off", label: "Off" },
-];
-
-const dragFaceOptions: { value: DragFace; label: string }[] = [
-  { value: "front", label: "Front" },
-  { value: "back", label: "Back" },
-  { value: "both", label: "Both" },
 ];
 
 /**
@@ -191,24 +178,10 @@ export function SettingsPanel({
   const [activeTab, setActiveTab] = useState<TabId>("system");
 
   const {
-    // layout, // Not yet implemented
-    maxVisibleCards,
-    shuffleOnLoad,
     reduceMotion,
     highContrast,
-    dragModeEnabled,
-    visualTheme,
-    // cardBackStyle, // Not yet implemented
-    dragFace,
-    // setLayout, // Not yet implemented
-    setMaxVisibleCards,
-    setShuffleOnLoad,
     setReduceMotion,
     setHighContrast,
-    setDragModeEnabled,
-    setVisualTheme,
-    // setCardBackStyle, // Not yet implemented
-    setDragFace,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -313,157 +286,13 @@ export function SettingsPanel({
         );
 
       case "theme":
-        return (
-          <>
-            <h4 className={styles.subsectionTitle}>Visual Theme</h4>
-            <div className={styles.themeCards} role="radiogroup" aria-label="Visual theme">
-              {visualThemeOptions.map(({ value, label, description }) => (
-                <button
-                  key={value}
-                  type="button"
-                  className={[
-                    styles.themeCard,
-                    visualTheme === value ? styles.themeCardActive : "",
-                  ].filter(Boolean).join(" ")}
-                  onClick={() => { setVisualTheme(value); }}
-                  role="radio"
-                  aria-checked={visualTheme === value}
-                >
-                  <span className={styles.themeCardLabel}>{label}</span>
-                  <span className={styles.themeCardDescription}>{description}</span>
-                </button>
-              ))}
-            </div>
+        return <ThemeSettingsTabs />;
 
-            <h4 className={styles.subsectionTitle}>Theme Properties</h4>
-            <p className={styles.themeInfo}>
-              Themes control: corner radius, shadows, animations, fonts, accent colours, and card borders.
-            </p>
-            {/* Layout Mode - not yet implemented
-            <div className={styles.row}>
-              <span className={styles.label}>Layout Mode</span>
-              <div className={styles.layoutSwitcher} role="radiogroup" aria-label="Layout options">
-                {layoutOptions.map(({ type, icon, label }) => (
-                  <button
-                    key={type}
-                    type="button"
-                    className={[
-                      styles.layoutButton,
-                      layout === type ? styles.layoutButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setLayout(type); }}
-                    role="radio"
-                    aria-checked={layout === type}
-                    aria-label={label}
-                    title={label}
-                  >
-                    <span className={styles.layoutIcon}>{icon}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-            */}
-            {/* Card Back Style - not yet implemented
-            <div className={styles.row}>
-              <span className={styles.label}>Card Back Style</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card back style">
-                {cardBackStyleOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      cardBackStyle === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardBackStyle(value); }}
-                    role="radio"
-                    aria-checked={cardBackStyle === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            */}
-          </>
-        );
-
-      case "behaviour":
-        return (
-          <>
-            <div className={styles.row}>
-              <span className={styles.label}>Max Visible Cards</span>
-              <div className={styles.numberControl}>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
-                  aria-label="Decrease"
-                  disabled={maxVisibleCards <= 1}
-                >
-                  −
-                </button>
-                <span className={styles.numberValue}>{maxVisibleCards}</span>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
-                  aria-label="Increase"
-                  disabled={maxVisibleCards >= 10}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Shuffle on load</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={shuffleOnLoad}
-                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Drag to reorder</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={dragModeEnabled}
-                  onChange={(e) => { setDragModeEnabled(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            {dragModeEnabled && (
-              <div className={styles.row}>
-                <span className={styles.label}>Drag Face</span>
-                <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag face">
-                  {dragFaceOptions.map(({ value, label }) => (
-                    <button
-                      key={value}
-                      type="button"
-                      className={[
-                        styles.segmentButton,
-                        dragFace === value ? styles.segmentButtonActive : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => { setDragFace(value); }}
-                      role="radio"
-                      aria-checked={dragFace === value}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </>
-        );
-
-      case "card":
+      case "cards":
         return <CardSettingsTabs />;
+
+      case "config":
+        return <ConfigSettingsTabs />;
     }
   };
 

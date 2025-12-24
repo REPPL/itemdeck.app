@@ -182,42 +182,6 @@
 }
 
 /* ============================================
-   More Button (expandable)
-   ============================================ */
-
-.moreButton {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-xs, 8px);
-  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
-  font-size: 0.875rem;
-  font-weight: 500;
-  background: transparent;
-  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
-  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: var(--radius-md, 8px);
-  cursor: pointer;
-  transition:
-    background-color var(--transition-fast, 150ms);
-  margin-bottom: var(--spacing-sm, 8px);
-}
-
-.moreButton:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.moreButton:focus-visible {
-  outline: 2px solid var(--focus-colour, #4f9eff);
-  outline-offset: 2px;
-}
-
-.moreButton svg {
-  width: 16px;
-  height: 16px;
-}
-
-/* ============================================
    Metadata Section
    ============================================ */
 
@@ -263,7 +227,7 @@
 }
 
 /* ============================================
-   Footer (Acknowledgement + Source buttons)
+   Footer
    ============================================ */
 
 .footer {
@@ -275,40 +239,50 @@
   gap: var(--spacing-sm, 8px);
 }
 
-.acknowledgementButton {
+.footerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  flex-wrap: wrap;
+}
+
+/* Outline button style (Acknowledgement, Source) */
+.outlineButton {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-xs, 8px);
-  padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
-  font-size: 0.875rem;
+  gap: var(--spacing-xs, 6px);
+  padding: var(--spacing-sm, 10px) var(--spacing-md, 14px);
+  font-size: 0.8rem;
   font-weight: 500;
   background: transparent;
   colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
   color: var(--text-secondary, rgba(255, 255, 255, 0.8));
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: var(--radius-md, 8px);
+  text-decoration: none;
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
     border-color var(--transition-fast, 150ms);
 }
 
-.acknowledgementButton:hover {
+.outlineButton:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.5);
 }
 
-.acknowledgementButton:focus-visible {
+.outlineButton:focus-visible {
   outline: 2px solid var(--focus-colour, #4f9eff);
   outline-offset: 2px;
 }
 
-.acknowledgementButton svg {
-  width: 16px;
-  height: 16px;
+.outlineButton svg {
+  width: 14px;
+  height: 14px;
 }
 
-.sourceButton {
+/* Primary button style (More) */
+.primaryButton {
   display: inline-flex;
   align-items: center;
   gap: var(--spacing-xs, 8px);
@@ -326,19 +300,87 @@
     transform var(--transition-fast, 150ms);
 }
 
-.sourceButton:hover {
+.primaryButton:hover {
   background: var(--colour-primary-hover, #3b8bef);
   transform: translateY(-2px);
 }
 
-.sourceButton:focus-visible {
+.primaryButton:focus-visible {
   outline: 2px solid var(--focus-colour, #4f9eff);
   outline-offset: 2px;
 }
 
-.sourceButton svg {
+.primaryButton svg {
   width: 16px;
   height: 16px;
+}
+
+/* ============================================
+   More Overlay
+   ============================================ */
+
+.moreOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: var(--spacing-md, 16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 20;
+  transform-origin: bottom center;
+  max-height: 60%;
+  overflow-y: auto;
+}
+
+.moreHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm, 12px);
+}
+
+.moreLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.moreCloseButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.moreCloseButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.moreCloseButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.moreCloseButton svg {
+  width: 14px;
+  height: 14px;
 }
 
 /* ============================================
@@ -433,6 +475,45 @@
 }
 
 .attributionLink svg {
+  width: 14px;
+  height: 14px;
+}
+
+.attributionActions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  flex-shrink: 0;
+}
+
+.attributionCloseButton {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.attributionCloseButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.attributionCloseButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.attributionCloseButton svg {
   width: 14px;
   height: 14px;
 }

@@ -6,12 +6,14 @@ import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { AdminButton } from "@/components/AdminButton";
+import { HelpButton } from "@/components/HelpButton";
+import { HelpModal } from "@/components/HelpModal";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
 import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
-import { useAdminModeShortcut } from "@/hooks/useGlobalKeyboard";
+import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
 import { useSettingsStore } from "@/stores/settingsStore";
 import "@/styles/themes";
 import styles from "./App.module.css";
@@ -23,6 +25,7 @@ function AppContent() {
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
 
   // Settings from store
@@ -30,6 +33,8 @@ function AppContent() {
   const titleDisplayMode = useSettingsStore((state) => state.titleDisplayMode);
   const reduceMotion = useSettingsStore((state) => state.reduceMotion);
   const highContrast = useSettingsStore((state) => state.highContrast);
+  const shuffleOnLoad = useSettingsStore((state) => state.shuffleOnLoad);
+  const setShuffleOnLoad = useSettingsStore((state) => state.setShuffleOnLoad);
 
   // Initialise theme (applies data-theme to document for light/dark mode)
   useTheme();
@@ -42,7 +47,46 @@ function AppContent() {
     setSettingsOpen((prev) => !prev);
   }, []);
 
+  const handleHelpToggle = useCallback(() => {
+    setHelpOpen((prev) => !prev);
+  }, []);
+
+  const handleShuffle = useCallback(() => {
+    // Toggle shuffle off and on to trigger a re-shuffle
+    if (shuffleOnLoad) {
+      setShuffleOnLoad(false);
+      // Re-enable after a tick to trigger re-render
+      setTimeout(() => {
+        setShuffleOnLoad(true);
+      }, 10);
+    } else {
+      setShuffleOnLoad(true);
+    }
+  }, [shuffleOnLoad, setShuffleOnLoad]);
+
   useAdminModeShortcut(handleSettingsToggle);
+
+  // Additional keyboard shortcuts: ?, S, R
+  useGlobalKeyboard({
+    shortcuts: [
+      {
+        key: "Slash", // ? key (Shift + /)
+        shift: true,
+        handler: handleHelpToggle,
+        preventDefault: true,
+      },
+      {
+        key: "KeyS",
+        handler: handleSettingsToggle,
+        preventDefault: true,
+      },
+      {
+        key: "KeyR",
+        handler: handleShuffle,
+        preventDefault: true,
+      },
+    ],
+  });
 
   // Apply settings as data attributes to document
   useEffect(() => {
@@ -81,7 +125,8 @@ function AppContent() {
         </QueryErrorBoundary>
       </main>
 
-      {/* Floating admin button (bottom-right) - always visible */}
+      {/* Floating buttons (bottom-right) */}
+      <HelpButton onClick={() => { setHelpOpen(true); }} />
       <AdminButton onClick={handleSettingsOpen} />
 
       {/* Settings panel */}
@@ -90,6 +135,12 @@ function AppContent() {
         onClose={handleSettingsClose}
         devtoolsEnabled={devtoolsEnabled}
         onDevtoolsToggle={handleDevtoolsToggle}
+      />
+
+      {/* Help modal */}
+      <HelpModal
+        isOpen={helpOpen}
+        onClose={() => { setHelpOpen(false); }}
       />
 
       <OfflineIndicator />

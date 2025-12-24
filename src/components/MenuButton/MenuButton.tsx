@@ -8,8 +8,6 @@ interface MenuButtonProps {
 /**
  * Menu button for opening the command overlay.
  * Fixed position in the top-left corner.
- *
- * TODO: Connect to command overlay when implemented
  */
 export function MenuButton({ isOpen, onClick }: MenuButtonProps) {
   return (

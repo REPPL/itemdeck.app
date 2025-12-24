@@ -1,0 +1,196 @@
+/**
+ * Help modal styles.
+ */
+
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1100;
+  padding: var(--spacing-lg, 24px);
+}
+
+.panel {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface-elevated, #1a1a2e);
+  border-radius: var(--radius-lg, 16px);
+  box-shadow: var(--elevation-5, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
+  overflow: hidden;
+  outline: none;
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+  border-bottom: 1px solid var(--colour-border, rgba(255, 255, 255, 0.2));
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 1.25rem;
+  font-weight: 600;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+}
+
+.closeButton {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full, 50%);
+  colour: white;
+  color: white;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.closeButton:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.closeButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.closeButton svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
+   Content
+   ============================================ */
+
+.content {
+  padding: var(--spacing-lg, 24px);
+}
+
+.shortcutsTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing-md, 16px);
+}
+
+.shortcutsTable tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.shortcutsTable tr:last-child {
+  border-bottom: none;
+}
+
+.keysCell {
+  padding: var(--spacing-sm, 12px) var(--spacing-sm, 12px);
+  padding-left: 0;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.descriptionCell {
+  padding: var(--spacing-sm, 12px) 0;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  font-size: 0.9rem;
+  vertical-align: middle;
+}
+
+.key {
+  display: inline-block;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-sm, 4px);
+  font-family: var(--font-family-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 500;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+}
+
+.keyPlus {
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  font-size: 0.75rem;
+  margin: 0 var(--spacing-xs, 4px);
+}
+
+/* ============================================
+   Settings Hint
+   ============================================ */
+
+.settingsHint {
+  margin: 0;
+  padding: var(--spacing-sm, 12px);
+  background: rgba(79, 158, 255, 0.1);
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.85rem;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  text-align: center;
+}
+
+.settingsHint strong {
+  colour: var(--colour-primary, #4f9eff);
+  color: var(--colour-primary, #4f9eff);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 480px) {
+  .backdrop {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .panel {
+    max-width: 100%;
+  }
+
+  .header {
+    padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  }
+
+  .content {
+    padding: var(--spacing-md, 16px);
+  }
+
+  .title {
+    font-size: 1.1rem;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton {
+    transition: none;
+  }
+}

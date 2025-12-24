@@ -48,8 +48,8 @@ interface DraggableCardGridProps {
   onFlip: (cardId: string) => void;
   /** Whether to show the rank badge */
   showRankBadge?: boolean;
-  /** Whether to show the device badge */
-  showDeviceBadge?: boolean;
+  /** Whether to show the footer badge */
+  showFooterBadge?: boolean;
   /** Placeholder text for unranked items */
   rankPlaceholderText?: string;
   /** Which card face allows dragging */
@@ -70,9 +70,10 @@ interface SortableCardProps {
   onFlip: () => void;
   isDragging?: boolean;
   showRankBadge?: boolean;
-  showDeviceBadge?: boolean;
+  showFooterBadge?: boolean;
   rankPlaceholderText?: string;
-  canDrag: boolean;
+  canDragFront: boolean;
+  canDragBack: boolean;
   cardBackDisplay?: CardBackDisplay;
   displayConfig?: CardDisplayConfig;
 }
@@ -84,12 +85,16 @@ function SortableCard({
   onFlip,
   isAnyDragging,
   showRankBadge,
-  showDeviceBadge,
+  showFooterBadge,
   rankPlaceholderText,
-  canDrag,
+  canDragFront,
+  canDragBack,
   cardBackDisplay,
   displayConfig,
 }: SortableCardProps & { isAnyDragging: boolean }) {
+  // Determine if any drag handle is active based on current face
+  const canDragCurrentFace = isFlipped ? canDragFront : canDragBack;
+
   const {
     attributes,
     listeners,
@@ -97,17 +102,25 @@ function SortableCard({
     transform,
     transition,
     isDragging: isSorting,
-  } = useSortable({ id: card.id, disabled: !canDrag });
+  } = useSortable({ id: card.id, disabled: !canDragCurrentFace });
 
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isSorting ? 0.5 : 1,
     zIndex: isSorting ? 100 : "auto",
-    cursor: canDrag ? (isSorting ? "grabbing" : "grab") : "pointer",
+    // Cursor shows grab only when drag handles are active
+    cursor: "pointer",
     // Only apply touch-action: none when actively dragging
     // This allows normal scrolling until a drag starts
     touchAction: isAnyDragging ? "none" : "manipulation",
+  };
+
+  // Create drag handle props to pass down to card faces
+  const dragHandleProps: React.HTMLAttributes<HTMLDivElement> = {
+    ...attributes,
+    ...listeners,
+    style: { cursor: isSorting ? "grabbing" : "grab", touchAction: "none" },
   };
 
   return (
@@ -118,8 +131,6 @@ function SortableCard({
         styles.cardWrapper,
         isSorting ? styles.sorting : "",
       ].filter(Boolean).join(" ")}
-      {...attributes}
-      {...(canDrag ? listeners : {})}
     >
       <Card
         card={card}
@@ -128,10 +139,14 @@ function SortableCard({
         onFlip={onFlip}
         tabIndex={-1}
         showRankBadge={showRankBadge}
-        showDeviceBadge={showDeviceBadge}
+        showFooterBadge={showFooterBadge}
         rankPlaceholderText={rankPlaceholderText}
         cardBackDisplay={cardBackDisplay}
         displayConfig={displayConfig}
+        showFrontDragHandle={canDragFront}
+        showBackDragHandle={canDragBack}
+        frontDragHandleProps={canDragFront ? dragHandleProps : undefined}
+        backDragHandleProps={canDragBack ? dragHandleProps : undefined}
       />
     </div>
   );
@@ -168,7 +183,7 @@ export function DraggableCardGrid({
   flippedCardIds,
   onFlip,
   showRankBadge,
-  showDeviceBadge,
+  showFooterBadge,
   rankPlaceholderText,
   dragFace = "back",
   cardBackDisplay,
@@ -249,13 +264,9 @@ export function DraggableCardGrid({
         >
           {cards.map((card, index) => {
             const isFlipped = flippedCardIds.includes(card.id);
-            // Determine if dragging is allowed based on dragFace setting
-            // isFlipped means front is showing (card has been clicked)
-            // !isFlipped means back is showing (default state)
-            const canDrag =
-              dragFace === "both" ||
-              (dragFace === "front" && isFlipped) ||
-              (dragFace === "back" && !isFlipped);
+            // Determine which faces can be dragged based on dragFace setting
+            const canDragFront = dragFace === "both" || dragFace === "front";
+            const canDragBack = dragFace === "both" || dragFace === "back";
             return (
               <SortableCard
                 key={card.id}
@@ -265,9 +276,10 @@ export function DraggableCardGrid({
                 onFlip={() => { onFlip(card.id); }}
                 isAnyDragging={activeId !== null}
                 showRankBadge={showRankBadge}
-                showDeviceBadge={showDeviceBadge}
+                showFooterBadge={showFooterBadge}
                 rankPlaceholderText={rankPlaceholderText}
-                canDrag={canDrag}
+                canDragFront={canDragFront}
+                canDragBack={canDragBack}
                 cardBackDisplay={cardBackDisplay}
                 displayConfig={displayConfig}
               />
@@ -285,7 +297,7 @@ export function DraggableCardGrid({
               isFlipped={flippedCardIds.includes(activeCard.id)}
               tabIndex={-1}
               showRankBadge={showRankBadge}
-              showDeviceBadge={showDeviceBadge}
+              showFooterBadge={showFooterBadge}
               rankPlaceholderText={rankPlaceholderText}
               cardBackDisplay={cardBackDisplay}
               displayConfig={displayConfig}

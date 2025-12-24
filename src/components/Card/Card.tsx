@@ -47,12 +47,22 @@ interface CardProps {
   cardBackDisplay?: CardBackDisplay;
   /** Whether to show the rank badge */
   showRankBadge?: boolean;
-  /** Whether to show the device badge */
-  showDeviceBadge?: boolean;
+  /** Whether to show the footer badge (device/platform) */
+  showFooterBadge?: boolean;
   /** Placeholder text for unranked items */
   rankPlaceholderText?: string;
   /** Display configuration for dynamic field resolution */
   displayConfig?: CardDisplayConfig;
+  /** Card size preset for responsive adjustments */
+  cardSize?: "small" | "medium" | "large";
+  /** Whether front face drag handle is enabled */
+  showFrontDragHandle?: boolean;
+  /** Whether back face drag handle is enabled */
+  showBackDragHandle?: boolean;
+  /** Drag handle props for front face (listeners and attributes from dnd-kit) */
+  frontDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Drag handle props for back face (listeners and attributes from dnd-kit) */
+  backDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 /**
@@ -77,11 +87,16 @@ export function Card({
   isFlipped = false,
   onFlip,
   tabIndex = 0,
-  cardBackDisplay = "year",
+  cardBackDisplay = "logo",
   showRankBadge = true,
-  showDeviceBadge = true,
+  showFooterBadge = true,
   rankPlaceholderText,
   displayConfig,
+  cardSize = "medium",
+  showFrontDragHandle = false,
+  showBackDragHandle = false,
+  frontDragHandleProps,
+  backDragHandleProps,
 }: CardProps) {
   const { cardDimensions, settings } = useSettingsContext();
   const { config } = useConfig();
@@ -117,12 +132,6 @@ export function Card({
     return card.rank ?? null;
   }, [entity, frontConfig?.badge, card.rank]);
 
-  const resolvedSecondaryBadge = useMemo(() => {
-    if (frontConfig?.secondaryBadge) {
-      return resolveFieldPathAsString(entity, frontConfig.secondaryBadge);
-    }
-    return undefined;
-  }, [entity, frontConfig?.secondaryBadge]);
 
   // Resolve back face values
   const resolvedLogoUrl = useMemo(() => {
@@ -132,19 +141,13 @@ export function Card({
     return card.logoUrl;
   }, [entity, backConfig?.logo, card.logoUrl]);
 
-  const resolvedBackTitle = useMemo(() => {
-    if (backConfig?.title) {
-      return resolveFieldPathAsString(entity, backConfig.title);
+  // Resolve footer badge (device) - use field path if configured
+  const resolvedDevice = useMemo(() => {
+    if (frontConfig?.footerBadge) {
+      return resolveFieldPathAsString(entity, frontConfig.footerBadge, card.device ?? "");
     }
-    return undefined;
-  }, [entity, backConfig?.title]);
-
-  const resolvedBackText = useMemo(() => {
-    if (backConfig?.text) {
-      return resolveFieldPathAsString(entity, backConfig.text, card.year ?? "");
-    }
-    return card.year;
-  }, [entity, backConfig?.text, card.year]);
+    return card.device;
+  }, [entity, frontConfig?.footerBadge, card.device]);
 
   const cardStyle = {
     width: `${String(cardDimensions.width)}px`,
@@ -203,9 +206,9 @@ export function Card({
           back={
             <CardBack
               logoUrl={resolvedLogoUrl ?? settings.card.logoUrl}
-              year={resolvedBackText}
-              title={resolvedBackTitle}
               display={cardBackDisplay}
+              showDragHandle={showBackDragHandle}
+              dragHandleProps={backDragHandleProps}
             />
           }
           front={
@@ -214,12 +217,14 @@ export function Card({
               title={resolvedTitle}
               subtitle={resolvedSubtitle}
               rank={resolvedRank}
-              secondaryBadge={resolvedSecondaryBadge}
-              device={card.device}
+              device={resolvedDevice}
               showRankBadge={showRankBadge}
-              showDeviceBadge={showDeviceBadge}
+              showFooterBadge={showFooterBadge}
               rankPlaceholderText={rankPlaceholderText}
+              cardSize={cardSize}
               onInfoClick={handleInfoClick}
+              showDragHandle={showFrontDragHandle}
+              dragHandleProps={frontDragHandleProps}
             />
           }
         />

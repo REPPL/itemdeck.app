@@ -24,6 +24,27 @@ function InfoIcon() {
   );
 }
 
+/**
+ * Drag handle grip icon (6 dots arranged in 2x3 pattern).
+ */
+function DragGripIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      aria-hidden="true"
+      className={styles.dragGripIconSmall}
+    >
+      <circle cx="9" cy="6" r="2" />
+      <circle cx="15" cy="6" r="2" />
+      <circle cx="9" cy="12" r="2" />
+      <circle cx="15" cy="12" r="2" />
+      <circle cx="9" cy="18" r="2" />
+      <circle cx="15" cy="18" r="2" />
+    </svg>
+  );
+}
+
 interface CardFrontProps {
   /** URL of the card's front image */
   imageUrl: string;
@@ -35,18 +56,22 @@ interface CardFrontProps {
   categoryTitle?: string;
   /** Rank number (1-based) or null for unranked */
   rank?: number | null;
-  /** Secondary badge value (e.g., rating) */
-  secondaryBadge?: string;
-  /** Device/platform name */
+  /** Device/platform name for footer badge */
   device?: string;
   /** Placeholder text for unranked items */
   rankPlaceholderText?: string;
   /** Whether to show the rank badge */
   showRankBadge?: boolean;
-  /** Whether to show the device badge */
-  showDeviceBadge?: boolean;
+  /** Whether to show the footer badge (device/platform) */
+  showFooterBadge?: boolean;
+  /** Card size preset for responsive adjustments */
+  cardSize?: "small" | "medium" | "large";
   /** Callback when info button is clicked */
   onInfoClick?: (event: React.MouseEvent) => void;
+  /** Whether drag handle should be shown */
+  showDragHandle?: boolean;
+  /** Drag handle props (listeners and attributes from dnd-kit) */
+  dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 /**
@@ -64,13 +89,18 @@ export function CardFront({
   title,
   subtitle,
   rank,
-  secondaryBadge,
   device,
   rankPlaceholderText,
   showRankBadge = true,
-  showDeviceBadge = true,
+  showFooterBadge = true,
+  cardSize = "medium",
   onInfoClick,
+  showDragHandle = false,
+  dragHandleProps,
 }: CardFrontProps) {
+  // Hide unranked badge on small cards to prevent overflow
+  const shouldShowRankBadge = showRankBadge && (rank !== null || cardSize !== "small");
+
   return (
     <div className={[styles.cardFace, styles.cardFront].join(" ")}>
       <ImageWithFallback
@@ -81,8 +111,8 @@ export function CardFront({
         loading="lazy"
       />
 
-      {/* Rank badge in top-left */}
-      {showRankBadge && (
+      {/* Rank badge in top-left - hide unranked text on small cards */}
+      {shouldShowRankBadge && (
         <div className={styles.badges}>
           <RankBadge
             rank={rank ?? null}
@@ -108,16 +138,24 @@ export function CardFront({
         <h3 className={styles.overlayTitle}>{title}</h3>
         <div className={styles.overlayFooter}>
           {subtitle && <span className={styles.overlayYear}>{subtitle}</span>}
-          {secondaryBadge && (
-            <span className={styles.overlaySecondaryBadge}>{secondaryBadge}</span>
-          )}
-          {showDeviceBadge && device && (
+          {showFooterBadge && device && (
             <div className={styles.overlayDeviceBadge}>
               <DeviceBadge device={device} size="small" />
             </div>
           )}
         </div>
       </div>
+
+      {/* Drag handle at bottom - same position as back */}
+      {showDragHandle && (
+        <div
+          className={styles.dragHandleFront}
+          {...dragHandleProps}
+          aria-label="Drag to reorder"
+        >
+          <DragGripIcon />
+        </div>
+      )}
     </div>
   );
 }

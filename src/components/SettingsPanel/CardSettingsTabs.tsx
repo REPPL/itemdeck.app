@@ -5,9 +5,10 @@
  * all settings are visible without scrolling.
  *
  * Sub-tabs:
- * - General: Size, Aspect Ratio (2 settings)
- * - Front: Footer Style, Title Display, Badges, Unranked Text (5 settings)
- * - Back: Display (1 setting)
+ * - Layout: Size, Aspect Ratio, Max Visible Cards
+ * - Front: Footer Style, Title Display, Badges
+ * - Back: Show Logo toggle
+ * - Behaviour: Drag to Reorder
  */
 
 import { useState, useCallback } from "react";
@@ -17,17 +18,18 @@ import {
   type TitleDisplayMode,
   type CardSizePreset,
   type CardAspectRatio,
-  type CardBackDisplay,
+  type DragFace,
 } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-type CardSubTab = "general" | "front" | "back";
+type CardSubTab = "layout" | "front" | "back" | "behaviour";
 
 const subTabs: { id: CardSubTab; label: string }[] = [
-  { id: "general", label: "General" },
+  { id: "layout", label: "Layout" },
   { id: "front", label: "Front" },
   { id: "back", label: "Back" },
+  { id: "behaviour", label: "Behaviour" },
 ];
 
 const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
@@ -52,18 +54,18 @@ const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
   { value: "1:1", label: "1:1" },
 ];
 
-const cardBackDisplayOptions: { value: CardBackDisplay; label: string }[] = [
-  { value: "both", label: "Both" },
-  { value: "year", label: "Year" },
-  { value: "logo", label: "Logo" },
+const dragModeOptions: { value: DragFace | "none"; label: string }[] = [
   { value: "none", label: "None" },
+  { value: "front", label: "Front" },
+  { value: "back", label: "Back" },
+  { value: "both", label: "Both" },
 ];
 
 /**
  * Sub-tabbed card settings interface.
  */
 export function CardSettingsTabs() {
-  const [activeSubTab, setActiveSubTab] = useState<CardSubTab>("general");
+  const [activeSubTab, setActiveSubTab] = useState<CardSubTab>("layout");
 
   const {
     cardSizePreset,
@@ -73,7 +75,9 @@ export function CardSettingsTabs() {
     titleDisplayMode,
     showRankBadge,
     showDeviceBadge,
-    rankPlaceholderText,
+    maxVisibleCards,
+    dragModeEnabled,
+    dragFace,
     setCardSizePreset,
     setCardAspectRatio,
     setCardBackDisplay,
@@ -81,19 +85,27 @@ export function CardSettingsTabs() {
     setTitleDisplayMode,
     setShowRankBadge,
     setShowDeviceBadge,
-    setRankPlaceholderText,
+    setMaxVisibleCards,
+    setDragModeEnabled,
+    setDragFace,
   } = useSettingsStore();
 
-  const handlePlaceholderChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRankPlaceholderText(event.target.value);
-    },
-    [setRankPlaceholderText]
-  );
+  // Compute effective drag mode from dragModeEnabled and dragFace
+  const effectiveDragMode: DragFace | "none" = dragModeEnabled ? dragFace : "none";
+
+  // Handle drag mode change
+  const handleDragModeChange = useCallback((value: DragFace | "none") => {
+    if (value === "none") {
+      setDragModeEnabled(false);
+    } else {
+      setDragModeEnabled(true);
+      setDragFace(value);
+    }
+  }, [setDragModeEnabled, setDragFace]);
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
-      case "general":
+      case "layout":
         return (
           <>
             <div className={styles.row}>
@@ -134,6 +146,30 @@ export function CardSettingsTabs() {
                     {label}
                   </button>
                 ))}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Max Visible Cards</span>
+              <div className={styles.numberControl}>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
+                  aria-label="Decrease"
+                  disabled={maxVisibleCards <= 1}
+                >
+                  −
+                </button>
+                <span className={styles.numberValue}>{maxVisibleCards}</span>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
+                  aria-label="Increase"
+                  disabled={maxVisibleCards >= 10}
+                >
+                  +
+                </button>
               </div>
             </div>
           </>
@@ -194,7 +230,7 @@ export function CardSettingsTabs() {
               </label>
             </div>
             <div className={styles.row}>
-              <span className={styles.label}>Show Device Badge</span>
+              <span className={styles.label}>Show Footer Badge</span>
               <label className={styles.toggle}>
                 <input
                   type="checkbox"
@@ -204,17 +240,6 @@ export function CardSettingsTabs() {
                 <span className={styles.toggleSlider} />
               </label>
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Unranked Text</span>
-              <input
-                type="text"
-                className={styles.textInput}
-                value={rankPlaceholderText}
-                onChange={handlePlaceholderChange}
-                placeholder="The one that got away!"
-                aria-label="Rank placeholder text"
-              />
-            </div>
           </>
         );
 
@@ -222,19 +247,36 @@ export function CardSettingsTabs() {
         return (
           <>
             <div className={styles.row}>
-              <span className={styles.label}>Display</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card back display">
-                {cardBackDisplayOptions.map(({ value, label }) => (
+              <span className={styles.label}>Show Logo</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={cardBackDisplay === "logo"}
+                  onChange={(e) => { setCardBackDisplay(e.target.checked ? "logo" : "none"); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+          </>
+        );
+
+      case "behaviour":
+        return (
+          <>
+            <div className={styles.row}>
+              <span className={styles.label}>Drag to Reorder</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
+                {dragModeOptions.map(({ value, label }) => (
                   <button
                     key={value}
                     type="button"
                     className={[
                       styles.segmentButton,
-                      cardBackDisplay === value ? styles.segmentButtonActive : "",
+                      effectiveDragMode === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardBackDisplay(value); }}
+                    onClick={() => { handleDragModeChange(value); }}
                     role="radio"
-                    aria-checked={cardBackDisplay === value}
+                    aria-checked={effectiveDragMode === value}
                   >
                     {label}
                   </button>

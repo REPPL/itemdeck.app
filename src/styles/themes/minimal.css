@@ -76,13 +76,13 @@
   background: rgba(255, 255, 255, 0.03);
 }
 
-/* Focus on content - ensure buttons remain visible */
-[data-visual-theme="minimal"] button {
+/* Focus on content - scoped to card actions only to avoid layout shifts */
+[data-visual-theme="minimal"] .card-actions button {
   background: transparent;
   border: 1px solid var(--colour-border, rgba(0, 0, 0, 0.1));
 }
 
-[data-visual-theme="minimal"] button:hover {
+[data-visual-theme="minimal"] .card-actions button:hover {
   background: rgba(0, 0, 0, 0.03);
   border-color: var(--colour-primary, #475569);
 }

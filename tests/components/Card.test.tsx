@@ -171,16 +171,16 @@ describe("Card", () => {
     expect(card).toHaveAttribute("aria-label", "Test Card (showing front)");
   });
 
-  it("displays year on both faces", () => {
+  it("displays year on front face", () => {
     render(
       <TestWrapper>
         <Card card={mockCard} />
       </TestWrapper>
     );
 
-    // Year appears on both back (textField) and front (overlay)
+    // Year appears on front face only (back face is logo-only since v0.6.2)
     const yearElements = screen.getAllByText("2024");
-    expect(yearElements).toHaveLength(2);
+    expect(yearElements).toHaveLength(1);
   });
 
   it("renders card without year", () => {

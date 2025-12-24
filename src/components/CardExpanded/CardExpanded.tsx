@@ -320,22 +320,42 @@ export function CardExpanded({
               {/* Platform - expandable to show platform details */}
               {card.categoryInfo && (
                 <div className={styles.platformSection}>
-                  <button
-                    type="button"
-                    className={styles.platformRow}
-                    onClick={() => { setPlatformExpanded(!platformExpanded); }}
-                    aria-expanded={platformExpanded}
-                    aria-controls="platform-details"
-                  >
-                    <span className={styles.platformLabel}>Platform:</span>
-                    <span className={styles.platformValue}>{card.categoryInfo.title}</span>
-                    {card.categoryInfo.year && (
-                      <span className={styles.platformYear}>({card.categoryInfo.year})</span>
+                  <div className={styles.platformHeader}>
+                    <button
+                      type="button"
+                      className={styles.platformRow}
+                      onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                      aria-expanded={platformExpanded}
+                      aria-controls="platform-details"
+                    >
+                      <span className={styles.platformLabel}>Platform:</span>
+                      <span className={styles.platformValue}>{card.categoryInfo.title}</span>
+                      {card.categoryInfo.year && (
+                        <span className={styles.platformYear}>({card.categoryInfo.year})</span>
+                      )}
+                      <span className={styles.platformChevron}>
+                        <ChevronIcon expanded={platformExpanded} />
+                      </span>
+                    </button>
+                    {/* Platform links in header row */}
+                    {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
+                      <div className={styles.platformHeaderLinks}>
+                        {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
+                          <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.platformHeaderLink}
+                            onClick={(e) => { e.stopPropagation(); }}
+                          >
+                            <span>{link.source ?? link.label ?? "Source"}</span>
+                            <ExternalLinkIcon />
+                          </a>
+                        ))}
+                      </div>
                     )}
-                    <span className={styles.platformChevron}>
-                      <ChevronIcon expanded={platformExpanded} />
-                    </span>
-                  </button>
+                  </div>
                   <AnimatePresence>
                     {platformExpanded && (
                       <motion.div
@@ -375,22 +395,6 @@ export function CardExpanded({
                               );
                             })}
                           </dl>
-                        )}
-                        {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
-                          <div className={styles.platformLinks}>
-                            {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
-                              <a
-                                key={index}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={styles.platformLink}
-                              >
-                                <span>{link.source ?? link.label ?? "Source"}</span>
-                                <ExternalLinkIcon />
-                              </a>
-                            ))}
-                          </div>
                         )}
                       </motion.div>
                     )}

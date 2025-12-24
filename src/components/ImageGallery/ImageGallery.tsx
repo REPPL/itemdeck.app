@@ -103,6 +103,14 @@ export function ImageGallery({
   // Internal state for uncontrolled mode
   const [internalIndex, setInternalIndex] = useState(0);
 
+  // Build display images array:
+  // Index 0: first image (zoomed/cover)
+  // Index 1: first image again (original size/contain)
+  // Index 2+: remaining images (original size/contain)
+  const displayImages = images.length > 0
+    ? [images[0], ...images]
+    : images;
+
   // Use controlled or internal index
   const currentIndex = controlledIndex ?? internalIndex;
   const setCurrentIndex = useCallback(
@@ -119,21 +127,23 @@ export function ImageGallery({
   // Navigation direction for animation
   const [direction, setDirection] = useState(0);
 
-  const hasMultipleImages = images.length > 1;
+  // Use displayImages for navigation (includes duplicated first image)
+  const totalImages = displayImages.length;
+  const hasMultipleImages = totalImages > 1;
 
   // Navigate to previous image
   const goToPrevious = useCallback(() => {
     if (!hasMultipleImages) return;
     setDirection(-1);
-    setCurrentIndex((currentIndex - 1 + images.length) % images.length);
-  }, [currentIndex, images.length, hasMultipleImages, setCurrentIndex]);
+    setCurrentIndex((currentIndex - 1 + totalImages) % totalImages);
+  }, [currentIndex, totalImages, hasMultipleImages, setCurrentIndex]);
 
   // Navigate to next image
   const goToNext = useCallback(() => {
     if (!hasMultipleImages) return;
     setDirection(1);
-    setCurrentIndex((currentIndex + 1) % images.length);
-  }, [currentIndex, images.length, hasMultipleImages, setCurrentIndex]);
+    setCurrentIndex((currentIndex + 1) % totalImages);
+  }, [currentIndex, totalImages, hasMultipleImages, setCurrentIndex]);
 
   // Navigate to specific index
   const goToIndex = useCallback(
@@ -209,9 +219,12 @@ export function ImageGallery({
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
           <motion.img
             key={currentIndex}
-            src={images[currentIndex]}
-            alt={`${alt} (${String(currentIndex + 1)} of ${String(images.length)})`}
-            className={styles.image}
+            src={displayImages[currentIndex]}
+            alt={`${alt} (${String(currentIndex + 1)} of ${String(totalImages)})`}
+            className={[
+              styles.image,
+              currentIndex === 0 ? styles.imageCover : styles.imageContain,
+            ].join(" ")}
             custom={direction}
             variants={slideVariants}
             initial="enter"
@@ -251,7 +264,7 @@ export function ImageGallery({
       {/* Dot indicators */}
       {showDots && hasMultipleImages && (
         <div className={styles.dots} role="tablist" aria-label="Gallery images">
-          {images.map((_, index) => (
+          {displayImages.map((_, index) => (
             <button
               key={index}
               type="button"

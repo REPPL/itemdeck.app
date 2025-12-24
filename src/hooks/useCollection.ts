@@ -15,7 +15,7 @@ import {
 } from "@/schemas";
 import {
   loadCollection,
-  isV1Collection,
+  detectCollectionVersion,
   createResolverContext,
   resolveAllRelationships,
   getEntityRank,
@@ -353,14 +353,14 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
  * @returns Collection result with display cards
  */
 async function fetchCollection(basePath: string): Promise<CollectionResult> {
-  // Check if this is a v1 collection
-  const isV1 = await isV1Collection(basePath);
+  // Check if this is a v1 or v2 schema collection
+  const version = await detectCollectionVersion(basePath);
 
-  if (isV1) {
+  if (version === "v1" || version === "v2") {
     return fetchV1Collection(basePath);
   }
 
-  // Fall back to legacy format
+  // Fall back to legacy format (items.json + categories.json)
   const collection = await fetchLegacyCollection(basePath);
 
   // Join cards with categories for display

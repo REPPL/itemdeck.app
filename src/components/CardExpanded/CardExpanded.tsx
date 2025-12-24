@@ -301,12 +301,26 @@ export function CardExpanded({
 
             {/* Card info */}
             <div className={styles.info}>
-              {/* Title and year row */}
+              {/* Title, year, and platform link row */}
               <header className={styles.header}>
-                <h2 id="expanded-card-title" className={styles.title}>
-                  {card.title}
-                </h2>
-                {card.year && <span className={styles.year}>{card.year}</span>}
+                <div className={styles.headerLeft}>
+                  <h2 id="expanded-card-title" className={styles.title}>
+                    {card.title}
+                  </h2>
+                  {card.year && <span className={styles.year}>{card.year}</span>}
+                </div>
+                {card.categoryInfo && (
+                  <button
+                    type="button"
+                    className={styles.platformLink}
+                    onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                    aria-expanded={platformExpanded}
+                    aria-controls="platform-overlay"
+                  >
+                    <span>{card.categoryInfo.title}</span>
+                    <InfoIcon />
+                  </button>
+                )}
               </header>
 
               {/* Divider */}
@@ -315,91 +329,6 @@ export function CardExpanded({
               {/* Summary */}
               {card.summary && (
                 <p className={styles.summary}>{card.summary}</p>
-              )}
-
-              {/* Platform - expandable to show platform details */}
-              {card.categoryInfo && (
-                <div className={styles.platformSection}>
-                  <div className={styles.platformHeader}>
-                    <button
-                      type="button"
-                      className={styles.platformRow}
-                      onClick={() => { setPlatformExpanded(!platformExpanded); }}
-                      aria-expanded={platformExpanded}
-                      aria-controls="platform-details"
-                    >
-                      <span className={styles.platformLabel}>Platform:</span>
-                      <span className={styles.platformValue}>{card.categoryInfo.title}</span>
-                      {card.categoryInfo.year && (
-                        <span className={styles.platformYear}>({card.categoryInfo.year})</span>
-                      )}
-                      <span className={styles.platformChevron}>
-                        <ChevronIcon expanded={platformExpanded} />
-                      </span>
-                    </button>
-                    {/* Platform links in header row */}
-                    {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
-                      <div className={styles.platformHeaderLinks}>
-                        {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
-                          <a
-                            key={index}
-                            href={link.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.platformHeaderLink}
-                            onClick={(e) => { e.stopPropagation(); }}
-                          >
-                            <span>{link.source ?? link.label ?? "Source"}</span>
-                            <ExternalLinkIcon />
-                          </a>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                  <AnimatePresence>
-                    {platformExpanded && (
-                      <motion.div
-                        id="platform-details"
-                        className={styles.platformDetails}
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: "auto" }}
-                        exit={{ opacity: 0, height: 0 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        {card.categoryInfo.summary && (
-                          <p className={styles.platformSummary}>{card.categoryInfo.summary}</p>
-                        )}
-                        {/* Display additional platform fields dynamically */}
-                        {card.categoryInfo.additionalFields && Object.keys(card.categoryInfo.additionalFields).length > 0 && (
-                          <dl className={styles.platformFields}>
-                            {Object.entries(card.categoryInfo.additionalFields).map(([key, value]) => {
-                              // Format the value for display
-                              const displayValue = typeof value === "string" || typeof value === "number"
-                                ? String(value)
-                                : Array.isArray(value)
-                                  ? value.join(", ")
-                                  : null;
-                              if (!displayValue) return null;
-
-                              // Convert camelCase to Title Case
-                              const label = key
-                                .replace(/([A-Z])/g, " $1")
-                                .replace(/^./, (s) => s.toUpperCase())
-                                .trim();
-
-                              return (
-                                <div key={key} className={styles.platformField}>
-                                  <dt className={styles.platformFieldLabel}>{label}</dt>
-                                  <dd className={styles.platformFieldValue}>{displayValue}</dd>
-                                </div>
-                              );
-                            })}
-                          </dl>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
               )}
 
               {/* Footer row: Left group (Acknowledgement + Source) | Right (More) */}
@@ -539,6 +468,81 @@ export function CardExpanded({
                         </div>
                       ))}
                     </dl>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Platform overlay */}
+              <AnimatePresence>
+                {platformExpanded && card.categoryInfo && (
+                  <motion.div
+                    id="platform-overlay"
+                    className={styles.platformOverlay}
+                    initial={{ opacity: 0, y: 20, scaleY: 0.8 }}
+                    animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                    exit={{ opacity: 0, y: 20, scaleY: 0.8 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                  >
+                    <div className={styles.platformOverlayHeader}>
+                      <div className={styles.platformOverlayTitle}>
+                        <span className={styles.platformOverlayLabel}>Platform</span>
+                        <span className={styles.platformOverlayName}>
+                          {card.categoryInfo.title}
+                          {card.categoryInfo.year && ` (${card.categoryInfo.year})`}
+                        </span>
+                      </div>
+                      <div className={styles.platformOverlayActions}>
+                        {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
+                          deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
+                            <a
+                              key={index}
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.platformOverlayLink}
+                            >
+                              <span>{link.source ?? link.label ?? "Source"}</span>
+                              <ExternalLinkIcon />
+                            </a>
+                          ))
+                        )}
+                        <button
+                          type="button"
+                          className={styles.platformOverlayCloseButton}
+                          onClick={() => { setPlatformExpanded(false); }}
+                          aria-label="Close platform info"
+                        >
+                          <CloseIcon />
+                        </button>
+                      </div>
+                    </div>
+                    {card.categoryInfo.summary && (
+                      <p className={styles.platformOverlaySummary}>{card.categoryInfo.summary}</p>
+                    )}
+                    {card.categoryInfo.additionalFields && Object.keys(card.categoryInfo.additionalFields).length > 0 && (
+                      <dl className={styles.platformOverlayFields}>
+                        {Object.entries(card.categoryInfo.additionalFields).map(([key, value]) => {
+                          const displayValue = typeof value === "string" || typeof value === "number"
+                            ? String(value)
+                            : Array.isArray(value)
+                              ? value.join(", ")
+                              : null;
+                          if (!displayValue) return null;
+
+                          const label = key
+                            .replace(/([A-Z])/g, " $1")
+                            .replace(/^./, (s) => s.toUpperCase())
+                            .trim();
+
+                          return (
+                            <div key={key} className={styles.platformOverlayField}>
+                              <dt className={styles.platformOverlayFieldLabel}>{label}</dt>
+                              <dd className={styles.platformOverlayFieldValue}>{displayValue}</dd>
+                            </div>
+                          );
+                        })}
+                      </dl>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>

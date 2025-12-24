@@ -2,7 +2,7 @@
  * ConfigSettingsTabs - Sub-tabbed interface for configuration settings.
  *
  * Top-level Configuration tab with sub-tabs:
- * - Display Order: Sort By, Sort Direction (when shuffle is off)
+ * - Display Order: Max Visible, Shuffle, Drag to Reorder, Sort By, Sort Direction
  * - Front Face: Footer Badge Field, Unranked Text
  * - Back Face: Subtitle Field, Logo Field
  */
@@ -11,6 +11,7 @@ import { useState, useCallback } from "react";
 import {
   useSettingsStore,
   type FieldMappingConfig,
+  type DragFace,
 } from "@/stores/settingsStore";
 import {
   SUBTITLE_FIELD_OPTIONS,
@@ -20,6 +21,13 @@ import {
 } from "@/utils/fieldPathResolver";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
+
+const dragModeOptions: { value: DragFace | "none"; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "front", label: "Front" },
+  { value: "back", label: "Back" },
+  { value: "both", label: "Both" },
+];
 
 type ConfigSubTab = "order" | "front" | "back";
 
@@ -37,11 +45,31 @@ export function ConfigSettingsTabs() {
 
   const {
     shuffleOnLoad,
+    setShuffleOnLoad,
+    maxVisibleCards,
+    setMaxVisibleCards,
+    dragModeEnabled,
+    setDragModeEnabled,
+    dragFace,
+    setDragFace,
     rankPlaceholderText,
     setRankPlaceholderText,
     fieldMapping,
     setFieldMapping,
   } = useSettingsStore();
+
+  // Compute effective drag mode from dragModeEnabled and dragFace
+  const effectiveDragMode: DragFace | "none" = dragModeEnabled ? dragFace : "none";
+
+  // Handle drag mode change
+  const handleDragModeChange = useCallback((value: DragFace | "none") => {
+    if (value === "none") {
+      setDragModeEnabled(false);
+    } else {
+      setDragModeEnabled(true);
+      setDragFace(value);
+    }
+  }, [setDragModeEnabled, setDragFace]);
 
   const handlePlaceholderChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,11 +90,62 @@ export function ConfigSettingsTabs() {
       case "order":
         return (
           <>
-            {shuffleOnLoad ? (
-              <p className={styles.themeInfo}>
-                Shuffle is enabled. Disable &ldquo;Shuffle on Load&rdquo; in Cards &gt; Layout to configure sort order.
-              </p>
-            ) : (
+            <div className={styles.row}>
+              <span className={styles.label}>Max Visible</span>
+              <div className={styles.numberControl}>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
+                  aria-label="Decrease"
+                  disabled={maxVisibleCards <= 1}
+                >
+                  −
+                </button>
+                <span className={styles.numberValue}>{maxVisibleCards}</span>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
+                  aria-label="Increase"
+                  disabled={maxVisibleCards >= 10}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Shuffle on Load</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={shuffleOnLoad}
+                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Drag to Reorder</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
+                {dragModeOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      effectiveDragMode === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { handleDragModeChange(value); }}
+                    role="radio"
+                    aria-checked={effectiveDragMode === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            {!shuffleOnLoad && (
               <>
                 <div className={styles.row}>
                   <span className={styles.label}>Sort By</span>

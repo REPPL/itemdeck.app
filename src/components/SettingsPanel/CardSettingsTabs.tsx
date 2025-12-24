@@ -5,19 +5,17 @@
  * all settings are visible without scrolling.
  *
  * Sub-tabs:
- * - Layout: Size, Aspect Ratio, Max Visible Cards
- * - Front: Footer Style, Title Display, Badges
+ * - Layout: Size, Aspect Ratio
+ * - Front: Title Display, Badges
  * - Back: Show Logo toggle
- * - Behaviour: Drag to Reorder
  */
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import {
   useSettingsStore,
   type TitleDisplayMode,
   type CardSizePreset,
   type CardAspectRatio,
-  type DragFace,
 } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
@@ -47,13 +45,6 @@ const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
   { value: "1:1", label: "1:1" },
 ];
 
-const dragModeOptions: { value: DragFace | "none"; label: string }[] = [
-  { value: "none", label: "None" },
-  { value: "front", label: "Front" },
-  { value: "back", label: "Back" },
-  { value: "both", label: "Both" },
-];
-
 /**
  * Sub-tabbed card settings interface.
  */
@@ -67,34 +58,13 @@ export function CardSettingsTabs() {
     titleDisplayMode,
     showRankBadge,
     showDeviceBadge,
-    maxVisibleCards,
-    shuffleOnLoad,
-    dragModeEnabled,
-    dragFace,
     setCardSizePreset,
     setCardAspectRatio,
     setCardBackDisplay,
     setTitleDisplayMode,
     setShowRankBadge,
     setShowDeviceBadge,
-    setMaxVisibleCards,
-    setShuffleOnLoad,
-    setDragModeEnabled,
-    setDragFace,
   } = useSettingsStore();
-
-  // Compute effective drag mode from dragModeEnabled and dragFace
-  const effectiveDragMode: DragFace | "none" = dragModeEnabled ? dragFace : "none";
-
-  // Handle drag mode change
-  const handleDragModeChange = useCallback((value: DragFace | "none") => {
-    if (value === "none") {
-      setDragModeEnabled(false);
-    } else {
-      setDragModeEnabled(true);
-      setDragFace(value);
-    }
-  }, [setDragModeEnabled, setDragFace]);
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -135,61 +105,6 @@ export function CardSettingsTabs() {
                     onClick={() => { setCardAspectRatio(value); }}
                     role="radio"
                     aria-checked={cardAspectRatio === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Max Visible</span>
-              <div className={styles.numberControl}>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
-                  aria-label="Decrease"
-                  disabled={maxVisibleCards <= 1}
-                >
-                  −
-                </button>
-                <span className={styles.numberValue}>{maxVisibleCards}</span>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
-                  aria-label="Increase"
-                  disabled={maxVisibleCards >= 10}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Shuffle on Load</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={shuffleOnLoad}
-                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Drag to Reorder</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
-                {dragModeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      effectiveDragMode === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleDragModeChange(value); }}
-                    role="radio"
-                    aria-checked={effectiveDragMode === value}
                   >
                     {label}
                   </button>

@@ -1,6 +1,6 @@
 # Roadmap
 
-Development roadmap for Itemdeck v0.1.0 through v0.7.0.
+Development roadmap for Itemdeck v0.1.0 through v0.8.0.
 
 ## Overview
 
@@ -12,7 +12,8 @@ Development roadmap for Itemdeck v0.1.0 through v0.7.0.
 | [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | ✅ Complete |
 | [v0.5.0](./milestones/v0.5.0.md) | Schema Design | ✅ Complete |
 | [v0.6.0](./milestones/v0.6.0.md) | Schema Loader | ✅ Complete |
-| v0.7.0 | Visual Overhaul | 📋 Planned |
+| v0.7.0 | TBD | 📋 Planned |
+| v0.8.0 | Visual Overhaul | 📋 Planned |
 
 ## Feature Summary
 

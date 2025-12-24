@@ -109,7 +109,7 @@ The following items from the original v0.6.0 scope were deferred:
 1. **Settings Audit & Reorganisation** - Collection-level settings customisation needs UX design
 2. **SettingsPanel UI Updates** - Dependent on settings audit
 
-These should be addressed in v0.7.0 or as a separate feature release.
+These should be addressed in a future release.
 
 ---
 

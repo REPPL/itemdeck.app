@@ -333,16 +333,21 @@ export function CardExpanded({
                         {card.categoryInfo.summary && (
                           <p className={styles.platformSummary}>{card.categoryInfo.summary}</p>
                         )}
-                        {card.categoryInfo.detailUrl && (
-                          <a
-                            href={card.categoryInfo.detailUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className={styles.platformLink}
-                          >
-                            <span>Wikipedia</span>
-                            <ExternalLinkIcon />
-                          </a>
+                        {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
+                          <div className={styles.platformLinks}>
+                            {card.categoryInfo.detailUrls.map((link, index) => (
+                              <a
+                                key={index}
+                                href={link.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={styles.platformLink}
+                              >
+                                <span>{link.source ?? link.label ?? "Source"}</span>
+                                <ExternalLinkIcon />
+                              </a>
+                            ))}
+                          </div>
                         )}
                       </motion.div>
                     )}

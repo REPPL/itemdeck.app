@@ -28,8 +28,10 @@ const SKIP_FIELDS = new Set([
   "category",
   "categoryTitle",
   "categoryShort",
+  "categoryInfo",
   "platform",
   "platformTitle",
+  "originalPlatform",
   "device",
   // Ranking fields (shown in badge)
   "rank",
@@ -42,6 +44,9 @@ const SKIP_FIELDS = new Set([
   "summary",
   // Redundant release date (year already shown)
   "originalReleaseDate",
+  // Rating fields (shown in dedicated section or skip duplicates)
+  "rating",
+  "averageRating",
 ]);
 
 /**

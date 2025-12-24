@@ -101,7 +101,7 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
     title: string;
     year?: string;
     summary?: string;
-    detailUrl?: string;
+    detailUrls?: DetailLink[];
   };
 
   /** Additional entity fields for field path resolution */
@@ -255,7 +255,9 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
         title: platform.title as string,
         year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
         summary: platform.summary as string | undefined,
-        detailUrl: platform.detailUrl as string | undefined,
+        detailUrls: normaliseDetailUrls(
+          platform.detailUrls as string | { url: string } | { url: string }[] | undefined
+        ),
       } : undefined,
     };
 

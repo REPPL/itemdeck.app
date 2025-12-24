@@ -29,12 +29,14 @@ export const TITLE_FIELD_OPTIONS: FieldOption[] = [
 
 export const SUBTITLE_FIELD_OPTIONS: FieldOption[] = [
   { value: "year", label: "Year" },
-  { value: "startDate", label: "Start Date" },
+  { value: "playedSince", label: "Played Since" },
   { value: "status", label: "Status" },
   { value: "none", label: "None" },
 ];
 
 export const FOOTER_BADGE_FIELD_OPTIONS: FieldOption[] = [
+  { value: "platform.shortTitle", label: "Platform (Short)" },
+  { value: "platform.title", label: "Platform (Full)" },
   { value: "categoryShort", label: "Category (Short)" },
   { value: "categoryTitle", label: "Category (Full)" },
   { value: "year", label: "Year" },
@@ -42,15 +44,17 @@ export const FOOTER_BADGE_FIELD_OPTIONS: FieldOption[] = [
 ];
 
 export const LOGO_FIELD_OPTIONS: FieldOption[] = [
-  { value: "category.logoUrl", label: "Category Logo" },
+  { value: "platform.logoUrl", label: "Platform Logo" },
+  { value: "logoUrl", label: "Card Logo" },
   { value: "none", label: "None (App Logo)" },
 ];
 
 export const SORT_FIELD_OPTIONS: FieldOption[] = [
-  { value: "order", label: "Order" },
+  { value: "order", label: "Order/Rank" },
+  { value: "myRank", label: "My Rank" },
   { value: "title", label: "Title" },
   { value: "year", label: "Year" },
-  { value: "startDate", label: "Start Date" },
+  { value: "playedSince", label: "Played Since" },
 ];
 
 /**

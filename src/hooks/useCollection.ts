@@ -15,6 +15,7 @@ import {
   getEntityRank,
   getImageUrls,
   getPrimaryImage,
+  getLogoUrl,
 } from "@/loaders";
 import type { Image } from "@/types/image";
 import type { ResolvedEntity } from "@/types/schema";
@@ -220,7 +221,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       categoryShort,
       order,
       imageAttribution: formatAttribution(images),
-      logoUrl: platform?.logoUrl as string | undefined,
+      logoUrl: getLogoUrl(platform?.images as Image[] | undefined),
       // Legacy aliases for backward compatibility
       device: categoryShort,
       platformTitle: platform?.title as string | undefined,

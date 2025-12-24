@@ -221,13 +221,15 @@ export function getEntityRank(
     }
   }
 
-  // Check for implicit rank field
-  if (typeof entity.rank === "number") {
-    return entity.rank;
+  // Check for implicit rank field (support both rank and myRank)
+  const rankValue = entity.rank ?? entity.myRank;
+
+  if (typeof rankValue === "number") {
+    return rankValue;
   }
 
-  if (typeof entity.rank === "string") {
-    const parsed = parseInt(entity.rank, 10);
+  if (typeof rankValue === "string") {
+    const parsed = parseInt(rankValue, 10);
     return Number.isNaN(parsed) ? null : parsed;
   }
 

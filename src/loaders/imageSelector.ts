@@ -249,3 +249,18 @@ export function getImageUrls(images: Image[] | undefined): string[] {
 
   return images.map((img) => img.url);
 }
+
+/**
+ * Get the logo URL from an entity's images.
+ *
+ * @param images - Array of images
+ * @returns Logo URL or undefined
+ */
+export function getLogoUrl(images: Image[] | undefined): string | undefined {
+  if (!images || images.length === 0) {
+    return undefined;
+  }
+
+  const logoImage = selectImage(images, "images[type=logo][0]");
+  return logoImage?.url;
+}

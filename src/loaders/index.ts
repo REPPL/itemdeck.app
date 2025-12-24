@@ -33,6 +33,7 @@ export {
   getPrimaryImage,
   getPrimaryImageUrl,
   getImageUrls,
+  getLogoUrl,
 } from "./imageSelector";
 
 // Field path parser

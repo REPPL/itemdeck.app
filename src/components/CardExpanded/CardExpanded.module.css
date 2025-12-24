@@ -68,11 +68,15 @@
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    color var(--transition-fast, 150ms),
     transform var(--transition-fast, 150ms);
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
+  color: white;
   transform: scale(1.1);
 }
 
@@ -365,11 +369,13 @@
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
     transform var(--transition-fast, 150ms);
 }
 
 .moreCloseButton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
   transform: scale(1.1);
 }
 
@@ -500,11 +506,13 @@
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
     transform var(--transition-fast, 150ms);
 }
 
 .attributionCloseButton:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
   transform: scale(1.1);
 }
 

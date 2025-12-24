@@ -49,6 +49,11 @@ export type ShadowIntensity = "none" | "subtle" | "medium" | "strong";
 export type AnimationStyle = "none" | "subtle" | "smooth" | "bouncy";
 
 /**
+ * Detail view transparency options.
+ */
+export type DetailTransparencyPreset = "none" | "25" | "50" | "75";
+
+/**
  * Theme customisation settings per theme.
  */
 export interface ThemeCustomisation {
@@ -64,8 +69,16 @@ export interface ThemeCustomisation {
   hoverColour: string;
   /** Card background colour (hex) */
   cardBackgroundColour: string;
-  /** Detail view background transparency (0-100) */
-  detailTransparency: number;
+  /** Detail view background transparency preset */
+  detailTransparency: DetailTransparencyPreset;
+  /** Footer overlay style (moved from Cards) */
+  overlayStyle: OverlayStyle;
+  /** Label for the 'More' button in detail view */
+  moreButtonLabel: string;
+  /** Whether to auto-expand the 'More' overlay if needed */
+  autoExpandMore: boolean;
+  /** Whether to zoom image to fill horizontal width */
+  zoomImage: boolean;
 }
 
 /**
@@ -79,7 +92,11 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#ff6b6b",
     hoverColour: "#ff8888",
     cardBackgroundColour: "#1a1a2e",
-    detailTransparency: 85,
+    detailTransparency: "25",
+    overlayStyle: "dark",
+    moreButtonLabel: "Details",
+    autoExpandMore: true,
+    zoomImage: false,
   },
   modern: {
     borderRadius: "medium",
@@ -88,7 +105,11 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#4f9eff",
     hoverColour: "#7ab8ff",
     cardBackgroundColour: "#1e293b",
-    detailTransparency: 90,
+    detailTransparency: "50",
+    overlayStyle: "dark",
+    moreButtonLabel: "Details",
+    autoExpandMore: true,
+    zoomImage: false,
   },
   minimal: {
     borderRadius: "small",
@@ -97,7 +118,11 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#6b7280",
     hoverColour: "#9ca3af",
     cardBackgroundColour: "#374151",
-    detailTransparency: 95,
+    detailTransparency: "75",
+    overlayStyle: "dark",
+    moreButtonLabel: "Details",
+    autoExpandMore: true,
+    zoomImage: false,
   },
 };
 
@@ -191,9 +216,6 @@ interface SettingsState {
   /** High contrast mode */
   highContrast: boolean;
 
-  /** Card overlay style (dark/light) */
-  overlayStyle: OverlayStyle;
-
   /** Title display mode (truncate/wrap) */
   titleDisplayMode: TitleDisplayMode;
 
@@ -224,6 +246,15 @@ interface SettingsState {
   /** Theme customisation per theme */
   themeCustomisations: Record<VisualTheme, ThemeCustomisation>;
 
+  /** Whether to show the help button */
+  showHelpButton: boolean;
+
+  /** Whether to show the settings button */
+  showSettingsButton: boolean;
+
+  /** Whether to show drag icon on cards */
+  showDragIcon: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -233,7 +264,6 @@ interface SettingsState {
   setShuffleOnLoad: (shuffle: boolean) => void;
   setReduceMotion: (preference: ReduceMotionPreference) => void;
   setHighContrast: (enabled: boolean) => void;
-  setOverlayStyle: (style: OverlayStyle) => void;
   setTitleDisplayMode: (mode: TitleDisplayMode) => void;
   setDragModeEnabled: (enabled: boolean) => void;
   setVisualTheme: (theme: VisualTheme) => void;
@@ -244,6 +274,9 @@ interface SettingsState {
   setDragFace: (face: DragFace) => void;
   setFieldMapping: (mapping: Partial<FieldMappingConfig>) => void;
   setThemeCustomisation: (theme: VisualTheme, customisation: Partial<ThemeCustomisation>) => void;
+  setShowHelpButton: (show: boolean) => void;
+  setShowSettingsButton: (show: boolean) => void;
+  setShowDragIcon: (show: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -259,7 +292,6 @@ const DEFAULT_SETTINGS = {
   shuffleOnLoad: true,
   reduceMotion: "system" as ReduceMotionPreference,
   highContrast: false,
-  overlayStyle: "dark" as OverlayStyle,
   titleDisplayMode: "truncate" as TitleDisplayMode,
   dragModeEnabled: true,
   visualTheme: "retro" as VisualTheme,
@@ -277,6 +309,9 @@ const DEFAULT_SETTINGS = {
     sortDirection: "asc" as const,
   },
   themeCustomisations: { ...DEFAULT_THEME_CUSTOMISATIONS },
+  showHelpButton: true,
+  showSettingsButton: true,
+  showDragIcon: true,
 };
 
 /**
@@ -317,10 +352,6 @@ export const useSettingsStore = create<SettingsState>()(
 
       setHighContrast: (highContrast) => {
         set({ highContrast });
-      },
-
-      setOverlayStyle: (overlayStyle) => {
-        set({ overlayStyle });
       },
 
       setTitleDisplayMode: (titleDisplayMode) => {
@@ -370,13 +401,25 @@ export const useSettingsStore = create<SettingsState>()(
         }));
       },
 
+      setShowHelpButton: (showHelpButton) => {
+        set({ showHelpButton });
+      },
+
+      setShowSettingsButton: (showSettingsButton) => {
+        set({ showSettingsButton });
+      },
+
+      setShowDragIcon: (showDragIcon) => {
+        set({ showDragIcon });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
     }),
     {
       name: "itemdeck-settings",
-      version: 6,
+      version: 7,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -387,7 +430,6 @@ export const useSettingsStore = create<SettingsState>()(
         shuffleOnLoad: state.shuffleOnLoad,
         reduceMotion: state.reduceMotion,
         highContrast: state.highContrast,
-        overlayStyle: state.overlayStyle,
         titleDisplayMode: state.titleDisplayMode,
         dragModeEnabled: state.dragModeEnabled,
         visualTheme: state.visualTheme,
@@ -398,6 +440,9 @@ export const useSettingsStore = create<SettingsState>()(
         dragFace: state.dragFace,
         fieldMapping: state.fieldMapping,
         themeCustomisations: state.themeCustomisations,
+        showHelpButton: state.showHelpButton,
+        showSettingsButton: state.showSettingsButton,
+        showDragIcon: state.showDragIcon,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -448,6 +493,19 @@ export const useSettingsStore = create<SettingsState>()(
         if (version < 6) {
           state = {
             ...state,
+            themeCustomisations: DEFAULT_SETTINGS.themeCustomisations,
+          };
+        }
+
+        // Handle migration from version 6 to 7 (new System settings, move overlayStyle to theme)
+        if (version < 7) {
+          // Remove overlayStyle from top-level (now in themeCustomisations)
+          const { overlayStyle: _os, ...rest } = state;
+          state = {
+            ...rest,
+            showHelpButton: DEFAULT_SETTINGS.showHelpButton,
+            showSettingsButton: DEFAULT_SETTINGS.showSettingsButton,
+            showDragIcon: DEFAULT_SETTINGS.showDragIcon,
             themeCustomisations: DEFAULT_SETTINGS.themeCustomisations,
           };
         }

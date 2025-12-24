@@ -14,7 +14,6 @@
 import { useState, useCallback } from "react";
 import {
   useSettingsStore,
-  type OverlayStyle,
   type TitleDisplayMode,
   type CardSizePreset,
   type CardAspectRatio,
@@ -23,18 +22,12 @@ import {
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-type CardSubTab = "layout" | "front" | "back" | "behaviour";
+type CardSubTab = "layout" | "front" | "back";
 
 const subTabs: { id: CardSubTab; label: string }[] = [
   { id: "layout", label: "Layout" },
-  { id: "front", label: "Front" },
-  { id: "back", label: "Back" },
-  { id: "behaviour", label: "Behaviour" },
-];
-
-const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
-  { value: "dark", label: "Dark" },
-  { value: "light", label: "Light" },
+  { id: "front", label: "Front Face" },
+  { id: "back", label: "Back Face" },
 ];
 
 const titleDisplayOptions: { value: TitleDisplayMode; label: string }[] = [
@@ -71,21 +64,21 @@ export function CardSettingsTabs() {
     cardSizePreset,
     cardAspectRatio,
     cardBackDisplay,
-    overlayStyle,
     titleDisplayMode,
     showRankBadge,
     showDeviceBadge,
     maxVisibleCards,
+    shuffleOnLoad,
     dragModeEnabled,
     dragFace,
     setCardSizePreset,
     setCardAspectRatio,
     setCardBackDisplay,
-    setOverlayStyle,
     setTitleDisplayMode,
     setShowRankBadge,
     setShowDeviceBadge,
     setMaxVisibleCards,
+    setShuffleOnLoad,
     setDragModeEnabled,
     setDragFace,
   } = useSettingsStore();
@@ -149,7 +142,7 @@ export function CardSettingsTabs() {
               </div>
             </div>
             <div className={styles.row}>
-              <span className={styles.label}>Max Visible Cards</span>
+              <span className={styles.label}>Max Visible</span>
               <div className={styles.numberControl}>
                 <button
                   type="button"
@@ -172,32 +165,43 @@ export function CardSettingsTabs() {
                 </button>
               </div>
             </div>
-          </>
-        );
-
-      case "front":
-        return (
-          <>
             <div className={styles.row}>
-              <span className={styles.label}>Footer Style</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Card overlay style">
-                {overlayStyleOptions.map(({ value, label }) => (
+              <span className={styles.label}>Shuffle on Load</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={shuffleOnLoad}
+                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Drag to Reorder</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
+                {dragModeOptions.map(({ value, label }) => (
                   <button
                     key={value}
                     type="button"
                     className={[
                       styles.segmentButton,
-                      overlayStyle === value ? styles.segmentButtonActive : "",
+                      effectiveDragMode === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setOverlayStyle(value); }}
+                    onClick={() => { handleDragModeChange(value); }}
                     role="radio"
-                    aria-checked={overlayStyle === value}
+                    aria-checked={effectiveDragMode === value}
                   >
                     {label}
                   </button>
                 ))}
               </div>
             </div>
+          </>
+        );
+
+      case "front":
+        return (
+          <>
             <div className={styles.row}>
               <span className={styles.label}>Title Display</span>
               <div className={styles.segmentedControl} role="radiogroup" aria-label="Title display mode">
@@ -256,32 +260,6 @@ export function CardSettingsTabs() {
                 />
                 <span className={styles.toggleSlider} />
               </label>
-            </div>
-          </>
-        );
-
-      case "behaviour":
-        return (
-          <>
-            <div className={styles.row}>
-              <span className={styles.label}>Drag to Reorder</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
-                {dragModeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      effectiveDragMode === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleDragModeChange(value); }}
-                    role="radio"
-                    aria-checked={effectiveDragMode === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
             </div>
           </>
         );

@@ -29,7 +29,9 @@ function AppContent() {
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
 
   // Settings from store
-  const overlayStyle = useSettingsStore((state) => state.overlayStyle);
+  const visualTheme = useSettingsStore((state) => state.visualTheme);
+  const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
+  const overlayStyle = themeCustomisations[visualTheme].overlayStyle;
   const titleDisplayMode = useSettingsStore((state) => state.titleDisplayMode);
   const reduceMotion = useSettingsStore((state) => state.reduceMotion);
   const highContrast = useSettingsStore((state) => state.highContrast);

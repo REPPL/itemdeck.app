@@ -11,6 +11,7 @@ import {
   type BorderRadiusPreset,
   type ShadowIntensity,
   type AnimationStyle,
+  type DetailTransparencyPreset,
 } from "@/stores/settingsStore";
 import { applyVisualTheme } from "@/styles/themes";
 
@@ -68,6 +69,14 @@ const ANIMATION_VALUES: Record<AnimationStyle, { duration: string; easing: strin
   },
 };
 
+/** Map transparency preset to alpha value */
+const TRANSPARENCY_VALUES: Record<DetailTransparencyPreset, number> = {
+  "none": 0,
+  "25": 0.25,
+  "50": 0.50,
+  "75": 0.75,
+};
+
 /**
  * Apply theme customisation settings as CSS variables.
  */
@@ -78,7 +87,7 @@ function applyThemeCustomisation(
   accentColour: string,
   hoverColour: string,
   cardBackgroundColour: string,
-  detailTransparency: number
+  detailTransparency: DetailTransparencyPreset
 ): void {
   const root = document.documentElement;
 
@@ -111,8 +120,8 @@ function applyThemeCustomisation(
   // Apply card background colour
   root.style.setProperty("--card-back-background", cardBackgroundColour);
 
-  // Apply detail view transparency (convert percentage to alpha)
-  const alpha = detailTransparency / 100;
+  // Apply detail view transparency
+  const alpha = TRANSPARENCY_VALUES[detailTransparency];
   root.style.setProperty("--detail-overlay-alpha", String(alpha));
   root.style.setProperty("--detail-overlay-background", `rgba(0, 0, 0, ${String(alpha)})`);
 }

@@ -300,11 +300,11 @@ export function CardExpanded({
                 <p className={styles.summary}>{card.summary}</p>
               )}
 
-              {/* Device/category */}
-              {card.device && (
+              {/* Platform - use full title from platformTitle, only show if defined */}
+              {card.platformTitle && (
                 <div className={styles.device}>
                   <span className={styles.deviceLabel}>Platform:</span>
-                  <span className={styles.deviceValue}>{card.device}</span>
+                  <span className={styles.deviceValue}>{card.platformTitle}</span>
                 </div>
               )}
 

@@ -222,6 +222,21 @@
   color: var(--card-overlay-text);
 }
 
+/* Overlay as drag handle - entire text area becomes draggable */
+.overlayDraggable {
+  cursor: grab;
+  touch-action: none;
+  transition: background-color var(--transition-fast);
+}
+
+.overlayDraggable:hover {
+  background: var(--card-overlay-background-hover, rgba(0, 0, 0, 0.75));
+}
+
+.overlayDraggable:active {
+  cursor: grabbing;
+}
+
 /* Fallback for browsers without backdrop-filter */
 @supports not (backdrop-filter: blur(12px)) {
   .overlay {
@@ -256,6 +271,7 @@
   align-items: center;
   gap: var(--spacing-sm);
   min-height: 24px;
+  position: relative;
 }
 
 .overlayYear {
@@ -298,6 +314,29 @@
 .overlayDeviceBadge {
   /* No absolute positioning - part of flex row */
   flex-shrink: 0;
+}
+
+/* Drag grip icon in overlay footer - absolutely positioned in centre */
+.overlayDragIcon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+}
+
+.overlayDraggable:hover .overlayDragIcon {
+  opacity: 0.9;
+}
+
+.dragGripIconSmall {
+  width: 14px;
+  height: 16px;
+  color: var(--card-overlay-text, rgba(255, 255, 255, 0.9));
 }
 
 /* ============================================
@@ -398,39 +437,43 @@
   opacity: 1;
 }
 
-/* Drag handle for card front - positioned at bottom, above overlay */
+/* Drag handle for card front - small icon button in bottom-left corner */
 .dragHandleFront {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: var(--spacing-xs);
+  left: var(--spacing-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--spacing-lg) var(--spacing-md);
-  min-height: 56px;
-  background: rgba(0, 0, 0, 0.4);
+  width: 32px;
+  height: 32px;
+  background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+  border-radius: var(--radius-sm);
   cursor: grab;
-  transition: background-color var(--transition-fast);
+  transition:
+    background-color var(--transition-fast),
+    transform var(--transition-fast);
   touch-action: none;
   z-index: 5; /* Above overlay */
 }
 
 .dragHandleFront:hover {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
+  transform: scale(1.1);
 }
 
 .dragHandleFront:active {
   cursor: grabbing;
+  transform: scale(1.05);
 }
 
 .dragHandleFront .dragGripIconSmall {
-  width: 20px;
-  height: 24px;
-  color: rgba(255, 255, 255, 0.7);
-  opacity: 0.6;
+  width: 16px;
+  height: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0.7;
   transition: opacity var(--transition-fast);
 }
 

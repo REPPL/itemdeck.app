@@ -134,10 +134,23 @@ export function CardFront({
         </button>
       )}
 
-      <div className={styles.overlay}>
+      <div
+        className={[
+          styles.overlay,
+          showDragHandle ? styles.overlayDraggable : "",
+        ].filter(Boolean).join(" ")}
+        {...(showDragHandle ? dragHandleProps : {})}
+        aria-label={showDragHandle ? "Drag to reorder" : undefined}
+      >
         <h3 className={styles.overlayTitle}>{title}</h3>
         <div className={styles.overlayFooter}>
           {subtitle && <span className={styles.overlayYear}>{subtitle}</span>}
+          {/* Drag grip icon shown when draggable - centred */}
+          {showDragHandle && (
+            <div className={styles.overlayDragIcon}>
+              <DragGripIcon />
+            </div>
+          )}
           {showFooterBadge && device && (
             <div className={styles.overlayDeviceBadge}>
               <DeviceBadge device={device} size="small" />
@@ -145,17 +158,6 @@ export function CardFront({
           )}
         </div>
       </div>
-
-      {/* Drag handle at bottom - same position as back */}
-      {showDragHandle && (
-        <div
-          className={styles.dragHandleFront}
-          {...dragHandleProps}
-          aria-label="Drag to reorder"
-        >
-          <DragGripIcon />
-        </div>
-      )}
     </div>
   );
 }

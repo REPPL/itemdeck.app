@@ -53,8 +53,11 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
   /** Rank from metadata (parsed as number or null) */
   rank: number | null;
 
-  /** Device/platform from metadata */
+  /** Device/platform short name from metadata (for badges) */
   device?: string;
+
+  /** Platform full title for detail view */
+  platformTitle?: string;
 
   /** Image attribution/source information (e.g., Wikimedia Commons) */
   imageAttribution?: string;
@@ -220,6 +223,7 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
       categoryTitle: platform?.title as string | undefined,
       rank,
       device: (platform?.shortTitle ?? platform?.title) as string | undefined,
+      platformTitle: platform?.title as string | undefined,
       imageAttribution: formatAttribution(images),
       logoUrl: platform?.logoUrl as string | undefined,
       metadata: Object.fromEntries(

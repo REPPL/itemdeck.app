@@ -147,8 +147,8 @@ function CloseIcon() {
 const tabs: Tab[] = [
   { id: "system", label: "System", icon: <SystemIcon /> },
   { id: "theme", label: "Theme", icon: <ThemeIcon /> },
-  { id: "cards", label: "Cards", icon: <CardIcon /> },
   { id: "config", label: "Config", icon: <ConfigIcon /> },
+  { id: "cards", label: "Cards", icon: <CardIcon /> },
 ];
 
 // Layout Mode - not yet implemented
@@ -180,8 +180,12 @@ export function SettingsPanel({
   const {
     reduceMotion,
     highContrast,
+    showHelpButton,
+    showSettingsButton,
     setReduceMotion,
     setHighContrast,
+    setShowHelpButton,
+    setShowSettingsButton,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -231,11 +235,7 @@ export function SettingsPanel({
         return (
           <>
             <div className={styles.row}>
-              <span className={styles.label}>Refresh Data</span>
-              <RefreshButton size="small" />
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Theme</span>
+              <span className={styles.label}>Dark Mode</span>
               <ThemeToggle />
             </div>
             <div className={styles.row}>
@@ -269,6 +269,28 @@ export function SettingsPanel({
                 <span className={styles.toggleSlider} />
               </label>
             </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Show Help Button</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={showHelpButton}
+                  onChange={(e) => { setShowHelpButton(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Show Settings Button</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={showSettingsButton}
+                  onChange={(e) => { setShowSettingsButton(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
             {onDevtoolsToggle && (
               <div className={styles.row}>
                 <span className={styles.label}>TanStack DevTools</span>
@@ -282,6 +304,11 @@ export function SettingsPanel({
                 </label>
               </div>
             )}
+            <div className={styles.divider} />
+            <div className={styles.row}>
+              <span className={styles.label}>Refresh Data</span>
+              <RefreshButton size="small" />
+            </div>
           </>
         );
 

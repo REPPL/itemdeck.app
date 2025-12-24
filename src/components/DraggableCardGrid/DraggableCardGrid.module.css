@@ -8,7 +8,6 @@
 .grid {
   display: grid;
   justify-content: center;
-  padding: var(--spacing-md);
   min-height: 100%;
 }
 

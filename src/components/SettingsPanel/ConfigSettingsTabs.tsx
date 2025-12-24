@@ -2,9 +2,9 @@
  * ConfigSettingsTabs - Sub-tabbed interface for configuration settings.
  *
  * Top-level Configuration tab with sub-tabs:
- * - Order: Shuffle on Load, Sort By, Sort Direction (sort only visible when shuffle off)
- * - Card: Field mapping split between Front (Footer Badge, Unranked Text) and Back (Subtitle, Logo)
- * - Misc: Other configurable options
+ * - Display Order: Sort By, Sort Direction (when shuffle is off)
+ * - Front Face: Footer Badge Field, Unranked Text
+ * - Back Face: Subtitle Field, Logo Field
  */
 
 import { useState, useCallback } from "react";
@@ -21,12 +21,12 @@ import {
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-type ConfigSubTab = "order" | "card" | "misc";
+type ConfigSubTab = "order" | "front" | "back";
 
 const subTabs: { id: ConfigSubTab; label: string }[] = [
-  { id: "order", label: "Order" },
-  { id: "card", label: "Card" },
-  { id: "misc", label: "Misc" },
+  { id: "order", label: "Display Order" },
+  { id: "front", label: "Front Face" },
+  { id: "back", label: "Back Face" },
 ];
 
 /**
@@ -37,7 +37,6 @@ export function ConfigSettingsTabs() {
 
   const {
     shuffleOnLoad,
-    setShuffleOnLoad,
     rankPlaceholderText,
     setRankPlaceholderText,
     fieldMapping,
@@ -63,19 +62,11 @@ export function ConfigSettingsTabs() {
       case "order":
         return (
           <>
-            <div className={styles.row}>
-              <span className={styles.label}>Shuffle on Load</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={shuffleOnLoad}
-                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            {/* Sort options only visible when shuffle is off */}
-            {!shuffleOnLoad && (
+            {shuffleOnLoad ? (
+              <p className={styles.themeInfo}>
+                Shuffle is enabled. Disable &ldquo;Shuffle on Load&rdquo; in Cards &gt; Layout to configure sort order.
+              </p>
+            ) : (
               <>
                 <div className={styles.row}>
                   <span className={styles.label}>Sort By</span>
@@ -124,11 +115,9 @@ export function ConfigSettingsTabs() {
           </>
         );
 
-      case "card":
+      case "front":
         return (
           <>
-            {/* Front Face Fields */}
-            <h4 className={styles.subsectionTitle}>Front Face</h4>
             <div className={styles.row}>
               <span className={styles.label}>Footer Badge Field</span>
               <select
@@ -153,9 +142,12 @@ export function ConfigSettingsTabs() {
                 aria-label="Rank placeholder text"
               />
             </div>
+          </>
+        );
 
-            {/* Back Face Fields */}
-            <h4 className={styles.subsectionTitle}>Back Face</h4>
+      case "back":
+        return (
+          <>
             <div className={styles.row}>
               <span className={styles.label}>Subtitle Field</span>
               <select
@@ -182,15 +174,6 @@ export function ConfigSettingsTabs() {
                 ))}
               </select>
             </div>
-          </>
-        );
-
-      case "misc":
-        return (
-          <>
-            <p className={styles.themeInfo}>
-              Additional configuration options will appear here as features are added.
-            </p>
           </>
         );
     }

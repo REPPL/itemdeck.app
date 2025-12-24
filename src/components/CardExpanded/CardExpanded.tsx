@@ -12,7 +12,23 @@ import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import type { DisplayCard } from "@/hooks/useCollection";
+import type { DetailLink } from "@/types/links";
 import styles from "./CardExpanded.module.css";
+
+/**
+ * Deduplicate links by source, keeping only the first link per source.
+ */
+function deduplicateLinksBySource(links: DetailLink[]): DetailLink[] {
+  const seen = new Set<string>();
+  return links.filter((link) => {
+    const key = link.source ?? link.label ?? link.url;
+    if (seen.has(key)) {
+      return false;
+    }
+    seen.add(key);
+    return true;
+  });
+}
 
 /**
  * External link icon.
@@ -335,7 +351,7 @@ export function CardExpanded({
                         )}
                         {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
                           <div className={styles.platformLinks}>
-                            {card.categoryInfo.detailUrls.map((link, index) => (
+                            {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
                               <a
                                 key={index}
                                 href={link.url}
@@ -370,9 +386,9 @@ export function CardExpanded({
                       <span>Acknowledgement</span>
                     </button>
                   )}
-                  {/* Show multiple detail URLs if available, fallback to single detailUrl */}
+                  {/* Show detail URLs deduplicated by source */}
                   {card.detailUrls && card.detailUrls.length > 0 ? (
-                    card.detailUrls.map((link, index) => (
+                    deduplicateLinksBySource(card.detailUrls).map((link, index) => (
                       <a
                         key={index}
                         href={link.url}

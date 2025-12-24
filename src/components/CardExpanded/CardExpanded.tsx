@@ -260,7 +260,7 @@ export function CardExpanded({
             {/* Header row: Rank badge (left) and Close button (right) */}
             <div className={styles.headerRow}>
               <div className={styles.rankBadge}>
-                <RankBadge rank={card.rank} size="large" />
+                <RankBadge rank={card.order ?? card.rank ?? null} size="large" />
               </div>
               <button
                 type="button"

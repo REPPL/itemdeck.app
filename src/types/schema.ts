@@ -1,11 +1,21 @@
 /**
- * Schema type definitions for the v1 collection format.
+ * Schema type definitions for the v2 collection format.
  *
  * Defines the Entity-Relationship data model for flexible collections.
+ * Supports structured ratings, multiple detail URLs, and dynamic field discovery.
  */
 
 import type { Image } from "./image";
 import type { DisplayConfig } from "./display";
+
+// Re-export v2 types for convenience
+export type { Rating, RatingValue } from "./rating";
+export type { DetailUrls, DetailLink } from "./links";
+
+/**
+ * Schema version identifiers.
+ */
+export type SchemaVersion = "v1" | "v2";
 
 /**
  * Field types supported by the schema.
@@ -20,7 +30,9 @@ export type FieldType =
   | "enum"
   | "array"
   | "object"
-  | "images";
+  | "images"
+  | "rating"      // v2: Structured rating with source metadata
+  | "detailUrls"; // v2: Multiple detail links with sources
 
 /**
  * Relationship cardinality types.
@@ -120,7 +132,7 @@ export interface CollectionMetadata {
 /**
  * Complete collection definition.
  *
- * The root schema for a v1 collection.
+ * The root schema for a v1 or v2 collection.
  */
 export interface CollectionDefinition {
   /** Schema URL for validation */
@@ -134,6 +146,9 @@ export interface CollectionDefinition {
 
   /** Collection description */
   description?: string;
+
+  /** Schema version (v1 or v2) - explicit in v2 collections */
+  schemaVersion?: SchemaVersion;
 
   /** Semantic version */
   version?: string;
@@ -149,6 +164,32 @@ export interface CollectionDefinition {
 
   /** Display configuration */
   display?: DisplayConfig;
+}
+
+/**
+ * Detect the schema version from a collection definition.
+ *
+ * @param definition - Collection definition to check
+ * @returns Detected schema version
+ */
+export function detectSchemaVersion(
+  definition: CollectionDefinition
+): SchemaVersion {
+  // Explicit version takes precedence
+  if (definition.schemaVersion) {
+    return definition.schemaVersion;
+  }
+
+  // Check for v2 features
+  for (const entityType of Object.values(definition.entityTypes)) {
+    for (const field of Object.values(entityType.fields)) {
+      if (field.type === "rating" || field.type === "detailUrls") {
+        return "v2";
+      }
+    }
+  }
+
+  return "v1";
 }
 
 /**

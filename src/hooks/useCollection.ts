@@ -2,7 +2,7 @@
  * Collection data fetching hook.
  *
  * Provides TanStack Query wrapper for fetching collection data
- * from various sources (local, GitHub). Supports both legacy and v1 schema formats.
+ * from various sources (local, GitHub). Supports both legacy, v1, and v2 schema formats.
  */
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
@@ -19,12 +19,16 @@ import {
   createResolverContext,
   resolveAllRelationships,
   getEntityRank,
-  getPrimaryImageUrl,
   getImageUrls,
+  getPrimaryImage,
 } from "@/loaders";
 import type { Image } from "@/types/image";
 import type { ResolvedEntity } from "@/types/schema";
 import type { DisplayConfig } from "@/types/display";
+import type { RatingValue } from "@/types/rating";
+import type { DetailLink } from "@/types/links";
+import { normaliseRating } from "@/types/rating";
+import { normaliseDetailUrls } from "@/types/links";
 
 /**
  * Local data source configuration.
@@ -39,6 +43,15 @@ interface LocalSourceConfig {
  *
  * Extends CardWithCategory but ensures imageUrl and imageUrls are always present
  * (placeholder is used for cards without images).
+ *
+ * v2 additions:
+ * - rating: Structured rating with source metadata
+ * - detailUrls: Multiple detail links with sources
+ * - primaryImage: Full primary image object for attribution display
+ *
+ * Terminology (v2):
+ * - Uses generic terms (category, order) instead of game-specific (platform, rank)
+ * - Legacy aliases maintained for backward compatibility
  */
 export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageUrls"> {
   /** Primary image URL (always present - placeholder used if not in source) */
@@ -50,23 +63,42 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
   /** Flattened category title for display */
   categoryTitle?: string;
 
-  /** Rank from metadata (parsed as number or null) */
-  rank: number | null;
+  /** Short category name for badges (was: device) */
+  categoryShort?: string;
 
-  /** Device/platform short name from metadata (for badges) */
-  device?: string;
-
-  /** Platform full title for detail view */
-  platformTitle?: string;
+  /** Order within category (was: rank) - null if not ordered */
+  order: number | null;
 
   /** Image attribution/source information (e.g., Wikimedia Commons) */
   imageAttribution?: string;
 
-  /** Logo URL for card back (from platform) */
+  /** Logo URL for card back (from category) */
   logoUrl?: string;
 
   /** Resolved entity data for dynamic field path resolution */
   _resolved?: Record<string, unknown>;
+
+  // Legacy aliases for backward compatibility
+
+  /** @deprecated Use categoryShort instead */
+  device?: string;
+
+  /** @deprecated Use categoryTitle instead */
+  platformTitle?: string;
+
+  /** @deprecated Use order instead */
+  rank?: number | null;
+
+  // v2 additions
+
+  /** Structured rating with source metadata (v2) */
+  rating?: RatingValue;
+
+  /** Multiple detail URLs with source info (v2) */
+  detailUrls?: DetailLink[];
+
+  /** Full primary image object for attribution display (v2) */
+  primaryImage?: Image;
 
   /** Additional entity fields for field path resolution */
   [key: string]: unknown;
@@ -179,11 +211,8 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
   const cards: DisplayCard[] = resolvedEntities.map((entity: ResolvedEntity) => {
     const images = entity.images;
     const imageUrls = getImageUrls(images);
-    const primaryImageUrl = getPrimaryImageUrl(
-      images,
-      undefined,
-      placeholder(entity.id)
-    );
+    const primaryImage = getPrimaryImage(images);
+    const primaryImageUrl = primaryImage?.url ?? placeholder(entity.id);
 
     // Get resolved platform
     const platform = entity._resolved?.platform as ResolvedEntity | undefined;
@@ -210,6 +239,21 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
       year = undefined;
     }
 
+    // v2: Normalise rating if present
+    const entityRating = entity.rating ?? entity.averageRating;
+    const rating = entityRating !== undefined
+      ? normaliseRating(entityRating as number | { score: number })
+      : undefined;
+
+    // v2: Normalise detailUrls if present
+    const detailUrls = normaliseDetailUrls(
+      entity.detailUrls as string | { url: string } | { url: string }[] | undefined
+    );
+
+    // v2: Use generic terminology
+    const categoryShort = (platform?.shortTitle ?? platform?.title) as string | undefined;
+    const order = rank;
+
     // Build DisplayCard with all entity fields for field path resolution
     const displayCard: DisplayCard = {
       // Core required fields
@@ -220,20 +264,30 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
       detailUrl: entity.detailUrl as string | undefined,
       imageUrl: primaryImageUrl,
       imageUrls: imageUrls.length > 0 ? imageUrls : [placeholder(entity.id)],
+      // v2 terminology
       categoryTitle: platform?.title as string | undefined,
-      rank,
-      device: (platform?.shortTitle ?? platform?.title) as string | undefined,
-      platformTitle: platform?.title as string | undefined,
+      categoryShort,
+      order,
       imageAttribution: formatAttribution(images),
       logoUrl: platform?.logoUrl as string | undefined,
+      // Legacy aliases for backward compatibility
+      device: categoryShort,
+      platformTitle: platform?.title as string | undefined,
+      rank: order,
       metadata: Object.fromEntries(
         Object.entries({
           category: entity.platform as string | undefined,
-          rank: rank !== null ? String(rank) : undefined,
+          order: order !== null ? String(order) : undefined,
+          // Legacy alias
+          rank: order !== null ? String(order) : undefined,
         }).filter((entry): entry is [string, string] => entry[1] !== undefined)
       ),
       // Include resolved relationships for field path resolution
       _resolved: entity._resolved,
+      // v2 additions
+      rating,
+      detailUrls: detailUrls.length > 0 ? detailUrls : undefined,
+      primaryImage,
     };
 
     // Copy all additional entity fields for field path resolution
@@ -311,20 +365,24 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       imageUrls = [placeholderUrl];
     }
 
-    // Parse rank from metadata
-    const rankStr = card.metadata?.rank;
-    const rank = rankStr ? parseInt(rankStr, 10) : null;
+    // Parse order/rank from metadata
+    const rankStr = card.metadata?.rank ?? card.metadata?.order;
+    const order = rankStr ? parseInt(rankStr, 10) : null;
+    const validOrder = Number.isNaN(order) ? null : order;
 
-    // Extract device from metadata or category
-    const device = card.metadata?.device ?? card.category?.title;
+    // Extract category short name from metadata or category
+    const categoryShort = card.metadata?.device ?? card.category?.title;
 
     return {
       ...card,
       imageUrl: imageUrls[0] ?? placeholderUrl,
       imageUrls,
       categoryTitle: card.category?.title,
-      rank: Number.isNaN(rank) ? null : rank,
-      device,
+      categoryShort,
+      order: validOrder,
+      // Legacy aliases
+      rank: validOrder,
+      device: categoryShort,
     };
   });
 
@@ -366,7 +424,7 @@ export function useLocalCollection(
 /**
  * Default local data path.
  */
-const DEFAULT_LOCAL_PATH = "/data/demo";
+const DEFAULT_LOCAL_PATH = "/data/retro-games";
 
 /**
  * Hook for fetching the default local collection.

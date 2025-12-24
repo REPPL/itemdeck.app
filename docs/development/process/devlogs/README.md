@@ -12,6 +12,7 @@ Development narratives documenting how each milestone was built.
 | [v0.4.1](./v0.4.1/README.md) | Settings & Themes | Complete |
 | [v0.5.0](./v0.5.0/README.md) | Schema Design | Complete |
 | [v0.6.0](./v0.6.0/README.md) | Schema Loader | Complete |
+| [v0.7.0](./v0.7.0/README.md) | Schema Flexibility | Complete |
 
 ## Structure
 

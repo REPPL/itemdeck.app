@@ -23,7 +23,7 @@ Central hub for Itemdeck development planning, roadmap, and process documentatio
 | [v0.4.0 Performance](./roadmap/milestones/v0.4.0.md) | ✅ Complete | Virtualisation, lazy loading, drag |
 | [v0.5.0 Schema Design](./roadmap/milestones/v0.5.0.md) | ✅ Complete | JSON Schema, Entity-Relationship |
 | [v0.6.0 Schema Loader](./roadmap/milestones/v0.6.0.md) | ✅ Complete | Loaders, resolvers, migration |
-| v0.7.0 TBD | 📋 Planned | TBD |
+| [v0.7.0 Schema Flexibility](./roadmap/milestones/v0.7.0.md) | 📋 Planned | Schema types, Zod, field discovery |
 | v0.8.0 Visual Overhaul | 📋 Planned | UI overhaul, navigation |
 
 ## Directory Structure

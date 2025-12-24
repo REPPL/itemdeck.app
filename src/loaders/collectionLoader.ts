@@ -1,15 +1,21 @@
 /**
- * Collection loader for v1 schema format.
+ * Collection loader for v1/v2 schema format.
  *
  * Loads and parses collection definitions from JSON files.
+ * Supports Zod validation for v2 schemas with helpful error messages.
  */
 
 import type {
   CollectionDefinition,
   Entity,
   LoadedCollection,
+  SchemaVersion,
 } from "@/types/schema";
-import { getPrimaryEntityType } from "@/types/schema";
+import { getPrimaryEntityType, detectSchemaVersion } from "@/types/schema";
+import {
+  safeValidateCollectionDefinition,
+  formatValidationError,
+} from "@/schemas/v2";
 
 /**
  * Load a collection definition from a path.
@@ -35,9 +41,14 @@ export async function loadCollectionDefinition(
 /**
  * Load entities of a specific type from a collection.
  *
- * Supports both single file and directory patterns:
- * - `entities/{type}.json` - Single file with array of entities
- * - `entities/{type}/*.json` - Directory with individual entity files
+ * Supports multiple patterns in order:
+ * 1. `{type}/index.json` - Index file listing entity IDs to load
+ * 2. `{type}/_index.json` - Alternative index file location
+ * 3. `{type}s.json` - Plural form single file with array
+ * 4. `{type}.json` - Single file with array of entities
+ *
+ * For index-based loading, the index file should contain an array of entity IDs.
+ * Individual entities are then loaded from `{type}/{id}.json`.
  *
  * @param basePath - Base path to the collection directory
  * @param entityType - Type of entities to load
@@ -47,8 +58,53 @@ export async function loadEntities(
   basePath: string,
   entityType: string
 ): Promise<Entity[]> {
-  // Try single file first
-  const singleFileUrl = `${basePath}/entities/${entityType}.json`;
+  // Pattern 1: Try index.json in entity type directory
+  const indexUrl = `${basePath}/${entityType}s/index.json`;
+  const altIndexUrl = `${basePath}/${entityType}s/_index.json`;
+
+  // Try index-based loading first
+  for (const url of [indexUrl, altIndexUrl]) {
+    try {
+      const response = await fetch(url);
+
+      if (response.ok) {
+        const indexData = (await response.json()) as unknown;
+
+        if (Array.isArray(indexData)) {
+          // Load individual entity files
+          const entities = await loadEntitiesFromDirectory(
+            `${basePath}/${entityType}s`,
+            indexData as string[]
+          );
+          return entities;
+        }
+      }
+    } catch {
+      // Index file doesn't exist, continue to next pattern
+    }
+  }
+
+  // Pattern 2: Try plural form single file
+  const pluralFileUrl = `${basePath}/${entityType}s.json`;
+
+  try {
+    const response = await fetch(pluralFileUrl);
+
+    if (response.ok) {
+      const data = (await response.json()) as unknown;
+
+      if (Array.isArray(data)) {
+        return data as Entity[];
+      }
+
+      return [data as Entity];
+    }
+  } catch {
+    // Plural file doesn't exist
+  }
+
+  // Pattern 3: Try singular form single file
+  const singleFileUrl = `${basePath}/${entityType}.json`;
 
   try {
     const response = await fetch(singleFileUrl);
@@ -64,30 +120,42 @@ export async function loadEntities(
       return [data as Entity];
     }
   } catch {
-    // File doesn't exist, try plural form
-  }
-
-  // Try plural form
-  const pluralFileUrl = `${basePath}/entities/${entityType}s.json`;
-
-  try {
-    const response = await fetch(pluralFileUrl);
-
-    if (response.ok) {
-      const data = (await response.json()) as unknown;
-
-      if (Array.isArray(data)) {
-        return data as Entity[];
-      }
-
-      return [data as Entity];
-    }
-  } catch {
-    // Plural file doesn't exist either
+    // File doesn't exist
   }
 
   // Return empty array if no entities found
   return [];
+}
+
+/**
+ * Load individual entity files from a directory.
+ *
+ * @param directoryPath - Path to the entity directory
+ * @param entityIds - Array of entity IDs to load
+ * @returns Array of loaded entities
+ */
+async function loadEntitiesFromDirectory(
+  directoryPath: string,
+  entityIds: string[]
+): Promise<Entity[]> {
+  const entityPromises = entityIds.map(async (id) => {
+    const entityUrl = `${directoryPath}/${id}.json`;
+
+    try {
+      const response = await fetch(entityUrl);
+
+      if (response.ok) {
+        return (await response.json()) as Entity;
+      }
+    } catch {
+      console.warn(`Failed to load entity: ${entityUrl}`);
+    }
+
+    return null;
+  });
+
+  const results = await Promise.all(entityPromises);
+  return results.filter((entity): entity is Entity => entity !== null);
 }
 
 /**
@@ -134,30 +202,33 @@ export async function loadCollection(
 /**
  * Validate that data is a valid collection definition.
  *
+ * Uses Zod validation for comprehensive type checking with helpful error messages.
+ *
  * @param data - Unknown data to validate
  * @returns Validated collection definition
  * @throws Error if validation fails
  */
 function validateCollectionDefinition(data: unknown): CollectionDefinition {
-  if (typeof data !== "object" || data === null) {
-    throw new Error("Collection definition must be an object");
+  // Use Zod for comprehensive validation
+  const result = safeValidateCollectionDefinition(data);
+
+  if (result.success) {
+    return result.data as CollectionDefinition;
   }
 
-  const obj = data as Record<string, unknown>;
+  // Format validation errors for helpful messages
+  const errorMessage = formatValidationError(result.error);
+  throw new Error(`Invalid collection definition:\n${errorMessage}`);
+}
 
-  if (typeof obj.id !== "string" || obj.id.length === 0) {
-    throw new Error("Collection must have a non-empty id");
-  }
-
-  if (typeof obj.name !== "string" || obj.name.length === 0) {
-    throw new Error("Collection must have a non-empty name");
-  }
-
-  if (typeof obj.entityTypes !== "object" || obj.entityTypes === null) {
-    throw new Error("Collection must have entityTypes defined");
-  }
-
-  return data as CollectionDefinition;
+/**
+ * Get the schema version of a collection.
+ *
+ * @param definition - Collection definition
+ * @returns Schema version (v1 or v2)
+ */
+export function getSchemaVersion(definition: CollectionDefinition): SchemaVersion {
+  return detectSchemaVersion(definition);
 }
 
 /**
@@ -167,18 +238,47 @@ function validateCollectionDefinition(data: unknown): CollectionDefinition {
  * @returns True if the path contains a v1 collection
  */
 export async function isV1Collection(basePath: string): Promise<boolean> {
+  const version = await detectCollectionVersion(basePath);
+  return version === "v1";
+}
+
+/**
+ * Check if a path points to a v2 schema collection.
+ *
+ * @param basePath - Base path to check
+ * @returns True if the path contains a v2 collection
+ */
+export async function isV2Collection(basePath: string): Promise<boolean> {
+  const version = await detectCollectionVersion(basePath);
+  return version === "v2";
+}
+
+/**
+ * Detect the schema version of a collection at a path.
+ *
+ * @param basePath - Base path to check
+ * @returns Schema version or undefined if not a valid collection
+ */
+export async function detectCollectionVersion(
+  basePath: string
+): Promise<SchemaVersion | undefined> {
   try {
     const response = await fetch(`${basePath}/collection.json`);
 
     if (!response.ok) {
-      return false;
+      return undefined;
     }
 
     const data = (await response.json()) as Record<string, unknown>;
 
-    // Check for entityTypes property (v1 schema indicator)
-    return "entityTypes" in data;
+    // Check for entityTypes property (required for both v1 and v2)
+    if (!("entityTypes" in data)) {
+      return undefined;
+    }
+
+    // Use detectSchemaVersion for accurate version detection
+    return detectSchemaVersion(data as unknown as CollectionDefinition);
   } catch {
-    return false;
+    return undefined;
   }
 }

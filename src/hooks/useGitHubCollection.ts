@@ -130,20 +130,24 @@ export function useGitHubCollection(
           imageUrls = [placeholder];
         }
 
-        // Parse rank from metadata
-        const rankStr = card.metadata?.rank;
-        const rank = rankStr ? parseInt(rankStr, 10) : null;
+        // Parse order/rank from metadata
+        const rankStr = card.metadata?.rank ?? card.metadata?.order;
+        const order = rankStr ? parseInt(rankStr, 10) : null;
+        const validOrder = Number.isNaN(order) ? null : order;
 
-        // Extract device from metadata or category
-        const device = card.metadata?.device ?? card.category?.title;
+        // Extract category short name from metadata or category
+        const categoryShort = card.metadata?.device ?? card.category?.title;
 
         return {
           ...card,
           imageUrl: imageUrls[0] ?? placeholder,
           imageUrls,
           categoryTitle: card.category?.title,
-          rank: Number.isNaN(rank) ? null : rank,
-          device,
+          categoryShort,
+          order: validOrder,
+          // Legacy aliases
+          rank: validOrder,
+          device: categoryShort,
         };
       });
 

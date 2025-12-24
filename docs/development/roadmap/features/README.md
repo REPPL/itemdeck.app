@@ -59,22 +59,36 @@ Feature specifications for Itemdeck development.
 | [F-015](./planned/F-015-image-lazy-loading.md) | Image Lazy Loading | 📋 Planned |
 | [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
 
-### v0.5.0 - Visual Overhaul & Navigation
+### v0.5.0 - Schema Design
+
+*Schema design milestone - no individual feature files (spec-based)*
+
+### v0.6.0 - Schema Loader
+
+*Schema loader milestone - no individual feature files (implementation-based)*
+
+### v0.7.0 - Schema Flexibility
 
 | ID | Feature | Status |
 |----|---------|--------|
-| TBD | To be determined | 📋 Planned |
+| - | Schema Type Definitions (Rating, DetailLink) | ✅ Complete |
+| - | Zod Validation Schemas | ✅ Complete |
+| - | Loader Updates (isPrimary, ratings, detailUrls) | ✅ Complete |
+| - | Dynamic Field Discovery | ✅ Complete |
+| - | Terminology Generalisation (platform → category) | ✅ Complete |
+| [F-020](./completed/F-020-attribution-system.md) | Attribution Display Component | ✅ Complete |
+| - | Demo Data Migration (81 games, individual files) | ✅ Complete |
+| - | Schema v2 Reference Documentation | ✅ Complete |
 
-### v0.6.0 - Quality & Security
+### Future Features (Unassigned)
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-026](./planned/F-026-component-storybook.md) | Component Storybook | 📋 Planned |
-| [F-041](./planned/F-041-card-animations-polish.md) | Card Animation Polish | 📋 Planned |
 | [F-017](./planned/F-017-testing-infrastructure.md) | Testing Infrastructure | 📋 Planned |
 | [F-018](./planned/F-018-security-hardening.md) | Security Hardening | 📋 Planned |
 | [F-019](./planned/F-019-accessibility-audit.md) | Accessibility Audit | 📋 Planned |
-| [F-020](./planned/F-020-attribution-system.md) | Attribution System | 📋 Planned |
+| [F-026](./planned/F-026-component-storybook.md) | Component Storybook | 📋 Planned |
+| [F-041](./planned/F-041-card-animations-polish.md) | Card Animation Polish | 📋 Planned |
 
 ## Status Legend
 

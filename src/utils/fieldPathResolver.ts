@@ -19,6 +19,9 @@ export interface FieldOption {
 
 /**
  * Default field options for card display mapping.
+ *
+ * These are fallback options used when no collection schema is loaded.
+ * v2: Uses generic terminology with legacy aliases.
  */
 export const TITLE_FIELD_OPTIONS: FieldOption[] = [
   { value: "title", label: "Title" },
@@ -26,29 +29,28 @@ export const TITLE_FIELD_OPTIONS: FieldOption[] = [
 
 export const SUBTITLE_FIELD_OPTIONS: FieldOption[] = [
   { value: "year", label: "Year" },
-  { value: "playedSince", label: "Playing Since" },
+  { value: "startDate", label: "Start Date" },
   { value: "status", label: "Status" },
   { value: "none", label: "None" },
 ];
 
 export const FOOTER_BADGE_FIELD_OPTIONS: FieldOption[] = [
-  { value: "platform.shortTitle", label: "Platform (Short)" },
-  { value: "platform.title", label: "Platform (Full)" },
-  { value: "device", label: "Device" },
+  { value: "categoryShort", label: "Category (Short)" },
+  { value: "categoryTitle", label: "Category (Full)" },
   { value: "year", label: "Year" },
   { value: "none", label: "None" },
 ];
 
 export const LOGO_FIELD_OPTIONS: FieldOption[] = [
-  { value: "platform.logoUrl", label: "Platform Logo" },
+  { value: "category.logoUrl", label: "Category Logo" },
   { value: "none", label: "None (App Logo)" },
 ];
 
 export const SORT_FIELD_OPTIONS: FieldOption[] = [
-  { value: "rank", label: "Rank" },
+  { value: "order", label: "Order" },
   { value: "title", label: "Title" },
   { value: "year", label: "Year" },
-  { value: "playedSince", label: "Playing Since" },
+  { value: "startDate", label: "Start Date" },
 ];
 
 /**

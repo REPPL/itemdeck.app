@@ -1,7 +1,8 @@
 /**
- * Image type definitions for the v1 schema.
+ * Image type definitions for the v2 schema.
  *
- * Provides structured image objects with attribution support.
+ * Provides structured image objects with attribution support,
+ * including isPrimary flag and enhanced source links.
  */
 
 /**
@@ -26,13 +27,21 @@ export interface Attribution {
   /** Source of the image (e.g., "Wikimedia Commons") */
   source?: string;
 
+  /** Direct URL to the source page (e.g., Wikipedia File: page) */
+  sourceUrl?: string;
+
   /** Author or creator of the image */
   author?: string;
 
-  /** Licence under which the image is used */
+  /** Licence under which the image is used (e.g., "CC BY-SA 4.0", "fair-use") */
   licence?: string;
 
-  /** URL to the original source or licence */
+  /** URL to the licence text */
+  licenceUrl?: string;
+
+  /**
+   * @deprecated Use sourceUrl instead. Kept for backward compatibility.
+   */
   url?: string;
 }
 
@@ -48,6 +57,9 @@ export interface Image {
   /** Type of image (cover, screenshot, etc.) */
   type?: ImageType;
 
+  /** Whether this is the primary/preferred image for display */
+  isPrimary?: boolean;
+
   /** Accessibility text describing the image */
   alt?: string;
 
@@ -59,6 +71,40 @@ export interface Image {
 
   /** Attribution information */
   attribution?: Attribution;
+}
+
+/**
+ * Get the primary image from an array.
+ *
+ * Priority:
+ * 1. Image with isPrimary=true
+ * 2. Image with type "cover" or "boxart"
+ * 3. First image in array
+ *
+ * @param images - Array of images
+ * @returns Primary image or undefined if empty
+ */
+export function getPrimaryImage(images: Image[]): Image | undefined {
+  if (!images || images.length === 0) {
+    return undefined;
+  }
+
+  // 1. Explicit isPrimary flag
+  const primary = images.find((img) => img.isPrimary);
+  if (primary) {
+    return primary;
+  }
+
+  // 2. Type-based fallback (cover or boxart)
+  const cover = images.find(
+    (img) => img.type === "cover" || img.type === "artwork"
+  );
+  if (cover) {
+    return cover;
+  }
+
+  // 3. First image
+  return images[0];
 }
 
 /**

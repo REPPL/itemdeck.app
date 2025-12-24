@@ -1,7 +1,8 @@
 /**
- * Image selector for v1 schema format.
+ * Image selector for v1/v2 schema format.
  *
  * Parses and evaluates image selection expressions.
+ * Supports isPrimary flag (v2) and type-based filtering (v1/v2).
  */
 
 import type { Image } from "@/types/image";
@@ -11,7 +12,8 @@ import type { Image } from "@/types/image";
  * - `images[0]` - First image by index
  * - `images[type=cover]` - All images of type "cover"
  * - `images[type=cover][0]` - First cover image
- * - `images[type=cover][0] ?? images[0]` - Cover or fallback to first
+ * - `images[isPrimary=true]` - Image marked as primary (v2)
+ * - `images[isPrimary=true][0] ?? images[type=cover][0] ?? images[0]` - Primary or cover or first
  */
 
 /**
@@ -19,7 +21,7 @@ import type { Image } from "@/types/image";
  */
 interface SelectToken {
   type: "index" | "filter" | "fallback";
-  value: string | number;
+  value: string | number | boolean;
   filterField?: string;
 }
 
@@ -48,7 +50,16 @@ function parseExpression(expression: string): SelectToken[][] {
       if (content.includes("=")) {
         const parts = content.split("=").map((s) => s.trim());
         const field = parts[0] ?? "";
-        const value = parts[1] ?? "";
+        const rawValue = parts[1] ?? "";
+
+        // Parse boolean values for isPrimary filter
+        let value: string | boolean = rawValue;
+        if (rawValue === "true") {
+          value = true;
+        } else if (rawValue === "false") {
+          value = false;
+        }
+
         tokens.push({
           type: "filter",
           value,
@@ -183,7 +194,12 @@ export function selectImage(
 /**
  * Get the primary image from an entity.
  *
- * Uses the expression "images[type=cover][0] ?? images[0]" by default.
+ * Priority (v2):
+ * 1. Image with isPrimary=true
+ * 2. Image with type "cover"
+ * 3. First image in array
+ *
+ * Uses the expression "images[isPrimary=true][0] ?? images[type=cover][0] ?? images[0]" by default.
  *
  * @param images - Array of images
  * @param preferredExpression - Optional custom expression
@@ -198,7 +214,7 @@ export function getPrimaryImage(
   }
 
   const expression =
-    preferredExpression ?? "images[type=cover][0] ?? images[0]";
+    preferredExpression ?? "images[isPrimary=true][0] ?? images[type=cover][0] ?? images[0]";
 
   return selectImage(images, expression);
 }

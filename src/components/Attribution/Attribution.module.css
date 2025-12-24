@@ -1,0 +1,58 @@
+/**
+ * Attribution component styles.
+ */
+
+.compact {
+  font-size: var(--font-size-xs, 0.75rem);
+  color: var(--colour-text-muted, rgba(255, 255, 255, 0.6));
+  display: inline;
+}
+
+.full {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.7));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.source {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.author {
+  display: inline-flex;
+  align-items: center;
+}
+
+.licence {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.375rem;
+  background-color: var(--colour-surface-elevated, rgba(255, 255, 255, 0.1));
+  border-radius: 0.25rem;
+  font-size: var(--font-size-xs, 0.75rem);
+}
+
+.link {
+  color: var(--colour-accent, #60a5fa);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  transition: color 0.15s ease;
+}
+
+.link:hover {
+  color: var(--colour-accent-hover, #93c5fd);
+  text-decoration: underline;
+}
+
+.link svg {
+  opacity: 0.7;
+  flex-shrink: 0;
+}

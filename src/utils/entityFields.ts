@@ -35,6 +35,13 @@ const SKIP_FIELDS = new Set([
   "rank",
   "order",
   "myRank",
+  // Title/year shown in header
+  "title",
+  "year",
+  // Summary shown below header
+  "summary",
+  // Redundant release date (year already shown)
+  "originalReleaseDate",
 ]);
 
 /**
@@ -55,15 +62,25 @@ export interface FieldDefinition {
  * Built-in field definitions with friendly labels.
  */
 const FIELD_DEFINITIONS: Record<string, FieldDefinition> = {
+  // Core fields
   title: { label: "Title", type: "text" },
   year: { label: "Year", type: "year" },
   summary: { label: "Summary", type: "text" },
+  // Personal fields (my* prefix)
+  myVerdict: { label: "My verdict", type: "text" },
+  myStartYear: { label: "Playing since", type: "year" },
+  myRating: { label: "My rating", type: "number", format: "stars" },
+  // Legacy personal fields
+  playedSince: { label: "Playing since", type: "year" },
+  verdict: { label: "Verdict", type: "text" },
+  rating: { label: "Rating", type: "number", format: "stars" },
+  status: { label: "Status", type: "enum", values: ["completed", "playing", "backlog", "abandoned"] },
+  // Metadata fields
+  genres: { label: "Genres", type: "text" },
+  averageRating: { label: "Average rating", type: "number" },
+  // Category fields (usually skipped)
   rank: { label: "Rank", type: "number" },
   device: { label: "Platform", type: "text" },
-  playedSince: { label: "Playing since", type: "year" },
-  status: { label: "Status", type: "enum", values: ["completed", "playing", "backlog", "abandoned"] },
-  rating: { label: "My rating", type: "number", format: "stars" },
-  verdict: { label: "Verdict", type: "text" },
   platform: { label: "Platform", type: "text" },
 };
 
@@ -132,8 +149,18 @@ export function formatFieldValue(
   }
 
   if (typeof value === "object") {
-    // For objects like platform, try to get title or shortTitle
     const obj = value as Record<string, unknown>;
+
+    // Handle rating objects (averageRating, rating)
+    if (typeof obj.score === "number") {
+      const score = obj.score;
+      const max = typeof obj.max === "number" ? obj.max : 5;
+      const source = typeof obj.source === "string" ? obj.source : undefined;
+      const stars = "★".repeat(Math.floor(score)) + "☆".repeat(max - Math.floor(score));
+      return source ? `${stars} (${source})` : stars;
+    }
+
+    // For objects like platform, try to get title or shortTitle
     if (typeof obj.title === "string" || typeof obj.title === "number") {
       return String(obj.title);
     }

@@ -323,7 +323,21 @@ export function CardExpanded({
                       <span>Acknowledgement</span>
                     </button>
                   )}
-                  {card.detailUrl && (
+                  {/* Show multiple detail URLs if available, fallback to single detailUrl */}
+                  {card.detailUrls && card.detailUrls.length > 0 ? (
+                    card.detailUrls.map((link, index) => (
+                      <a
+                        key={index}
+                        href={link.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.outlineButton}
+                      >
+                        <span>{link.source ?? link.label ?? "Source"}</span>
+                        <ExternalLinkIcon />
+                      </a>
+                    ))
+                  ) : card.detailUrl ? (
                     <a
                       href={card.detailUrl}
                       target="_blank"
@@ -333,7 +347,7 @@ export function CardExpanded({
                       <span>Source</span>
                       <ExternalLinkIcon />
                     </a>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* More button - primary style on right */}

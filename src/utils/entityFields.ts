@@ -10,17 +10,31 @@
  * These are internal/display fields that shouldn't be shown to users.
  */
 const SKIP_FIELDS = new Set([
+  // Internal fields
   "id",
   "_resolved",
+  "metadata",
+  // Image fields (shown in gallery)
   "images",
   "imageUrl",
   "imageUrls",
   "logoUrl",
-  "detailUrl",
   "imageAttribution",
-  "metadata",
-  "categoryTitle",
+  "primaryImage",
+  // Link fields (shown as buttons)
+  "detailUrl",
+  "detailUrls",
+  // Category fields (shown prominently elsewhere)
   "category",
+  "categoryTitle",
+  "categoryShort",
+  "platform",
+  "platformTitle",
+  "device",
+  // Ranking fields (shown in badge)
+  "rank",
+  "order",
+  "myRank",
 ]);
 
 /**
@@ -185,8 +199,10 @@ export function getDisplayableFields(
 
 /**
  * Fields that should be displayed prominently (not in "more" section).
+ * Note: rank, device, platform are now in SKIP_FIELDS as they're shown
+ * in dedicated UI elements (badge, platform row).
  */
-const PROMINENT_FIELDS = new Set(["title", "year", "rank", "device", "platform", "summary"]);
+const PROMINENT_FIELDS = new Set(["title", "year", "summary"]);
 
 /**
  * Check if a field should be displayed prominently.

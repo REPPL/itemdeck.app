@@ -68,15 +68,19 @@ export async function loadEntities(
       const response = await fetch(url);
 
       if (response.ok) {
-        const indexData = (await response.json()) as unknown;
+        // Verify content type is JSON before parsing
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          const indexData = (await response.json()) as unknown;
 
-        if (Array.isArray(indexData)) {
-          // Load individual entity files
-          const entities = await loadEntitiesFromDirectory(
-            `${basePath}/${entityType}s`,
-            indexData as string[]
-          );
-          return entities;
+          if (Array.isArray(indexData)) {
+            // Load individual entity files
+            const entities = await loadEntitiesFromDirectory(
+              `${basePath}/${entityType}s`,
+              indexData as string[]
+            );
+            return entities;
+          }
         }
       }
     } catch {
@@ -91,13 +95,16 @@ export async function loadEntities(
     const response = await fetch(pluralFileUrl);
 
     if (response.ok) {
-      const data = (await response.json()) as unknown;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = (await response.json()) as unknown;
 
-      if (Array.isArray(data)) {
-        return data as Entity[];
+        if (Array.isArray(data)) {
+          return data as Entity[];
+        }
+
+        return [data as Entity];
       }
-
-      return [data as Entity];
     }
   } catch {
     // Plural file doesn't exist
@@ -110,14 +117,17 @@ export async function loadEntities(
     const response = await fetch(singleFileUrl);
 
     if (response.ok) {
-      const data = (await response.json()) as unknown;
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        const data = (await response.json()) as unknown;
 
-      if (Array.isArray(data)) {
-        return data as Entity[];
+        if (Array.isArray(data)) {
+          return data as Entity[];
+        }
+
+        // Single entity in file
+        return [data as Entity];
       }
-
-      // Single entity in file
-      return [data as Entity];
     }
   } catch {
     // File doesn't exist
@@ -145,7 +155,10 @@ async function loadEntitiesFromDirectory(
       const response = await fetch(entityUrl);
 
       if (response.ok) {
-        return (await response.json()) as Entity;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          return (await response.json()) as Entity;
+        }
       }
     } catch {
       console.warn(`Failed to load entity: ${entityUrl}`);

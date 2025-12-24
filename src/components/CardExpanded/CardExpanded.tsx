@@ -148,6 +148,7 @@ export function CardExpanded({
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
+  const [platformExpanded, setPlatformExpanded] = useState(false);
 
   // Auto-discover displayable fields from the card entity
   const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
@@ -300,11 +301,52 @@ export function CardExpanded({
                 <p className={styles.summary}>{card.summary}</p>
               )}
 
-              {/* Platform - use full title from platformTitle, only show if defined */}
-              {card.platformTitle && (
-                <div className={styles.device}>
-                  <span className={styles.deviceLabel}>Platform:</span>
-                  <span className={styles.deviceValue}>{card.platformTitle}</span>
+              {/* Platform - expandable to show platform details */}
+              {card.categoryInfo && (
+                <div className={styles.platformSection}>
+                  <button
+                    type="button"
+                    className={styles.platformRow}
+                    onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                    aria-expanded={platformExpanded}
+                    aria-controls="platform-details"
+                  >
+                    <span className={styles.platformLabel}>Platform:</span>
+                    <span className={styles.platformValue}>{card.categoryInfo.title}</span>
+                    {card.categoryInfo.year && (
+                      <span className={styles.platformYear}>({card.categoryInfo.year})</span>
+                    )}
+                    <span className={styles.platformChevron}>
+                      <ChevronIcon expanded={platformExpanded} />
+                    </span>
+                  </button>
+                  <AnimatePresence>
+                    {platformExpanded && (
+                      <motion.div
+                        id="platform-details"
+                        className={styles.platformDetails}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: "auto" }}
+                        exit={{ opacity: 0, height: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        {card.categoryInfo.summary && (
+                          <p className={styles.platformSummary}>{card.categoryInfo.summary}</p>
+                        )}
+                        {card.categoryInfo.detailUrl && (
+                          <a
+                            href={card.categoryInfo.detailUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={styles.platformLink}
+                          >
+                            <span>Wikipedia</span>
+                            <ExternalLinkIcon />
+                          </a>
+                        )}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 

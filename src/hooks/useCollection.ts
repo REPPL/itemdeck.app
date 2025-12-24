@@ -95,6 +95,15 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
   /** Full primary image object for attribution display (v2) */
   primaryImage?: Image;
 
+  /** Full category/platform info for expanded display */
+  categoryInfo?: {
+    id: string;
+    title: string;
+    year?: string;
+    summary?: string;
+    detailUrl?: string;
+  };
+
   /** Additional entity fields for field path resolution */
   [key: string]: unknown;
 }
@@ -240,6 +249,14 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       rating,
       detailUrls: detailUrls.length > 0 ? detailUrls : undefined,
       primaryImage,
+      // Category/platform info for expanded view
+      categoryInfo: platform ? {
+        id: platform.id,
+        title: platform.title as string,
+        year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
+        summary: platform.summary as string | undefined,
+        detailUrl: platform.detailUrl as string | undefined,
+      } : undefined,
     };
 
     // Copy all additional entity fields for field path resolution

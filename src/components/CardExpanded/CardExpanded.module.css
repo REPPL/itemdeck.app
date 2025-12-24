@@ -186,6 +186,122 @@
 }
 
 /* ============================================
+   Platform Section (Expandable)
+   ============================================ */
+
+.platformSection {
+  margin-bottom: var(--spacing-md, 16px);
+  border-radius: var(--radius-md, 8px);
+  background: rgba(255, 255, 255, 0.05);
+  overflow: hidden;
+}
+
+.platformRow {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  width: 100%;
+  padding: var(--spacing-sm, 12px);
+  font-size: 0.875rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--transition-fast, 150ms);
+}
+
+.platformRow:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.platformRow:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: -2px;
+}
+
+.platformLabel {
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.platformValue {
+  font-weight: 600;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.platformYear {
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  font-weight: 400;
+}
+
+.platformChevron {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+.platformChevron svg {
+  width: 16px;
+  height: 16px;
+}
+
+.platformDetails {
+  padding: 0 var(--spacing-sm, 12px) var(--spacing-sm, 12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.platformSummary {
+  margin: var(--spacing-sm, 12px) 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+}
+
+.platformLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 6px);
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  colour: white;
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md, 8px);
+  text-decoration: none;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms);
+}
+
+.platformLink:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.platformLink:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.platformLink svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================
    Metadata Section
    ============================================ */
 

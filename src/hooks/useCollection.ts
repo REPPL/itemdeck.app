@@ -2,20 +2,14 @@
  * Collection data fetching hook.
  *
  * Provides TanStack Query wrapper for fetching collection data
- * from various sources (local, GitHub). Supports both legacy, v1, and v2 schema formats.
+ * from local sources. Uses v2 schema format exclusively.
  */
 
 import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
 import { collectionKeys } from "./queryKeys";
-import {
-  collectionSchema,
-  joinCardsWithCategories,
-  type Collection,
-  type CardWithCategory,
-} from "@/schemas";
+import { type Collection, type CardWithCategory } from "@/schemas";
 import {
   loadCollection,
-  detectCollectionVersion,
   createResolverContext,
   resolveAllRelationships,
   getEntityRank,
@@ -119,64 +113,6 @@ interface CollectionResult {
 }
 
 /**
- * Fetch collection data from local JSON files (legacy format).
- *
- * @param basePath - Base path for the collection
- * @returns Collection data with items and categories
- */
-async function fetchLegacyCollection(basePath: string): Promise<Collection> {
-  // Fetch items and categories in parallel
-  const [itemsResponse, categoriesResponse] = await Promise.all([
-    fetch(`${basePath}/items.json`),
-    fetch(`${basePath}/categories.json`),
-  ]);
-
-  if (!itemsResponse.ok) {
-    throw new Error(`Failed to fetch items: ${String(itemsResponse.status)}`);
-  }
-
-  if (!categoriesResponse.ok) {
-    throw new Error(
-      `Failed to fetch categories: ${String(categoriesResponse.status)}`
-    );
-  }
-
-  // Verify content types before parsing
-  const itemsContentType = itemsResponse.headers.get("content-type");
-  const categoriesContentType = categoriesResponse.headers.get("content-type");
-
-  if (!itemsContentType?.includes("application/json")) {
-    throw new Error(`Invalid content type for items: ${itemsContentType ?? "unknown"}`);
-  }
-
-  if (!categoriesContentType?.includes("application/json")) {
-    throw new Error(`Invalid content type for categories: ${categoriesContentType ?? "unknown"}`);
-  }
-
-  const [items, categories] = await Promise.all([
-    itemsResponse.json() as Promise<unknown[]>,
-    categoriesResponse.json() as Promise<unknown[]>,
-  ]);
-
-  // Optionally fetch collection metadata
-  let meta: unknown;
-  try {
-    const metaResponse = await fetch(`${basePath}/collection.json`);
-    if (metaResponse.ok) {
-      const metaContentType = metaResponse.headers.get("content-type");
-      if (metaContentType?.includes("application/json")) {
-        meta = await metaResponse.json() as unknown;
-      }
-    }
-  } catch {
-    // Collection metadata is optional
-  }
-
-  // Validate the assembled collection
-  return collectionSchema.parse({ items, categories, meta });
-}
-
-/**
  * Format attribution from structured Image object.
  */
 function formatAttribution(images: Image[] | undefined): string | undefined {
@@ -204,12 +140,12 @@ function formatAttribution(images: Image[] | undefined): string | undefined {
 }
 
 /**
- * Fetch and process v1 schema collection.
+ * Fetch and process v2 schema collection.
  *
  * @param basePath - Base path for the collection
  * @returns Collection result with display cards
  */
-async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
+async function fetchCollection(basePath: string): Promise<CollectionResult> {
   const loaded = await loadCollection(basePath);
   const context = createResolverContext(loaded.definition, loaded.entities);
 
@@ -347,68 +283,10 @@ async function fetchV1Collection(basePath: string): Promise<CollectionResult> {
 }
 
 /**
- * Fetch collection data, auto-detecting format.
- *
- * @param basePath - Base path for the collection
- * @returns Collection result with display cards
- */
-async function fetchCollection(basePath: string): Promise<CollectionResult> {
-  // Check if this is a v1 or v2 schema collection
-  const version = await detectCollectionVersion(basePath);
-
-  if (version === "v1" || version === "v2") {
-    return fetchV1Collection(basePath);
-  }
-
-  // Fall back to legacy format (items.json + categories.json)
-  const collection = await fetchLegacyCollection(basePath);
-
-  // Join cards with categories for display
-  const cards = joinCardsWithCategories(collection.items, collection.categories);
-
-  // Process cards with placeholder images, image arrays, and metadata extraction
-  const cardsWithImages: DisplayCard[] = cards.map((card) => {
-    // Build imageUrls array: prefer imageUrls, fallback to imageUrl, then placeholder
-    const placeholderUrl = `https://picsum.photos/seed/${card.id}/400/300`;
-    let imageUrls: string[];
-
-    if (card.imageUrls && card.imageUrls.length > 0) {
-      imageUrls = card.imageUrls;
-    } else if (card.imageUrl) {
-      imageUrls = [card.imageUrl];
-    } else {
-      imageUrls = [placeholderUrl];
-    }
-
-    // Parse order/rank from metadata
-    const rankStr = card.metadata?.rank ?? card.metadata?.order;
-    const order = rankStr ? parseInt(rankStr, 10) : null;
-    const validOrder = Number.isNaN(order) ? null : order;
-
-    // Extract category short name from metadata or category
-    const categoryShort = card.metadata?.device ?? card.category?.title;
-
-    return {
-      ...card,
-      imageUrl: imageUrls[0] ?? placeholderUrl,
-      imageUrls,
-      categoryTitle: card.category?.title,
-      categoryShort,
-      order: validOrder,
-      // Legacy aliases
-      rank: validOrder,
-      device: categoryShort,
-    };
-  });
-
-  return { cards: cardsWithImages, collection };
-}
-
-/**
  * Hook for fetching local collection data.
  *
  * Uses TanStack Query for caching, loading states, and error handling.
- * Automatically detects and supports both legacy and v1 schema formats.
+ * Uses v2 schema format exclusively.
  *
  * @param config - Local source configuration
  * @param options - Additional query options

@@ -1,16 +1,15 @@
-import { useState, useCallback } from "react";
-import { SVGPlaceholder } from "./SVGPlaceholder";
-import { ImageSkeleton } from "./ImageSkeleton";
+import { useState, useCallback, useMemo } from "react";
+import { generateColour } from "./placeholderUtils";
 import styles from "./ImageWithFallback.module.css";
 
-type LoadState = "loading" | "loaded" | "fallback" | "placeholder";
+type LoadState = "loading" | "loaded" | "error";
 
 interface ImageWithFallbackProps {
   /** Primary image URL */
   src: string;
   /** Alt text for accessibility */
   alt: string;
-  /** Title for SVG placeholder initials */
+  /** Title for placeholder display */
   title: string;
   /** Optional fallback image URL */
   fallbackSrc?: string;
@@ -21,12 +20,11 @@ interface ImageWithFallbackProps {
 }
 
 /**
- * Image component with fallback chain.
+ * Image component with title placeholder underneath.
  *
- * Load order:
- * 1. Primary src (loading skeleton shown)
- * 2. Fallback src (if provided and primary fails)
- * 3. SVG placeholder with initials (if all fail)
+ * Shows a coloured background with bold title text as the base layer.
+ * The image is overlaid on top and fades in when loaded.
+ * If the image fails to load, the title placeholder remains visible.
  */
 export function ImageWithFallback({
   src,
@@ -39,6 +37,9 @@ export function ImageWithFallback({
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [currentSrc, setCurrentSrc] = useState(src);
 
+  // Generate consistent background colour from title
+  const bgColour = useMemo(() => generateColour(title), [title]);
+
   const handleLoad = useCallback(() => {
     setLoadState("loaded");
   }, []);
@@ -47,38 +48,37 @@ export function ImageWithFallback({
     if (loadState === "loading" && fallbackSrc && currentSrc !== fallbackSrc) {
       // Try fallback image
       setCurrentSrc(fallbackSrc);
-      setLoadState("fallback");
     } else {
-      // Show placeholder
-      setLoadState("placeholder");
+      // Image failed - placeholder will remain visible
+      setLoadState("error");
     }
   }, [loadState, fallbackSrc, currentSrc]);
 
-  // Show placeholder for final fallback state
-  if (loadState === "placeholder") {
-    return (
-      <SVGPlaceholder
-        title={title}
-        className={[styles.image, className ?? ""].join(" ")}
-      />
-    );
-  }
-
   return (
     <div className={styles.container}>
-      {/* Show skeleton while loading */}
-      {loadState === "loading" && (
-        <ImageSkeleton className={styles.skeleton} />
-      )}
+      {/* Base layer: coloured background with title */}
+      <div
+        className={styles.placeholder}
+        style={{ backgroundColor: bgColour }}
+      >
+        <span className={styles.placeholderTitle}>{title}</span>
+      </div>
 
-      <img
-        src={currentSrc}
-        alt={alt}
-        className={[styles.image, className ?? "", loadState === "loading" ? styles.hidden : ""].join(" ")}
-        loading={loading}
-        onLoad={handleLoad}
-        onError={handleError}
-      />
+      {/* Overlay: actual image (fades in when loaded) */}
+      {loadState !== "error" && (
+        <img
+          src={currentSrc}
+          alt={alt}
+          className={[
+            styles.image,
+            className ?? "",
+            loadState === "loaded" ? styles.imageLoaded : styles.imageLoading,
+          ].join(" ")}
+          loading={loading}
+          onLoad={handleLoad}
+          onError={handleError}
+        />
+      )}
     </div>
   );
 }

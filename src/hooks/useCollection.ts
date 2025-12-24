@@ -102,6 +102,8 @@ export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageU
     year?: string;
     summary?: string;
     detailUrls?: DetailLink[];
+    /** Additional fields from the platform entity for dynamic display */
+    additionalFields?: Record<string, unknown>;
   };
 
   /** Additional entity fields for field path resolution */
@@ -250,15 +252,30 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       detailUrls: detailUrls.length > 0 ? detailUrls : undefined,
       primaryImage,
       // Category/platform info for expanded view
-      categoryInfo: platform ? {
-        id: platform.id,
-        title: platform.title as string,
-        year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
-        summary: platform.summary as string | undefined,
-        detailUrls: normaliseDetailUrls(
-          platform.detailUrls as string | { url: string } | { url: string }[] | undefined
-        ),
-      } : undefined,
+      categoryInfo: platform ? (() => {
+        // Extract additional fields (exclude internal/display fields)
+        const skipFields = new Set([
+          "id", "title", "shortTitle", "year", "summary", "images",
+          "detailUrl", "detailUrls", "_resolved", "logoUrl",
+        ]);
+        const additionalFields: Record<string, unknown> = {};
+        for (const [key, value] of Object.entries(platform)) {
+          if (!skipFields.has(key) && value !== undefined && value !== null) {
+            additionalFields[key] = value;
+          }
+        }
+
+        return {
+          id: platform.id,
+          title: platform.title as string,
+          year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
+          summary: platform.summary as string | undefined,
+          detailUrls: normaliseDetailUrls(
+            platform.detailUrls as string | { url: string } | { url: string }[] | undefined
+          ),
+          additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined,
+        };
+      })() : undefined,
     };
 
     // Copy all additional entity fields for field path resolution

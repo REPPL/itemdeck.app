@@ -349,6 +349,33 @@ export function CardExpanded({
                         {card.categoryInfo.summary && (
                           <p className={styles.platformSummary}>{card.categoryInfo.summary}</p>
                         )}
+                        {/* Display additional platform fields dynamically */}
+                        {card.categoryInfo.additionalFields && Object.keys(card.categoryInfo.additionalFields).length > 0 && (
+                          <dl className={styles.platformFields}>
+                            {Object.entries(card.categoryInfo.additionalFields).map(([key, value]) => {
+                              // Format the value for display
+                              const displayValue = typeof value === "string" || typeof value === "number"
+                                ? String(value)
+                                : Array.isArray(value)
+                                  ? value.join(", ")
+                                  : null;
+                              if (!displayValue) return null;
+
+                              // Convert camelCase to Title Case
+                              const label = key
+                                .replace(/([A-Z])/g, " $1")
+                                .replace(/^./, (s) => s.toUpperCase())
+                                .trim();
+
+                              return (
+                                <div key={key} className={styles.platformField}>
+                                  <dt className={styles.platformFieldLabel}>{label}</dt>
+                                  <dd className={styles.platformFieldValue}>{displayValue}</dd>
+                                </div>
+                              );
+                            })}
+                          </dl>
+                        )}
                         {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
                           <div className={styles.platformLinks}>
                             {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (

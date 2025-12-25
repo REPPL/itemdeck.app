@@ -132,7 +132,9 @@
    Card Back Styles (logo + year)
    ============================================ */
 
-/* Logo container - always centred */
+/* Logo container - centred with max-bounds sizing
+   Using max-width and max-height to preserve aspect ratio
+   while ensuring consistent sizing across different logos */
 .logoContainer {
   position: absolute;
   top: 50%;
@@ -141,15 +143,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60%;
-  max-height: 50%;
+  max-width: 70%;
+  max-height: 45%;
   color: var(--card-back-logo-colour);
 }
 
 .logo {
-  width: 100%;
-  height: auto;
+  max-width: 100%;
   max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
   /* For inline SVGs, inherit colour from parent */
   fill: currentColor;

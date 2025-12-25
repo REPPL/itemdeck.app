@@ -67,6 +67,9 @@ interface ImageGalleryProps {
   /** Whether to show dot indicators */
   showDots?: boolean;
 
+  /** Whether to zoom first image to fill (cover) or show at original size (contain) */
+  zoomImage?: boolean;
+
   /** Additional class name for the container */
   className?: string;
 }
@@ -98,6 +101,7 @@ export function ImageGallery({
   onChange,
   showArrows = true,
   showDots = true,
+  zoomImage = true,
   className,
 }: ImageGalleryProps) {
   // Internal state for uncontrolled mode
@@ -223,7 +227,9 @@ export function ImageGallery({
             alt={`${alt} (${String(currentIndex + 1)} of ${String(totalImages)})`}
             className={[
               styles.image,
-              currentIndex === 0 ? styles.imageCover : styles.imageContain,
+              // First image: use cover if zoomImage is true, otherwise contain
+              // Other images: always use contain
+              currentIndex === 0 && zoomImage ? styles.imageCover : styles.imageContain,
             ].join(" ")}
             custom={direction}
             variants={slideVariants}

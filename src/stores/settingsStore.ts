@@ -94,8 +94,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     cardBackgroundColour: "#1a1a2e",
     detailTransparency: "25",
     overlayStyle: "dark",
-    moreButtonLabel: "Details",
-    autoExpandMore: true,
+    moreButtonLabel: "Verdict",
+    autoExpandMore: false,
     zoomImage: false,
   },
   modern: {
@@ -107,8 +107,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     cardBackgroundColour: "#1e293b",
     detailTransparency: "50",
     overlayStyle: "dark",
-    moreButtonLabel: "Details",
-    autoExpandMore: true,
+    moreButtonLabel: "Verdict",
+    autoExpandMore: false,
     zoomImage: false,
   },
   minimal: {
@@ -120,8 +120,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     cardBackgroundColour: "#374151",
     detailTransparency: "75",
     overlayStyle: "dark",
-    moreButtonLabel: "Details",
-    autoExpandMore: true,
+    moreButtonLabel: "Verdict",
+    autoExpandMore: false,
     zoomImage: false,
   },
 };

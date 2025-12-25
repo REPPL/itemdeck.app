@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { DetailLink } from "@/types/links";
 import styles from "./CardExpanded.module.css";
@@ -47,29 +48,6 @@ function ExternalLinkIcon() {
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
-
-/**
- * Chevron icon for expanding/collapsing.
- */
-function ChevronIcon({ expanded }: { expanded: boolean }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      style={{
-        transform: expanded ? "rotate(180deg)" : "rotate(0deg)",
-        transition: "transform 0.2s ease",
-      }}
-    >
-      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
@@ -166,6 +144,14 @@ export function CardExpanded({
   const [showAttribution, setShowAttribution] = useState(false);
   const [platformExpanded, setPlatformExpanded] = useState(false);
 
+  // Get settings from store
+  const visualTheme = useSettingsStore((state) => state.visualTheme);
+  const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
+  const currentCustomisation = themeCustomisations[visualTheme];
+  const moreButtonLabel = currentCustomisation.moreButtonLabel;
+  const autoExpandMore = currentCustomisation.autoExpandMore;
+  const zoomImage = currentCustomisation.zoomImage;
+
   // Auto-discover displayable fields from the card entity
   const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
     // Cast card to record for field discovery
@@ -183,6 +169,21 @@ export function CardExpanded({
       previousActiveElement.current.focus();
     }
   }, [isOpen]);
+
+  // Reset overlay states when closing, auto-expand if setting is enabled when opening
+  useEffect(() => {
+    if (isOpen) {
+      // Auto-expand "More" overlay when opening if setting is enabled
+      if (autoExpandMore && additionalFields.length > 0) {
+        setDetailsExpanded(true);
+      }
+    } else {
+      // Reset all overlay states when closing
+      setDetailsExpanded(false);
+      setShowAttribution(false);
+      setPlatformExpanded(false);
+    }
+  }, [isOpen, autoExpandMore, additionalFields.length]);
 
   // Escape key to close
   useEffect(() => {
@@ -296,6 +297,7 @@ export function CardExpanded({
                 alt={card.title}
                 showArrows
                 showDots
+                zoomImage={zoomImage}
               />
             </div>
 
@@ -337,13 +339,14 @@ export function CardExpanded({
                   {card.imageAttribution && (
                     <button
                       type="button"
-                      className={styles.outlineButton}
+                      className={styles.iconButton}
                       onClick={() => { setShowAttribution(!showAttribution); }}
                       aria-expanded={showAttribution}
                       aria-controls="attribution-overlay"
+                      aria-label="Image acknowledgement"
+                      title="Image acknowledgement"
                     >
                       <InfoIcon />
-                      <span>Acknowledgement</span>
                     </button>
                   )}
                   {/* Show detail URLs deduplicated by source */}
@@ -373,7 +376,7 @@ export function CardExpanded({
                   ) : null}
                 </div>
 
-                {/* More button - primary style on right */}
+                {/* More/Verdict button - primary style on right */}
                 {hasAdditionalFields && (
                   <button
                     type="button"
@@ -382,8 +385,8 @@ export function CardExpanded({
                     aria-expanded={detailsExpanded}
                     aria-controls="more-overlay"
                   >
-                    <ChevronIcon expanded={detailsExpanded} />
-                    <span>More</span>
+                    <InfoIcon />
+                    <span>{moreButtonLabel}</span>
                   </button>
                 )}
               </div>
@@ -450,7 +453,7 @@ export function CardExpanded({
                     transition={{ duration: 0.2, ease: "easeOut" }}
                   >
                     <div className={styles.moreHeader}>
-                      <span className={styles.moreLabel}>Details</span>
+                      <span className={styles.moreLabel}>{moreButtonLabel}</span>
                       <button
                         type="button"
                         className={styles.moreCloseButton}

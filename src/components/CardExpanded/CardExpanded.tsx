@@ -10,6 +10,8 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
+import { SourceIcon, isKnownSource } from "@/components/SourceIcon";
+import { ExternalLinkIcon, CloseIcon, InfoIcon } from "@/components/Icons";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { DisplayCard } from "@/hooks/useCollection";
@@ -29,68 +31,6 @@ function deduplicateLinksBySource(links: DetailLink[]): DetailLink[] {
     seen.add(key);
     return true;
   });
-}
-
-/**
- * External link icon.
- */
-function ExternalLinkIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
-    </svg>
-  );
-}
-
-/**
- * Close icon.
- */
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/**
- * Info icon for acknowledgement button.
- */
-function InfoIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" y1="16" x2="12" y2="12" />
-      <line x1="12" y1="8" x2="12.01" y2="8" />
-    </svg>
-  );
 }
 
 interface CardExpandedProps {
@@ -151,6 +91,9 @@ export function CardExpanded({
   const moreButtonLabel = currentCustomisation.moreButtonLabel;
   const autoExpandMore = currentCustomisation.autoExpandMore;
   const zoomImage = currentCustomisation.zoomImage;
+  const detailAnimationEnabled = currentCustomisation.detailAnimation;
+  const overlayAnimationEnabled = currentCustomisation.overlayAnimation;
+  const verdictAnimationStyle = currentCustomisation.verdictAnimationStyle;
 
   // Auto-discover displayable fields from the card entity
   const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
@@ -252,7 +195,7 @@ export function CardExpanded({
           initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
           animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
           exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
-          transition={{ duration: 0.3 }}
+          transition={{ duration: detailAnimationEnabled ? 0.3 : 0 }}
           onClick={handleBackdropClick}
           aria-hidden="true"
         >
@@ -263,14 +206,13 @@ export function CardExpanded({
             aria-modal="true"
             aria-labelledby="expanded-card-title"
             tabIndex={-1}
-            initial={getOriginStyles()}
+            initial={detailAnimationEnabled ? getOriginStyles() : { opacity: 0 }}
             animate={{ x: 0, y: 0, scale: 1, opacity: 1 }}
-            exit={getOriginStyles()}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 30,
-            }}
+            exit={detailAnimationEnabled ? getOriginStyles() : { opacity: 0 }}
+            transition={detailAnimationEnabled
+              ? { type: "spring", stiffness: 300, damping: 30 }
+              : { duration: 0 }
+            }
             onClick={(e) => {
               e.stopPropagation();
             }}
@@ -299,11 +241,27 @@ export function CardExpanded({
                 showDots
                 zoomImage={zoomImage}
               />
+              {/* Platform button inside gallery, bottom right - inactive when overlay is shown */}
+              {card.categoryInfo && (
+                <button
+                  type="button"
+                  className={[
+                    styles.galleryPlatformButton,
+                    platformExpanded ? styles.galleryPlatformButtonInactive : "",
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                  aria-expanded={platformExpanded}
+                  aria-controls="platform-overlay"
+                >
+                  <span>{card.categoryInfo.title}</span>
+                  <InfoIcon />
+                </button>
+              )}
             </div>
 
             {/* Card info */}
             <div className={styles.info}>
-              {/* Title, year, and platform link row */}
+              {/* Title and year row */}
               <header className={styles.header}>
                 <div className={styles.headerLeft}>
                   <h2 id="expanded-card-title" className={styles.title}>
@@ -311,18 +269,6 @@ export function CardExpanded({
                   </h2>
                   {card.year && <span className={styles.year}>{card.year}</span>}
                 </div>
-                {card.categoryInfo && (
-                  <button
-                    type="button"
-                    className={styles.platformLink}
-                    onClick={() => { setPlatformExpanded(!platformExpanded); }}
-                    aria-expanded={platformExpanded}
-                    aria-controls="platform-overlay"
-                  >
-                    <span>{card.categoryInfo.title}</span>
-                    <InfoIcon />
-                  </button>
-                )}
               </header>
 
               {/* Divider */}
@@ -351,27 +297,50 @@ export function CardExpanded({
                   )}
                   {/* Show detail URLs deduplicated by source */}
                   {card.detailUrls && card.detailUrls.length > 0 ? (
-                    deduplicateLinksBySource(card.detailUrls).map((link, index) => (
-                      <a
-                        key={index}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={styles.outlineButton}
-                      >
-                        <span>{link.source ?? link.label ?? "Source"}</span>
-                        <ExternalLinkIcon />
-                      </a>
-                    ))
+                    deduplicateLinksBySource(card.detailUrls).map((link, index) => {
+                      const hasKnownIcon = isKnownSource(link.url);
+                      return (
+                        <a
+                          key={index}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={hasKnownIcon ? styles.sourceIconButton : styles.outlineButton}
+                          title={link.source ?? link.label ?? "Source"}
+                        >
+                          {hasKnownIcon ? (
+                            <>
+                              <SourceIcon url={link.url} source={link.source} className={styles.sourceIconSvg} />
+                              <ExternalLinkIcon />
+                            </>
+                          ) : (
+                            <>
+                              <span>{link.source ?? link.label ?? "Source"}</span>
+                              <ExternalLinkIcon />
+                            </>
+                          )}
+                        </a>
+                      );
+                    })
                   ) : card.detailUrl ? (
                     <a
                       href={card.detailUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className={styles.outlineButton}
+                      className={isKnownSource(card.detailUrl) ? styles.sourceIconButton : styles.outlineButton}
+                      title="Source"
                     >
-                      <span>Source</span>
-                      <ExternalLinkIcon />
+                      {isKnownSource(card.detailUrl) ? (
+                        <>
+                          <SourceIcon url={card.detailUrl} className={styles.sourceIconSvg} />
+                          <ExternalLinkIcon />
+                        </>
+                      ) : (
+                        <>
+                          <span>Source</span>
+                          <ExternalLinkIcon />
+                        </>
+                      )}
                     </a>
                   ) : null}
                 </div>
@@ -397,10 +366,10 @@ export function CardExpanded({
                   <motion.div
                     id="attribution-overlay"
                     className={styles.attributionOverlay}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={overlayAnimationEnabled ? { opacity: 0, y: 20 } : { opacity: 0 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{ duration: 0.2 }}
+                    exit={overlayAnimationEnabled ? { opacity: 0, y: 20 } : { opacity: 0 }}
+                    transition={{ duration: overlayAnimationEnabled ? 0.2 : 0 }}
                   >
                     <div className={styles.attributionHeader}>
                       <div className={styles.attributionContent}>
@@ -441,115 +410,152 @@ export function CardExpanded({
                 )}
               </AnimatePresence>
 
-              {/* More details overlay */}
-              <AnimatePresence>
-                {detailsExpanded && hasAdditionalFields && (
-                  <motion.div
-                    id="more-overlay"
-                    className={styles.moreOverlay}
-                    initial={{ opacity: 0, y: 20, scaleY: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                    exit={{ opacity: 0, y: 20, scaleY: 0.8 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <div className={styles.moreHeader}>
-                      <span className={styles.moreLabel}>{moreButtonLabel}</span>
-                      <button
-                        type="button"
-                        className={styles.moreCloseButton}
-                        onClick={() => { setDetailsExpanded(false); }}
-                        aria-label="Close details"
-                      >
-                        <CloseIcon />
-                      </button>
-                    </div>
-                    <dl className={styles.metadataList}>
-                      {additionalFields.map(({ key, label, value }) => (
-                        <div key={key} className={styles.metadataItem}>
-                          <dt className={styles.metadataKey}>{label}</dt>
-                          <dd className={styles.metadataValue}>{value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Platform overlay */}
-              <AnimatePresence>
-                {platformExpanded && card.categoryInfo && (
-                  <motion.div
-                    id="platform-overlay"
-                    className={styles.platformOverlay}
-                    initial={{ opacity: 0, y: 20, scaleY: 0.8 }}
-                    animate={{ opacity: 1, y: 0, scaleY: 1 }}
-                    exit={{ opacity: 0, y: 20, scaleY: 0.8 }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                  >
-                    <div className={styles.platformOverlayHeader}>
-                      <div className={styles.platformOverlayTitle}>
-                        <span className={styles.platformOverlayLabel}>Platform</span>
-                        <span className={styles.platformOverlayName}>
-                          {card.categoryInfo.title}
-                          {card.categoryInfo.year && ` (${card.categoryInfo.year})`}
-                        </span>
-                      </div>
-                      <div className={styles.platformOverlayActions}>
-                        {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
-                          deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => (
-                            <a
-                              key={index}
-                              href={link.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={styles.platformOverlayLink}
-                            >
-                              <span>{link.source ?? link.label ?? "Source"}</span>
-                              <ExternalLinkIcon />
-                            </a>
-                          ))
-                        )}
-                        <button
-                          type="button"
-                          className={styles.platformOverlayCloseButton}
-                          onClick={() => { setPlatformExpanded(false); }}
-                          aria-label="Close platform info"
-                        >
-                          <CloseIcon />
-                        </button>
-                      </div>
-                    </div>
-                    {card.categoryInfo.summary && (
-                      <p className={styles.platformOverlaySummary}>{card.categoryInfo.summary}</p>
-                    )}
-                    {card.categoryInfo.additionalFields && Object.keys(card.categoryInfo.additionalFields).length > 0 && (
-                      <dl className={styles.platformOverlayFields}>
-                        {Object.entries(card.categoryInfo.additionalFields).map(([key, value]) => {
-                          const displayValue = typeof value === "string" || typeof value === "number"
-                            ? String(value)
-                            : Array.isArray(value)
-                              ? value.join(", ")
-                              : null;
-                          if (!displayValue) return null;
-
-                          const label = key
-                            .replace(/([A-Z])/g, " $1")
-                            .replace(/^./, (s) => s.toUpperCase())
-                            .trim();
-
-                          return (
-                            <div key={key} className={styles.platformOverlayField}>
-                              <dt className={styles.platformOverlayFieldLabel}>{label}</dt>
-                              <dd className={styles.platformOverlayFieldValue}>{displayValue}</dd>
-                            </div>
-                          );
-                        })}
-                      </dl>
-                    )}
-                  </motion.div>
-                )}
-              </AnimatePresence>
             </div>
+
+            {/* More details overlay - outside info section so it can expand to full panel */}
+            <AnimatePresence>
+              {detailsExpanded && hasAdditionalFields && (
+                <motion.div
+                  id="more-overlay"
+                  className={[
+                    styles.moreOverlay,
+                    verdictAnimationStyle === "flip" ? styles.moreOverlayFlip : "",
+                  ].filter(Boolean).join(" ")}
+                  initial={overlayAnimationEnabled
+                    ? verdictAnimationStyle === "flip"
+                      ? { rotateY: 180, opacity: 0 }
+                      : { opacity: 0, y: 20, scaleY: 0.8 }
+                    : { opacity: 0 }
+                  }
+                  animate={verdictAnimationStyle === "flip"
+                    ? { rotateY: 0, opacity: 1 }
+                    : { opacity: 1, y: 0, scaleY: 1 }
+                  }
+                  exit={overlayAnimationEnabled
+                    ? verdictAnimationStyle === "flip"
+                      ? { rotateY: 180, opacity: 0 }
+                      : { opacity: 0, y: 20, scaleY: 0.8 }
+                    : { opacity: 0 }
+                  }
+                  transition={overlayAnimationEnabled
+                    ? verdictAnimationStyle === "flip"
+                      ? { duration: 0.5, ease: [0.4, 0, 0.2, 1] }
+                      : { duration: 0.2, ease: "easeOut" }
+                    : { duration: 0 }
+                  }
+                  style={verdictAnimationStyle === "flip" ? { transformStyle: "preserve-3d" } : undefined}
+                >
+                  <div className={styles.moreHeader}>
+                    <div className={styles.moreHeaderLeft}>
+                      <span className={styles.moreTitle}>{card.title}</span>
+                      {card.year && <span className={styles.moreYear}>{card.year}</span>}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.moreCloseButton}
+                      onClick={() => { setDetailsExpanded(false); }}
+                      aria-label="Close details"
+                    >
+                      <CloseIcon />
+                    </button>
+                  </div>
+                  <dl className={styles.metadataList}>
+                    {additionalFields.map(({ key, label, value }) => (
+                      <div key={key} className={styles.metadataItem}>
+                        <dt className={styles.metadataKey}>{label}</dt>
+                        <dd className={styles.metadataValue}>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Platform overlay - outside info section so it can expand to full panel */}
+            <AnimatePresence>
+              {platformExpanded && card.categoryInfo && (
+                <motion.div
+                  id="platform-overlay"
+                  className={styles.platformOverlay}
+                  initial={overlayAnimationEnabled ? { opacity: 0, y: 20, scaleY: 0.8 } : { opacity: 0 }}
+                  animate={{ opacity: 1, y: 0, scaleY: 1 }}
+                  exit={overlayAnimationEnabled ? { opacity: 0, y: 20, scaleY: 0.8 } : { opacity: 0 }}
+                  transition={overlayAnimationEnabled ? { duration: 0.2, ease: "easeOut" } : { duration: 0 }}
+                >
+                  <div className={styles.platformOverlayHeader}>
+                    <div className={styles.platformOverlayHeaderLeft}>
+                      <span className={styles.platformOverlayName}>{card.categoryInfo.title}</span>
+                      {card.categoryInfo.year && <span className={styles.platformOverlayYear}>{card.categoryInfo.year}</span>}
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.platformOverlayCloseButton}
+                      onClick={() => { setPlatformExpanded(false); }}
+                      aria-label="Close platform info"
+                    >
+                      <CloseIcon />
+                    </button>
+                  </div>
+                  {card.categoryInfo.summary && (
+                    <p className={styles.platformOverlaySummary}>{card.categoryInfo.summary}</p>
+                  )}
+                  {card.categoryInfo.additionalFields && Object.keys(card.categoryInfo.additionalFields).length > 0 && (
+                    <dl className={styles.platformOverlayFields}>
+                      {Object.entries(card.categoryInfo.additionalFields).map(([key, value]) => {
+                        const displayValue = typeof value === "string" || typeof value === "number"
+                          ? String(value)
+                          : Array.isArray(value)
+                            ? value.join(", ")
+                            : null;
+                        if (!displayValue) return null;
+
+                        const label = key
+                          .replace(/([A-Z])/g, " $1")
+                          .replace(/^./, (s) => s.toUpperCase())
+                          .trim();
+
+                        return (
+                          <div key={key} className={styles.platformOverlayField}>
+                            <dt className={styles.platformOverlayFieldLabel}>{label}</dt>
+                            <dd className={styles.platformOverlayFieldValue}>{displayValue}</dd>
+                          </div>
+                        );
+                      })}
+                    </dl>
+                  )}
+                  {/* Footer with links */}
+                  {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
+                    <div className={styles.platformOverlayFooter}>
+                      {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => {
+                        const hasKnownIcon = isKnownSource(link.url);
+                        return (
+                          <a
+                            key={index}
+                            href={link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={hasKnownIcon ? styles.sourceIconButton : styles.platformOverlayLink}
+                            title={link.source ?? link.label ?? "Source"}
+                          >
+                            {hasKnownIcon ? (
+                              <>
+                                <SourceIcon url={link.url} source={link.source} className={styles.sourceIconSvg} />
+                                <ExternalLinkIcon />
+                              </>
+                            ) : (
+                              <>
+                                <span>{link.source ?? link.label ?? "Source"}</span>
+                                <ExternalLinkIcon />
+                              </>
+                            )}
+                          </a>
+                        );
+                      })}
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.div>
         </motion.div>
       )}

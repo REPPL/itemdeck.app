@@ -14,6 +14,7 @@ Development narratives documenting how each milestone was built.
 | [v0.6.0](./v0.6.0/README.md) | Schema Loader | Complete |
 | [v0.7.0](./v0.7.0/README.md) | Schema Flexibility | Complete |
 | [v0.7.1](./v0.7.1/README.md) | Settings Fixes & Visual Polish | Complete |
+| [v0.7.2](./v0.7.2/README.md) | Visual Polish & Animation Refinements | Complete |
 
 ## Structure
 

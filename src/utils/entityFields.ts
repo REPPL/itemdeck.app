@@ -33,10 +33,12 @@ const SKIP_FIELDS = new Set([
   "platformTitle",
   "originalPlatform",
   "device",
-  // Ranking fields (shown in badge)
-  "rank",
+  // Genre fields (not needed in verdict view)
+  "genre",
+  "genres",
+  // Ranking fields (order is internal, myRank shown in Verdict, skip rank)
   "order",
-  "myRank",
+  "rank",
   // Title/year shown in header
   "title",
   "year",
@@ -44,9 +46,8 @@ const SKIP_FIELDS = new Set([
   "summary",
   // Redundant release date (year already shown)
   "originalReleaseDate",
-  // Rating fields (shown in dedicated section or skip duplicates)
+  // Rating fields (skip personal rating, keep average reviews)
   "rating",
-  "averageRating",
 ]);
 
 /**
@@ -75,6 +76,7 @@ const FIELD_DEFINITIONS: Record<string, FieldDefinition> = {
   myVerdict: { label: "My verdict", type: "text" },
   myStartYear: { label: "Playing since", type: "year" },
   myRating: { label: "My rating", type: "number", format: "stars" },
+  myRank: { label: "My rank", type: "number" },
   // Legacy personal fields
   playedSince: { label: "Playing since", type: "year" },
   verdict: { label: "Verdict", type: "text" },
@@ -82,7 +84,7 @@ const FIELD_DEFINITIONS: Record<string, FieldDefinition> = {
   status: { label: "Status", type: "enum", values: ["completed", "playing", "backlog", "abandoned"] },
   // Metadata fields
   genres: { label: "Genres", type: "text" },
-  averageRating: { label: "Average rating", type: "number" },
+  averageRating: { label: "Reviews", type: "number", format: "stars10" },
   // Category fields (usually skipped)
   rank: { label: "Rank", type: "number" },
   device: { label: "Platform", type: "text" },
@@ -125,13 +127,25 @@ export function formatFieldValue(
     return null;
   }
 
-  // Check for star rating format
+  // Check for star rating format (5-star scale)
   if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars") {
     const valueStr = typeof value === "number" ? String(value) : (typeof value === "string" ? value : "");
     const num = parseFloat(valueStr);
     if (!isNaN(num)) {
       const fullStars = Math.floor(num);
       const emptyStars = 5 - fullStars;
+      return "★".repeat(fullStars) + "☆".repeat(emptyStars);
+    }
+  }
+
+  // Check for 10-star rating format (for review scores)
+  if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars10") {
+    const valueStr = typeof value === "number" ? String(value) : (typeof value === "string" ? value : "");
+    const num = parseFloat(valueStr);
+    if (!isNaN(num)) {
+      // Round to nearest whole star for clean display
+      const fullStars = Math.round(num);
+      const emptyStars = 10 - fullStars;
       return "★".repeat(fullStars) + "☆".repeat(emptyStars);
     }
   }
@@ -159,7 +173,23 @@ export function formatFieldValue(
     // Handle rating objects (averageRating, rating)
     if (typeof obj.score === "number") {
       const score = obj.score;
+      // Default max is 5 (most review scores are out of 5)
+      // For 10-point scales, data should explicitly set max: 10
       const max = typeof obj.max === "number" ? obj.max : 5;
+      const sourceCount = typeof obj.sourceCount === "number" ? obj.sourceCount : undefined;
+
+      // For stars10 format, display as 10-star scale
+      // Normalise score to 10-point scale regardless of original max
+      if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars10") {
+        const normalisedScore = (score / max) * 10;
+        // Round to nearest whole star for clean display
+        const fullStars = Math.round(normalisedScore);
+        const emptyStars = 10 - fullStars;
+        const stars = "★".repeat(fullStars) + "☆".repeat(emptyStars);
+        return sourceCount ? `${stars} (${sourceCount})` : stars;
+      }
+
+      // Default 5-star display
       const source = typeof obj.source === "string" ? obj.source : undefined;
       const stars = "★".repeat(Math.floor(score)) + "☆".repeat(max - Math.floor(score));
       return source ? `${stars} (${source})` : stars;

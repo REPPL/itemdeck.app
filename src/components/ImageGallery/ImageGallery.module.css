@@ -27,15 +27,15 @@
   -webkit-user-drag: none;
 }
 
-/* First image: zoomed 3% beyond frame, aligned to top */
+/* First image: zoomed to fill entire frame, cropping if needed */
 .imageCover {
-  /* Scale 3% larger than container to ensure full coverage */
+  /* Fill the entire container */
   top: 0;
-  left: -1.5%;
-  width: 103%;
-  height: 103%;
+  left: 0;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: top center;
+  object-position: center top;
 }
 
 /* Subsequent images: original size, aligned to top */
@@ -84,7 +84,6 @@
 
 .navButton:hover {
   background: rgba(0, 0, 0, 0.7);
-  transform: translateY(-50%) scale(1.1);
 }
 
 .navButton:focus-visible {
@@ -140,7 +139,6 @@
 
 .dot:hover {
   background: rgba(255, 255, 255, 0.7);
-  transform: scale(1.2);
 }
 
 .dot:focus-visible {
@@ -150,7 +148,6 @@
 
 .dotActive {
   background: white;
-  transform: scale(1.2);
 }
 
 /* ============================================

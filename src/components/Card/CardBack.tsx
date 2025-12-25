@@ -1,3 +1,4 @@
+import { useState } from "react";
 import appLogo from "@/assets/placeholder-logo.svg";
 import type { CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
@@ -45,17 +46,31 @@ export function CardBack({
   showDragHandle = false,
   dragHandleProps,
 }: CardBackProps) {
-  // Use platform logo, fall back to app logo
-  const logoSrc = logoUrl ?? appLogo;
+  const [hasError, setHasError] = useState(false);
+
+  // Use platform logo, fall back to app logo if none provided or on error
+  const logoSrc = (logoUrl && !hasError) ? logoUrl : appLogo;
   const showLogo = display === "logo" || display === "both";
+
+  // Handle image load error - fall back to app logo
+  const handleError = () => {
+    setHasError(true);
+  };
 
   // Don't render anything if display is "none"
   if (display === "none") {
     return <div className={[styles.cardFace, styles.cardBack].join(" ")} />;
   }
 
+  // Build class names - add hasDragHandle when drag handle is shown
+  const backClasses = [
+    styles.cardFace,
+    styles.cardBack,
+    showDragHandle ? styles.hasDragHandle : "",
+  ].filter(Boolean).join(" ");
+
   return (
-    <div className={[styles.cardFace, styles.cardBack].join(" ")}>
+    <div className={backClasses}>
       {showLogo && (
         <div className={styles.logoContainer}>
           <img
@@ -63,6 +78,7 @@ export function CardBack({
             src={logoSrc}
             alt=""
             aria-hidden="true"
+            onError={handleError}
           />
         </div>
       )}

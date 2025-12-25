@@ -27,9 +27,14 @@
   max-height: 90vh;
   background: var(--card-back-background, var(--surface-elevated, #1a1a2e));
   border-radius: var(--radius-lg, 16px);
+  /* Match card border style */
+  border: var(--card-border-width, 0) solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--elevation-5, 0 25px 50px -12px rgba(0, 0, 0, 0.5));
   overflow: hidden;
   outline: none;
+  /* 3D perspective for flip animations */
+  perspective: 1000px;
+  transform-style: preserve-3d;
 }
 
 /* ============================================
@@ -53,8 +58,9 @@
 }
 
 .closeButton {
-  width: 40px;
-  height: 40px;
+  /* Match gallery nav button style (48px) */
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -68,16 +74,11 @@
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms),
-    color var(--transition-fast, 150ms),
-    transform var(--transition-fast, 150ms);
+    border-color var(--transition-fast, 150ms);
 }
 
 .closeButton:hover {
-  background: var(--colour-accent, #ff6b6b);
-  border-color: var(--colour-accent, #ff6b6b);
-  color: white;
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .closeButton:focus-visible {
@@ -86,8 +87,8 @@
 }
 
 .closeButton svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
 }
 
 /* ============================================
@@ -95,10 +96,62 @@
    ============================================ */
 
 .galleryContainer {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 10;
   min-height: 180px;
   background: #000;
+}
+
+/* Platform button inside gallery - lower right corner, aligned with nav buttons horizontally */
+.galleryPlatformButton {
+  position: absolute;
+  /* Lower right corner */
+  bottom: var(--spacing-md, 16px);
+  /* Align horizontally with gallery nav buttons */
+  right: var(--spacing-md, 16px);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs, 6px);
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
+  font-size: 0.875rem;
+  font-weight: 600;
+  /* Primary button style - accent colour */
+  background: var(--colour-accent, #ff6b6b);
+  colour: white;
+  color: white;
+  border: none;
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  z-index: 15;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.galleryPlatformButton:hover {
+  background: var(--colour-hover, #ff8888);
+}
+
+/* Inactive state when platform overlay is shown */
+.galleryPlatformButtonInactive {
+  background: rgba(100, 100, 100, 0.6);
+  opacity: 0.6;
+  cursor: default;
+}
+
+.galleryPlatformButtonInactive:hover {
+  background: rgba(100, 100, 100, 0.6);
+}
+
+.galleryPlatformButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.galleryPlatformButton svg {
+  width: 16px;
+  height: 16px;
 }
 
 /* ============================================
@@ -106,6 +159,7 @@
    ============================================ */
 
 .info {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -146,29 +200,29 @@
   color: var(--text-secondary, rgba(255, 255, 255, 0.7));
 }
 
-/* Platform link button in header */
+/* Platform link button in header - primary button style */
 .platformLink {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: var(--spacing-xs, 6px);
+  padding: var(--spacing-xs, 8px) var(--spacing-sm, 12px);
   font-size: 0.8rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.1);
+  font-weight: 600;
+  background: var(--colour-primary, #4f9eff);
   colour: white;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: none;
   border-radius: var(--radius-md, 8px);
   cursor: pointer;
   white-space: nowrap;
   transition:
     background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms);
+    transform var(--transition-fast, 150ms);
 }
 
 .platformLink:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
+  background: var(--colour-primary-hover, #3b8bef);
+  transform: translateY(-2px);
 }
 
 .platformLink:focus-visible {
@@ -179,7 +233,6 @@
 .platformLink svg {
   width: 14px;
   height: 14px;
-  opacity: 0.7;
 }
 
 /* ============================================
@@ -401,13 +454,13 @@
 
 .metadataList {
   margin: 0;
-  padding: var(--spacing-sm, 8px);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: var(--radius-md, 8px);
+  padding: 0;
+  background: transparent;
 }
 
 .metadataItem {
   display: flex;
+  align-items: baseline;
   gap: var(--spacing-sm, 8px);
   padding: var(--spacing-xs, 4px) 0;
 }
@@ -490,6 +543,53 @@
   height: 14px;
 }
 
+/* Source icon button (for Wikipedia, MobyGames, IGN) - with external link indicator */
+.sourceIconButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius-md, 8px);
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    color var(--transition-fast, 150ms);
+}
+
+.sourceIconButton:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: white;
+}
+
+.sourceIconButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.sourceIconButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+.sourceIconSvg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sourceIconSvg svg {
+  width: 18px;
+  height: 18px;
+}
+
 /* Icon-only button style (Acknowledgement info icon) */
 .iconButton {
   width: 36px;
@@ -565,27 +665,73 @@
 
 .moreOverlay {
   position: absolute;
+  /* Start from bottom, expand upward as needed
+     Min height: info section only (bottom: 0, no top constraint)
+     Max height: full panel (top: 0) */
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.9);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: var(--spacing-md, 16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  /* Max height is full panel, content determines actual height */
+  max-height: 100%;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: var(--spacing-lg, 20px);
   z-index: 20;
   transform-origin: bottom center;
-  max-height: 60%;
   overflow-y: auto;
+}
+
+/* Flip animation variant - covers full panel and uses 3D transform */
+.moreOverlayFlip {
+  /* Cover full panel for flip effect */
+  top: 0;
+  /* 3D flip settings */
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transform-origin: center center;
 }
 
 .moreHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--spacing-sm, 12px);
+  gap: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+  padding-bottom: var(--spacing-sm, 12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.moreHeaderLeft {
+  /* Match .headerLeft layout exactly */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-sm, 12px);
+  flex: 1;
+  min-width: 0;
+}
+
+.moreTitle {
+  /* Match .title styles exactly */
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
+  colour: var(--text-primary, white);
+  color: var(--text-primary, white);
+  line-height: 1.2;
+}
+
+.moreYear {
+  /* Match .year styles exactly */
+  font-size: 1rem;
+  font-weight: 500;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* Legacy label style (kept for backwards compatibility) */
 .moreLabel {
   font-size: 0.75rem;
   font-weight: 600;
@@ -596,27 +742,27 @@
 }
 
 .moreCloseButton {
-  width: 32px;
-  height: 32px;
+  /* Match gallery nav button size (48px) */
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full, 50%);
   colour: white;
   color: white;
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms),
-    transform var(--transition-fast, 150ms);
+    border-color var(--transition-fast, 150ms);
 }
 
 .moreCloseButton:hover {
-  background: var(--colour-accent, #ff6b6b);
-  border-color: var(--colour-accent, #ff6b6b);
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .moreCloseButton:focus-visible {
@@ -625,8 +771,8 @@
 }
 
 .moreCloseButton svg {
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
 }
 
 /* ============================================
@@ -649,7 +795,7 @@
 .attributionHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-sm, 12px);
 }
 
@@ -733,27 +879,27 @@
 }
 
 .attributionCloseButton {
-  width: 32px;
-  height: 32px;
+  /* Match gallery nav button size (48px) */
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full, 50%);
   colour: white;
   color: white;
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms),
-    transform var(--transition-fast, 150ms);
+    border-color var(--transition-fast, 150ms);
 }
 
 .attributionCloseButton:hover {
-  background: var(--colour-accent, #ff6b6b);
-  border-color: var(--colour-accent, #ff6b6b);
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .attributionCloseButton:focus-visible {
@@ -762,8 +908,8 @@
 }
 
 .attributionCloseButton svg {
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
 }
 
 /* ============================================
@@ -772,48 +918,58 @@
 
 .platformOverlay {
   position: absolute;
+  /* Cover from bottom up to full panel height if needed */
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.95);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  padding: var(--spacing-md, 16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 20;
+  /* Allow expansion up to full panel height */
+  max-height: 100%;
+  background: rgba(0, 0, 0, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: var(--spacing-lg, 20px);
+  z-index: 25;
   transform-origin: bottom center;
-  max-height: 70%;
   overflow-y: auto;
 }
 
 .platformOverlayHeader {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--spacing-sm, 12px);
-  margin-bottom: var(--spacing-sm, 12px);
+  margin-bottom: var(--spacing-md, 16px);
+  padding-bottom: var(--spacing-sm, 12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.platformOverlayTitle {
+/* Match moreHeaderLeft layout */
+.platformOverlayHeaderLeft {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--spacing-sm, 12px);
+  flex: 1;
+  min-width: 0;
 }
 
-.platformOverlayLabel {
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  colour: var(--text-secondary, rgba(255, 255, 255, 0.5));
-  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
-}
-
+/* Match moreTitle styles */
 .platformOverlayName {
-  font-size: 1.1rem;
-  font-weight: 600;
+  margin: 0;
+  font-family: var(--font-family-heading);
+  font-size: 1.5rem;
+  font-weight: 700;
   colour: var(--text-primary, white);
   color: var(--text-primary, white);
+  line-height: 1.2;
+}
+
+/* Match moreYear styles */
+.platformOverlayYear {
+  font-size: 1rem;
+  font-weight: 500;
+  colour: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
 }
 
 .platformOverlayActions {
@@ -858,27 +1014,27 @@
 }
 
 .platformOverlayCloseButton {
-  width: 32px;
-  height: 32px;
+  /* Match gallery nav button size (48px) */
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--radius-full, 50%);
   colour: white;
   color: white;
   cursor: pointer;
   transition:
     background-color var(--transition-fast, 150ms),
-    border-color var(--transition-fast, 150ms),
-    transform var(--transition-fast, 150ms);
+    border-color var(--transition-fast, 150ms);
 }
 
 .platformOverlayCloseButton:hover {
-  background: var(--colour-accent, #ff6b6b);
-  border-color: var(--colour-accent, #ff6b6b);
-  transform: scale(1.1);
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .platformOverlayCloseButton:focus-visible {
@@ -887,8 +1043,8 @@
 }
 
 .platformOverlayCloseButton svg {
-  width: 14px;
-  height: 14px;
+  width: 24px;
+  height: 24px;
 }
 
 .platformOverlaySummary {
@@ -928,6 +1084,15 @@
   font-weight: 500;
   colour: var(--text-primary, white);
   color: var(--text-primary, white);
+}
+
+.platformOverlayFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs, 6px);
+  margin-top: var(--spacing-md, 16px);
+  padding-top: var(--spacing-sm, 12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* ============================================

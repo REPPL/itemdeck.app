@@ -61,10 +61,10 @@ export function Attribution({
   compact = false,
   className,
 }: AttributionProps) {
-  const { source, sourceUrl, author, licence, licenceUrl, url } = attribution;
+  const { source, sourceUrl, author, licence, licenceUrl } = attribution;
 
-  // Use sourceUrl or fall back to deprecated url field
-  const effectiveSourceUrl = sourceUrl ?? url;
+  // Use sourceUrl (deprecated url field no longer used)
+  const effectiveSourceUrl = sourceUrl;
 
   // Don't render if no attribution data
   if (!source && !author && !licence) {
@@ -73,7 +73,7 @@ export function Attribution({
 
   if (compact) {
     return (
-      <span className={`${styles.compact} ${className ?? ""}`}>
+      <span className={[styles.compact, className].filter(Boolean).join(" ")}>
         {source && (
           <>
             {effectiveSourceUrl ? (
@@ -112,7 +112,7 @@ export function Attribution({
   }
 
   return (
-    <div className={`${styles.full} ${className ?? ""}`}>
+    <div className={[styles.full, className].filter(Boolean).join(" ")}>
       {source && (
         <span className={styles.source}>
           Image from{" "}

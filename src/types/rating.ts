@@ -35,7 +35,7 @@ export type Rating = number | RatingValue;
  * Type guard to check if a rating is a structured RatingValue.
  */
 export function isStructuredRating(rating: Rating): rating is RatingValue {
-  return typeof rating === "object" && rating !== null && "score" in rating;
+  return typeof rating === "object" && "score" in rating;
 }
 
 /**
@@ -47,7 +47,7 @@ export function isStructuredRating(rating: Rating): rating is RatingValue {
  */
 export function normaliseRating(
   rating: Rating,
-  defaultMax: number = 5
+  defaultMax = 5
 ): RatingValue {
   if (isStructuredRating(rating)) {
     return {
@@ -68,11 +68,11 @@ export function normaliseRating(
  * @param precision - Decimal places (default: 1)
  * @returns Formatted string (e.g., "4.5/5")
  */
-export function formatRating(rating: Rating, precision: number = 1): string {
+export function formatRating(rating: Rating, precision = 1): string {
   const normalised = normaliseRating(rating);
   const score = normalised.score.toFixed(precision);
   const max = normalised.max ?? 5;
-  return `${score}/${max}`;
+  return `${score}/${String(max)}`;
 }
 
 /**

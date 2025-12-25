@@ -12,6 +12,7 @@ import {
   useSettingsStore,
   type FieldMappingConfig,
   type DragFace,
+  type DefaultCardFace,
 } from "@/stores/settingsStore";
 import {
   SUBTITLE_FIELD_OPTIONS,
@@ -19,6 +20,7 @@ import {
   LOGO_FIELD_OPTIONS,
   SORT_FIELD_OPTIONS,
 } from "@/utils/fieldPathResolver";
+import { useCollectionData } from "@/context/CollectionDataContext";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -29,10 +31,15 @@ const dragModeOptions: { value: DragFace | "none"; label: string }[] = [
   { value: "both", label: "Both" },
 ];
 
+const defaultFaceOptions: { value: DefaultCardFace; label: string }[] = [
+  { value: "back", label: "Back" },
+  { value: "front", label: "Front" },
+];
+
 type ConfigSubTab = "order" | "front" | "back";
 
 const subTabs: { id: ConfigSubTab; label: string }[] = [
-  { id: "order", label: "Display Order" },
+  { id: "order", label: "Display" },
   { id: "front", label: "Front Face" },
   { id: "back", label: "Back Face" },
 ];
@@ -42,6 +49,8 @@ const subTabs: { id: ConfigSubTab; label: string }[] = [
  */
 export function ConfigSettingsTabs() {
   const [activeSubTab, setActiveSubTab] = useState<ConfigSubTab>("order");
+  const { cards: allCards } = useCollectionData();
+  const totalCards = allCards.length;
 
   const {
     shuffleOnLoad,
@@ -52,6 +61,12 @@ export function ConfigSettingsTabs() {
     setDragModeEnabled,
     dragFace,
     setDragFace,
+    defaultCardFace,
+    setDefaultCardFace,
+    randomSelectionEnabled,
+    setRandomSelectionEnabled,
+    randomSelectionCount,
+    setRandomSelectionCount,
     rankPlaceholderText,
     setRankPlaceholderText,
     fieldMapping,
@@ -126,6 +141,26 @@ export function ConfigSettingsTabs() {
               </label>
             </div>
             <div className={styles.row}>
+              <span className={styles.label}>Show Cards</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Default card face">
+                {defaultFaceOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      defaultCardFace === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setDefaultCardFace(value); }}
+                    role="radio"
+                    aria-checked={defaultCardFace === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.row}>
               <span className={styles.label}>Drag to Reorder</span>
               <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
                 {dragModeOptions.map(({ value, label }) => (
@@ -188,6 +223,48 @@ export function ConfigSettingsTabs() {
                       Desc
                     </button>
                   </div>
+                </div>
+              </>
+            )}
+
+            {/* Divider before Random Selection */}
+            <div className={styles.divider} />
+
+            {/* Random Selection Toggle */}
+            <div className={styles.row}>
+              <span className={styles.label}>Random Selection</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={randomSelectionEnabled}
+                  onChange={(e) => { setRandomSelectionEnabled(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+
+            {/* Selection Count (when enabled) */}
+            {randomSelectionEnabled && (
+              <>
+                <div className={styles.row}>
+                  <span className={styles.label}>Show</span>
+                  <div className={styles.sliderWrapper}>
+                    <input
+                      type="range"
+                      min={1}
+                      max={Math.max(totalCards, 1)}
+                      value={Math.min(randomSelectionCount, totalCards || 1)}
+                      onChange={(e) => { setRandomSelectionCount(Number(e.target.value)); }}
+                      className={styles.slider}
+                      aria-label="Number of cards to show"
+                    />
+                    <span className={styles.sliderValue}>
+                      [{Math.min(randomSelectionCount, totalCards || 1)}/{totalCards}]
+                    </span>
+                  </div>
+                </div>
+                <div className={styles.helpText}>
+                  A random subset will be selected each time the page loads.
                 </div>
               </>
             )}

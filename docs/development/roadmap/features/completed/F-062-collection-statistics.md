@@ -51,48 +51,48 @@ Add a dismissible statistics bar above the card grid.
 
 ### Phase 1: Statistics Computation
 
-- [ ] Create `src/utils/collectionStats.ts`
-- [ ] Compute total count
-- [ ] Compute numeric field ranges (min, max, average)
-- [ ] Compute categorical field distributions
-- [ ] Handle missing/null values gracefully
+- [x] Create `src/utils/collectionStats.ts`
+- [x] Compute total count
+- [x] Compute numeric field ranges (min, max, average)
+- [x] Compute categorical field distributions
+- [x] Handle missing/null values gracefully
 
 ### Phase 2: Statistics Bar Component
 
-- [ ] Create `src/components/StatisticsBar/StatisticsBar.tsx`
-- [ ] Display key metrics in single line
-- [ ] Add dismiss button (×)
-- [ ] Persist dismissed state in settings
-- [ ] Toggle visibility from settings
+- [x] Create `src/components/Statistics/StatisticsBar.tsx`
+- [x] Display key metrics in single line
+- [x] Add dismiss button (×)
+- [x] Persist dismissed state in settings
+- [x] Toggle visibility from settings
 
 ### Phase 3: Dynamic Field Detection
 
-- [ ] Identify numeric fields for range/average
-- [ ] Identify categorical fields for distribution
-- [ ] Identify date/year fields for timeline
-- [ ] Use schema from collection config
+- [x] Identify numeric fields for range/average
+- [x] Identify categorical fields for distribution
+- [x] Identify date/year fields for timeline
+- [x] Configurable field names
 
 ### Phase 4: Expanded Panel (Optional)
 
-- [ ] Create `StatisticsPanel.tsx` for detailed view
-- [ ] Add expandable section to statistics bar
-- [ ] Render bar charts for distributions
-- [ ] Make charts responsive
+- [ ] Create `StatisticsPanel.tsx` for detailed view (deferred to future)
+- [ ] Add expandable section to statistics bar (deferred)
+- [ ] Render bar charts for distributions (deferred)
+- [ ] Make charts responsive (deferred)
 
 ### Phase 5: Settings Integration
 
-- [ ] Add "Show Statistics" toggle to settings
-- [ ] Persist preference
-- [ ] Allow re-showing after dismissal
+- [x] Add `showStatisticsBar` toggle to settings store
+- [x] Persist preference
+- [x] Allow re-showing after dismissal
 
 ## Success Criteria
 
-- [ ] Statistics bar displays above grid
-- [ ] Total count accurate
-- [ ] Year/date range calculated correctly
-- [ ] Averages computed for numeric fields
-- [ ] Bar dismissible and stays dismissed
-- [ ] Can re-enable from settings
+- [x] Statistics bar displays above grid
+- [x] Total count accurate
+- [x] Year/date range calculated correctly
+- [x] Averages computed for numeric fields
+- [x] Bar dismissible and stays dismissed
+- [x] Can re-enable from settings
 
 ## Dependencies
 
@@ -118,4 +118,4 @@ Add a dismissible statistics bar above the card grid.
 
 ---
 
-**Status**: Planned
+**Status**: Complete

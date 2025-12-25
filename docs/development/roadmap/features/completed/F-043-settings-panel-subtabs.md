@@ -60,22 +60,22 @@ Use a horizontal pill/tab bar within the Cards section:
 
 ## Implementation Tasks
 
-- [ ] Create `CardSettingsSubtabs` component
-- [ ] Create sub-tab navigation UI (pills or tabs)
-- [ ] Move existing settings into appropriate sub-tabs
-- [ ] Add sub-tab state (which tab is active)
-- [ ] Ensure keyboard navigation works within sub-tabs
-- [ ] Add transitions between sub-tabs
-- [ ] Test accessibility (ARIA roles, focus management)
+- [x] Create `CardSettingsSubtabs` component
+- [x] Create sub-tab navigation UI (pills or tabs)
+- [x] Move existing settings into appropriate sub-tabs
+- [x] Add sub-tab state (which tab is active)
+- [x] Ensure keyboard navigation works within sub-tabs
+- [x] Add transitions between sub-tabs
+- [x] Test accessibility (ARIA roles, focus management)
 
 ## Success Criteria
 
-- [ ] "Cards" tab shows three sub-tabs: General, Front, Back
-- [ ] All existing settings function correctly after move
-- [ ] Sub-tab selection is keyboard accessible
-- [ ] Visual indicator shows active sub-tab
-- [ ] Sub-tab state persists during settings panel session
-- [ ] Mobile-friendly layout
+- [x] "Cards" tab shows three sub-tabs: Layout, Front, Back
+- [x] All existing settings function correctly after move
+- [x] Sub-tab selection is keyboard accessible
+- [x] Visual indicator shows active sub-tab
+- [x] Sub-tab state persists during settings panel session
+- [x] Mobile-friendly layout
 
 ## Dependencies
 
@@ -100,4 +100,4 @@ Use a horizontal pill/tab bar within the Cards section:
 
 ---
 
-**Status**: Planned
+**Status**: Complete

@@ -9,4 +9,7 @@ export {
   DragGripIcon,
   SettingsIcon,
   ZoomIcon,
+  PlusIcon,
+  TrashIcon,
+  CheckIcon,
 } from "./Icons";

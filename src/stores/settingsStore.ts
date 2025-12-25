@@ -207,6 +207,11 @@ export type CardBackStyle = "bitmap" | "svg" | "colour";
 export type DragFace = "front" | "back" | "both";
 
 /**
+ * Which card face to show by default (all cards start on this face).
+ */
+export type DefaultCardFace = "front" | "back";
+
+/**
  * Field mapping configuration for card display.
  * Maps UI elements to entity field paths.
  */
@@ -337,6 +342,12 @@ interface SettingsState {
   /** Number of cards to randomly select (when enabled) */
   randomSelectionCount: number;
 
+  /** Which face cards show by default (front or back) */
+  defaultCardFace: DefaultCardFace;
+
+  /** Whether to show the statistics bar above the grid */
+  showStatisticsBar: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -364,6 +375,8 @@ interface SettingsState {
   applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
   setRandomSelectionEnabled: (enabled: boolean) => void;
   setRandomSelectionCount: (count: number) => void;
+  setDefaultCardFace: (face: DefaultCardFace) => void;
+  setShowStatisticsBar: (show: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -403,6 +416,8 @@ const DEFAULT_SETTINGS = {
   hasAppliedCollectionDefaults: false,
   randomSelectionEnabled: false,
   randomSelectionCount: 10,
+  defaultCardFace: "back" as DefaultCardFace,
+  showStatisticsBar: true,
 };
 
 /**
@@ -520,6 +535,14 @@ export const useSettingsStore = create<SettingsState>()(
         set({ randomSelectionCount });
       },
 
+      setDefaultCardFace: (defaultCardFace) => {
+        set({ defaultCardFace });
+      },
+
+      setShowStatisticsBar: (showStatisticsBar) => {
+        set({ showStatisticsBar });
+      },
+
       applyCollectionDefaults: (config) => {
         set((state) => {
           // Only apply if not already applied
@@ -557,9 +580,7 @@ export const useSettingsStore = create<SettingsState>()(
           if (config.fieldMapping) {
             updates.fieldMapping = {
               ...state.fieldMapping,
-              ...Object.fromEntries(
-                Object.entries(config.fieldMapping).filter(([, v]) => v !== undefined)
-              ),
+              ...config.fieldMapping,
             } as FieldMappingConfig;
           }
 
@@ -573,7 +594,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 14,
+      version: 16,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -601,6 +622,8 @@ export const useSettingsStore = create<SettingsState>()(
         hasAppliedCollectionDefaults: state.hasAppliedCollectionDefaults,
         randomSelectionEnabled: state.randomSelectionEnabled,
         randomSelectionCount: state.randomSelectionCount,
+        defaultCardFace: state.defaultCardFace,
+        showStatisticsBar: state.showStatisticsBar,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -768,6 +791,22 @@ export const useSettingsStore = create<SettingsState>()(
             ...state,
             randomSelectionEnabled: false,
             randomSelectionCount: 10,
+          };
+        }
+
+        // Handle migration from version 14 to 15 (add defaultCardFace)
+        if (version < 15) {
+          state = {
+            ...state,
+            defaultCardFace: "back",
+          };
+        }
+
+        // Handle migration from version 15 to 16 (add showStatisticsBar)
+        if (version < 16) {
+          state = {
+            ...state,
+            showStatisticsBar: true,
           };
         }
 

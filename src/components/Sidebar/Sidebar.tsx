@@ -33,7 +33,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         aria-hidden={!isOpen}
       >
         <nav className={styles.nav}>
-          <p className={styles.placeholder}>Commands will go here</p>
+          {/* Source switcher will be added in Phase 3 (F-047) */}
         </nav>
       </aside>
     </>

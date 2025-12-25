@@ -1,0 +1,261 @@
+/**
+ * Source health status indicator styles.
+ */
+
+/* ============================================
+   Health Status Indicator
+   ============================================ */
+
+.indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 6px);
+  flex-shrink: 0;
+}
+
+.indicator::before {
+  content: "";
+  display: block;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+/* Size variants */
+.indicator--small::before {
+  width: 8px;
+  height: 8px;
+}
+
+.indicator--medium::before {
+  width: 12px;
+  height: 12px;
+}
+
+.indicator--large::before {
+  width: 16px;
+  height: 16px;
+}
+
+/* Status colours */
+.indicator--healthy {
+  color: #22c55e; /* Green */
+}
+
+.indicator--degraded {
+  color: #f59e0b; /* Amber */
+}
+
+.indicator--unreachable {
+  color: #ef4444; /* Red */
+}
+
+.indicator--invalid {
+  color: #ef4444; /* Red */
+}
+
+.label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* ============================================
+   Health Badge
+   ============================================ */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 6px);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-sm, 6px);
+  font-size: 0.75rem;
+}
+
+.badgeName {
+  font-weight: 600;
+  color: var(--text-primary, white);
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeCount {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.badgeLatency {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   Health Card
+   ============================================ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+  padding: var(--spacing-md, 16px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md, 12px);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.card--active {
+  border-color: var(--colour-accent, #ff6b6b);
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.card--active:hover {
+  background: rgba(255, 107, 107, 0.15);
+}
+
+.card--loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+/* Status border accents */
+.card--healthy {
+  border-left: 3px solid #22c55e;
+}
+
+.card--degraded {
+  border-left: 3px solid #f59e0b;
+}
+
+.card--unreachable {
+  border-left: 3px solid #ef4444;
+}
+
+.card--invalid {
+  border-left: 3px solid #ef4444;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.cardStatus {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+.cardLatency {
+  margin-left: auto;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  font-variant-numeric: tabular-nums;
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, white);
+}
+
+.cardUrl {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardMeta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.cardIssues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+}
+
+.cardIssue {
+  font-size: 0.7rem;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm, 4px);
+}
+
+.cardIssue--warning {
+  color: #fbbf24; /* Amber */
+  border-left: 2px solid #fbbf24;
+}
+
+.cardIssue--error {
+  color: #f87171; /* Red */
+  border-left: 2px solid #f87171;
+}
+
+.cardIssueMore {
+  font-size: 0.7rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+  font-style: italic;
+}
+
+.cardError {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #f87171;
+}
+
+/* ============================================
+   Skeleton Loading
+   ============================================ */
+
+.skeleton {
+  display: inline-block;
+  height: 1em;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm, 4px);
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

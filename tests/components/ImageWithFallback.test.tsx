@@ -95,7 +95,7 @@ describe("ImageSkeleton", () => {
 });
 
 describe("ImageWithFallback", () => {
-  it("shows loading skeleton initially", () => {
+  it("shows title placeholder as base layer", () => {
     render(
       <ImageWithFallback
         src="https://example.com/image.jpg"
@@ -104,7 +104,8 @@ describe("ImageWithFallback", () => {
       />
     );
 
-    expect(screen.getByRole("status", { name: /Loading image/ })).toBeInTheDocument();
+    // The placeholder with title is always visible as the base layer
+    expect(screen.getByText("Test")).toBeInTheDocument();
   });
 
   it("shows image after successful load", async () => {
@@ -119,11 +120,10 @@ describe("ImageWithFallback", () => {
     const img = screen.getByRole("img", { name: "Test image" });
     fireEvent.load(img);
 
+    // Image should remain visible after loading
     await waitFor(() => {
-      expect(screen.queryByRole("status")).not.toBeInTheDocument();
+      expect(img).toBeInTheDocument();
     });
-
-    expect(img).toBeInTheDocument();
   });
 
   it("shows placeholder when image fails to load", async () => {
@@ -138,9 +138,11 @@ describe("ImageWithFallback", () => {
     const img = screen.getByRole("img", { name: "Test image" });
     fireEvent.error(img);
 
+    // When image fails, the img element is removed and title placeholder shows through
     await waitFor(() => {
-      expect(screen.getByRole("img", { name: /Placeholder for Test Title/ })).toBeInTheDocument();
+      expect(screen.queryByRole("img", { name: "Test image" })).not.toBeInTheDocument();
     });
+    expect(screen.getByText("Test Title")).toBeInTheDocument();
   });
 
   it("tries fallback image before placeholder", async () => {
@@ -185,9 +187,11 @@ describe("ImageWithFallback", () => {
     // Trigger error on fallback image
     fireEvent.error(img);
 
+    // When fallback fails, img element is removed and title placeholder shows through
     await waitFor(() => {
-      expect(screen.getByRole("img", { name: /Placeholder for Test Title/ })).toBeInTheDocument();
+      expect(screen.queryByRole("img", { name: "Test image" })).not.toBeInTheDocument();
     });
+    expect(screen.getByText("Test Title")).toBeInTheDocument();
   });
 
   it("applies custom className", () => {

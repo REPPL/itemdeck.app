@@ -68,8 +68,3 @@
   opacity: 1;
   transition: opacity 200ms ease 200ms;
 }
-
-.placeholder {
-  color: var(--colour-text-muted);
-  font-size: 0.875rem;
-}

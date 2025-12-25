@@ -8,7 +8,6 @@
 import type {
   CollectionDefinition,
   EntityTypeDefinition,
-  FieldDefinition,
   FieldType,
 } from "@/types/schema";
 import type { FieldOption } from "@/utils/fieldPathResolver";
@@ -89,7 +88,7 @@ function discoverEntityFields(
   const options: FieldOption[] = [];
 
   for (const [name, field] of Object.entries(entityType.fields)) {
-    const fieldDef = field as FieldDefinition;
+    const fieldDef = field;
     const fieldPath = prefix ? `${prefix}.${name}` : name;
 
     if (isFieldSuitableFor(fieldDef.type, context)) {
@@ -126,7 +125,7 @@ function discoverRelatedFields(
 
   // Find fields that reference other entity types
   for (const [fieldName, field] of Object.entries(primaryEntity.fields)) {
-    const fieldDef = field as FieldDefinition;
+    const fieldDef = field;
 
     if (fieldDef.ref) {
       const relatedEntity = definition.entityTypes[fieldDef.ref];
@@ -152,7 +151,7 @@ function discoverRelatedFields(
         const relatedEntity = definition.entityTypes[relDef.target];
         if (relatedEntity) {
           // Check if we already have this from ref fields
-          const alreadyAdded = options.some((opt) => opt.value.startsWith(`${fieldName}.`));
+          const alreadyAdded = options.some((opt) => opt.value.startsWith(`${fieldName ?? ""}.`));
           if (!alreadyAdded) {
             const relatedOptions = discoverEntityFields(
               relatedEntity,

@@ -93,6 +93,9 @@ export interface CardDisplayConfig {
 
   /** Back face configuration */
   back?: CardBackConfig;
+
+  /** Fields to display in the Verdict view, in order. If empty/undefined, shows all in alphabetical order. */
+  verdictFields?: string[];
 }
 
 /**

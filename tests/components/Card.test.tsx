@@ -7,16 +7,37 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { Card } from "@/components/Card/Card";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { CardData } from "@/types/card";
 
+// Mock the useCollectionData hook to avoid needing full CollectionDataProvider
+vi.mock("@/context/CollectionDataContext", () => ({
+  useCollectionData: () => ({
+    cards: [],
+    displayConfig: undefined,
+    config: undefined,
+    collection: undefined,
+    isLoading: false,
+    error: null,
+  }),
+}));
+
 // Test wrapper with required providers
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false },
+  },
+});
+
 function TestWrapper({ children }: { children: React.ReactNode }) {
   return (
-    <ConfigProvider>
-      <SettingsProvider>
-        {children}
-      </SettingsProvider>
-    </ConfigProvider>
+    <QueryClientProvider client={queryClient}>
+      <ConfigProvider>
+        <SettingsProvider>
+          {children}
+        </SettingsProvider>
+      </ConfigProvider>
+    </QueryClientProvider>
   );
 }
 

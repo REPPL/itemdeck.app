@@ -12,11 +12,10 @@ import { z } from "zod";
 
 export const attributionSchema = z.object({
   source: z.string().optional(),
-  sourceUrl: z.string().url().optional(),
+  sourceUrl: z.url().optional(),
   author: z.string().optional(),
   licence: z.string().optional(),
-  licenceUrl: z.string().url().optional(),
-  url: z.string().url().optional(), // Deprecated, for backward compatibility
+  licenceUrl: z.url().optional(),
 });
 
 export type AttributionSchema = z.infer<typeof attributionSchema>;
@@ -37,7 +36,7 @@ export const imageTypeSchema = z.enum([
 ]);
 
 export const imageSchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
   type: imageTypeSchema.optional(),
   isPrimary: z.boolean().optional(),
   alt: z.string().optional(),
@@ -59,7 +58,7 @@ export const ratingValueSchema = z.object({
   max: z.number().positive().optional(),
   sourceCount: z.number().nonnegative().optional(),
   source: z.string().optional(),
-  sourceUrl: z.string().url().optional(),
+  sourceUrl: z.url().optional(),
 });
 
 export const ratingSchema = z.union([z.number(), ratingValueSchema]);
@@ -71,14 +70,14 @@ export type RatingSchema = z.infer<typeof ratingSchema>;
 // ============================================================================
 
 export const detailLinkSchema = z.object({
-  url: z.string().url(),
+  url: z.url(),
   source: z.string().optional(),
   label: z.string().optional(),
   isPrimary: z.boolean().optional(),
 });
 
 export const detailUrlsSchema = z.union([
-  z.string().url(),
+  z.url(),
   detailLinkSchema,
   z.array(detailLinkSchema),
 ]);
@@ -105,21 +104,26 @@ export const fieldTypeSchema = z.enum([
   "detailUrls",
 ]);
 
-export const fieldDefinitionSchema: z.ZodType<unknown> = z.lazy(() =>
-  z.object({
-    type: fieldTypeSchema,
-    required: z.boolean().optional(),
-    description: z.string().optional(),
-    default: z.unknown().optional(),
-    enum: z.array(z.string()).optional(),
-    items: fieldDefinitionSchema.optional(),
-    ref: z.string().optional(),
-    label: z.string().optional(),
-    format: z.string().optional(),
-  })
-);
+// Define base field definition without recursive reference first
+const baseFieldDef = z.object({
+  type: fieldTypeSchema,
+  required: z.boolean().optional(),
+  description: z.string().optional(),
+  default: z.unknown().optional(),
+  enum: z.array(z.string()).optional(),
+  ref: z.string().optional(),
+  label: z.string().optional(),
+  format: z.string().optional(),
+});
 
-export type FieldDefinitionSchema = z.infer<typeof fieldDefinitionSchema>;
+// Extend with recursive items field
+export const fieldDefinitionSchema: z.ZodType<FieldDefinitionSchema> = baseFieldDef.extend({
+  items: z.lazy(() => fieldDefinitionSchema).optional(),
+});
+
+export type FieldDefinitionSchema = z.infer<typeof baseFieldDef> & {
+  items?: FieldDefinitionSchema;
+};
 
 // ============================================================================
 // Entity Type Schema
@@ -191,6 +195,8 @@ export const cardBackConfigSchema = z.object({
 export const cardDisplayConfigSchema = z.object({
   front: cardFrontConfigSchema.optional(),
   back: cardBackConfigSchema.optional(),
+  /** Fields to display in the Verdict view, in order. If empty/undefined, shows all in alphabetical order. */
+  verdictFields: z.array(z.string()).optional(),
 });
 
 export const displayConfigSchema = z.object({
@@ -294,7 +300,7 @@ export type CollectionConfigSchema = z.infer<typeof collectionConfigSchema>;
 export const collectionMetadataSchema = z.object({
   author: z.string().optional(),
   licence: z.string().optional(),
-  homepage: z.string().url().optional(),
+  homepage: z.url().optional(),
   tags: z.array(z.string()).optional(),
 });
 
@@ -334,7 +340,7 @@ export const baseEntitySchema = z.object({
   images: imagesArraySchema.optional(),
 });
 
-export const entitySchema = baseEntitySchema.passthrough();
+export const entitySchema = baseEntitySchema.loose();
 
 export type EntitySchema = z.infer<typeof entitySchema>;
 

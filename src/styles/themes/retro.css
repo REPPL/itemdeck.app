@@ -47,7 +47,7 @@
   --colour-secondary: #ff00ff;
   --colour-accent: #ffff00;
 
-  /* Card styling */
+  /* Card styling - base border width (small size) */
   --card-border-width: 3px;
   --card-border-style: solid;
   --card-border-colour: #00ff00;
@@ -60,6 +60,15 @@
   /* CRT scanline effect (optional - applied via pseudo-elements) */
   --crt-scanline-colour: rgba(0, 0, 0, 0.1);
   --crt-scanline-size: 2px;
+}
+
+/* Size-specific border widths for retro theme */
+[data-visual-theme="retro"] [data-card-size="medium"] .cardFace {
+  border-width: 4px;
+}
+
+[data-visual-theme="retro"] [data-card-size="large"] .cardFace {
+  border-width: 5px;
 }
 
 /* CRT scanline overlay effect */

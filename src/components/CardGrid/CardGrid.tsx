@@ -36,6 +36,8 @@ export function CardGrid() {
   const fieldMapping = useSettingsStore((state) => state.fieldMapping);
   const randomSelectionEnabled = useSettingsStore((state) => state.randomSelectionEnabled);
   const randomSelectionCount = useSettingsStore((state) => state.randomSelectionCount);
+  const defaultCardFace = useSettingsStore((state) => state.defaultCardFace);
+  const cardSizePreset = useSettingsStore((state) => state.cardSizePreset);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
@@ -108,7 +110,22 @@ export function CardGrid() {
   }, []);
 
   // Track flipped card IDs in order (oldest first)
+  // When defaultCardFace is "front", all cards start flipped
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
+
+  // Initialise flipped state based on defaultCardFace setting
+  // When "front", flip all cards; when "back", unflip all
+  const prevDefaultFaceRef = useRef(defaultCardFace);
+  useEffect(() => {
+    if (defaultCardFace === "front") {
+      // Show all fronts: flip all cards
+      setFlippedCardIds(cards.map((c) => c.id));
+    } else if (prevDefaultFaceRef.current === "front") {
+      // Switching from front to back: unflip all
+      setFlippedCardIds([]);
+    }
+    prevDefaultFaceRef.current = defaultCardFace;
+  }, [defaultCardFace, cards]);
 
   // Calculate number of columns for keyboard navigation
   const columns = useMemo(() => {
@@ -259,6 +276,7 @@ export function CardGrid() {
             showFooterBadge={showFooterBadge}
             rankPlaceholderText={rankPlaceholderText}
             displayConfig={mergedDisplayConfig}
+            cardSize={cardSizePreset}
           />
         </div>
       );
@@ -281,6 +299,7 @@ export function CardGrid() {
         dragFace={dragFace}
         cardBackDisplay={cardBackDisplay}
         displayConfig={mergedDisplayConfig}
+        cardSize={cardSizePreset}
       />
     );
   }

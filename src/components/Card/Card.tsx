@@ -196,6 +196,7 @@ export function Card({
         style={cardStyle}
         title={cardNumber !== undefined ? `Card #${String(cardNumber)}` : undefined}
         data-card-id={card.id}
+        data-card-size={cardSize}
         data-flipped={isFlipped}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -210,8 +211,8 @@ export function Card({
         <CardInner
           isFlipped={isFlipped}
           flipDuration={config.animation.flipDuration}
-          onFlipStart={() => setIsFlipping(true)}
-          onFlipComplete={() => setIsFlipping(false)}
+          onFlipStart={() => { setIsFlipping(true); }}
+          onFlipComplete={() => { setIsFlipping(false); }}
           back={
             <CardBack
               logoUrl={resolvedLogoUrl ?? settings.card.logoUrl}

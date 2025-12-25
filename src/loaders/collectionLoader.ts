@@ -35,7 +35,7 @@ export async function loadCollectionDefinition(
   }
 
   const contentType = response.headers.get("content-type");
-  if (!contentType || !contentType.includes("application/json")) {
+  if (!contentType?.includes("application/json")) {
     throw new Error(
       `Invalid content type for collection definition: ${contentType ?? "unknown"}`
     );
@@ -77,7 +77,7 @@ export async function loadEntities(
       if (response.ok) {
         // Verify content type is JSON before parsing
         const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType?.includes("application/json")) {
           const indexData = (await response.json()) as unknown;
 
           if (Array.isArray(indexData)) {
@@ -103,7 +103,7 @@ export async function loadEntities(
 
     if (response.ok) {
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
@@ -125,7 +125,7 @@ export async function loadEntities(
 
     if (response.ok) {
       const contentType = response.headers.get("content-type");
-      if (contentType && contentType.includes("application/json")) {
+      if (contentType?.includes("application/json")) {
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
@@ -163,7 +163,7 @@ async function loadEntitiesFromDirectory(
 
       if (response.ok) {
         const contentType = response.headers.get("content-type");
-        if (contentType && contentType.includes("application/json")) {
+        if (contentType?.includes("application/json")) {
           return (await response.json()) as Entity;
         }
       }
@@ -290,7 +290,7 @@ export async function detectCollectionVersion(
     }
 
     const contentType = response.headers.get("content-type");
-    if (!contentType || !contentType.includes("application/json")) {
+    if (!contentType?.includes("application/json")) {
       return undefined;
     }
 

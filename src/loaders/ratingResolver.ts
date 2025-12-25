@@ -23,7 +23,7 @@ export { isStructuredRating, normaliseRating, formatRating, ratingToPercentage }
  * @returns Score value or undefined
  */
 export function getRatingScore(rating: Rating | undefined): number | undefined {
-  if (rating === undefined || rating === null) {
+  if (rating === undefined) {
     return undefined;
   }
 
@@ -42,7 +42,7 @@ export function getRatingScore(rating: Rating | undefined): number | undefined {
  * @returns Max value
  */
 export function getRatingMax(rating: Rating | undefined, defaultMax = 5): number {
-  if (rating === undefined || rating === null || typeof rating === "number") {
+  if (rating === undefined || typeof rating === "number") {
     return defaultMax;
   }
 
@@ -58,7 +58,7 @@ export function getRatingMax(rating: Rating | undefined, defaultMax = 5): number
 export function getRatingSource(
   rating: Rating | undefined
 ): { source?: string; sourceUrl?: string; sourceCount?: number } | undefined {
-  if (rating === undefined || rating === null || typeof rating === "number") {
+  if (rating === undefined || typeof rating === "number") {
     return undefined;
   }
 
@@ -108,7 +108,7 @@ export function displayRating(
 ): string {
   const { showMax = true, showSource = false, precision = 1 } = options;
 
-  if (rating === undefined || rating === null) {
+  if (rating === undefined) {
     return "";
   }
 
@@ -116,7 +116,7 @@ export function displayRating(
   let display = formatRating(normalised, precision);
 
   if (showMax && normalised.max !== 5) {
-    display = `${normalised.score.toFixed(precision)}/${normalised.max}`;
+    display = `${normalised.score.toFixed(precision)}/${String(normalised.max ?? 5)}`;
   }
 
   if (showSource && normalised.source) {

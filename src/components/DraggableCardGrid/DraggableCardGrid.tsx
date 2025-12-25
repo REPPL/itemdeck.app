@@ -58,6 +58,8 @@ interface DraggableCardGridProps {
   cardBackDisplay?: CardBackDisplay;
   /** Display configuration for dynamic field resolution */
   displayConfig?: CardDisplayConfig;
+  /** Card size preset for responsive adjustments */
+  cardSize?: "small" | "medium" | "large";
 }
 
 /**
@@ -76,6 +78,7 @@ interface SortableCardProps {
   canDragBack: boolean;
   cardBackDisplay?: CardBackDisplay;
   displayConfig?: CardDisplayConfig;
+  cardSize?: "small" | "medium" | "large";
 }
 
 function SortableCard({
@@ -91,6 +94,7 @@ function SortableCard({
   canDragBack,
   cardBackDisplay,
   displayConfig,
+  cardSize,
 }: SortableCardProps & { isAnyDragging: boolean }) {
   // Determine if any drag handle is active based on current face
   const canDragCurrentFace = isFlipped ? canDragFront : canDragBack;
@@ -143,6 +147,7 @@ function SortableCard({
         rankPlaceholderText={rankPlaceholderText}
         cardBackDisplay={cardBackDisplay}
         displayConfig={displayConfig}
+        cardSize={cardSize}
         showFrontDragHandle={canDragFront}
         showBackDragHandle={canDragBack}
         frontDragHandleProps={canDragFront ? dragHandleProps : undefined}
@@ -188,6 +193,7 @@ export function DraggableCardGrid({
   dragFace = "back",
   cardBackDisplay,
   displayConfig,
+  cardSize,
 }: DraggableCardGridProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
 
@@ -282,6 +288,7 @@ export function DraggableCardGrid({
                 canDragBack={canDragBack}
                 cardBackDisplay={cardBackDisplay}
                 displayConfig={displayConfig}
+                cardSize={cardSize}
               />
             );
           })}
@@ -301,6 +308,7 @@ export function DraggableCardGrid({
               rankPlaceholderText={rankPlaceholderText}
               cardBackDisplay={cardBackDisplay}
               displayConfig={displayConfig}
+              cardSize={cardSize}
             />
           </div>
         )}

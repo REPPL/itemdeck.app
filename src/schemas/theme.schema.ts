@@ -207,7 +207,7 @@ export const themeIndexEntrySchema = z.object({
   /** Optional description */
   description: z.string().optional(),
   /** Optional preview image URL */
-  preview: z.string().url().optional(),
+  preview: z.url().optional(),
 });
 
 export type ThemeIndexEntry = z.infer<typeof themeIndexEntrySchema>;

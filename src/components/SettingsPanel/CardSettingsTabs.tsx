@@ -17,7 +17,6 @@ import {
   type CardSizePreset,
   type CardAspectRatio,
 } from "@/stores/settingsStore";
-import { useCollectionData } from "@/context/CollectionDataContext";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -51,8 +50,6 @@ const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
  */
 export function CardSettingsTabs() {
   const [activeSubTab, setActiveSubTab] = useState<CardSubTab>("layout");
-  const { cards: allCards } = useCollectionData();
-  const totalCards = allCards.length;
 
   const {
     cardSizePreset,
@@ -61,16 +58,12 @@ export function CardSettingsTabs() {
     titleDisplayMode,
     showRankBadge,
     showDeviceBadge,
-    randomSelectionEnabled,
-    randomSelectionCount,
     setCardSizePreset,
     setCardAspectRatio,
     setCardBackDisplay,
     setTitleDisplayMode,
     setShowRankBadge,
     setShowDeviceBadge,
-    setRandomSelectionEnabled,
-    setRandomSelectionCount,
   } = useSettingsStore();
 
   const renderSubTabContent = () => {
@@ -118,48 +111,6 @@ export function CardSettingsTabs() {
                 ))}
               </div>
             </div>
-
-            {/* Divider */}
-            <div className={styles.divider} />
-
-            {/* Random Selection Toggle */}
-            <div className={styles.row}>
-              <span className={styles.label}>Random Selection</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={randomSelectionEnabled}
-                  onChange={(e) => { setRandomSelectionEnabled(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-
-            {/* Selection Count (when enabled) */}
-            {randomSelectionEnabled && (
-              <>
-                <div className={styles.row}>
-                  <span className={styles.label}>Show</span>
-                  <div className={styles.sliderWrapper}>
-                    <input
-                      type="range"
-                      min={1}
-                      max={Math.max(totalCards, 1)}
-                      value={Math.min(randomSelectionCount, totalCards || 1)}
-                      onChange={(e) => { setRandomSelectionCount(Number(e.target.value)); }}
-                      className={styles.slider}
-                      aria-label="Number of cards to show"
-                    />
-                    <span className={styles.sliderValue}>
-                      {Math.min(randomSelectionCount, totalCards || 1)} of {totalCards}
-                    </span>
-                  </div>
-                </div>
-                <div className={styles.helpText}>
-                  A random subset will be selected each time the page loads.
-                </div>
-              </>
-            )}
           </>
         );
 

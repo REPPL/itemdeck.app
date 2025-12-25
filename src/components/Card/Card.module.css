@@ -388,7 +388,8 @@
 }
 
 .infoButton:hover {
-  background: rgba(0, 0, 0, 0.8);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
   transform: scale(1.1);
 }
 

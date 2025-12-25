@@ -666,7 +666,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  flex-direction: row-reverse; /* Value on left, picker on right */
+  /* Value on left, picker on right (natural order) */
 }
 
 .colourPicker {
@@ -807,6 +807,27 @@
   gap: var(--spacing-xs);
 }
 
+.formatSelect {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  color: var(--colour-text);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.formatSelect:hover {
+  border-color: var(--colour-border-dark, var(--colour-accent));
+}
+
+.formatSelect:focus {
+  outline: none;
+  border-color: var(--colour-accent);
+  box-shadow: 0 0 0 2px var(--colour-accent-transparent, rgba(99, 102, 241, 0.2));
+}
+
 .secondaryButton {
   padding: var(--spacing-xs) var(--spacing-sm);
   background: var(--colour-surface);
@@ -871,10 +892,285 @@
   margin: var(--spacing-xs) 0;
 }
 
+/* ============================================
+   Source Settings Styles
+   ============================================ */
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.sectionDescription {
+  font-size: var(--text-xs);
+  color: var(--colour-text-muted);
+  margin: 0 0 var(--spacing-md);
+  line-height: 1.4;
+}
+
+.sourceList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.sourceItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+}
+
+.sourceItemActive {
+  border-color: var(--colour-primary);
+  background: rgba(var(--colour-primary-rgb, 37, 99, 235), 0.05);
+}
+
+.sourceItemHeader {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.sourceItemStatus {
+  flex-shrink: 0;
+}
+
+.sourceItemLoading {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--colour-border);
+  border-top-color: var(--colour-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sourceItemInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.sourceItemName {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--colour-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sourceItemUrl {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--colour-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sourceItemActions {
+  flex-shrink: 0;
+}
+
+.sourceItemLatency {
+  font-size: var(--text-xs);
+  font-family: monospace;
+  color: var(--colour-text-muted);
+}
+
+.sourceItemButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+}
+
+.sourceItemButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--colour-border-light);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 500;
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.sourceItemButton:hover:not(:disabled) {
+  background: var(--colour-border);
+  color: var(--colour-text);
+}
+
+.sourceItemButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.sourceItemButton svg {
+  width: 14px;
+  height: 14px;
+}
+
+.sourceItemButtonActive {
+  background: var(--colour-primary);
+  color: white;
+}
+
+.sourceItemButtonActive:hover:not(:disabled) {
+  background: var(--colour-primary-dark, var(--colour-primary));
+  color: white;
+}
+
+.sourceItemButtonDefault {
+  background: var(--colour-success, #22c55e);
+  color: white;
+}
+
+.sourceItemButtonDefault:hover:not(:disabled) {
+  background: #16a34a;
+  color: white;
+}
+
+.sourceItemButtonDanger {
+  color: #dc2626;
+}
+
+.sourceItemButtonDanger:hover:not(:disabled) {
+  background: #dc2626;
+  color: white;
+}
+
+/* Add Source Form */
+.addSourceForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--colour-text);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--colour-primary);
+}
+
+.input::placeholder {
+  color: var(--colour-text-muted);
+}
+
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.formError {
+  font-size: var(--text-xs);
+  color: #dc2626;
+  margin: 0;
+}
+
+.primaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--colour-primary);
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: white;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.primaryButton:hover:not(:disabled) {
+  background: var(--colour-primary-dark, var(--colour-primary));
+}
+
+.primaryButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.primaryButton svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Info Box */
+.infoBox {
+  padding: var(--spacing-sm);
+  background: var(--colour-border-light);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--colour-text-muted);
+  line-height: 1.5;
+}
+
+.infoBox p {
+  margin: 0 0 var(--spacing-xs);
+}
+
+.infoBox p:last-child {
+  margin-bottom: 0;
+}
+
+.infoLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  color: var(--colour-primary);
+  text-decoration: none;
+  margin-top: var(--spacing-xs);
+}
+
+.infoLink:hover {
+  text-decoration: underline;
+}
+
+.infoLink svg {
+  width: 12px;
+  height: 12px;
+}
+
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .overlay,
   .panel {
+    animation: none;
+  }
+
+  .sourceItemLoading {
     animation: none;
   }
 }

@@ -9,6 +9,7 @@ import { AdminButton } from "@/components/AdminButton";
 import { HelpButton } from "@/components/HelpButton";
 import { HelpModal } from "@/components/HelpModal";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { StatisticsBar } from "@/components/Statistics";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -122,6 +123,14 @@ function AppContent() {
     setDevtoolsEnabled((prev) => !prev);
   }, []);
 
+  // Statistics bar settings
+  const showStatisticsBar = useSettingsStore((state) => state.showStatisticsBar);
+  const setShowStatisticsBar = useSettingsStore((state) => state.setShowStatisticsBar);
+
+  const handleStatisticsBarDismiss = useCallback(() => {
+    setShowStatisticsBar(false);
+  }, [setShowStatisticsBar]);
+
   return (
     <div className={styles.app}>
       {/* Skip to main content link (accessibility) */}
@@ -139,6 +148,9 @@ function AppContent() {
 
       {/* Main content */}
       <main id="main-content" className={styles.main}>
+        {showStatisticsBar && (
+          <StatisticsBar onDismiss={handleStatisticsBarDismiss} />
+        )}
         <QueryErrorBoundary>
           <CardGrid />
         </QueryErrorBoundary>

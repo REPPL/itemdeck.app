@@ -78,7 +78,8 @@
 }
 
 .closeButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
 }
 
 .closeButton:focus-visible {
@@ -100,7 +101,13 @@
   width: 100%;
   aspect-ratio: 16 / 10;
   min-height: 180px;
+  margin: var(--spacing-md, 16px);
+  margin-bottom: 0;
+  width: calc(100% - var(--spacing-md, 16px) * 2);
   background: #000;
+  /* Top corners rounded, bottom corners flat to connect with info section */
+  border-radius: var(--radius-md, 12px) var(--radius-md, 12px) 0 0;
+  overflow: hidden;
 }
 
 /* Platform button inside gallery - lower right corner, aligned with nav buttons horizontally */
@@ -665,31 +672,27 @@
 
 .moreOverlay {
   position: absolute;
-  /* Start from bottom, expand upward as needed
-     Min height: info section only (bottom: 0, no top constraint)
-     Max height: full panel (top: 0) */
+  /* Cover the entire panel */
+  top: 0;
   bottom: 0;
   left: 0;
   right: 0;
-  /* Max height is full panel, content determines actual height */
-  max-height: 100%;
-  background: rgba(0, 0, 0, 0.92);
+  /* Background colour set via inline style to support light/dark themes */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: var(--spacing-lg, 20px);
   z-index: 20;
-  transform-origin: bottom center;
+  transform-origin: center center;
   overflow-y: auto;
+  /* Match panel border radius */
+  border-radius: var(--radius-lg, 16px);
 }
 
-/* Flip animation variant - covers full panel and uses 3D transform */
+/* Flip animation variant - 3D transform settings */
 .moreOverlayFlip {
-  /* Cover full panel for flip effect */
-  top: 0;
   /* 3D flip settings */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  transform-origin: center center;
 }
 
 .moreHeader {
@@ -762,7 +765,8 @@
 }
 
 .moreCloseButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
 }
 
 .moreCloseButton:focus-visible {
@@ -781,14 +785,14 @@
 
 .attributionOverlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: var(--spacing-md, 16px);
+  left: var(--spacing-md, 16px);
+  right: var(--spacing-md, 16px);
   background: rgba(0, 0, 0, 0.9);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: var(--spacing-md, 16px);
-  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md, 12px);
   z-index: 20;
 }
 
@@ -899,7 +903,8 @@
 }
 
 .attributionCloseButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
 }
 
 .attributionCloseButton:focus-visible {
@@ -1034,7 +1039,8 @@
 }
 
 .platformOverlayCloseButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
 }
 
 .platformOverlayCloseButton:focus-visible {
@@ -1112,6 +1118,23 @@
 
   .galleryContainer {
     aspect-ratio: 16 / 9;
+    margin: var(--spacing-sm, 8px);
+    margin-bottom: 0;
+    width: calc(100% - var(--spacing-sm, 8px) * 2);
+    /* Top corners rounded, bottom flat */
+    border-radius: var(--radius-sm, 8px) var(--radius-sm, 8px) 0 0;
+  }
+
+  .attributionOverlay {
+    bottom: var(--spacing-sm, 8px);
+    left: var(--spacing-sm, 8px);
+    right: var(--spacing-sm, 8px);
+    border-radius: var(--radius-sm, 8px);
+  }
+
+  .moreOverlay {
+    /* Full coverage, no border radius on mobile */
+    border-radius: 0;
   }
 
   .title {
@@ -1129,4 +1152,41 @@
   .moreDetailsButton {
     transition: none;
   }
+}
+
+/* ============================================
+   Light Background Contrast Adjustments
+   ============================================ */
+
+/* When overlay has light background, use dark text */
+.moreOverlay[data-light-bg="true"] .moreTitle,
+.moreOverlay[data-light-bg="true"] .moreYear,
+.moreOverlay[data-light-bg="true"] .metadataKey,
+.moreOverlay[data-light-bg="true"] .metadataValue {
+  color: #1a1a1a;
+}
+
+.moreOverlay[data-light-bg="true"] .moreYear,
+.moreOverlay[data-light-bg="true"] .metadataKey {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.moreOverlay[data-light-bg="true"] .moreHeader {
+  border-bottom-color: rgba(0, 0, 0, 0.15);
+}
+
+.moreOverlay[data-light-bg="true"] .moreCloseButton {
+  background: rgba(0, 0, 0, 0.15);
+  border-color: rgba(0, 0, 0, 0.2);
+  color: #1a1a1a;
+}
+
+.moreOverlay[data-light-bg="true"] .moreCloseButton:hover {
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
+  color: white;
+}
+
+.moreOverlay[data-light-bg="true"] .metadataItem:not(:last-child) {
+  border-bottom-color: rgba(0, 0, 0, 0.1);
 }

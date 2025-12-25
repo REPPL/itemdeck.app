@@ -15,6 +15,8 @@ import { ExternalLinkIcon, CloseIcon, InfoIcon } from "@/components/Icons";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useUILabels } from "@/context/CollectionUIContext";
+import { useCollectionData } from "@/context/CollectionDataContext";
+import { isLightColour } from "@/utils/colourContrast";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { DetailLink } from "@/types/links";
 import styles from "./CardExpanded.module.css";
@@ -95,17 +97,31 @@ export function CardExpanded({
   const detailAnimationEnabled = currentCustomisation.detailAnimation;
   const overlayAnimationEnabled = currentCustomisation.overlayAnimation;
   const verdictAnimationStyle = currentCustomisation.verdictAnimationStyle;
+  const cardBackgroundColour = currentCustomisation.cardBackgroundColour;
+
+  // Determine if background is light (needs dark text)
+  const hasLightBackground = useMemo(() => {
+    if (!cardBackgroundColour) return false;
+    // Strip alpha channel if present (8-char hex -> 6-char)
+    const cleanHex = cardBackgroundColour.replace(/^#/, "");
+    const hex6 = cleanHex.length === 8 ? cleanHex.slice(0, 6) : cleanHex;
+    return isLightColour(`#${hex6}`);
+  }, [cardBackgroundColour]);
 
   // Get UI labels from collection context
   const uiLabels = useUILabels();
+
+  // Get display config from collection for verdict fields
+  const { displayConfig } = useCollectionData();
+  const verdictFields = displayConfig?.card?.verdictFields;
 
   // Auto-discover displayable fields from the card entity
   const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
     // Cast card to record for field discovery
     const entity = card as unknown as Record<string, unknown>;
-    const allFields = getDisplayableFields(entity);
+    const allFields = getDisplayableFields(entity, { verdictFields });
     return categoriseFields(allFields);
-  }, [card]);
+  }, [card, verdictFields]);
 
   // Focus management
   useEffect(() => {
@@ -224,7 +240,7 @@ export function CardExpanded({
             {/* Header row: Rank badge (left) and Close button (right) */}
             <div className={styles.headerRow}>
               <div className={styles.rankBadge}>
-                <RankBadge rank={card.order ?? card.rank ?? null} size="large" />
+                <RankBadge rank={card.order ?? null} size="large" />
               </div>
               <button
                 type="button"
@@ -425,6 +441,7 @@ export function CardExpanded({
                     styles.moreOverlay,
                     verdictAnimationStyle === "flip" ? styles.moreOverlayFlip : "",
                   ].filter(Boolean).join(" ")}
+                  data-light-bg={hasLightBackground ? "true" : undefined}
                   initial={overlayAnimationEnabled
                     ? verdictAnimationStyle === "flip"
                       ? { rotateY: 180, opacity: 0 }
@@ -447,7 +464,10 @@ export function CardExpanded({
                       : { duration: 0.2, ease: "easeOut" }
                     : { duration: 0 }
                   }
-                  style={verdictAnimationStyle === "flip" ? { transformStyle: "preserve-3d" } : undefined}
+                  style={{
+                    ...(verdictAnimationStyle === "flip" ? { transformStyle: "preserve-3d" as const } : {}),
+                    backgroundColor: cardBackgroundColour,
+                  }}
                 >
                   <div className={styles.moreHeader}>
                     <div className={styles.moreHeaderLeft}>

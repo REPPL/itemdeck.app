@@ -9,7 +9,7 @@ import { useState, useRef, useMemo } from "react";
 import { useCacheStats, useCacheManagement, useImagePreloader, formatBytes } from "@/hooks/useImageCache";
 import { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
 import { useCollectionData } from "@/context/CollectionDataContext";
-import { exportCollection } from "@/lib/collectionExport";
+import { importCollection, exportCollectionWithFormat, type ExportFormat } from "@/lib/collectionExport";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -31,6 +31,7 @@ export function StorageSettingsTabs() {
   const { cards, collection } = useCollectionData();
   const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("images");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [exportFormat, setExportFormat] = useState<ExportFormat>("json");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Get all image URLs for re-caching
@@ -40,8 +41,12 @@ export function StorageSettingsTabs() {
 
   const handleExport = () => {
     if (collection) {
-      exportCollection(collection);
+      exportCollectionWithFormat(collection, { format: exportFormat });
     }
+  };
+
+  const handleFormatChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setExportFormat(e.target.value as ExportFormat);
   };
 
   const handleImportClick = () => {
@@ -52,12 +57,25 @@ export function StorageSettingsTabs() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // For now, just show a message. Full import would require
-    // storing to localStorage and reloading
-    alert("Import functionality coming soon. Export works now.");
+    void (async () => {
+      try {
+        const imported = await importCollection(file);
 
-    // Reset input
-    e.target.value = "";
+        // Store to localStorage for persistence
+        const IMPORT_KEY = "itemdeck-imported-collection";
+        localStorage.setItem(IMPORT_KEY, JSON.stringify(imported));
+
+        // Notify user and reload to apply changes
+        if (window.confirm("Collection imported successfully! The page will reload to apply changes.")) {
+          window.location.reload();
+        }
+      } catch (error) {
+        alert(error instanceof Error ? error.message : "Failed to import collection");
+      }
+
+      // Reset input
+      e.target.value = "";
+    })();
   };
 
   const handleRecache = () => {
@@ -132,14 +150,26 @@ export function StorageSettingsTabs() {
             {/* Export */}
             <div className={styles.row}>
               <span className={styles.label}>Export Collection</span>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={handleExport}
-                disabled={!collection || cards.length === 0}
-              >
-                Export JSON
-              </button>
+              <div className={styles.buttonGroup}>
+                <select
+                  className={styles.formatSelect}
+                  value={exportFormat}
+                  onChange={handleFormatChange}
+                  aria-label="Export format"
+                >
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="markdown">Markdown</option>
+                </select>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={handleExport}
+                  disabled={!collection || cards.length === 0}
+                >
+                  Export
+                </button>
+              </div>
             </div>
 
             {/* Import */}

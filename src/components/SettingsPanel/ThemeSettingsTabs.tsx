@@ -94,6 +94,20 @@ const overlayStyleOptions: { value: OverlayStyle; label: string }[] = [
 ];
 
 /**
+ * Convert hex colour to 6-character format for HTML color input.
+ * Strips alpha channel if present (8-char hex -> 6-char hex).
+ */
+function toHex6(hex: string | undefined): string {
+  if (!hex) return "#000000";
+  const clean = hex.replace(/^#/, "");
+  // If 8 characters (with alpha), take first 6
+  if (clean.length === 8) {
+    return `#${clean.slice(0, 6)}`;
+  }
+  return hex;
+}
+
+/**
  * Theme settings with sub-tabs.
  */
 export function ThemeSettingsTabs() {
@@ -262,11 +276,11 @@ export function ThemeSettingsTabs() {
             <div className={styles.row}>
               <span className={styles.label}>Border Colour</span>
               <div className={styles.colourPickerWrapper}>
-                <span className={styles.colourValue}>{currentCustomisation.borderColour}</span>
+                <span className={styles.colourValue}>{toHex6(currentCustomisation.borderColour)}</span>
                 <input
                   type="color"
                   className={styles.colourPicker}
-                  value={currentCustomisation.borderColour}
+                  value={toHex6(currentCustomisation.borderColour)}
                   onChange={handleBorderColourChange}
                   aria-label="Border colour"
                 />
@@ -275,11 +289,11 @@ export function ThemeSettingsTabs() {
             <div className={styles.row}>
               <span className={styles.label}>Text Colour</span>
               <div className={styles.colourPickerWrapper}>
-                <span className={styles.colourValue}>{currentCustomisation.textColour}</span>
+                <span className={styles.colourValue}>{toHex6(currentCustomisation.textColour)}</span>
                 <input
                   type="color"
                   className={styles.colourPicker}
-                  value={currentCustomisation.textColour}
+                  value={toHex6(currentCustomisation.textColour)}
                   onChange={handleTextColourChange}
                   aria-label="Text colour"
                 />

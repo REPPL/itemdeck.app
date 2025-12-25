@@ -186,7 +186,7 @@ export function formatFieldValue(
         const fullStars = Math.round(normalisedScore);
         const emptyStars = 10 - fullStars;
         const stars = "★".repeat(fullStars) + "☆".repeat(emptyStars);
-        return sourceCount ? `${stars} (${sourceCount})` : stars;
+        return sourceCount ? `${stars} (${String(sourceCount)})` : stars;
       }
 
       // Default 5-star display
@@ -227,11 +227,27 @@ export interface DisplayableField {
 }
 
 /**
+ * Options for filtering and ordering displayable fields.
+ */
+export interface GetDisplayableFieldsOptions {
+  /**
+   * If specified, only these fields are displayed, in this order.
+   * Field names can be the raw key or the display label.
+   * If not specified, all fields are shown in alphabetical order.
+   */
+  verdictFields?: string[];
+}
+
+/**
  * Extract displayable fields from an entity.
  * Returns fields that have non-empty values and aren't in the skip list.
+ *
+ * @param entity - The entity to extract fields from
+ * @param options - Optional filtering and ordering options
  */
 export function getDisplayableFields(
-  entity: Record<string, unknown>
+  entity: Record<string, unknown>,
+  options?: GetDisplayableFieldsOptions
 ): DisplayableField[] {
   const fields: DisplayableField[] = [];
 
@@ -256,7 +272,27 @@ export function getDisplayableFields(
     });
   }
 
-  return fields;
+  // If verdictFields is specified, filter and order by it
+  if (options?.verdictFields && options.verdictFields.length > 0) {
+    const orderedFields: DisplayableField[] = [];
+
+    for (const fieldSpec of options.verdictFields) {
+      // Find field by key or label (case-insensitive)
+      const field = fields.find(
+        (f) =>
+          f.key.toLowerCase() === fieldSpec.toLowerCase() ||
+          f.label.toLowerCase() === fieldSpec.toLowerCase()
+      );
+      if (field) {
+        orderedFields.push(field);
+      }
+    }
+
+    return orderedFields;
+  }
+
+  // Default: sort alphabetically by label
+  return fields.sort((a, b) => a.label.localeCompare(b.label));
 }
 
 /**

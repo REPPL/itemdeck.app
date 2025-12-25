@@ -85,7 +85,7 @@ export interface Image {
  * @returns Primary image or undefined if empty
  */
 export function getPrimaryImage(images: Image[]): Image | undefined {
-  if (!images || images.length === 0) {
+  if (images.length === 0) {
     return undefined;
   }
 

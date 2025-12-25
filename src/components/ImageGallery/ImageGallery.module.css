@@ -83,7 +83,8 @@
 }
 
 .navButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--colour-accent, #ff6b6b);
+  border-color: var(--colour-accent, #ff6b6b);
 }
 
 .navButton:focus-visible {

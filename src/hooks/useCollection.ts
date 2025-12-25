@@ -240,7 +240,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       categoryShort,
       order,
       imageAttribution: formatAttribution(images),
-      logoUrl: getLogoUrl(platform?.images as Image[] | undefined),
+      logoUrl: getLogoUrl(platform?.images),
       // Legacy aliases for backward compatibility
       device: categoryShort,
       platformTitle: platform?.title as string | undefined,
@@ -322,7 +322,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
 
   // Cache the collection for offline use (fire and forget)
   const sourceId = basePath.replace(/\//g, "-");
-  cacheCollection(sourceId, legacyCollection).catch((error) => {
+  cacheCollection(sourceId, legacyCollection).catch((error: unknown) => {
     console.warn("Failed to cache collection:", error);
   });
 

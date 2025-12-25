@@ -1,0 +1,66 @@
+/**
+ * Statistics component styles.
+ */
+
+.statisticsBar {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--colour-surface);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-md);
+  box-shadow: var(--elevation-1);
+}
+
+.statsIcon {
+  font-size: var(--text-sm);
+  flex-shrink: 0;
+}
+
+.statsSummary {
+  flex: 1;
+  font-size: var(--text-sm);
+  color: var(--colour-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dismissButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.dismissButton:hover {
+  background: var(--colour-border-light);
+  color: var(--colour-text);
+}
+
+.dismissButton:focus-visible {
+  outline: 2px solid var(--focus-colour);
+  outline-offset: 2px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .statisticsBar {
+    padding: var(--spacing-xs) var(--spacing-sm);
+  }
+
+  .statsSummary {
+    font-size: var(--text-xs);
+  }
+}

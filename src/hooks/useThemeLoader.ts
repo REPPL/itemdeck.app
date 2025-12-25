@@ -111,17 +111,17 @@ export function getThemeCssVariables(theme: Theme): Record<string, string> {
   // Animation overrides
   if (theme.animations) {
     const { animations } = theme;
-    if (animations.flip?.duration) {
-      variables["--theme-flip-duration"] = `${animations.flip.duration}s`;
+    if (animations.flip?.duration !== undefined) {
+      variables["--theme-flip-duration"] = `${String(animations.flip.duration)}s`;
     }
     if (animations.flip?.easing) {
       variables["--theme-flip-easing"] = animations.flip.easing;
     }
-    if (animations.detail?.duration) {
-      variables["--theme-detail-duration"] = `${animations.detail.duration}s`;
+    if (animations.detail?.duration !== undefined) {
+      variables["--theme-detail-duration"] = `${String(animations.detail.duration)}s`;
     }
-    if (animations.overlay?.duration) {
-      variables["--theme-overlay-duration"] = `${animations.overlay.duration}s`;
+    if (animations.overlay?.duration !== undefined) {
+      variables["--theme-overlay-duration"] = `${String(animations.overlay.duration)}s`;
     }
   }
 

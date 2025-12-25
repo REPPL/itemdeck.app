@@ -1,0 +1,224 @@
+/**
+ * Collection browser styles.
+ */
+
+/* ============================================
+   Collection Grid
+   ============================================ */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-md, 16px);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl, 48px);
+  color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+  text-align: center;
+}
+
+/* ============================================
+   Collection Card
+   ============================================ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-md, 12px);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  position: relative;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms),
+    box-shadow var(--transition-fast, 150ms);
+}
+
+.card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.cardActive {
+  border-color: var(--colour-accent, #ff6b6b);
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.cardActive:hover {
+  background: rgba(255, 107, 107, 0.15);
+  border-color: var(--colour-accent, #ff6b6b);
+}
+
+.cardSkeleton {
+  pointer-events: none;
+}
+
+/* Thumbnail */
+.cardThumbnail {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  background: rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.cardThumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform var(--transition-normal, 200ms);
+}
+
+.card:hover .cardThumbnail img {
+  transform: scale(1.05);
+}
+
+/* Content */
+.cardContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+  padding: var(--spacing-sm, 12px);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs, 8px);
+}
+
+.cardTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary, white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardDescription {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.cardMeta {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, rgba(255, 255, 255, 0.5));
+}
+
+/* Active indicator */
+.cardActiveIndicator {
+  position: absolute;
+  top: var(--spacing-sm, 8px);
+  right: var(--spacing-sm, 8px);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: var(--colour-accent, #ff6b6b);
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* ============================================
+   Skeleton Loading
+   ============================================ */
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    rgba(255, 255, 255, 0.2) 50%,
+    rgba(255, 255, 255, 0.1) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite;
+  border-radius: var(--radius-sm, 4px);
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+/* ============================================
+   Collection Switcher (Compact)
+   ============================================ */
+
+.switcher {
+  width: 100%;
+  padding: var(--spacing-sm, 10px) var(--spacing-md, 14px);
+  padding-right: 32px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary, white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md, 8px);
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 16px;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms);
+}
+
+.switcher:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.switcher:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.switcher option {
+  background: #1a1a2e;
+  color: white;
+  padding: var(--spacing-sm, 8px);
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}

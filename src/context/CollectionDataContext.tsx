@@ -26,6 +26,9 @@ interface CollectionData {
   /** Collection configuration for defaults */
   config?: CollectionConfig;
 
+  /** Raw collection data (for export) */
+  collection?: CollectionResult["collection"];
+
   /** Loading state */
   isLoading: boolean;
 
@@ -69,6 +72,7 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
     cards: data?.cards ?? [],
     displayConfig: data?.displayConfig,
     config: data?.config,
+    collection: data?.collection,
     isLoading,
     error: error ?? null,
   };

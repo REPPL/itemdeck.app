@@ -5,9 +5,11 @@
  * Sub-tabs: Images | Cache | About
  */
 
-import { useState } from "react";
-import { useCacheStats, useCacheManagement, formatBytes } from "@/hooks/useImageCache";
+import { useState, useRef, useMemo } from "react";
+import { useCacheStats, useCacheManagement, useImagePreloader, formatBytes } from "@/hooks/useImageCache";
 import { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
+import { useCollectionData } from "@/context/CollectionDataContext";
+import { exportCollection } from "@/lib/collectionExport";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -25,8 +27,44 @@ const subTabs: { id: StorageSubTab; label: string }[] = [
 export function StorageSettingsTabs() {
   const { data: stats, isLoading, refetch } = useCacheStats(DEFAULT_MAX_CACHE_SIZE);
   const { clearCache, isClearing } = useCacheManagement();
+  const { preload, isPreloading, progressPercent } = useImagePreloader();
+  const { cards, collection } = useCollectionData();
   const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("images");
   const [showConfirm, setShowConfirm] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get all image URLs for re-caching
+  const imageUrls = useMemo(() => {
+    return cards.flatMap((card) => card.imageUrls).filter(Boolean);
+  }, [cards]);
+
+  const handleExport = () => {
+    if (collection) {
+      exportCollection(collection);
+    }
+  };
+
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // For now, just show a message. Full import would require
+    // storing to localStorage and reloading
+    alert("Import functionality coming soon. Export works now.");
+
+    // Reset input
+    e.target.value = "";
+  };
+
+  const handleRecache = () => {
+    if (imageUrls.length > 0) {
+      void preload(imageUrls);
+    }
+  };
 
   const handleClearCache = () => {
     if (showConfirm) {
@@ -88,6 +126,44 @@ export function StorageSettingsTabs() {
             <div className={styles.helpText}>
               Images are cached locally for faster loading and offline access.
             </div>
+
+            <div className={styles.divider} />
+
+            {/* Export */}
+            <div className={styles.row}>
+              <span className={styles.label}>Export Collection</span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleExport}
+                disabled={!collection || cards.length === 0}
+              >
+                Export JSON
+              </button>
+            </div>
+
+            {/* Import */}
+            <div className={styles.row}>
+              <span className={styles.label}>Import Collection</span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleImportClick}
+              >
+                Import JSON
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            <div className={styles.helpText}>
+              Export saves the current collection. Import loads a previously exported collection.
+            </div>
           </>
         );
 
@@ -144,6 +220,27 @@ export function StorageSettingsTabs() {
             <div className={styles.helpText}>
               When the cache limit is reached, the oldest images are automatically
               removed to make space for new ones (LRU eviction).
+            </div>
+
+            <div className={styles.divider} />
+
+            {/* Re-cache Images */}
+            <div className={styles.row}>
+              <span className={styles.label}>
+                {isPreloading ? `Caching... ${String(Math.round(progressPercent))}%` : "Re-cache Images"}
+              </span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleRecache}
+                disabled={isPreloading || imageUrls.length === 0}
+              >
+                {isPreloading ? "Caching..." : "Re-cache"}
+              </button>
+            </div>
+
+            <div className={styles.helpText}>
+              Re-downloads and caches all images. Useful if images appear broken.
             </div>
           </>
         );

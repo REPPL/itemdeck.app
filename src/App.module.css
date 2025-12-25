@@ -21,3 +21,24 @@
   width: 100%;
   padding: var(--grid-gap);
 }
+
+/* Skip to content link - visually hidden until focused */
+.skipLink {
+  position: absolute;
+  left: -9999px;
+  top: var(--spacing-md);
+  z-index: 9999;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--colour-background);
+  color: var(--colour-text);
+  border: 2px solid var(--colour-accent, var(--colour-primary));
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.skipLink:focus {
+  left: var(--spacing-md);
+  outline: 2px solid var(--colour-accent, var(--colour-primary));
+  outline-offset: 2px;
+}

@@ -146,7 +146,15 @@ export function LoadingScreen({
               style={{ width: `${String(overallProgress)}%` }}
             />
           </div>
-          <p className={styles.status}>{statusText}</p>
+          {/* ARIA live region for screen readers */}
+          <p
+            className={styles.status}
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {statusText}
+          </p>
         </div>
 
         {phase === "images" && (

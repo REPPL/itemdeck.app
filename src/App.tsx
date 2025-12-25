@@ -8,6 +8,7 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { AdminButton } from "@/components/AdminButton";
 import { HelpButton } from "@/components/HelpButton";
 import { HelpModal } from "@/components/HelpModal";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -28,6 +29,11 @@ function AppContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
+  const [loadingComplete, setLoadingComplete] = useState(false);
+
+  const handleLoadingComplete = useCallback(() => {
+    setLoadingComplete(true);
+  }, []);
 
   // Settings from store
   const visualTheme = useSettingsStore((state) => state.visualTheme);
@@ -118,11 +124,21 @@ function AppContent() {
 
   return (
     <div className={styles.app}>
+      {/* Skip to main content link (accessibility) */}
+      <a href="#main-content" className={styles.skipLink}>
+        Skip to content
+      </a>
+
+      {/* Loading screen (shows during initial load) */}
+      {!loadingComplete && (
+        <LoadingScreen onComplete={handleLoadingComplete} />
+      )}
+
       {/* Sidebar (Explorer) */}
       <Sidebar isOpen={sidebarOpen} onClose={handleSidebarClose} />
 
       {/* Main content */}
-      <main className={styles.main}>
+      <main id="main-content" className={styles.main}>
         <QueryErrorBoundary>
           <CardGrid />
         </QueryErrorBoundary>

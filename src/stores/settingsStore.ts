@@ -331,6 +331,12 @@ interface SettingsState {
   /** Whether collection defaults have been applied (prevents re-applying on subsequent loads) */
   hasAppliedCollectionDefaults: boolean;
 
+  /** Whether random selection is enabled */
+  randomSelectionEnabled: boolean;
+
+  /** Number of cards to randomly select (when enabled) */
+  randomSelectionCount: number;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -356,6 +362,8 @@ interface SettingsState {
   setCustomThemeUrl: (url: string | null) => void;
   setHasAppliedCollectionDefaults: (applied: boolean) => void;
   applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
+  setRandomSelectionEnabled: (enabled: boolean) => void;
+  setRandomSelectionCount: (count: number) => void;
   resetToDefaults: () => void;
 }
 
@@ -393,6 +401,8 @@ const DEFAULT_SETTINGS = {
   showDragIcon: true,
   customThemeUrl: null,
   hasAppliedCollectionDefaults: false,
+  randomSelectionEnabled: false,
+  randomSelectionCount: 10,
 };
 
 /**
@@ -502,6 +512,14 @@ export const useSettingsStore = create<SettingsState>()(
         set({ hasAppliedCollectionDefaults });
       },
 
+      setRandomSelectionEnabled: (randomSelectionEnabled) => {
+        set({ randomSelectionEnabled });
+      },
+
+      setRandomSelectionCount: (randomSelectionCount) => {
+        set({ randomSelectionCount });
+      },
+
       applyCollectionDefaults: (config) => {
         set((state) => {
           // Only apply if not already applied
@@ -555,7 +573,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 13,
+      version: 14,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -581,6 +599,8 @@ export const useSettingsStore = create<SettingsState>()(
         showDragIcon: state.showDragIcon,
         customThemeUrl: state.customThemeUrl,
         hasAppliedCollectionDefaults: state.hasAppliedCollectionDefaults,
+        randomSelectionEnabled: state.randomSelectionEnabled,
+        randomSelectionCount: state.randomSelectionCount,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -739,6 +759,15 @@ export const useSettingsStore = create<SettingsState>()(
           state = {
             ...state,
             hasAppliedCollectionDefaults: true,
+          };
+        }
+
+        // Handle migration from version 13 to 14 (add random selection)
+        if (version < 14) {
+          state = {
+            ...state,
+            randomSelectionEnabled: false,
+            randomSelectionCount: 10,
           };
         }
 

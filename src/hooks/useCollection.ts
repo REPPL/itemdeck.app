@@ -17,6 +17,7 @@ import {
   getPrimaryImage,
   getLogoUrl,
 } from "@/loaders";
+import { cacheCollection } from "@/lib/cardCache";
 import type { Image } from "@/types/image";
 import type { ResolvedEntity, CollectionConfig } from "@/types/schema";
 import type { DisplayConfig } from "@/types/display";
@@ -318,6 +319,12 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       };
     }),
   };
+
+  // Cache the collection for offline use (fire and forget)
+  const sourceId = basePath.replace(/\//g, "-");
+  cacheCollection(sourceId, legacyCollection).catch((error) => {
+    console.warn("Failed to cache collection:", error);
+  });
 
   return {
     cards,

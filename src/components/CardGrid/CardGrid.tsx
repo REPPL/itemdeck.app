@@ -7,6 +7,7 @@ import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { createFieldSortComparator } from "@/utils/fieldPathResolver";
+import { shuffle } from "@/utils/shuffle";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { CardDisplayConfig } from "@/types/display";
 import styles from "./CardGrid.module.css";
@@ -33,6 +34,8 @@ export function CardGrid() {
   const cardBackDisplay = useSettingsStore((state) => state.cardBackDisplay);
   const shuffleOnLoad = useSettingsStore((state) => state.shuffleOnLoad);
   const fieldMapping = useSettingsStore((state) => state.fieldMapping);
+  const randomSelectionEnabled = useSettingsStore((state) => state.randomSelectionEnabled);
+  const randomSelectionCount = useSettingsStore((state) => state.randomSelectionCount);
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
@@ -54,8 +57,20 @@ export function CardGrid() {
     };
   }, [displayConfig, fieldMapping]);
 
+  // Apply random selection before shuffle/sort
+  const selectedCards = useMemo(() => {
+    if (!randomSelectionEnabled || randomSelectionCount <= 0 || sourceCards.length === 0) {
+      return sourceCards;
+    }
+    // Limit to available cards
+    const count = Math.min(randomSelectionCount, sourceCards.length);
+    // Shuffle and take first N for random selection
+    const shuffled = shuffle([...sourceCards]);
+    return shuffled.slice(0, count);
+  }, [sourceCards, randomSelectionEnabled, randomSelectionCount]);
+
   // Shuffle or sort cards based on settings
-  const { cards: shuffledCards } = useShuffledCards(sourceCards, {
+  const { cards: shuffledCards } = useShuffledCards(selectedCards, {
     enabled: true,
     shuffleOnLoad,
   });

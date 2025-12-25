@@ -45,6 +45,12 @@ These reports provide:
 | 13 | Ethical Image Sourcing | [ethical-image-sourcing.md](./ethical-image-sourcing.md) | ✅ Complete |
 | 14 | Data Repository Architecture | [data-repository-architecture.md](./data-repository-architecture.md) | ✅ Complete |
 
+### State-of-the-Art Reports
+
+| Topic | File | Status |
+|-------|------|--------|
+| Remote Data Assessment | [state-of-the-art-remote-data-assessment.md](./state-of-the-art-remote-data-assessment.md) | ✅ Complete |
+
 ### Numbered Research
 
 | ID | Topic | File | Status |

@@ -25,6 +25,11 @@ Features queued for future development.
 - [F-043-settings-panel-subtabs.md](./F-043-settings-panel-subtabs.md)
 - [F-044-random-card-sampling.md](./F-044-random-card-sampling.md)
 
+### v0.9.0 - Remote Source Intelligence
+- [F-045-remote-source-health-check.md](./F-045-remote-source-health-check.md)
+- [F-046-collection-discovery-ui.md](./F-046-collection-discovery-ui.md)
+- [F-047-remote-source-management.md](./F-047-remote-source-management.md)
+
 ### Future
 - [F-028-card-drag-and-drop.md](./F-028-card-drag-and-drop.md)
 - [F-031-fit-to-viewport.md](./F-031-fit-to-viewport.md)

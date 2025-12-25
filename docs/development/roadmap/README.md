@@ -12,10 +12,13 @@ Development roadmap for Itemdeck v0.1.0 through v0.9.0.
 | [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | ✅ Complete |
 | [v0.5.0](./milestones/v0.5.0.md) | Schema Design | ✅ Complete |
 | [v0.6.0](./milestones/v0.6.0.md) | Schema Loader | ✅ Complete |
+| [v0.6.2](./milestones/v0.6.2.md) | Settings Restructure | ✅ Complete |
 | [v0.7.0](./milestones/v0.7.0.md) | Schema Flexibility | ✅ Complete |
 | [v0.7.1](./milestones/v0.7.1.md) | Settings & Visual Polish | ✅ Complete |
-| [v0.8.0](./milestones/v0.8.0.md) | Visual Overhaul | 📋 Planned |
-| [v0.9.0](./milestones/v0.9.0.md) | Remote Source Intelligence | 📋 Planned |
+| [v0.7.2](./milestones/v0.7.2.md) | Visual Polish | 🚀 Ready |
+| [v0.7.3](./milestones/v0.7.3.md) | Settings Audit | 🚀 Ready |
+| [v0.8.0](./milestones/v0.8.0.md) | Configuration Externalisation | 🚀 Ready |
+| [v0.9.0](./milestones/v0.9.0.md) | Remote Source Intelligence | 🚀 Ready |
 
 ## Feature Summary
 
@@ -62,6 +65,9 @@ Development roadmap for Itemdeck v0.1.0 through v0.9.0.
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | 📋 Planned |
 | F-041 | Card Animation Polish | v0.6.0 | 📋 Planned |
+| F-042 | Collection Display Driver | v0.6.2 | ✅ Complete |
+| F-043 | Settings Panel Sub-tabs | v0.6.2 | ✅ Complete |
+| F-044 | Random Card Sampling | v0.6.2 | ✅ Complete |
 | F-045 | Remote Source Health Check | v0.9.0 | 📋 Planned |
 | F-046 | Collection Discovery UI | v0.9.0 | 📋 Planned |
 | F-047 | Remote Source Management | v0.9.0 | 📋 Planned |

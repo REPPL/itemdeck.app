@@ -80,6 +80,56 @@ Feature specifications for Itemdeck development.
 | - | Demo Data Migration (81 games, individual files) | ✅ Complete |
 | - | Schema v2 Reference Documentation | ✅ Complete |
 
+### v0.9.0 - Remote Source Intelligence
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-045](./planned/F-045-remote-source-health-check.md) | Remote Source Health Check | 📋 Planned |
+| [F-046](./planned/F-046-collection-discovery-ui.md) | Collection Discovery UI | 📋 Planned |
+| [F-047](./planned/F-047-remote-source-management.md) | Remote Source Management | 📋 Planned |
+| [F-062](./planned/F-062-collection-statistics.md) | Collection Statistics Summary | 📋 Planned |
+| [F-063](./planned/F-063-collection-export.md) | Collection Export | 📋 Planned |
+
+### v0.10.0 - Data Editing
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-048](./planned/F-048-edit-mode-toggle.md) | Edit Mode Toggle | 📋 Planned |
+| [F-049](./planned/F-049-entity-edits-store.md) | Entity Edits Store | 📋 Planned |
+| [F-050](./planned/F-050-edit-form-component.md) | Edit Form Component | 📋 Planned |
+| [F-051](./planned/F-051-edit-button-integration.md) | Edit Button Integration | 📋 Planned |
+| [F-052](./planned/F-052-edit-export-import.md) | Edit Export/Import | 📋 Planned |
+
+### v0.11.0 - Mechanics Foundation
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-053](./planned/F-053-mechanic-plugin-registry.md) | Mechanic Plugin Registry | 📋 Planned |
+| [F-054](./planned/F-054-mechanic-context-provider.md) | Mechanic Context Provider | 📋 Planned |
+| [F-055](./planned/F-055-mechanic-overlay-system.md) | Mechanic Overlay System | 📋 Planned |
+| [F-056](./planned/F-056-settings-mechanic-selector.md) | Settings Mechanic Selector | 📋 Planned |
+
+### v0.12.0 - Core Mechanics
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-057](./planned/F-057-memory-game-mechanic.md) | Memory Game Mechanic | 📋 Planned |
+| [F-058](./planned/F-058-collection-mechanic.md) | Collection Mechanic | 📋 Planned |
+| [F-061](./planned/F-061-snap-ranking-mechanic.md) | Snap Ranking Mechanic | 📋 Planned |
+
+### v0.13.0 - Advanced Mechanics
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-059](./planned/F-059-competing-mechanic.md) | Competing Mechanic (Top Trumps) | 📋 Planned |
+| [F-060](./planned/F-060-quiz-mechanic.md) | Quiz Mechanic | 📋 Planned |
+
+### v1.0.0 - Multi-Collection
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-064](./planned/F-064-collection-comparison.md) | Collection Comparison Mode | 📋 Planned |
+
 ### Future Features (Unassigned)
 
 | ID | Feature | Status |

@@ -1,6 +1,6 @@
 # Roadmap
 
-Development roadmap for Itemdeck v0.1.0 through v0.9.0.
+Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 
 ## Overview
 
@@ -19,6 +19,11 @@ Development roadmap for Itemdeck v0.1.0 through v0.9.0.
 | [v0.8.0](./milestones/v0.8.0.md) | Visual Overhaul & Caching | ✅ Complete |
 | [v0.8.1](./milestones/v0.8.1.md) | Random Selection & Accessibility | ✅ Complete |
 | [v0.9.0](./milestones/v0.9.0.md) | Remote Source Intelligence | 📋 Planned |
+| [v0.10.0](./milestones/v0.10.0.md) | Data Editing | 📋 Planned |
+| [v0.11.0](./milestones/v0.11.0.md) | Mechanics Foundation | 📋 Planned |
+| [v0.12.0](./milestones/v0.12.0.md) | Core Mechanics | 📋 Planned |
+| [v0.13.0](./milestones/v0.13.0.md) | Advanced Mechanics | 📋 Planned |
+| [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
 
 ## Feature Summary
 
@@ -71,6 +76,23 @@ Development roadmap for Itemdeck v0.1.0 through v0.9.0.
 | F-045 | Remote Source Health Check | v0.9.0 | 📋 Planned |
 | F-046 | Collection Discovery UI | v0.9.0 | 📋 Planned |
 | F-047 | Remote Source Management | v0.9.0 | 📋 Planned |
+| F-048 | Edit Mode Toggle | v0.10.0 | 📋 Planned |
+| F-049 | Entity Edits Store | v0.10.0 | 📋 Planned |
+| F-050 | Edit Form Component | v0.10.0 | 📋 Planned |
+| F-051 | Edit Button Integration | v0.10.0 | 📋 Planned |
+| F-052 | Edit Export/Import | v0.10.0 | 📋 Planned |
+| F-053 | Mechanic Plugin Registry | v0.11.0 | 📋 Planned |
+| F-054 | Mechanic Context Provider | v0.11.0 | 📋 Planned |
+| F-055 | Mechanic Overlay System | v0.11.0 | 📋 Planned |
+| F-056 | Settings Mechanic Selector | v0.11.0 | 📋 Planned |
+| F-057 | Memory Game Mechanic | v0.12.0 | 📋 Planned |
+| F-058 | Collection Mechanic | v0.12.0 | 📋 Planned |
+| F-059 | Competing Mechanic | v0.13.0 | 📋 Planned |
+| F-060 | Quiz Mechanic | v0.13.0 | 📋 Planned |
+| F-061 | Snap Ranking Mechanic | v0.12.0 | 📋 Planned |
+| F-062 | Collection Statistics | v0.9.0 | 📋 Planned |
+| F-063 | Collection Export | v0.9.0 | 📋 Planned |
+| F-064 | Collection Comparison | v1.0.0 | 📋 Planned |
 
 ## Contents
 

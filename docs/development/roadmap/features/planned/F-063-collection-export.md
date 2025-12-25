@@ -1,0 +1,169 @@
+# F-063: Collection Export
+
+## Problem Statement
+
+Users cannot backup, share, or analyse their collection data externally:
+
+1. **No backup** - Data stuck in browser/app
+2. **No sharing** - Cannot share collection with others
+3. **No analysis** - Cannot use external tools (spreadsheets)
+4. **No portability** - Cannot move data between systems
+
+## Design Approach
+
+Add client-side export functionality with multiple format options.
+
+### Export Dialog
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ Export Collection                                     [×]   │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│ Format:                                                     │
+│ ● JSON (complete data, reimportable)                        │
+│ ○ CSV (spreadsheet compatible)                              │
+│ ○ Markdown (human readable)                                 │
+│                                                             │
+│ Include:                                                    │
+│ ☑ All fields                                                │
+│ ☐ Only visible fields                                       │
+│ ☐ Include images (base64, large file)                       │
+│ ☑ Include local edits                                       │
+│                                                             │
+│ Filter:                                                     │
+│ ● All items (124)                                           │
+│ ○ Current view/filter (45)                                  │
+│ ○ Selected items only (0)                                   │
+│                                                             │
+│ Filename: retro-games-2025-12-25                            │
+│                                                             │
+│                              [Cancel]  [Export ↓]           │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Export Formats
+
+**JSON Format:**
+```json
+{
+  "exportVersion": 1,
+  "exportedAt": "2025-12-25T12:00:00Z",
+  "collectionId": "retro-games",
+  "itemCount": 124,
+  "items": [
+    {
+      "id": "super-metroid-snes",
+      "title": "Super Metroid",
+      "platform": "SNES",
+      "year": 1994,
+      "...": "..."
+    }
+  ]
+}
+```
+
+**CSV Format:**
+```csv
+id,title,platform,year,summary
+super-metroid-snes,Super Metroid,SNES,1994,"A side-scrolling..."
+legend-of-zelda-nes,The Legend of Zelda,NES,1986,"An action-adventure..."
+```
+
+**Markdown Format:**
+```markdown
+# Retro Games Collection
+
+Exported: 2025-12-25
+
+## Items (124)
+
+### Super Metroid
+- **Platform:** SNES
+- **Year:** 1994
+- **Summary:** A side-scrolling...
+
+### The Legend of Zelda
+- **Platform:** NES
+- **Year:** 1986
+...
+```
+
+## Implementation Tasks
+
+### Phase 1: Export Core
+
+- [ ] Create `src/utils/collectionExport.ts`
+- [ ] Implement `exportToJSON(items, options)` function
+- [ ] Implement `exportToCSV(items, options)` function
+- [ ] Implement `exportToMarkdown(items, options)` function
+- [ ] Trigger browser download using Blob/URL
+
+### Phase 2: Export Dialog
+
+- [ ] Create `src/components/ExportDialog/ExportDialog.tsx`
+- [ ] Format selection (radio buttons)
+- [ ] Options checkboxes
+- [ ] Filter selection
+- [ ] Custom filename input
+
+### Phase 3: Settings Integration
+
+- [ ] Add "Export Collection" button to settings
+- [ ] Open export dialog on click
+- [ ] Also accessible from grid header/menu
+
+### Phase 4: Field Selection
+
+- [ ] Detect all available fields from schema
+- [ ] Allow selecting specific fields to export
+- [ ] Remember last field selection
+
+### Phase 5: Filter Integration
+
+- [ ] Export all items
+- [ ] Export current filtered view
+- [ ] Export selected items (if multi-select exists)
+
+### Phase 6: Local Edits Integration
+
+- [ ] Option to include local edits
+- [ ] Merge edits into exported data
+- [ ] Mark edited fields (in JSON format)
+
+## Success Criteria
+
+- [ ] JSON export creates valid, complete file
+- [ ] CSV export opens correctly in Excel/Sheets
+- [ ] Markdown export is human readable
+- [ ] Filename includes collection ID and date
+- [ ] Filter options work correctly
+- [ ] Local edits can be included/excluded
+
+## Dependencies
+
+- **F-049**: Entity Edits Store (for including edits)
+- **Existing**: Collection data from hooks
+
+## Complexity
+
+**Medium** - Multiple formats with options UI.
+
+## Testing Strategy
+
+- Unit tests for each export format
+- Test CSV escaping (quotes, commas)
+- Test Markdown formatting
+- Test with special characters in data
+- Test export/import round-trip (JSON)
+
+---
+
+## Related Documentation
+
+- [F-062: Collection Statistics Summary](./F-062-collection-statistics.md)
+- [F-052: Edit Export/Import](./F-052-edit-export-import.md)
+
+---
+
+**Status**: Planned

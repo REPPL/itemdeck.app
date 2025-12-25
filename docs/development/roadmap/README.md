@@ -1,6 +1,6 @@
 # Roadmap
 
-Development roadmap for Itemdeck v0.1.0 through v0.8.0.
+Development roadmap for Itemdeck v0.1.0 through v0.9.0.
 
 ## Overview
 
@@ -12,8 +12,10 @@ Development roadmap for Itemdeck v0.1.0 through v0.8.0.
 | [v0.4.0](./milestones/v0.4.0.md) | Performance & Interaction | ✅ Complete |
 | [v0.5.0](./milestones/v0.5.0.md) | Schema Design | ✅ Complete |
 | [v0.6.0](./milestones/v0.6.0.md) | Schema Loader | ✅ Complete |
-| [v0.7.0](./milestones/v0.7.0.md) | Schema Flexibility | 📋 Planned |
-| v0.8.0 | Visual Overhaul | 📋 Planned |
+| [v0.7.0](./milestones/v0.7.0.md) | Schema Flexibility | ✅ Complete |
+| [v0.7.1](./milestones/v0.7.1.md) | Settings & Visual Polish | ✅ Complete |
+| [v0.8.0](./milestones/v0.8.0.md) | Visual Overhaul | 📋 Planned |
+| [v0.9.0](./milestones/v0.9.0.md) | Remote Source Intelligence | 📋 Planned |
 
 ## Feature Summary
 
@@ -60,6 +62,9 @@ Development roadmap for Itemdeck v0.1.0 through v0.8.0.
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | 📋 Planned |
 | F-041 | Card Animation Polish | v0.6.0 | 📋 Planned |
+| F-045 | Remote Source Health Check | v0.9.0 | 📋 Planned |
+| F-046 | Collection Discovery UI | v0.9.0 | 📋 Planned |
+| F-047 | Remote Source Management | v0.9.0 | 📋 Planned |
 
 ## Contents
 

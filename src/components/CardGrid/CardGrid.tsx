@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/Card/Card";
 import { DraggableCardGrid } from "@/components/DraggableCardGrid";
-import { useDefaultCollection } from "@/hooks/useCollection";
+import { useCollectionData } from "@/context/CollectionDataContext";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
@@ -21,9 +21,8 @@ const GAP = 16; // var(--grid-gap) = 1rem = 16px
  * Supports keyboard navigation with roving tabindex.
  */
 export function CardGrid() {
-  const { data, isLoading, error } = useDefaultCollection();
-  const sourceCards = useMemo(() => data?.cards ?? [], [data?.cards]);
-  const displayConfig = data?.displayConfig?.card;
+  const { cards: sourceCards, displayConfig: collectionDisplayConfig, isLoading, error } = useCollectionData();
+  const displayConfig = collectionDisplayConfig?.card;
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
   const showRankBadge = useSettingsStore((state) => state.showRankBadge);

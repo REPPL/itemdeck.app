@@ -1,5 +1,6 @@
 import { useState } from "react";
 import appLogo from "@/assets/placeholder-logo.svg";
+import { isLightColour } from "@/utils/colourContrast";
 import type { CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
 
@@ -33,6 +34,10 @@ interface CardBackProps {
   showDragHandle?: boolean;
   /** Drag handle props (listeners and attributes from dnd-kit) */
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Whether the card is currently flipping (hides drag handle during animation) */
+  isFlipping?: boolean;
+  /** Background colour for contrast calculation */
+  backgroundColour?: string;
 }
 
 /**
@@ -45,12 +50,17 @@ export function CardBack({
   display = "logo",
   showDragHandle = false,
   dragHandleProps,
+  isFlipping = false,
+  backgroundColour,
 }: CardBackProps) {
   const [hasError, setHasError] = useState(false);
 
   // Use platform logo, fall back to app logo if none provided or on error
   const logoSrc = (logoUrl && !hasError) ? logoUrl : appLogo;
   const showLogo = display === "logo" || display === "both";
+
+  // Determine if background is light (needs dark text/icons)
+  const hasLightBackground = backgroundColour ? isLightColour(backgroundColour) : false;
 
   // Handle image load error - fall back to app logo
   const handleError = () => {
@@ -69,8 +79,14 @@ export function CardBack({
     showDragHandle ? styles.hasDragHandle : "",
   ].filter(Boolean).join(" ");
 
+  // Hide drag handle during flip animation
+  const shouldShowDragHandle = showDragHandle && !isFlipping;
+
   return (
-    <div className={backClasses}>
+    <div
+      className={backClasses}
+      data-light-bg={hasLightBackground ? "true" : undefined}
+    >
       {showLogo && (
         <div className={styles.logoContainer}>
           <img
@@ -82,8 +98,8 @@ export function CardBack({
           />
         </div>
       )}
-      {/* Drag handle indicator at bottom */}
-      {showDragHandle && (
+      {/* Drag handle indicator at bottom - hidden during flip animation */}
+      {shouldShowDragHandle && (
         <div
           className={styles.dragHandle}
           {...dragHandleProps}

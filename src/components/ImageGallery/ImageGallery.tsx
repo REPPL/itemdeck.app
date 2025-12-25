@@ -135,19 +135,23 @@ export function ImageGallery({
   const totalImages = displayImages.length;
   const hasMultipleImages = totalImages > 1;
 
-  // Navigate to previous image
-  const goToPrevious = useCallback(() => {
-    if (!hasMultipleImages) return;
-    setDirection(-1);
-    setCurrentIndex((currentIndex - 1 + totalImages) % totalImages);
-  }, [currentIndex, totalImages, hasMultipleImages, setCurrentIndex]);
+  // Check if at boundaries (no wrap-around)
+  const isAtFirst = currentIndex === 0;
+  const isAtLast = currentIndex === totalImages - 1;
 
-  // Navigate to next image
+  // Navigate to previous image (no wrap-around)
+  const goToPrevious = useCallback(() => {
+    if (!hasMultipleImages || isAtFirst) return;
+    setDirection(-1);
+    setCurrentIndex(currentIndex - 1);
+  }, [currentIndex, hasMultipleImages, isAtFirst, setCurrentIndex]);
+
+  // Navigate to next image (no wrap-around)
   const goToNext = useCallback(() => {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleImages || isAtLast) return;
     setDirection(1);
-    setCurrentIndex((currentIndex + 1) % totalImages);
-  }, [currentIndex, totalImages, hasMultipleImages, setCurrentIndex]);
+    setCurrentIndex(currentIndex + 1);
+  }, [currentIndex, hasMultipleImages, isAtLast, setCurrentIndex]);
 
   // Navigate to specific index
   const goToIndex = useCallback(
@@ -250,17 +254,29 @@ export function ImageGallery({
         <>
           <button
             type="button"
-            className={[styles.navButton, styles.navButtonPrev].filter(Boolean).join(" ")}
+            className={[
+              styles.navButton,
+              styles.navButtonPrev,
+              isAtFirst ? styles.navButtonDisabled : "",
+            ].filter(Boolean).join(" ")}
             onClick={goToPrevious}
+            disabled={isAtFirst}
             aria-label="Previous image"
+            aria-disabled={isAtFirst}
           >
             <ChevronLeftIcon />
           </button>
           <button
             type="button"
-            className={[styles.navButton, styles.navButtonNext].filter(Boolean).join(" ")}
+            className={[
+              styles.navButton,
+              styles.navButtonNext,
+              isAtLast ? styles.navButtonDisabled : "",
+            ].filter(Boolean).join(" ")}
             onClick={goToNext}
+            disabled={isAtLast}
             aria-label="Next image"
+            aria-disabled={isAtLast}
           >
             <ChevronRightIcon />
           </button>

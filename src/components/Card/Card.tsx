@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useMemo } from "react";
 import { motion } from "framer-motion";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
+import { useSettingsStore } from "@/stores/settingsStore";
 import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
@@ -102,7 +103,13 @@ export function Card({
   const { config } = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  const [isFlipping, setIsFlipping] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
+
+  // Get card background colour for contrast calculation
+  const visualTheme = useSettingsStore((state) => state.visualTheme);
+  const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
+  const cardBackgroundColour = themeCustomisations[visualTheme].cardBackgroundColour;
 
   // Resolve field values using display configuration
   // Cast card to ResolvedEntity for field path resolution
@@ -203,12 +210,16 @@ export function Card({
         <CardInner
           isFlipped={isFlipped}
           flipDuration={config.animation.flipDuration}
+          onFlipStart={() => setIsFlipping(true)}
+          onFlipComplete={() => setIsFlipping(false)}
           back={
             <CardBack
               logoUrl={resolvedLogoUrl ?? settings.card.logoUrl}
               display={cardBackDisplay}
               showDragHandle={showBackDragHandle}
               dragHandleProps={backDragHandleProps}
+              isFlipping={isFlipping}
+              backgroundColour={cardBackgroundColour}
             />
           }
           front={
@@ -225,6 +236,7 @@ export function Card({
               onInfoClick={handleInfoClick}
               showDragHandle={showFrontDragHandle}
               dragHandleProps={frontDragHandleProps}
+              isFlipping={isFlipping}
             />
           }
         />

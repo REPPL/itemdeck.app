@@ -449,6 +449,34 @@
   opacity: 1;
 }
 
+/* ============================================
+   Light Background Contrast Styles
+   ============================================ */
+
+/* Light background: dark text/icons for better contrast */
+.cardBack[data-light-bg="true"] .dragHandle {
+  background: rgba(0, 0, 0, 0.08);
+  border-top-color: rgba(0, 0, 0, 0.1);
+}
+
+.cardBack[data-light-bg="true"] .dragGripIcon {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.cardBack[data-light-bg="true"] .dragHandle:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+.cardBack[data-light-bg="true"]:hover .dragGripIcon,
+.cardBack[data-light-bg="true"] .dragHandle:hover .dragGripIcon {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* Light background: adjust logo container text if any */
+.cardBack[data-light-bg="true"] .logoContainer {
+  color: rgba(0, 0, 0, 0.7);
+}
+
 /* Drag handle for card front - small icon button in bottom-left corner */
 .dragHandleFront {
   position: absolute;

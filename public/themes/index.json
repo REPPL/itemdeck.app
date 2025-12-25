@@ -1,0 +1,16 @@
+{
+  "themes": [
+    {
+      "id": "retro-warm",
+      "name": "Retro Warm",
+      "url": "retro-warm.json",
+      "description": "A warm, nostalgic theme with sunset colours"
+    },
+    {
+      "id": "modern-ocean",
+      "name": "Modern Ocean",
+      "url": "modern-ocean.json",
+      "description": "A cool, calming theme with ocean-inspired colours"
+    }
+  ]
+}

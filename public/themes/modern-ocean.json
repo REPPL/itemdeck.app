@@ -1,0 +1,35 @@
+{
+  "id": "modern-ocean",
+  "name": "Modern Ocean",
+  "version": "1.0.0",
+  "description": "A cool, calming theme with ocean-inspired colours",
+  "extends": "modern",
+  "colours": {
+    "accent": "#00bcd4",
+    "hover": "#4dd0e1",
+    "cardBackground": "#0d2137",
+    "border": "#00bcd433",
+    "text": "#e0f7fa",
+    "textSecondary": "#80deea"
+  },
+  "animations": {
+    "flip": {
+      "duration": 0.7,
+      "easing": "ease-in-out"
+    },
+    "detail": {
+      "duration": 0.3,
+      "easing": "ease-out"
+    }
+  },
+  "borders": {
+    "radius": "large",
+    "width": "small"
+  },
+  "shadows": {
+    "intensity": "medium"
+  },
+  "verdict": {
+    "animationStyle": "slide"
+  }
+}

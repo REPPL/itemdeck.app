@@ -12,6 +12,7 @@ import { RefreshButton } from "@/components/RefreshButton";
 import { CardSettingsTabs } from "./CardSettingsTabs";
 import { ThemeSettingsTabs } from "./ThemeSettingsTabs";
 import { ConfigSettingsTabs } from "./ConfigSettingsTabs";
+import { StorageSettingsTabs } from "./StorageSettingsTabs";
 import {
   useSettingsStore,
   type ReduceMotionPreference,
@@ -35,7 +36,7 @@ interface SettingsPanelProps {
 /**
  * Tab configuration.
  */
-type TabId = "system" | "theme" | "cards" | "config";
+type TabId = "system" | "theme" | "cards" | "config" | "storage";
 
 interface Tab {
   id: TabId;
@@ -97,6 +98,16 @@ function ConfigIcon() {
   );
 }
 
+function StorageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <ellipse cx="12" cy="5" rx="9" ry="3" />
+      <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3" />
+      <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5" />
+    </svg>
+  );
+}
+
 function CloseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -149,6 +160,7 @@ const tabs: Tab[] = [
   { id: "theme", label: "Theme", icon: <ThemeIcon /> },
   { id: "config", label: "Config", icon: <ConfigIcon /> },
   { id: "cards", label: "Cards", icon: <CardIcon /> },
+  { id: "storage", label: "Storage", icon: <StorageIcon /> },
 ];
 
 // Layout Mode - not yet implemented
@@ -320,6 +332,9 @@ export function SettingsPanel({
 
       case "config":
         return <ConfigSettingsTabs />;
+
+      case "storage":
+        return <StorageSettingsTabs />;
     }
   };
 

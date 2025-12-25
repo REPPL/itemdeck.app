@@ -205,6 +205,89 @@ export const displayConfigSchema = z.object({
 export type DisplayConfigSchema = z.infer<typeof displayConfigSchema>;
 
 // ============================================================================
+// UI Labels Schema
+// ============================================================================
+
+export const uiLabelsSchema = z.object({
+  moreButton: z.string().optional(),
+  platformLabel: z.string().optional(),
+  acknowledgementButton: z.string().optional(),
+  imageSourceLabel: z.string().optional(),
+  sourceButtonDefault: z.string().optional(),
+  rankPlaceholder: z.string().optional(),
+  wikipediaLabel: z.string().optional(),
+  closeLabel: z.string().optional(),
+});
+
+export type UILabelsSchema = z.infer<typeof uiLabelsSchema>;
+
+// ============================================================================
+// Collection Config Schema
+// ============================================================================
+
+/**
+ * Default visual settings for the collection.
+ */
+export const collectionDefaultsSchema = z.object({
+  /** Default visual theme */
+  theme: z.enum(["retro", "modern", "minimal"]).optional(),
+  /** Default card size preset */
+  cardSize: z.enum(["small", "medium", "large"]).optional(),
+  /** Default card aspect ratio */
+  cardAspectRatio: z.enum(["3:4", "5:7", "1:1"]).optional(),
+});
+
+export type CollectionDefaultsSchema = z.infer<typeof collectionDefaultsSchema>;
+
+/**
+ * Card display settings for the collection.
+ */
+export const collectionCardsConfigSchema = z.object({
+  /** Maximum visible flipped cards */
+  maxVisibleCards: z.number().int().positive().optional(),
+  /** Whether to shuffle cards on load */
+  shuffleOnLoad: z.boolean().optional(),
+  /** What to show on card back */
+  cardBackDisplay: z.enum(["year", "logo", "both", "none"]).optional(),
+});
+
+export type CollectionCardsConfigSchema = z.infer<typeof collectionCardsConfigSchema>;
+
+/**
+ * Field mapping configuration for the collection.
+ */
+export const collectionFieldMappingSchema = z.object({
+  /** Field path for card title */
+  titleField: z.string().optional(),
+  /** Field path for card subtitle */
+  subtitleField: z.string().optional(),
+  /** Field path for footer badge */
+  footerBadgeField: z.string().optional(),
+  /** Field path for card back logo */
+  logoField: z.string().optional(),
+  /** Field path for sort order */
+  sortField: z.string().optional(),
+  /** Sort direction */
+  sortDirection: z.enum(["asc", "desc"]).optional(),
+});
+
+export type CollectionFieldMappingSchema = z.infer<typeof collectionFieldMappingSchema>;
+
+/**
+ * Complete collection configuration.
+ */
+export const collectionConfigSchema = z.object({
+  /** Default settings for new users */
+  defaults: collectionDefaultsSchema.optional(),
+  /** Card display settings */
+  cards: collectionCardsConfigSchema.optional(),
+  /** Field mapping configuration */
+  fieldMapping: collectionFieldMappingSchema.optional(),
+});
+
+export type CollectionConfigSchema = z.infer<typeof collectionConfigSchema>;
+
+// ============================================================================
 // Collection Metadata Schema
 // ============================================================================
 
@@ -234,6 +317,8 @@ export const collectionDefinitionSchema = z.object({
   entityTypes: z.record(z.string(), entityTypeDefinitionSchema),
   relationships: z.record(z.string(), relationshipDefinitionSchema).optional(),
   display: displayConfigSchema.optional(),
+  uiLabels: uiLabelsSchema.optional(),
+  config: collectionConfigSchema.optional(),
 });
 
 export type CollectionDefinitionSchema = z.infer<

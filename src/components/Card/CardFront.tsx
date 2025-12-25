@@ -72,6 +72,8 @@ interface CardFrontProps {
   showDragHandle?: boolean;
   /** Drag handle props (listeners and attributes from dnd-kit) */
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Whether the card is currently flipping (hides drag handle during animation) */
+  isFlipping?: boolean;
 }
 
 /**
@@ -97,9 +99,13 @@ export function CardFront({
   onInfoClick,
   showDragHandle = false,
   dragHandleProps,
+  isFlipping = false,
 }: CardFrontProps) {
   // Hide unranked badge on small cards to prevent overflow
   const shouldShowRankBadge = showRankBadge && (rank !== null || cardSize !== "small");
+
+  // Hide drag handle during flip animation
+  const shouldShowDragHandle = showDragHandle && !isFlipping;
 
   return (
     <div className={[styles.cardFace, styles.cardFront].join(" ")}>
@@ -137,16 +143,16 @@ export function CardFront({
       <div
         className={[
           styles.overlay,
-          showDragHandle ? styles.overlayDraggable : "",
+          shouldShowDragHandle ? styles.overlayDraggable : "",
         ].filter(Boolean).join(" ")}
-        {...(showDragHandle ? dragHandleProps : {})}
-        aria-label={showDragHandle ? "Drag to reorder" : undefined}
+        {...(shouldShowDragHandle ? dragHandleProps : {})}
+        aria-label={shouldShowDragHandle ? "Drag to reorder" : undefined}
       >
         <h3 className={styles.overlayTitle}>{title}</h3>
         <div className={styles.overlayFooter}>
           {subtitle && <span className={styles.overlayYear}>{subtitle}</span>}
-          {/* Drag grip icon shown when draggable - centred */}
-          {showDragHandle && (
+          {/* Drag grip icon shown when draggable - centred, hidden during flip */}
+          {shouldShowDragHandle && (
             <div className={styles.overlayDragIcon}>
               <DragGripIcon />
             </div>

@@ -105,6 +105,18 @@
   right: var(--spacing-md, 16px);
 }
 
+/* Disabled state for boundary arrows */
+.navButtonDisabled {
+  opacity: 0.3 !important;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.navButtonDisabled:hover {
+  background: rgba(0, 0, 0, 0.5);
+  transform: translateY(-50%);
+}
+
 /* ============================================
    Dot Indicators
    ============================================ */

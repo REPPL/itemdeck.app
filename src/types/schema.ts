@@ -7,6 +7,7 @@
 
 import type { Image } from "./image";
 import type { DisplayConfig } from "./display";
+import type { UILabels } from "@/context/CollectionUIContext";
 
 // Re-export v2 types for convenience
 export type { Rating, RatingValue } from "./rating";
@@ -164,6 +165,39 @@ export interface CollectionDefinition {
 
   /** Display configuration */
   display?: DisplayConfig;
+
+  /** Custom UI labels for this collection */
+  uiLabels?: Partial<UILabels>;
+
+  /** Collection configuration defaults */
+  config?: CollectionConfig;
+}
+
+/**
+ * Collection configuration for default settings.
+ */
+export interface CollectionConfig {
+  /** Default visual settings */
+  defaults?: {
+    theme?: "retro" | "modern" | "minimal";
+    cardSize?: "small" | "medium" | "large";
+    cardAspectRatio?: "3:4" | "5:7" | "1:1";
+  };
+  /** Card display settings */
+  cards?: {
+    maxVisibleCards?: number;
+    shuffleOnLoad?: boolean;
+    cardBackDisplay?: "year" | "logo" | "both" | "none";
+  };
+  /** Field mapping configuration */
+  fieldMapping?: {
+    titleField?: string;
+    subtitleField?: string;
+    footerBadgeField?: string;
+    logoField?: string;
+    sortField?: string;
+    sortDirection?: "asc" | "desc";
+  };
 }
 
 /**

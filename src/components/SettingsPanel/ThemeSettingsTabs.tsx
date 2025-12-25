@@ -134,6 +134,14 @@ export function ThemeSettingsTabs() {
     setThemeCustomisation(visualTheme, { cardBackgroundColour: event.target.value });
   }, [visualTheme, setThemeCustomisation]);
 
+  const handleBorderColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setThemeCustomisation(visualTheme, { borderColour: event.target.value });
+  }, [visualTheme, setThemeCustomisation]);
+
+  const handleTextColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setThemeCustomisation(visualTheme, { textColour: event.target.value });
+  }, [visualTheme, setThemeCustomisation]);
+
   const handleTransparencyChange = useCallback((value: DetailTransparencyPreset) => {
     setThemeCustomisation(visualTheme, { detailTransparency: value });
   }, [visualTheme, setThemeCustomisation]);
@@ -300,6 +308,32 @@ export function ThemeSettingsTabs() {
                   value={currentCustomisation.cardBackgroundColour}
                   onChange={handleCardBackgroundChange}
                   aria-label="Card background colour"
+                />
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Border Colour</span>
+              <div className={styles.colourPickerWrapper}>
+                <span className={styles.colourValue}>{currentCustomisation.borderColour}</span>
+                <input
+                  type="color"
+                  className={styles.colourPicker}
+                  value={currentCustomisation.borderColour}
+                  onChange={handleBorderColourChange}
+                  aria-label="Border colour"
+                />
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Text Colour</span>
+              <div className={styles.colourPickerWrapper}>
+                <span className={styles.colourValue}>{currentCustomisation.textColour}</span>
+                <input
+                  type="color"
+                  className={styles.colourPicker}
+                  value={currentCustomisation.textColour}
+                  onChange={handleTextColourChange}
+                  aria-label="Text colour"
                 />
               </div>
             </div>

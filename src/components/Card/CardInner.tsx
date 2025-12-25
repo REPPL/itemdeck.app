@@ -12,13 +12,24 @@ interface CardInnerProps {
   back: ReactNode;
   /** Card front face */
   front: ReactNode;
+  /** Callback when flip animation starts */
+  onFlipStart?: () => void;
+  /** Callback when flip animation completes */
+  onFlipComplete?: () => void;
 }
 
 /**
  * Inner container that handles 3D flip transform.
  * Contains both card faces and rotates on Y-axis when flipped.
  */
-export function CardInner({ isFlipped, flipDuration, back, front }: CardInnerProps) {
+export function CardInner({
+  isFlipped,
+  flipDuration,
+  back,
+  front,
+  onFlipStart,
+  onFlipComplete,
+}: CardInnerProps) {
   const visualTheme = useSettingsStore((state) => state.visualTheme);
   const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
   const flipAnimationEnabled = themeCustomisations[visualTheme].flipAnimation;
@@ -36,6 +47,16 @@ export function CardInner({ isFlipped, flipDuration, back, front }: CardInnerPro
         ease: "easeInOut",
       }}
       style={{ transformStyle: "preserve-3d" }}
+      onAnimationStart={() => {
+        // Only trigger if animation has meaningful duration
+        if (actualDuration > 0) {
+          onFlipStart?.();
+        }
+      }}
+      onAnimationComplete={() => {
+        // Always trigger complete to ensure state is correct
+        onFlipComplete?.();
+      }}
     >
       {back}
       {front}

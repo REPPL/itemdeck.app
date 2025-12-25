@@ -9,6 +9,31 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
 /**
+ * Collection config structure for applying defaults.
+ * Mirrors CollectionConfig from types/schema.ts to avoid circular imports.
+ */
+export interface CollectionConfigForDefaults {
+  defaults?: {
+    theme?: "retro" | "modern" | "minimal";
+    cardSize?: "small" | "medium" | "large";
+    cardAspectRatio?: "3:4" | "5:7" | "1:1";
+  };
+  cards?: {
+    maxVisibleCards?: number;
+    shuffleOnLoad?: boolean;
+    cardBackDisplay?: "year" | "logo" | "both" | "none";
+  };
+  fieldMapping?: {
+    titleField?: string;
+    subtitleField?: string;
+    footerBadgeField?: string;
+    logoField?: string;
+    sortField?: string;
+    sortDirection?: "asc" | "desc";
+  };
+}
+
+/**
  * Layout type options.
  */
 export type LayoutType = "grid" | "list" | "compact";
@@ -81,6 +106,10 @@ export interface ThemeCustomisation {
   hoverColour: string;
   /** Card background colour (hex) */
   cardBackgroundColour: string;
+  /** Card border colour (hex) */
+  borderColour: string;
+  /** Text colour (hex) - for titles, labels, and icons on card back */
+  textColour: string;
   /** Detail view background transparency preset */
   detailTransparency: DetailTransparencyPreset;
   /** Footer overlay style (moved from Cards) */
@@ -113,6 +142,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#ff6b6b",
     hoverColour: "#ff8888",
     cardBackgroundColour: "#1a1a2e",
+    borderColour: "#ffffff33",
+    textColour: "#ffffff",
     detailTransparency: "25",
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
@@ -131,6 +162,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#4f9eff",
     hoverColour: "#7ab8ff",
     cardBackgroundColour: "#1e293b",
+    borderColour: "#ffffff20",
+    textColour: "#ffffff",
     detailTransparency: "50",
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
@@ -149,6 +182,8 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     accentColour: "#6b7280",
     hoverColour: "#9ca3af",
     cardBackgroundColour: "#374151",
+    borderColour: "#ffffff15",
+    textColour: "#ffffff",
     detailTransparency: "75",
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
@@ -290,6 +325,12 @@ interface SettingsState {
   /** Whether to show drag icon on cards */
   showDragIcon: boolean;
 
+  /** Custom theme URL (null = use built-in theme) */
+  customThemeUrl: string | null;
+
+  /** Whether collection defaults have been applied (prevents re-applying on subsequent loads) */
+  hasAppliedCollectionDefaults: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -312,6 +353,9 @@ interface SettingsState {
   setShowHelpButton: (show: boolean) => void;
   setShowSettingsButton: (show: boolean) => void;
   setShowDragIcon: (show: boolean) => void;
+  setCustomThemeUrl: (url: string | null) => void;
+  setHasAppliedCollectionDefaults: (applied: boolean) => void;
+  applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
   resetToDefaults: () => void;
 }
 
@@ -347,6 +391,8 @@ const DEFAULT_SETTINGS = {
   showHelpButton: true,
   showSettingsButton: true,
   showDragIcon: true,
+  customThemeUrl: null,
+  hasAppliedCollectionDefaults: false,
 };
 
 /**
@@ -448,13 +494,68 @@ export const useSettingsStore = create<SettingsState>()(
         set({ showDragIcon });
       },
 
+      setCustomThemeUrl: (customThemeUrl) => {
+        set({ customThemeUrl });
+      },
+
+      setHasAppliedCollectionDefaults: (hasAppliedCollectionDefaults) => {
+        set({ hasAppliedCollectionDefaults });
+      },
+
+      applyCollectionDefaults: (config) => {
+        set((state) => {
+          // Only apply if not already applied
+          if (state.hasAppliedCollectionDefaults) {
+            return state;
+          }
+
+          const updates: Partial<SettingsState> = {
+            hasAppliedCollectionDefaults: true,
+          };
+
+          // Apply visual defaults
+          if (config.defaults?.theme) {
+            updates.visualTheme = config.defaults.theme;
+          }
+          if (config.defaults?.cardSize) {
+            updates.cardSizePreset = config.defaults.cardSize;
+          }
+          if (config.defaults?.cardAspectRatio) {
+            updates.cardAspectRatio = config.defaults.cardAspectRatio;
+          }
+
+          // Apply card defaults
+          if (config.cards?.maxVisibleCards !== undefined) {
+            updates.maxVisibleCards = config.cards.maxVisibleCards;
+          }
+          if (config.cards?.shuffleOnLoad !== undefined) {
+            updates.shuffleOnLoad = config.cards.shuffleOnLoad;
+          }
+          if (config.cards?.cardBackDisplay) {
+            updates.cardBackDisplay = config.cards.cardBackDisplay;
+          }
+
+          // Apply field mapping defaults
+          if (config.fieldMapping) {
+            updates.fieldMapping = {
+              ...state.fieldMapping,
+              ...Object.fromEntries(
+                Object.entries(config.fieldMapping).filter(([, v]) => v !== undefined)
+              ),
+            } as FieldMappingConfig;
+          }
+
+          return updates;
+        });
+      },
+
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
     }),
     {
       name: "itemdeck-settings",
-      version: 10,
+      version: 13,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -478,6 +579,8 @@ export const useSettingsStore = create<SettingsState>()(
         showHelpButton: state.showHelpButton,
         showSettingsButton: state.showSettingsButton,
         showDragIcon: state.showDragIcon,
+        customThemeUrl: state.customThemeUrl,
+        hasAppliedCollectionDefaults: state.hasAppliedCollectionDefaults,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -600,6 +703,43 @@ export const useSettingsStore = create<SettingsState>()(
             );
             state = { ...state, themeCustomisations: updatedCustomisations };
           }
+        }
+
+        // Handle migration from version 10 to 11 (add borderColour and textColour)
+        if (version < 11) {
+          const existingCustomisations = state.themeCustomisations as Record<string, Record<string, unknown>> | undefined;
+          if (existingCustomisations) {
+            // Add borderColour and textColour to each theme
+            const updatedCustomisations = Object.fromEntries(
+              Object.entries(existingCustomisations).map(([theme, customisation]) => [
+                theme,
+                {
+                  ...customisation,
+                  borderColour: customisation.borderColour ?? "#ffffff33",
+                  textColour: customisation.textColour ?? "#ffffff",
+                },
+              ])
+            );
+            state = { ...state, themeCustomisations: updatedCustomisations };
+          }
+        }
+
+        // Handle migration from version 11 to 12 (add customThemeUrl)
+        if (version < 12) {
+          state = {
+            ...state,
+            customThemeUrl: null,
+          };
+        }
+
+        // Handle migration from version 12 to 13 (add hasAppliedCollectionDefaults)
+        // For existing users (who have localStorage data), mark as true so collection
+        // defaults don't override their existing settings
+        if (version < 13) {
+          state = {
+            ...state,
+            hasAppliedCollectionDefaults: true,
+          };
         }
 
         return state as unknown as SettingsState;

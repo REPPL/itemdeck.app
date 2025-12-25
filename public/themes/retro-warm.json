@@ -1,0 +1,35 @@
+{
+  "id": "retro-warm",
+  "name": "Retro Warm",
+  "version": "1.0.0",
+  "description": "A warm, nostalgic theme with sunset colours",
+  "extends": "retro",
+  "colours": {
+    "accent": "#e65100",
+    "hover": "#ff7d1a",
+    "cardBackground": "#2d1b1b",
+    "border": "#ffffff40",
+    "text": "#fff8e1",
+    "textSecondary": "#ffcc80"
+  },
+  "animations": {
+    "flip": {
+      "duration": 0.5,
+      "easing": "ease-out"
+    },
+    "detail": {
+      "duration": 0.25,
+      "easing": "ease-out"
+    }
+  },
+  "borders": {
+    "radius": "small",
+    "width": "medium"
+  },
+  "shadows": {
+    "intensity": "strong"
+  },
+  "verdict": {
+    "animationStyle": "flip"
+  }
+}

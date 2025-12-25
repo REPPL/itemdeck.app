@@ -9,6 +9,7 @@
  * - Unranked: placeholder text
  */
 
+import { useUILabels } from "@/context/CollectionUIContext";
 import styles from "./RankBadge.module.css";
 
 /**
@@ -76,7 +77,7 @@ interface RankBadgeProps {
   /** Rank number (1-based) or null for unranked */
   rank: number | null;
 
-  /** Placeholder text for unranked items */
+  /** Placeholder text for unranked items (overrides collection default) */
   placeholderText?: string;
 
   /** Size variant */
@@ -110,9 +111,12 @@ function getOrdinalSuffix(n: number): string {
  */
 export function RankBadge({
   rank,
-  placeholderText = "The one that got away!",
+  placeholderText,
   size = "medium",
 }: RankBadgeProps) {
+  // Get default from collection context, allow prop override
+  const uiLabels = useUILabels();
+  const displayPlaceholder = placeholderText ?? uiLabels.rankPlaceholder;
   // Determine variant based on rank
   // Treat null, 0, and negative values as unranked
   const getVariant = (): string => {
@@ -145,7 +149,7 @@ export function RankBadge({
       <RankStars rank={rank} />
     </>
   ) : (
-    <span className={styles.placeholder}>{placeholderText}</span>
+    <span className={styles.placeholder}>{displayPlaceholder}</span>
   );
 
   return (

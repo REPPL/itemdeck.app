@@ -14,6 +14,7 @@ import { SourceIcon, isKnownSource } from "@/components/SourceIcon";
 import { ExternalLinkIcon, CloseIcon, InfoIcon } from "@/components/Icons";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useUILabels } from "@/context/CollectionUIContext";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { DetailLink } from "@/types/links";
 import styles from "./CardExpanded.module.css";
@@ -94,6 +95,9 @@ export function CardExpanded({
   const detailAnimationEnabled = currentCustomisation.detailAnimation;
   const overlayAnimationEnabled = currentCustomisation.overlayAnimation;
   const verdictAnimationStyle = currentCustomisation.verdictAnimationStyle;
+
+  // Get UI labels from collection context
+  const uiLabels = useUILabels();
 
   // Auto-discover displayable fields from the card entity
   const { prominent: _prominent, additional: additionalFields } = useMemo(() => {
@@ -306,7 +310,7 @@ export function CardExpanded({
                           target="_blank"
                           rel="noopener noreferrer"
                           className={hasKnownIcon ? styles.sourceIconButton : styles.outlineButton}
-                          title={link.source ?? link.label ?? "Source"}
+                          title={link.source ?? link.label ?? uiLabels.sourceButtonDefault}
                         >
                           {hasKnownIcon ? (
                             <>
@@ -315,7 +319,7 @@ export function CardExpanded({
                             </>
                           ) : (
                             <>
-                              <span>{link.source ?? link.label ?? "Source"}</span>
+                              <span>{link.source ?? link.label ?? uiLabels.sourceButtonDefault}</span>
                               <ExternalLinkIcon />
                             </>
                           )}
@@ -328,7 +332,7 @@ export function CardExpanded({
                       target="_blank"
                       rel="noopener noreferrer"
                       className={isKnownSource(card.detailUrl) ? styles.sourceIconButton : styles.outlineButton}
-                      title="Source"
+                      title={uiLabels.sourceButtonDefault}
                     >
                       {isKnownSource(card.detailUrl) ? (
                         <>
@@ -337,7 +341,7 @@ export function CardExpanded({
                         </>
                       ) : (
                         <>
-                          <span>Source</span>
+                          <span>{uiLabels.sourceButtonDefault}</span>
                           <ExternalLinkIcon />
                         </>
                       )}
@@ -373,7 +377,7 @@ export function CardExpanded({
                   >
                     <div className={styles.attributionHeader}>
                       <div className={styles.attributionContent}>
-                        <span className={styles.attributionLabel}>Image Source</span>
+                        <span className={styles.attributionLabel}>{uiLabels.imageSourceLabel}</span>
                         <p className={styles.attributionText}>{card.imageAttribution}</p>
                       </div>
                       <div className={styles.attributionActions}>
@@ -535,7 +539,7 @@ export function CardExpanded({
                             target="_blank"
                             rel="noopener noreferrer"
                             className={hasKnownIcon ? styles.sourceIconButton : styles.platformOverlayLink}
-                            title={link.source ?? link.label ?? "Source"}
+                            title={link.source ?? link.label ?? uiLabels.sourceButtonDefault}
                           >
                             {hasKnownIcon ? (
                               <>
@@ -544,7 +548,7 @@ export function CardExpanded({
                               </>
                             ) : (
                               <>
-                                <span>{link.source ?? link.label ?? "Source"}</span>
+                                <span>{link.source ?? link.label ?? uiLabels.sourceButtonDefault}</span>
                                 <ExternalLinkIcon />
                               </>
                             )}

@@ -11,6 +11,7 @@ import { HelpModal } from "@/components/HelpModal";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
+import { CollectionDataProvider } from "@/context/CollectionDataContext";
 import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
 import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
@@ -163,7 +164,9 @@ function App() {
     <ConfigProvider>
       <SettingsProvider>
         <MotionProvider>
-          <AppContent />
+          <CollectionDataProvider>
+            <AppContent />
+          </CollectionDataProvider>
         </MotionProvider>
       </SettingsProvider>
     </ConfigProvider>

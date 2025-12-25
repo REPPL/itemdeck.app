@@ -18,10 +18,11 @@ import {
   getLogoUrl,
 } from "@/loaders";
 import type { Image } from "@/types/image";
-import type { ResolvedEntity } from "@/types/schema";
+import type { ResolvedEntity, CollectionConfig } from "@/types/schema";
 import type { DisplayConfig } from "@/types/display";
 import type { RatingValue } from "@/types/rating";
 import type { DetailLink } from "@/types/links";
+import type { UILabels } from "@/context/CollectionUIContext";
 import { normaliseRating } from "@/types/rating";
 import { normaliseDetailUrls } from "@/types/links";
 
@@ -122,6 +123,12 @@ interface CollectionResult {
 
   /** Display configuration from collection definition */
   displayConfig?: DisplayConfig;
+
+  /** Custom UI labels from collection definition */
+  uiLabels?: Partial<UILabels>;
+
+  /** Collection configuration defaults */
+  config?: CollectionConfig;
 }
 
 /**
@@ -316,6 +323,8 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
     cards,
     collection: legacyCollection,
     displayConfig: loaded.definition.display,
+    uiLabels: loaded.definition.uiLabels,
+    config: loaded.definition.config,
   };
 }
 

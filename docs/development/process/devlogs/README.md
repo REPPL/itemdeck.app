@@ -16,6 +16,7 @@ Development narratives documenting how each milestone was built.
 | [v0.7.1](./v0.7.1/README.md) | Settings Fixes & Visual Polish | Complete |
 | [v0.7.2](./v0.7.2/README.md) | Visual Polish & Animation Refinements | Complete |
 | [v0.8.0](./v0.8.0/README.md) | Visual Overhaul, Configuration & Caching | Complete |
+| [v0.8.1](./v0.8.1/README.md) | Random Selection & Accessibility | Complete |
 
 ## Structure
 

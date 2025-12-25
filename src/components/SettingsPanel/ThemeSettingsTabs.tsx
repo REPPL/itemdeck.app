@@ -38,7 +38,7 @@ import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 import themeStyles from "./ThemeSettingsTabs.module.css";
 
-type ThemeSubTab = "style" | "colours" | "detail";
+type ThemeSubTab = "style" | "colours" | "detail" | "animations";
 
 const themeOptions: { value: VisualTheme; label: string }[] = [
   { value: "minimal", label: "Minimal" },
@@ -50,6 +50,7 @@ const subTabs: { id: ThemeSubTab; label: string }[] = [
   { id: "style", label: "Card Style" },
   { id: "colours", label: "Colours" },
   { id: "detail", label: "Detail View" },
+  { id: "animations", label: "Animations" },
 ];
 
 const borderRadiusOptions: { value: BorderRadiusPreset; label: string }[] = [
@@ -239,59 +240,6 @@ export function ThemeSettingsTabs() {
                 ))}
               </div>
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Animation</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Animation style">
-                {animationStyleOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      currentCustomisation.animationStyle === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleAnimationStyleChange(value); }}
-                    role="radio"
-                    aria-checked={currentCustomisation.animationStyle === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Card Flip Animation</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={currentCustomisation.flipAnimation}
-                  onChange={handleFlipAnimationChange}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Detail View Animation</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={currentCustomisation.detailAnimation}
-                  onChange={handleDetailAnimationChange}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Overlay Animation</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={currentCustomisation.overlayAnimation}
-                  onChange={handleOverlayAnimationChange}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
           </>
         );
 
@@ -441,6 +389,69 @@ export function ThemeSettingsTabs() {
                 />
                 <span className={styles.toggleSlider} />
               </label>
+            </div>
+          </>
+        );
+
+      case "animations":
+        return (
+          <>
+            <div className={styles.row}>
+              <span className={styles.label}>Animation Style</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Animation style">
+                {animationStyleOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      currentCustomisation.animationStyle === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { handleAnimationStyleChange(value); }}
+                    role="radio"
+                    aria-checked={currentCustomisation.animationStyle === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Card Flip</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.flipAnimation}
+                  onChange={handleFlipAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Detail View</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.detailAnimation}
+                  onChange={handleDetailAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Overlay</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.overlayAnimation}
+                  onChange={handleOverlayAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.helpText}>
+              Toggle individual animation effects on or off. Set animation style to
+              &quot;None&quot; to disable all animations globally.
             </div>
           </>
         );

@@ -9,6 +9,7 @@ import { useEffect } from "react";
 import {
   useSettingsStore,
   type BorderRadiusPreset,
+  type BorderWidthPreset,
   type ShadowIntensity,
   type AnimationStyle,
   type DetailTransparencyPreset,
@@ -23,6 +24,16 @@ const BORDER_RADIUS_VALUES: Record<BorderRadiusPreset, string> = {
   small: "4px",
   medium: "8px",
   large: "16px",
+};
+
+/**
+ * Border width CSS values by preset.
+ */
+const BORDER_WIDTH_VALUES: Record<BorderWidthPreset, string> = {
+  none: "0px",
+  small: "1px",
+  medium: "2px",
+  large: "4px",
 };
 
 /**
@@ -82,12 +93,16 @@ const TRANSPARENCY_VALUES: Record<DetailTransparencyPreset, number> = {
  */
 function applyThemeCustomisation(
   borderRadius: BorderRadiusPreset,
+  borderWidth: BorderWidthPreset,
   shadowIntensity: ShadowIntensity,
   animationStyle: AnimationStyle,
   accentColour: string,
   hoverColour: string,
   cardBackgroundColour: string,
-  detailTransparency: DetailTransparencyPreset
+  detailTransparency: DetailTransparencyPreset,
+  flipAnimation: boolean,
+  detailAnimation: boolean,
+  overlayAnimation: boolean
 ): void {
   const root = document.documentElement;
 
@@ -95,6 +110,10 @@ function applyThemeCustomisation(
   const radiusValue = BORDER_RADIUS_VALUES[borderRadius];
   root.style.setProperty("--card-border-radius", radiusValue);
   root.style.setProperty("--radius-md", radiusValue);
+
+  // Apply border width
+  const widthValue = BORDER_WIDTH_VALUES[borderWidth];
+  root.style.setProperty("--card-border-width", widthValue);
 
   // Apply shadow intensity
   const shadowValue = SHADOW_VALUES[shadowIntensity];
@@ -124,6 +143,11 @@ function applyThemeCustomisation(
   const alpha = TRANSPARENCY_VALUES[detailTransparency];
   root.style.setProperty("--detail-overlay-alpha", String(alpha));
   root.style.setProperty("--detail-overlay-background", `rgba(0, 0, 0, ${String(alpha)})`);
+
+  // Apply granular animation toggles
+  root.style.setProperty("--flip-animation-enabled", flipAnimation ? "1" : "0");
+  root.style.setProperty("--detail-animation-enabled", detailAnimation ? "1" : "0");
+  root.style.setProperty("--overlay-animation-enabled", overlayAnimation ? "1" : "0");
 }
 
 /**
@@ -152,12 +176,16 @@ export function useVisualTheme(): void {
     const customisation = themeCustomisations[visualTheme];
     applyThemeCustomisation(
       customisation.borderRadius,
+      customisation.borderWidth,
       customisation.shadowIntensity,
       customisation.animationStyle,
       customisation.accentColour,
       customisation.hoverColour,
       customisation.cardBackgroundColour,
-      customisation.detailTransparency
+      customisation.detailTransparency,
+      customisation.flipAnimation,
+      customisation.detailAnimation,
+      customisation.overlayAnimation
     );
   }, [visualTheme, themeCustomisations]);
 }

@@ -28,6 +28,7 @@ import {
   useSettingsStore,
   type VisualTheme,
   type BorderRadiusPreset,
+  type BorderWidthPreset,
   type ShadowIntensity,
   type AnimationStyle,
   type DetailTransparencyPreset,
@@ -52,6 +53,13 @@ const subTabs: { id: ThemeSubTab; label: string }[] = [
 ];
 
 const borderRadiusOptions: { value: BorderRadiusPreset; label: string }[] = [
+  { value: "none", label: "None" },
+  { value: "small", label: "Small" },
+  { value: "medium", label: "Medium" },
+  { value: "large", label: "Large" },
+];
+
+const borderWidthOptions: { value: BorderWidthPreset; label: string }[] = [
   { value: "none", label: "None" },
   { value: "small", label: "Small" },
   { value: "medium", label: "Medium" },
@@ -102,6 +110,10 @@ export function ThemeSettingsTabs() {
     setThemeCustomisation(visualTheme, { borderRadius: value });
   }, [visualTheme, setThemeCustomisation]);
 
+  const handleBorderWidthChange = useCallback((value: BorderWidthPreset) => {
+    setThemeCustomisation(visualTheme, { borderWidth: value });
+  }, [visualTheme, setThemeCustomisation]);
+
   const handleShadowIntensityChange = useCallback((value: ShadowIntensity) => {
     setThemeCustomisation(visualTheme, { shadowIntensity: value });
   }, [visualTheme, setThemeCustomisation]);
@@ -142,6 +154,18 @@ export function ThemeSettingsTabs() {
     setThemeCustomisation(visualTheme, { zoomImage: event.target.checked });
   }, [visualTheme, setThemeCustomisation]);
 
+  const handleFlipAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setThemeCustomisation(visualTheme, { flipAnimation: event.target.checked });
+  }, [visualTheme, setThemeCustomisation]);
+
+  const handleDetailAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setThemeCustomisation(visualTheme, { detailAnimation: event.target.checked });
+  }, [visualTheme, setThemeCustomisation]);
+
+  const handleOverlayAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    setThemeCustomisation(visualTheme, { overlayAnimation: event.target.checked });
+  }, [visualTheme, setThemeCustomisation]);
+
   const renderSubTabContent = () => {
     switch (activeSubTab) {
       case "style":
@@ -161,6 +185,26 @@ export function ThemeSettingsTabs() {
                     onClick={() => { handleBorderRadiusChange(value); }}
                     role="radio"
                     aria-checked={currentCustomisation.borderRadius === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Border Width</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Border width">
+                {borderWidthOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      currentCustomisation.borderWidth === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { handleBorderWidthChange(value); }}
+                    role="radio"
+                    aria-checked={currentCustomisation.borderWidth === value}
                   >
                     {label}
                   </button>
@@ -206,6 +250,39 @@ export function ThemeSettingsTabs() {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Card Flip Animation</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.flipAnimation}
+                  onChange={handleFlipAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Detail View Animation</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.detailAnimation}
+                  onChange={handleDetailAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Overlay Animation</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={currentCustomisation.overlayAnimation}
+                  onChange={handleOverlayAnimationChange}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
             </div>
           </>
         );

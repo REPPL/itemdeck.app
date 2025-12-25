@@ -14,7 +14,9 @@ Release planning for Itemdeck v0.1.0 through v0.8.0.
 | [v0.6.0](./v0.6.0.md) | Schema Loader | ✅ Complete | 7 |
 | [v0.6.1](./v0.6.1.md) | UI Configuration & Settings | 📋 Deferred | 3 + research |
 | [v0.7.0](./v0.7.0.md) | Schema Flexibility | ✅ Complete | 8 |
-| v0.8.0 | Visual Overhaul | 📋 Planned | TBD |
+| [v0.7.1](./v0.7.1.md) | Settings Fixes & Visual Polish | ✅ Complete | 10 |
+| [v0.7.2](./v0.7.2.md) | Visual Polish & Animation Refinements | ✅ Complete | 8 |
+| v0.8.0 | Visual Overhaul, Configuration & Caching | 📋 Planned | TBD |
 
 ## Dependencies
 
@@ -41,6 +43,12 @@ v0.6.0 Schema Loader ✅
     │
     ▼
 v0.7.0 Schema Flexibility ✅
+    │
+    ▼
+v0.7.1 Settings Fixes ✅
+    │
+    ▼
+v0.7.2 Visual Polish ✅
     │
     ▼
 v0.8.0 Visual Overhaul 📋

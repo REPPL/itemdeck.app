@@ -39,6 +39,11 @@ export type VisualTheme = "retro" | "modern" | "minimal";
 export type BorderRadiusPreset = "none" | "small" | "medium" | "large";
 
 /**
+ * Border width preset options.
+ */
+export type BorderWidthPreset = "none" | "small" | "medium" | "large";
+
+/**
  * Shadow intensity options.
  */
 export type ShadowIntensity = "none" | "subtle" | "medium" | "strong";
@@ -54,11 +59,18 @@ export type AnimationStyle = "none" | "subtle" | "smooth" | "bouncy";
 export type DetailTransparencyPreset = "none" | "25" | "50" | "75";
 
 /**
+ * Verdict animation style - how the "More/Verdict" overlay appears.
+ */
+export type VerdictAnimationStyle = "slide" | "flip";
+
+/**
  * Theme customisation settings per theme.
  */
 export interface ThemeCustomisation {
   /** Border radius preset */
   borderRadius: BorderRadiusPreset;
+  /** Border width preset */
+  borderWidth: BorderWidthPreset;
   /** Shadow intensity */
   shadowIntensity: ShadowIntensity;
   /** Animation style (controls hover lift effect) */
@@ -79,6 +91,14 @@ export interface ThemeCustomisation {
   autoExpandMore: boolean;
   /** Whether to zoom image to fill horizontal width */
   zoomImage: boolean;
+  /** Whether to enable card flip animation */
+  flipAnimation: boolean;
+  /** Whether to enable detail view open/close animation */
+  detailAnimation: boolean;
+  /** Whether to enable overlay (More, Attribution, Platform) animations */
+  overlayAnimation: boolean;
+  /** Verdict overlay animation style - slide up or flip card */
+  verdictAnimationStyle: VerdictAnimationStyle;
 }
 
 /**
@@ -87,6 +107,7 @@ export interface ThemeCustomisation {
 export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisation> = {
   retro: {
     borderRadius: "none",
+    borderWidth: "small",
     shadowIntensity: "strong",
     animationStyle: "none",
     accentColour: "#ff6b6b",
@@ -96,10 +117,15 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
     autoExpandMore: false,
-    zoomImage: false,
+    zoomImage: true,
+    flipAnimation: true,
+    detailAnimation: true,
+    overlayAnimation: true,
+    verdictAnimationStyle: "flip",
   },
   modern: {
     borderRadius: "medium",
+    borderWidth: "none",
     shadowIntensity: "medium",
     animationStyle: "smooth",
     accentColour: "#4f9eff",
@@ -109,10 +135,15 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
     autoExpandMore: false,
-    zoomImage: false,
+    zoomImage: true,
+    flipAnimation: true,
+    detailAnimation: true,
+    overlayAnimation: true,
+    verdictAnimationStyle: "slide",
   },
   minimal: {
     borderRadius: "small",
+    borderWidth: "small",
     shadowIntensity: "subtle",
     animationStyle: "subtle",
     accentColour: "#6b7280",
@@ -122,7 +153,11 @@ export const DEFAULT_THEME_CUSTOMISATIONS: Record<VisualTheme, ThemeCustomisatio
     overlayStyle: "dark",
     moreButtonLabel: "Verdict",
     autoExpandMore: false,
-    zoomImage: false,
+    zoomImage: true,
+    flipAnimation: true,
+    detailAnimation: true,
+    overlayAnimation: true,
+    verdictAnimationStyle: "slide",
   },
 };
 
@@ -419,7 +454,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 7,
+      version: 10,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -508,6 +543,63 @@ export const useSettingsStore = create<SettingsState>()(
             showDragIcon: DEFAULT_SETTINGS.showDragIcon,
             themeCustomisations: DEFAULT_SETTINGS.themeCustomisations,
           };
+        }
+
+        // Handle migration from version 7 to 8 (add borderWidth and animation settings to theme customisations)
+        if (version < 8) {
+          const existingCustomisations = state.themeCustomisations as Record<string, Record<string, unknown>> | undefined;
+          if (existingCustomisations) {
+            // Add borderWidth and animation settings to each theme's customisation
+            const updatedCustomisations = Object.fromEntries(
+              Object.entries(existingCustomisations).map(([theme, customisation]) => [
+                theme,
+                {
+                  ...customisation,
+                  borderWidth: customisation.borderWidth ?? "small",
+                  flipAnimation: customisation.flipAnimation ?? true,
+                  detailAnimation: customisation.detailAnimation ?? true,
+                  overlayAnimation: customisation.overlayAnimation ?? true,
+                },
+              ])
+            );
+            state = { ...state, themeCustomisations: updatedCustomisations };
+          }
+        }
+
+        // Handle migration from version 8 to 9 (enable zoomImage by default)
+        if (version < 9) {
+          const existingCustomisations = state.themeCustomisations as Record<string, Record<string, unknown>> | undefined;
+          if (existingCustomisations) {
+            // Set zoomImage to true for all themes
+            const updatedCustomisations = Object.fromEntries(
+              Object.entries(existingCustomisations).map(([theme, customisation]) => [
+                theme,
+                {
+                  ...customisation,
+                  zoomImage: true,
+                },
+              ])
+            );
+            state = { ...state, themeCustomisations: updatedCustomisations };
+          }
+        }
+
+        // Handle migration from version 9 to 10 (add verdictAnimationStyle)
+        if (version < 10) {
+          const existingCustomisations = state.themeCustomisations as Record<string, Record<string, unknown>> | undefined;
+          if (existingCustomisations) {
+            // Add verdictAnimationStyle to each theme - default to flip for retro, slide for others
+            const updatedCustomisations = Object.fromEntries(
+              Object.entries(existingCustomisations).map(([theme, customisation]) => [
+                theme,
+                {
+                  ...customisation,
+                  verdictAnimationStyle: customisation.verdictAnimationStyle ?? (theme === "retro" ? "flip" : "slide"),
+                },
+              ])
+            );
+            state = { ...state, themeCustomisations: updatedCustomisations };
+          }
         }
 
         return state as unknown as SettingsState;

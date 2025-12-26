@@ -400,8 +400,35 @@ export function useScrollRestoration<T extends HTMLElement>(
 
 ---
 
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/VirtualCardGrid/`
+
+### Key Files
+
+- `VirtualCardGrid.tsx` - Main virtual scrolling component using @tanstack/react-virtual
+- `VirtualCardGrid.module.css` - Component styles
+- `index.ts` - Module exports
+
+### Integration
+
+- Uses TanStack Virtual (`@tanstack/react-virtual`) for virtualisation
+- Integrates with existing CardGrid layout system
+- Supports responsive column calculations
+- Works with settings store for card dimensions
+
+---
+
 ## Related Documentation
 
 - [Performance & Virtualisation Research](../../../../research/performance-virtualisation.md)
 - [ADR-006: TanStack Virtual for Large Lists](../../../decisions/adrs/ADR-006-virtualisation.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

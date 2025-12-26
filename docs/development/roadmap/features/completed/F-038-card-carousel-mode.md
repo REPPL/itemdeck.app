@@ -79,12 +79,38 @@ v0.4.0
 
 ---
 
-## Related Documentation
+---
 
-- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
-- [Layout Presets](./F-011-layout-presets.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/CardCarousel/`
+
+### Key Files
+
+- `CardCarousel.tsx` - Full-width carousel view component
+- `CardCarousel.module.css` - Carousel layout and transition styles
+- `index.ts` - Module exports
+
+### Integration
+
+- Uses Framer Motion for slide/crossfade transitions
+- Supports swipe gestures and arrow key navigation
+- Shows adjacent card peek previews
+- Integrates with layout presets (F-011)
+- Respects reduced motion preference
 
 ---
 
-**Status**: Planned
+## Related Documentation
+
+- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
+- [Layout Presets](../completed/F-011-layout-presets.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

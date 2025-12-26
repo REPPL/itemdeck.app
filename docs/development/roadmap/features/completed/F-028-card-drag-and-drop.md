@@ -66,13 +66,39 @@ v0.4.0
 
 ---
 
-## Related Documentation
+---
 
-- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
-- [State Persistence](./F-012-state-persistence.md)
-- [Keyboard Navigation](../completed/F-004-keyboard-navigation.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/DraggableCardGrid/`
+
+### Key Files
+
+- `DraggableCardGrid.tsx` - Drag-and-drop enabled card grid using @dnd-kit
+- `DraggableCardGrid.module.css` - Drag state styles
+- `index.ts` - Module exports
+
+### Integration
+
+- Uses @dnd-kit/core and @dnd-kit/sortable for drag-and-drop
+- Supports both mouse and touch interactions
+- Visual feedback with ghost image and drop indicators
+- Integrates with settings store for drag mode toggle
+- Persists custom order to state
 
 ---
 
-**Status**: Planned
+## Related Documentation
+
+- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
+- [State Persistence](../completed/F-012-state-persistence.md)
+- [Keyboard Navigation](../completed/F-004-keyboard-navigation.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

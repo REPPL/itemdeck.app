@@ -78,13 +78,39 @@ v0.4.0
 
 ---
 
-## Related Documentation
+---
 
-- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
-- [Card Info Button](./F-029-card-info-button.md)
-- [State Persistence](./F-012-state-persistence.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/CardQuickActions/`
+
+### Key Files
+
+- `CardQuickActions.tsx` - Floating action bar component
+- `CardQuickActions.module.css` - Reveal animation and positioning styles
+- `index.ts` - Module exports
+
+### Integration
+
+- Appears on card hover/focus with staggered animation
+- Actions include: favourite, share, external link, more menu
+- Keyboard shortcuts available when card is focused
+- Coordinates with info button (F-029) placement
+- Favourite state persisted to settings store
 
 ---
 
-**Status**: Planned
+## Related Documentation
+
+- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
+- [Card Info Button](../completed/F-029-card-info-button.md)
+- [State Persistence](../completed/F-012-state-persistence.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

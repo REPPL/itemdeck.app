@@ -21,6 +21,7 @@ Post-milestone reflections and lessons learned.
 | [v0.10.0](./v0.10.0/README.md) | Data Editing | Complete |
 | [v0.10.1](./v0.10.1/README.md) | UI Polish & Data Model Refinement | Complete |
 | [v0.10.5](./v0.10.5/README.md) | Field Descriptions & Demo Data | Complete |
+| [v0.10.6](./v0.10.6/README.md) | Documentation Sync & Forgotten Features | Complete |
 
 ## Structure
 

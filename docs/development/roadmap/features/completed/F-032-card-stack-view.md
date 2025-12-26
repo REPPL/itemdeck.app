@@ -75,12 +75,36 @@ v0.4.0
 
 ---
 
-## Related Documentation
+---
 
-- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
-- [Layout Presets](./F-011-layout-presets.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/CardStack/`
+
+### Key Files
+
+- `CardStack.tsx` - Overlapping card stack layout component
+- Styles integrated with CardGrid CSS modules
+
+### Integration
+
+- Uses Framer Motion for spring physics animations
+- Supports click-to-front and swipe navigation
+- Integrates with layout mode toggle in settings
+- Works alongside grid view as alternative layout
 
 ---
 
-**Status**: Planned
+## Related Documentation
+
+- [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
+- [Layout Presets](../completed/F-011-layout-presets.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

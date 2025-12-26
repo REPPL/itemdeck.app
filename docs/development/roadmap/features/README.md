@@ -47,16 +47,10 @@ Feature specifications for Itemdeck development.
 | ID | Feature | Status |
 |----|---------|--------|
 | [F-025](./planned/F-025-bundle-size-monitoring.md) | Bundle Size Monitoring | 📋 Planned |
-| [F-028](./planned/F-028-card-drag-and-drop.md) | Card Drag and Drop | 📋 Planned |
 | [F-031](./planned/F-031-fit-to-viewport.md) | Fit to Viewport Mode | 📋 Planned |
-| [F-032](./planned/F-032-card-stack-view.md) | Card Stack View | 📋 Planned |
-| [F-035](./planned/F-035-card-quick-actions.md) | Card Quick Actions | 📋 Planned |
 | [F-036](./planned/F-036-card-filtering.md) | Card Filtering | 📋 Planned |
 | [F-037](./planned/F-037-card-sorting.md) | Card Sorting | 📋 Planned |
-| [F-038](./planned/F-038-card-carousel-mode.md) | Card Carousel Mode | 📋 Planned |
 | [F-040](./planned/F-040-touch-gestures.md) | Touch Gestures | 📋 Planned |
-| [F-014](./planned/F-014-virtual-scrolling.md) | Virtual Scrolling | 📋 Planned |
-| [F-015](./planned/F-015-image-lazy-loading.md) | Image Lazy Loading | 📋 Planned |
 | [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
 
 ### v0.5.0 - Schema Design
@@ -120,6 +114,19 @@ Feature specifications for Itemdeck development.
 | InfoTooltip Component | CSS-only accessible tooltip component | ✅ Complete |
 | Platform Data Enhancement | Add MobyGames URLs to all 13 platforms | ✅ Complete |
 | Data Consistency Audit | Verify all games have required fields | ✅ Complete |
+
+### v0.10.6 - Documentation Sync & Forgotten Features
+
+*Documentation-only release recognising features implemented but not documented*
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-014](./completed/F-014-virtual-scrolling.md) | Virtual Scrolling | ✅ Complete |
+| [F-015](./completed/F-015-image-lazy-loading.md) | Image Lazy Loading | ✅ Complete |
+| [F-028](./completed/F-028-card-drag-and-drop.md) | Card Drag and Drop | ✅ Complete |
+| [F-032](./completed/F-032-card-stack-view.md) | Card Stack View | ✅ Complete |
+| [F-035](./completed/F-035-card-quick-actions.md) | Card Quick Actions | ✅ Complete |
+| [F-038](./completed/F-038-card-carousel-mode.md) | Card Carousel Mode | ✅ Complete |
 
 ### v0.11.0 - Mechanics Foundation
 

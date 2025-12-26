@@ -439,8 +439,36 @@ export function NativeLazyImage({
 
 ---
 
+## Implementation Notes
+
+**Milestone**: v0.10.6 (recognised as complete - originally planned for v0.4.0)
+
+### Component Path
+
+`src/components/LazyImage/`
+
+### Key Files
+
+- `LazyImage.tsx` - Intersection Observer-based lazy loading component
+- `LazyImage.module.css` - Shimmer animation and loading styles
+- `index.ts` - Module exports
+
+### Integration
+
+- Uses Intersection Observer API for viewport detection
+- Supports placeholder shimmer animation
+- Handles error states with fallback display
+- Respects `prefers-reduced-motion` preference
+- Native `loading="lazy"` attribute as baseline
+
+---
+
 ## Related Documentation
 
 - [Performance & Virtualisation Research](../../../../research/performance-virtualisation.md)
 - [Asset Management Research](../../../../research/asset-management.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+- [v0.10.6 Milestone](../../milestones/v0.10.6.md)
+
+---
+
+**Status**: Complete

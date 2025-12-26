@@ -20,6 +20,9 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.8.1](./milestones/v0.8.1.md) | Random Selection & Accessibility | ✅ Complete |
 | [v0.9.0](./milestones/v0.9.0.md) | Remote Source Intelligence | ✅ Complete |
 | [v0.10.0](./milestones/v0.10.0.md) | Data Editing | ✅ Complete |
+| [v0.10.1](./milestones/v0.10.1.md) | UI Polish & Data Model | ✅ Complete |
+| [v0.10.5](./milestones/v0.10.5.md) | Field Descriptions & Demo Data | ✅ Complete |
+| [v0.10.6](./milestones/v0.10.6.md) | Documentation Sync | ✅ Complete |
 | [v0.11.0](./milestones/v0.11.0.md) | Mechanics Foundation | 📋 Planned |
 | [v0.12.0](./milestones/v0.12.0.md) | Core Mechanics | 📋 Planned |
 | [v0.13.0](./milestones/v0.13.0.md) | Advanced Mechanics | 📋 Planned |
@@ -42,8 +45,8 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-011 | Layout Presets | v0.3.0 | ✅ Complete |
 | F-012 | State Persistence | v0.3.0 | ✅ Complete |
 | F-013 | Settings Panel | v0.3.0 | ✅ Complete |
-| F-014 | Virtual Scrolling | v0.4.0 | 📋 Planned |
-| F-015 | Image Lazy Loading | v0.4.0 | 📋 Planned |
+| F-014 | Virtual Scrolling | v0.10.6 | ✅ Complete |
+| F-015 | Image Lazy Loading | v0.10.6 | ✅ Complete |
 | F-016 | Bundle Optimisation | v0.4.0 | 📋 Planned |
 | F-017 | Testing Infrastructure | v0.6.0 | 📋 Planned |
 | F-018 | Security Hardening | v0.6.0 | 📋 Planned |
@@ -56,17 +59,17 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-025 | Bundle Size Monitoring | v0.4.0 | 📋 Planned |
 | F-026 | Component Storybook | v0.6.0 | 📋 Planned |
 | F-027 | Shuffle by Default | v0.3.0 | ✅ Complete |
-| F-028 | Card Drag and Drop | v0.4.0 | 📋 Planned |
+| F-028 | Card Drag and Drop | v0.10.6 | ✅ Complete |
 | F-029 | Card Info Button | v0.3.0 | ✅ Complete |
 | F-030 | Enhanced Card Front Design | v0.3.0 | ✅ Complete |
 | F-031 | Fit to Viewport Mode | v0.4.0 | 📋 Planned |
-| F-032 | Card Stack View | v0.4.0 | 📋 Planned |
+| F-032 | Card Stack View | v0.10.6 | ✅ Complete |
 | F-033 | Card Elevation System | v0.3.0 | ✅ Complete |
 | F-034 | Card Badges | v0.3.0 | ✅ Complete |
-| F-035 | Card Quick Actions | v0.4.0 | 📋 Planned |
+| F-035 | Card Quick Actions | v0.10.6 | ✅ Complete |
 | F-036 | Card Filtering | v0.4.0 | 📋 Planned |
 | F-037 | Card Sorting | v0.4.0 | 📋 Planned |
-| F-038 | Card Carousel Mode | v0.4.0 | 📋 Planned |
+| F-038 | Card Carousel Mode | v0.10.6 | ✅ Complete |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | 📋 Planned |
 | F-041 | Card Animation Polish | v0.6.0 | 📋 Planned |

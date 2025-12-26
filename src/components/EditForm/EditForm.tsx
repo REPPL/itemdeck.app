@@ -3,34 +3,56 @@
  *
  * Modal form for editing entity fields locally.
  * Uses overlay pattern - edits are stored separately from source data.
+ * Supports two tabs: Card (item) and Context (platform/category).
  */
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { z } from "zod";
-import { CloseIcon } from "@/components/Icons/Icons";
 import { useEditsStore } from "@/stores/editsStore";
 import { useEscapeShortcut } from "@/hooks/useGlobalKeyboard";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./EditForm.module.css";
 
+/** Active tab in the edit form */
+type EditTab = "card" | "context";
+
 /**
- * Editable fields schema.
+ * Card editable fields schema.
+ * Only text fields are editable for safety.
  */
-const editableFieldsSchema = z.object({
+const cardFieldsSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  year: z.number().min(1900).max(2100).optional().nullable(),
   summary: z.string().optional().nullable(),
   myVerdict: z.string().optional().nullable(),
-  myRank: z.number().min(1).optional().nullable(),
 });
 
-type EditableFields = z.infer<typeof editableFieldsSchema>;
+type CardFields = z.infer<typeof cardFieldsSchema>;
+
+/**
+ * Context (platform) editable fields schema.
+ * Only text fields are editable for safety.
+ */
+const contextFieldsSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  summary: z.string().optional().nullable(),
+});
+
+type ContextFields = z.infer<typeof contextFieldsSchema>;
 
 interface EditFormProps {
   /** The card being edited */
   card: DisplayCard;
   /** Called when form is closed */
   onClose: () => void;
+}
+
+/**
+ * Get the context entity ID for edits store.
+ * Prefixed with "context:" to distinguish from card IDs.
+ */
+function getContextEditId(contextId: string): string {
+  return `context:${contextId}`;
 }
 
 /**
@@ -42,39 +64,56 @@ export function EditForm({ card, onClose }: EditFormProps) {
   const hasEdits = useEditsStore((s) => s.hasEdits);
   const getEdit = useEditsStore((s) => s.getEdit);
 
-  // Get existing edits for this card
-  const existingEdit = getEdit(card.id);
+  // Determine if context tab should be available
+  const hasContext = Boolean(card.categoryInfo?.id);
+  const contextId = card.categoryInfo?.id;
+  const contextEditId = contextId ? getContextEditId(contextId) : null;
 
-  // Form state - merge existing edits with source data
-  const [formData, setFormData] = useState<EditableFields>(() => {
-    const editTitle = existingEdit?.fields.title as string | undefined;
-    const editYear = existingEdit?.fields.year as number | string | undefined;
-    const editSummary = existingEdit?.fields.summary as string | undefined;
-    const editVerdict = existingEdit?.fields.myVerdict as string | undefined;
-    const editRank = existingEdit?.fields.myRank as number | undefined;
+  // Tab state
+  const [activeTab, setActiveTab] = useState<EditTab>("card");
+
+  // Get existing edits for this card
+  const existingCardEdit = getEdit(card.id);
+  const existingContextEdit = contextEditId ? getEdit(contextEditId) : undefined;
+
+  // Card form state - merge existing edits with source data
+  const [cardFormData, setCardFormData] = useState<CardFields>(() => {
+    const editTitle = existingCardEdit?.fields.title as string | undefined;
+    const editSummary = existingCardEdit?.fields.summary as string | undefined;
+    const editVerdict = existingCardEdit?.fields.myVerdict as string | undefined;
     const cardSummary = card.summary;
     const cardVerdict = card.myVerdict as string | undefined;
-    const cardRank = card.myRank;
 
     return {
       title: editTitle ?? card.title,
-      year: parseYear(editYear ?? card.year),
       summary: editSummary ?? cardSummary ?? null,
       myVerdict: editVerdict ?? cardVerdict ?? null,
-      myRank: editRank ?? cardRank ?? null,
     };
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof EditableFields, string>>>({});
-  const [isDirty, setIsDirty] = useState(false);
+  // Context form state - merge existing edits with source data
+  const [contextFormData, setContextFormData] = useState<ContextFields>(() => {
+    const editTitle = existingContextEdit?.fields.title as string | undefined;
+    const editSummary = existingContextEdit?.fields.summary as string | undefined;
+    const contextTitle = card.categoryInfo?.title ?? "";
+    const contextSummary = card.categoryInfo?.summary;
+
+    return {
+      title: editTitle ?? contextTitle,
+      summary: editSummary ?? contextSummary ?? null,
+    };
+  });
+
+  const [cardErrors, setCardErrors] = useState<Partial<Record<keyof CardFields, string>>>({});
+  const [contextErrors, setContextErrors] = useState<Partial<Record<keyof ContextFields, string>>>({});
 
   const modalRef = useRef<HTMLDivElement>(null);
   const firstInputRef = useRef<HTMLInputElement>(null);
 
-  // Focus first input on mount
+  // Focus first input on mount and tab change
   useEffect(() => {
     firstInputRef.current?.focus();
-  }, []);
+  }, [activeTab]);
 
   // Escape key closes modal
   useEscapeShortcut(onClose, true);
@@ -83,68 +122,110 @@ export function EditForm({ card, onClose }: EditFormProps) {
   const handleBackdropClick = useCallback(
     (e: React.MouseEvent) => {
       if (e.target === e.currentTarget) {
-        if (isDirty) {
-          // Could add confirmation here, but for now just close
-          onClose();
-        } else {
-          onClose();
-        }
+        onClose();
       }
     },
-    [isDirty, onClose]
+    [onClose]
   );
 
-  // Handle field change
-  const handleChange = useCallback(
-    (field: keyof EditableFields, value: string | number | null) => {
-      setFormData((prev) => ({ ...prev, [field]: value }));
-      setIsDirty(true);
-      // Clear error when field changes
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
+  // Handle card field change
+  const handleCardChange = useCallback(
+    (field: keyof CardFields, value: string | null) => {
+      setCardFormData((prev) => ({ ...prev, [field]: value }));
+      setCardErrors((prev) => ({ ...prev, [field]: undefined }));
     },
     []
   );
 
-  // Validate and save
-  const handleSave = useCallback(() => {
-    // Clean up null/undefined values for validation
+  // Handle context field change
+  const handleContextChange = useCallback(
+    (field: keyof ContextFields, value: string | null) => {
+      setContextFormData((prev) => ({ ...prev, [field]: value }));
+      setContextErrors((prev) => ({ ...prev, [field]: undefined }));
+    },
+    []
+  );
+
+  // Validate and save card
+  const handleSaveCard = useCallback(() => {
     const cleanedData = {
-      title: formData.title,
-      year: formData.year ?? undefined,
-      summary: formData.summary ?? undefined,
-      myVerdict: formData.myVerdict ?? undefined,
-      myRank: formData.myRank ?? undefined,
+      title: cardFormData.title,
+      summary: cardFormData.summary ?? undefined,
+      myVerdict: cardFormData.myVerdict ?? undefined,
     };
 
-    const result = editableFieldsSchema.safeParse(cleanedData);
+    const result = cardFieldsSchema.safeParse(cleanedData);
 
     if (!result.success) {
-      const fieldErrors: Partial<Record<keyof EditableFields, string>> = {};
+      const fieldErrors: Partial<Record<keyof CardFields, string>> = {};
       for (const issue of result.error.issues) {
-        const field = issue.path[0] as keyof EditableFields;
+        const field = issue.path[0] as keyof CardFields;
         fieldErrors[field] = issue.message;
       }
-      setErrors(fieldErrors);
-      return;
+      setCardErrors(fieldErrors);
+      return false;
     }
 
-    // Save to edits store
     setFields(card.id, {
       title: result.data.title,
-      year: result.data.year ?? null,
       summary: result.data.summary ?? null,
       myVerdict: result.data.myVerdict ?? null,
-      myRank: result.data.myRank ?? null,
     });
 
-    onClose();
-  }, [formData, card.id, setFields, onClose]);
+    return true;
+  }, [cardFormData, card.id, setFields]);
 
-  // Handle revert
+  // Validate and save context
+  const handleSaveContext = useCallback(() => {
+    if (!contextEditId) return true;
+
+    const cleanedData = {
+      title: contextFormData.title,
+      summary: contextFormData.summary ?? undefined,
+    };
+
+    const result = contextFieldsSchema.safeParse(cleanedData);
+
+    if (!result.success) {
+      const fieldErrors: Partial<Record<keyof ContextFields, string>> = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof ContextFields;
+        fieldErrors[field] = issue.message;
+      }
+      setContextErrors(fieldErrors);
+      return false;
+    }
+
+    setFields(contextEditId, {
+      title: result.data.title,
+      summary: result.data.summary ?? null,
+    });
+
+    return true;
+  }, [contextFormData, contextEditId, setFields]);
+
+  // Save current tab
+  const handleSave = useCallback(() => {
+    if (activeTab === "card") {
+      if (handleSaveCard()) {
+        onClose();
+      }
+    } else {
+      if (handleSaveContext()) {
+        onClose();
+      }
+    }
+  }, [activeTab, handleSaveCard, handleSaveContext, onClose]);
+
+  // Handle revert for current tab
   const handleRevert = useCallback(() => {
-    revertEntity(card.id);
+    if (activeTab === "card") {
+      revertEntity(card.id);
+    } else if (contextEditId) {
+      revertEntity(contextEditId);
+    }
     onClose();
-  }, [card.id, revertEntity, onClose]);
+  }, [activeTab, card.id, contextEditId, revertEntity, onClose]);
 
   // Handle form submit
   const handleSubmit = useCallback(
@@ -156,11 +237,23 @@ export function EditForm({ card, onClose }: EditFormProps) {
   );
 
   const cardHasEdits = hasEdits(card.id);
+  const contextHasEdits = contextEditId ? hasEdits(contextEditId) : false;
+  const currentTabHasEdits = activeTab === "card" ? cardHasEdits : contextHasEdits;
 
-  return (
+  // Prevent keyboard events from bubbling to parent components
+  // This ensures spacebar works in textareas when the edit form is open
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Let escape bubble up (handled by useEscapeShortcut)
+    if (e.key === "Escape") return;
+    // Stop all other keys from bubbling
+    e.stopPropagation();
+  }, []);
+
+  return createPortal(
     <div
       className={styles.overlay}
       onClick={handleBackdropClick}
+      onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby="edit-form-title"
@@ -168,140 +261,143 @@ export function EditForm({ card, onClose }: EditFormProps) {
       <div className={styles.modal} ref={modalRef}>
         <div className={styles.header}>
           <h2 id="edit-form-title" className={styles.title}>
-            Edit Card
+            Edit
           </h2>
-          <button
-            type="button"
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close"
-          >
-            <CloseIcon size={20} />
-          </button>
         </div>
+
+        {/* Tabs */}
+        {hasContext && (
+          <div className={styles.tabs} role="tablist">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "card"}
+              className={[styles.tab, activeTab === "card" ? styles.tabActive : ""].filter(Boolean).join(" ")}
+              onClick={() => { setActiveTab("card"); }}
+            >
+              Card
+              {cardHasEdits && <span className={styles.editIndicator} title="Has edits" />}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeTab === "context"}
+              className={[styles.tab, activeTab === "context" ? styles.tabActive : ""].filter(Boolean).join(" ")}
+              onClick={() => { setActiveTab("context"); }}
+            >
+              Context
+              {contextHasEdits && <span className={styles.editIndicator} title="Has edits" />}
+            </button>
+          </div>
+        )}
 
         <div className={styles.body}>
           <form className={styles.form} onSubmit={handleSubmit}>
-            {/* Title */}
-            <div className={styles.field}>
-              <label htmlFor="edit-title" className={styles.label}>
-                Title<span className={styles.required}>*</span>
-              </label>
-              <input
-                ref={firstInputRef}
-                id="edit-title"
-                type="text"
-                className={styles.input}
-                value={formData.title}
-                onChange={(e) => { handleChange("title", e.target.value); }}
-                aria-invalid={!!errors.title}
-                aria-describedby={errors.title ? "edit-title-error" : undefined}
-              />
-              {errors.title && (
-                <span id="edit-title-error" className={styles.error}>
-                  {errors.title}
-                </span>
-              )}
-            </div>
+            {activeTab === "card" ? (
+              <>
+                {/* Card Title */}
+                <div className={styles.field}>
+                  <label htmlFor="edit-card-title" className={styles.label}>
+                    Title<span className={styles.required}>*</span>
+                  </label>
+                  <input
+                    ref={firstInputRef}
+                    id="edit-card-title"
+                    type="text"
+                    className={styles.input}
+                    value={cardFormData.title}
+                    onChange={(e) => { handleCardChange("title", e.target.value); }}
+                    aria-invalid={!!cardErrors.title}
+                    aria-describedby={cardErrors.title ? "edit-card-title-error" : undefined}
+                  />
+                  {cardErrors.title && (
+                    <span id="edit-card-title-error" className={styles.error}>
+                      {cardErrors.title}
+                    </span>
+                  )}
+                </div>
 
-            {/* Year */}
-            <div className={styles.field}>
-              <label htmlFor="edit-year" className={styles.label}>
-                Year
-              </label>
-              <input
-                id="edit-year"
-                type="number"
-                className={styles.input}
-                value={formData.year ?? ""}
-                onChange={(e) => {
-                  handleChange(
-                    "year",
-                    e.target.value ? parseInt(e.target.value, 10) : null
-                  );
-                }}
-                min={1900}
-                max={2100}
-                placeholder="1900-2100"
-                aria-invalid={!!errors.year}
-                aria-describedby={errors.year ? "edit-year-error" : undefined}
-              />
-              {errors.year && (
-                <span id="edit-year-error" className={styles.error}>
-                  {errors.year}
-                </span>
-              )}
-            </div>
+                {/* Card Summary */}
+                <div className={styles.field}>
+                  <label htmlFor="edit-card-summary" className={styles.label}>
+                    Summary
+                  </label>
+                  <textarea
+                    id="edit-card-summary"
+                    className={styles.textarea}
+                    value={cardFormData.summary ?? ""}
+                    onChange={(e) => {
+                      handleCardChange("summary", e.target.value || null);
+                    }}
+                    placeholder="Brief description..."
+                    rows={3}
+                  />
+                </div>
 
-            {/* Summary */}
-            <div className={styles.field}>
-              <label htmlFor="edit-summary" className={styles.label}>
-                Summary
-              </label>
-              <textarea
-                id="edit-summary"
-                className={styles.textarea}
-                value={formData.summary ?? ""}
-                onChange={(e) => {
-                  handleChange("summary", e.target.value || null);
-                }}
-                placeholder="Brief description..."
-                rows={3}
-              />
-            </div>
+                {/* My Verdict */}
+                <div className={styles.field}>
+                  <label htmlFor="edit-card-verdict" className={styles.label}>
+                    My Verdict
+                  </label>
+                  <textarea
+                    id="edit-card-verdict"
+                    className={styles.textarea}
+                    value={cardFormData.myVerdict ?? ""}
+                    onChange={(e) => {
+                      handleCardChange("myVerdict", e.target.value || null);
+                    }}
+                    placeholder="Your personal opinion..."
+                    rows={3}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Context Title */}
+                <div className={styles.field}>
+                  <label htmlFor="edit-context-title" className={styles.label}>
+                    Title<span className={styles.required}>*</span>
+                  </label>
+                  <input
+                    ref={firstInputRef}
+                    id="edit-context-title"
+                    type="text"
+                    className={styles.input}
+                    value={contextFormData.title}
+                    onChange={(e) => { handleContextChange("title", e.target.value); }}
+                    aria-invalid={!!contextErrors.title}
+                    aria-describedby={contextErrors.title ? "edit-context-title-error" : undefined}
+                  />
+                  {contextErrors.title && (
+                    <span id="edit-context-title-error" className={styles.error}>
+                      {contextErrors.title}
+                    </span>
+                  )}
+                </div>
 
-            {/* My Verdict */}
-            <div className={styles.field}>
-              <label htmlFor="edit-verdict" className={styles.label}>
-                My Verdict
-              </label>
-              <textarea
-                id="edit-verdict"
-                className={styles.textarea}
-                value={formData.myVerdict ?? ""}
-                onChange={(e) => {
-                  handleChange("myVerdict", e.target.value || null);
-                }}
-                placeholder="Your personal opinion..."
-                rows={3}
-              />
-            </div>
-
-            {/* My Rank */}
-            <div className={styles.field}>
-              <label htmlFor="edit-rank" className={styles.label}>
-                My Rank
-              </label>
-              <input
-                id="edit-rank"
-                type="number"
-                className={styles.input}
-                value={formData.myRank ?? ""}
-                onChange={(e) => {
-                  handleChange(
-                    "myRank",
-                    e.target.value ? parseInt(e.target.value, 10) : null
-                  );
-                }}
-                min={1}
-                placeholder="Position (1, 2, 3...)"
-                aria-invalid={!!errors.myRank}
-                aria-describedby={errors.myRank ? "edit-rank-error" : undefined}
-              />
-              {errors.myRank && (
-                <span id="edit-rank-error" className={styles.error}>
-                  {errors.myRank}
-                </span>
-              )}
-              <span className={styles.hint}>
-                Leave empty for unranked items
-              </span>
-            </div>
+                {/* Context Summary */}
+                <div className={styles.field}>
+                  <label htmlFor="edit-context-summary" className={styles.label}>
+                    Summary
+                  </label>
+                  <textarea
+                    id="edit-context-summary"
+                    className={styles.textarea}
+                    value={contextFormData.summary ?? ""}
+                    onChange={(e) => {
+                      handleContextChange("summary", e.target.value || null);
+                    }}
+                    placeholder="Brief description..."
+                    rows={3}
+                  />
+                </div>
+              </>
+            )}
           </form>
         </div>
 
         <div className={styles.footer}>
-          {cardHasEdits && (
+          {currentTabHasEdits && (
             <button
               type="button"
               className={[styles.button, styles.revertButton].filter(Boolean).join(" ")}
@@ -326,21 +422,9 @@ export function EditForm({ card, onClose }: EditFormProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
-}
-
-/**
- * Parse year from various formats.
- */
-function parseYear(value: unknown): number | null {
-  if (value === null || value === undefined) return null;
-  if (typeof value === "number") return value;
-  if (typeof value === "string") {
-    const parsed = parseInt(value, 10);
-    return isNaN(parsed) ? null : parsed;
-  }
-  return null;
 }
 
 export default EditForm;

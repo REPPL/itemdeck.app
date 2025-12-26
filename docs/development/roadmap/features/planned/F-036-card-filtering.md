@@ -1,20 +1,31 @@
-# F-036: Card Filtering
+# F-036: Card Filtering (with Search)
 
 ## Problem Statement
 
-As card collections grow, users need ways to filter and find specific cards. The current implementation shows all cards without filtering capability. Filters by category, year, favourites, or custom attributes would improve discoverability.
+As card collections grow, users need ways to filter and find specific cards. The current implementation shows all cards without filtering capability. A prominent search bar with combined filter chips would improve discoverability.
 
 ## Design Approach
 
-Implement a filter bar with toggleable filter chips/buttons. Filters can be combined (AND logic). Filtered-out cards animate out of view, and the grid reflows.
+Implement a **floating search bar** always visible above the grid, with toggleable filter chips/buttons below. Filters can be combined (AND logic). Filtered-out cards animate out of view, and the grid reflows.
 
-### Filter Bar Layout
+### Search Bar Layout (Primary)
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ 🔍 Search...  │ [All] [Favourites] [2024] [Category▼]│
-└──────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│ 🔍 Search cards...                                    [✕]  │
+├────────────────────────────────────────────────────────────┤
+│ Showing 42 of 120 cards                                    │
+│ [Platform: Game Boy ✕] [Year: 1990-1995 ✕] [Clear all]    │
+└────────────────────────────────────────────────────────────┘
 ```
+
+### Key Design Decisions
+
+1. **Floating Position**: Search bar above grid, always visible (not in settings)
+2. **Keyboard Shortcut**: `/` to focus search input
+3. **Debounced Input**: 300ms delay before filtering
+4. **Result Count**: Display "Showing X of Y cards"
+5. **Filter Chips**: Active filters appear as dismissible chips
 
 ### Filter Types
 
@@ -33,37 +44,74 @@ Cards not matching filter:
 3. Remove from layout (height collapses)
 4. Grid reflows with layout animation
 
+### Search Fields (Configurable)
+
+Default fields searched:
+- `title` - Card title
+- `summary` - Description text
+- `verdict` - User verdict/review
+
+### Technical Implementation
+
+**State Management (settingsStore.ts):**
+```typescript
+searchQuery: string;
+searchFields: string[];  // ['title', 'summary', 'verdict']
+activeFilters: { field: string; values: string[] }[];
+setSearchQuery: (query: string) => void;
+clearSearch: () => void;
+setFilter: (field: string, values: string[]) => void;
+clearFilter: (field: string) => void;
+clearAllFilters: () => void;
+```
+
+**Filter Logic (CardGrid.tsx):**
+```typescript
+const searchedCards = useMemo(() => {
+  if (!searchQuery.trim()) return selectedCards;
+  const query = searchQuery.toLowerCase();
+  return selectedCards.filter(card =>
+    searchFields.some(field => {
+      const value = resolveFieldPath(card, field);
+      return String(value ?? '').toLowerCase().includes(query);
+    })
+  );
+}, [selectedCards, searchQuery, searchFields]);
+```
+
 ## Implementation Tasks
 
-- [ ] Create `FilterBar` component
-- [ ] Implement text search input
-- [ ] Create filter chip/toggle components
-- [ ] Implement dropdown filter for categories
+- [ ] Add search/filter state to `settingsStore.ts`
+- [ ] Create `SearchBar` component with floating layout
+- [ ] Implement debounced text search input
+- [ ] Create `FilterChip` component
+- [ ] Implement filter dropdown for categories/platform
 - [ ] Add year range filter (if applicable)
-- [ ] Create `useFilteredCards` hook
+- [ ] Integrate filter logic in `CardGrid.tsx`
 - [ ] Animate card exit/enter on filter change
 - [ ] Handle empty state (no matches)
-- [ ] Persist active filters to URL params
-- [ ] Sync with virtual scrolling if enabled
+- [ ] Add keyboard shortcut `/` to focus search
+- [ ] Persist active filters to URL params (optional)
 - [ ] Ensure filter controls accessible
 - [ ] Write tests for filter logic
 
 ## Success Criteria
 
-- [ ] Text search filters cards by title
-- [ ] Filter toggles work correctly
+- [ ] Text search filters cards by title, summary, verdict
+- [ ] Filter chips display and dismiss correctly
 - [ ] Multiple filters combine (AND)
 - [ ] Cards animate in/out on filter change
 - [ ] Empty state shown when no matches
-- [ ] Filter state persists in URL
-- [ ] Filter bar is keyboard accessible
+- [ ] `/` keyboard shortcut focuses search
+- [ ] Result count displays "Showing X of Y"
+- [ ] Search bar is keyboard accessible
 - [ ] Screen readers announce filter results count
 
 ## Dependencies
 
 - **Requires**: v0.2.0 (card data from GitHub)
-- **Recommends**: F-014 Virtual Scrolling (coordination)
-- **Related**: F-035 Card Quick Actions (favourites filter)
+- **Uses**: `fieldPathResolver.ts` for nested field access
+- **Related**: F-065 Card Grouping, F-067 Statistics Dashboard
 
 ## Complexity
 
@@ -71,7 +119,7 @@ Medium
 
 ## Milestone
 
-v0.4.0
+v0.11.0
 
 ---
 
@@ -79,7 +127,7 @@ v0.4.0
 
 - [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
 - [GitHub Data Source](../completed/F-007-github-data-source.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+- [v0.11.0 Milestone](../../milestones/v0.11.0.md)
 
 ---
 

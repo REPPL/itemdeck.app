@@ -15,6 +15,7 @@ import {
   type DetailTransparencyPreset,
 } from "@/stores/settingsStore";
 import { applyVisualTheme } from "@/styles/themes";
+import { isLightColour } from "@/utils/colourContrast";
 
 /**
  * Border radius CSS values by preset.
@@ -102,7 +103,8 @@ function applyThemeCustomisation(
   detailTransparency: DetailTransparencyPreset,
   flipAnimation: boolean,
   detailAnimation: boolean,
-  overlayAnimation: boolean
+  overlayAnimation: boolean,
+  borderColour: string
 ): void {
   const root = document.documentElement;
 
@@ -124,9 +126,30 @@ function applyThemeCustomisation(
   const animValue = ANIMATION_VALUES[animationStyle];
   root.style.setProperty("--transition-normal", animValue.duration);
   root.style.setProperty("--easing-default", animValue.easing);
-  // Set hover scale based on animation style
-  const hoverScale = animationStyle === "none" ? "1" : animationStyle === "subtle" ? "1.01" : "1.02";
-  root.style.setProperty("--card-hover-scale", hoverScale);
+
+  // Set hover effects based on animation style
+  // "none" = no hover effects at all
+  // "subtle" and "smooth" = shadow change only
+  // "bouncy" = shadow change + scale/translate
+  if (animationStyle === "none") {
+    // No hover effects
+    root.style.setProperty("--card-hover-scale", "1");
+    root.style.setProperty("--card-hover-translate", "0");
+    root.style.setProperty("--card-hover-shadow", "var(--elevation-1)");
+    root.style.setProperty("--card-hover-glow", "var(--shadow-card)");
+  } else if (animationStyle === "bouncy") {
+    // Full hover effects with movement
+    root.style.setProperty("--card-hover-scale", "1.02");
+    root.style.setProperty("--card-hover-translate", "-2px");
+    root.style.setProperty("--card-hover-shadow", "var(--elevation-2)");
+    root.style.setProperty("--card-hover-glow", "0 0 20px rgba(100, 150, 255, 0.4), 0 0 40px rgba(100, 150, 255, 0.2), var(--shadow-card-hover)");
+  } else {
+    // Subtle/smooth - shadow change only, no movement
+    root.style.setProperty("--card-hover-scale", "1");
+    root.style.setProperty("--card-hover-translate", "0");
+    root.style.setProperty("--card-hover-shadow", "var(--elevation-2)");
+    root.style.setProperty("--card-hover-glow", "0 0 20px rgba(100, 150, 255, 0.4), 0 0 40px rgba(100, 150, 255, 0.2), var(--shadow-card-hover)");
+  }
 
   // Apply accent colour
   root.style.setProperty("--colour-accent", accentColour);
@@ -148,6 +171,25 @@ function applyThemeCustomisation(
   root.style.setProperty("--flip-animation-enabled", flipAnimation ? "1" : "0");
   root.style.setProperty("--detail-animation-enabled", detailAnimation ? "1" : "0");
   root.style.setProperty("--overlay-animation-enabled", overlayAnimation ? "1" : "0");
+
+  // Apply border colour
+  root.style.setProperty("--card-border-colour", borderColour);
+
+  // Calculate auto-contrast text colours based on card background
+  // Strip alpha channel if present (8-char hex -> 6-char)
+  const cleanBgHex = cardBackgroundColour.replace(/^#/, "");
+  const bgHex6 = cleanBgHex.length === 8 ? cleanBgHex.slice(0, 6) : cleanBgHex;
+  const bgIsLight = isLightColour(`#${bgHex6}`);
+
+  // Apply text colour for card back - auto-contrast based on background
+  // Ignores user's text colour setting to ensure readability
+  root.style.setProperty("--card-back-text", bgIsLight ? "#1a1a1a" : "#ffffff");
+  root.style.setProperty("--card-back-text-background", bgIsLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.15)");
+
+  // Set contrast-aware colours for expanded view
+  root.style.setProperty("--text-contrast-primary", bgIsLight ? "#1a1a1a" : "#ffffff");
+  root.style.setProperty("--text-contrast-secondary", bgIsLight ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.7)");
+  root.style.setProperty("--border-contrast", bgIsLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)");
 }
 
 /**
@@ -185,7 +227,8 @@ export function useVisualTheme(): void {
       customisation.detailTransparency,
       customisation.flipAnimation,
       customisation.detailAnimation,
-      customisation.overlayAnimation
+      customisation.overlayAnimation,
+      customisation.borderColour
     );
   }, [visualTheme, themeCustomisations]);
 }

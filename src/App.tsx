@@ -115,7 +115,8 @@ function AppContent() {
   // Apply settings as data attributes to document
   useEffect(() => {
     document.documentElement.dataset.overlayStyle = overlayStyle;
-    document.documentElement.dataset.titleDisplay = titleDisplayMode;
+    // Use setAttribute for hyphenated data attributes
+    document.documentElement.setAttribute("data-title-display", titleDisplayMode);
     document.documentElement.dataset.reduceMotion = reduceMotion;
     document.documentElement.dataset.highContrast = String(highContrast);
   }, [overlayStyle, titleDisplayMode, reduceMotion, highContrast]);
@@ -140,6 +141,10 @@ function AppContent() {
   // Statistics bar settings
   const showStatisticsBar = useSettingsStore((state) => state.showStatisticsBar);
   const setShowStatisticsBar = useSettingsStore((state) => state.setShowStatisticsBar);
+
+  // Button visibility settings
+  const showHelpButton = useSettingsStore((state) => state.showHelpButton);
+  const showSettingsButton = useSettingsStore((state) => state.showSettingsButton);
 
   const handleStatisticsBarDismiss = useCallback(() => {
     setShowStatisticsBar(false);
@@ -173,9 +178,19 @@ function AppContent() {
       {/* Edit mode indicator (top-right, shows when edit mode active) */}
       <EditModeIndicator onClick={handleSettingsOpen} />
 
-      {/* Floating buttons (bottom-right) */}
-      <HelpButton onClick={() => { setHelpOpen(true); }} />
-      <AdminButton onClick={handleSettingsOpen} />
+      {/* Floating buttons (bottom-right, stacked from bottom) */}
+      {(showHelpButton || showSettingsButton) && (
+        <div className={styles.floatingButtons}>
+          {/* Settings button appears at bottom (first in column-reverse) */}
+          {showSettingsButton && (
+            <AdminButton onClick={handleSettingsOpen} />
+          )}
+          {/* Help button appears above settings (or at bottom if settings hidden) */}
+          {showHelpButton && (
+            <HelpButton onClick={() => { setHelpOpen(true); }} />
+          )}
+        </div>
+      )}
 
       {/* Settings panel */}
       <SettingsPanel

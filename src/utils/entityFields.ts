@@ -48,6 +48,11 @@ const SKIP_FIELDS = new Set([
   "originalReleaseDate",
   // Rating fields (skip personal rating, keep average reviews)
   "rating",
+  // Edit tracking fields (shown as formatted indicator in footer)
+  "editedAt",
+  "hasEdits",
+  "_editedAt",
+  "_hasEdits",
 ]);
 
 /**
@@ -62,33 +67,103 @@ export interface FieldDefinition {
   values?: string[];
   /** Number format (e.g., "stars" for star rating) */
   format?: string;
+  /** Description shown in tooltip */
+  description?: string;
 }
 
 /**
- * Built-in field definitions with friendly labels.
+ * Built-in field definitions with friendly labels and descriptions.
  */
 const FIELD_DEFINITIONS: Record<string, FieldDefinition> = {
   // Core fields
-  title: { label: "Title", type: "text" },
-  year: { label: "Year", type: "year" },
-  summary: { label: "Summary", type: "text" },
+  title: {
+    label: "Title",
+    type: "text",
+    description: "The official name of this item",
+  },
+  year: {
+    label: "Year",
+    type: "year",
+    description: "Year of original release",
+  },
+  summary: {
+    label: "Summary",
+    type: "text",
+    description: "Brief description of this item",
+  },
   // Personal fields (my* prefix)
-  myVerdict: { label: "My verdict", type: "text" },
-  myStartYear: { label: "Playing since", type: "year" },
-  myRating: { label: "My rating", type: "number", format: "stars" },
-  myRank: { label: "My rank", type: "number" },
+  myVerdict: {
+    label: "My verdict",
+    type: "text",
+    description: "Personal reflection or opinion",
+  },
+  myStartYear: {
+    label: "Playing since",
+    type: "year",
+    description: "Year I first experienced this",
+  },
+  myRating: {
+    label: "My rating",
+    type: "number",
+    format: "stars",
+    description: "Personal rating out of 5 stars",
+  },
+  myRank: {
+    label: "My rank",
+    type: "number",
+    description: "Personal ranking within this category (1 = favourite)",
+  },
   // Legacy personal fields
-  playedSince: { label: "Playing since", type: "year" },
-  verdict: { label: "Verdict", type: "text" },
-  rating: { label: "Rating", type: "number", format: "stars" },
-  status: { label: "Status", type: "enum", values: ["completed", "playing", "backlog", "abandoned"] },
+  playedSince: {
+    label: "Playing since",
+    type: "year",
+    description: "Year I first experienced this",
+  },
+  verdict: {
+    label: "Verdict",
+    type: "text",
+    description: "Personal reflection or opinion",
+  },
+  rating: {
+    label: "Rating",
+    type: "number",
+    format: "stars",
+    description: "Personal rating out of 5 stars",
+  },
+  status: {
+    label: "Status",
+    type: "enum",
+    values: ["completed", "playing", "backlog", "abandoned"],
+    description: "Current progress status",
+  },
   // Metadata fields
-  genres: { label: "Genres", type: "text" },
-  averageRating: { label: "Reviews", type: "number", format: "stars10" },
+  genres: {
+    label: "Genres",
+    type: "text",
+    description: "Categories or genres this belongs to",
+  },
+  averageRating: {
+    label: "Reviews",
+    type: "number",
+    format: "stars10",
+    description: "Aggregate review score from external sources",
+  },
   // Category fields (usually skipped)
-  rank: { label: "Rank", type: "number" },
-  device: { label: "Platform", type: "text" },
-  platform: { label: "Platform", type: "text" },
+  rank: {
+    label: "Rank",
+    type: "number",
+    description: "Position in ordered list",
+  },
+  device: {
+    label: "Platform",
+    type: "text",
+    description: "The platform or device",
+  },
+  platform: {
+    label: "Platform",
+    type: "text",
+    description: "The platform or device",
+  },
 };
 
 /**
@@ -113,6 +188,14 @@ export function toTitleCase(fieldName: string): string {
  */
 export function getFieldLabel(fieldName: string): string {
   return FIELD_DEFINITIONS[fieldName]?.label ?? toTitleCase(fieldName);
+}
+
+/**
+ * Get the description for a field, if available.
+ * Returns undefined if no description is defined.
+ */
+export function getFieldDescription(fieldName: string): string | undefined {
+  return FIELD_DEFINITIONS[fieldName]?.description;
 }
 
 /**
@@ -224,6 +307,8 @@ export interface DisplayableField {
   label: string;
   /** Formatted value */
   value: string;
+  /** Description for tooltip (optional) */
+  description?: string;
 }
 
 /**
@@ -269,6 +354,7 @@ export function getDisplayableFields(
       key,
       label: getFieldLabel(key),
       value: formattedValue,
+      description: getFieldDescription(key),
     });
   }
 

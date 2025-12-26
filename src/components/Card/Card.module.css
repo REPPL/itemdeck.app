@@ -51,13 +51,23 @@
 }
 
 .card:hover {
-  box-shadow: var(--elevation-2);
-  transform: translateY(-2px);
+  /* Hover effects controlled by CSS variables set based on animation style */
+  box-shadow: var(--card-hover-shadow, var(--elevation-2));
+  transform: translateY(var(--card-hover-translate, 0)) scale(var(--card-hover-scale, 1));
 }
 
 .card:active {
   box-shadow: var(--elevation-1);
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
+}
+
+/* Hide shadow during flip animation to prevent visual artefacts */
+.card[data-flipping="true"] {
+  box-shadow: none;
+}
+
+.card[data-flipping="true"]:hover {
+  box-shadow: none;
 }
 
 .card.elevated {
@@ -106,16 +116,13 @@
   border-radius: var(--card-border-radius);
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  border: var(--card-border-width, 0) solid rgba(255, 255, 255, 0.2);
+  border: var(--card-border-width, 0) solid var(--card-border-colour, rgba(255, 255, 255, 0.2));
   transition: box-shadow var(--transition-normal);
 }
 
-/* Hover glow effect on both faces */
+/* Hover glow effect on both faces - controlled by animation style */
 .card:hover .cardFace {
-  box-shadow:
-    0 0 20px rgba(100, 150, 255, 0.4),
-    0 0 40px rgba(100, 150, 255, 0.2),
-    var(--shadow-card-hover);
+  box-shadow: var(--card-hover-glow, 0 0 20px rgba(100, 150, 255, 0.4), 0 0 40px rgba(100, 150, 255, 0.2), var(--shadow-card-hover));
 }
 
 /* Back face - visible by default (no rotation) */
@@ -263,17 +270,18 @@
   font-weight: 700;
   line-height: 1.2;
   letter-spacing: -0.02em;
+  /* Hardcoded white - overlay always has dark background */
+  color: white;
   text-shadow: var(--card-overlay-text-shadow);
   max-width: 100%;
 
-  /* Multi-line with ellipsis - max 2 lines */
+  /* Line clamping controlled by title display mode setting */
   display: -webkit-box;
-  -webkit-line-clamp: var(--card-title-line-clamp, 2);
+  -webkit-line-clamp: var(--card-title-line-clamp, 1);
   -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  /* Allow wrapping for multi-line */
-  white-space: normal;
+  overflow: var(--card-title-overflow, hidden);
+  text-overflow: var(--card-title-text-overflow, ellipsis);
+  white-space: var(--card-title-white-space, nowrap);
 }
 
 /* Footer row: year on left, device badge on right */
@@ -290,6 +298,8 @@
   font-size: var(--text-fluid-small);
   font-weight: 600;
   opacity: 0.95;
+  /* Hardcoded white - overlay always has dark background */
+  color: white;
   text-shadow: var(--card-overlay-text-shadow);
   line-height: 1;
 }

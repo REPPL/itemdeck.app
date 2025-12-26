@@ -6,17 +6,23 @@
  *
  * Sub-tabs:
  * - Layout: Size, Aspect Ratio
- * - Front: Title Display, Badges
- * - Back: Show Logo toggle
+ * - Front: Title Display, Badges, Footer Badge Field, Unranked Text
+ * - Back: Show Logo, Subtitle Field, Logo Field
  */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
   useSettingsStore,
   type TitleDisplayMode,
   type CardSizePreset,
   type CardAspectRatio,
+  type FieldMappingConfig,
 } from "@/stores/settingsStore";
+import {
+  SUBTITLE_FIELD_OPTIONS,
+  FOOTER_BADGE_FIELD_OPTIONS,
+  LOGO_FIELD_OPTIONS,
+} from "@/utils/fieldPathResolver";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -58,13 +64,31 @@ export function CardSettingsTabs() {
     titleDisplayMode,
     showRankBadge,
     showDeviceBadge,
+    rankPlaceholderText,
+    fieldMapping,
     setCardSizePreset,
     setCardAspectRatio,
     setCardBackDisplay,
     setTitleDisplayMode,
     setShowRankBadge,
     setShowDeviceBadge,
+    setRankPlaceholderText,
+    setFieldMapping,
   } = useSettingsStore();
+
+  const handlePlaceholderChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      setRankPlaceholderText(event.target.value);
+    },
+    [setRankPlaceholderText]
+  );
+
+  const handleFieldMappingChange = useCallback(
+    (field: keyof FieldMappingConfig, value: string) => {
+      setFieldMapping({ [field]: value });
+    },
+    [setFieldMapping]
+  );
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -149,6 +173,20 @@ export function CardSettingsTabs() {
               </label>
             </div>
             <div className={styles.row}>
+              <span className={styles.label}>Unranked Text</span>
+              <input
+                type="text"
+                className={styles.textInput}
+                value={rankPlaceholderText}
+                onChange={handlePlaceholderChange}
+                placeholder="The one that got away!"
+                aria-label="Rank placeholder text"
+              />
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.row}>
               <span className={styles.label}>Show Footer Badge</span>
               <label className={styles.toggle}>
                 <input
@@ -159,12 +197,41 @@ export function CardSettingsTabs() {
                 <span className={styles.toggleSlider} />
               </label>
             </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Footer Badge Field</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.footerBadgeField}
+                onChange={(e) => { handleFieldMappingChange("footerBadgeField", e.target.value); }}
+                aria-label="Footer badge field"
+              >
+                {FOOTER_BADGE_FIELD_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
           </>
         );
 
       case "back":
         return (
           <>
+            <div className={styles.row}>
+              <span className={styles.label}>Subtitle Field</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.subtitleField}
+                onChange={(e) => { handleFieldMappingChange("subtitleField", e.target.value); }}
+                aria-label="Subtitle field"
+              >
+                {SUBTITLE_FIELD_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.divider} />
+
             <div className={styles.row}>
               <span className={styles.label}>Show Logo</span>
               <label className={styles.toggle}>
@@ -175,6 +242,19 @@ export function CardSettingsTabs() {
                 />
                 <span className={styles.toggleSlider} />
               </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Logo Field</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.logoField}
+                onChange={(e) => { handleFieldMappingChange("logoField", e.target.value); }}
+                aria-label="Logo field"
+              >
+                {LOGO_FIELD_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
             </div>
           </>
         );

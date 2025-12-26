@@ -166,8 +166,8 @@ describe("settingsStore - Collection Config", () => {
 
       // Should still mark as applied
       expect(useSettingsStore.getState().hasAppliedCollectionDefaults).toBe(true);
-      // But keep default values
-      expect(useSettingsStore.getState().visualTheme).toBe("retro");
+      // But keep default values (store default is "modern")
+      expect(useSettingsStore.getState().visualTheme).toBe("modern");
     });
   });
 });

@@ -19,6 +19,8 @@ Development narratives documenting how each milestone was built.
 | [v0.8.1](./v0.8.1/README.md) | Random Selection & Accessibility | Complete |
 | [v0.9.0](./v0.9.0/README.md) | Remote Source Intelligence | Complete |
 | [v0.10.0](./v0.10.0/README.md) | Data Editing | Complete |
+| [v0.10.1](./v0.10.1/README.md) | UI Polish & Data Model Refinement | Complete |
+| [v0.10.5](./v0.10.5/README.md) | Field Descriptions & Demo Data | Complete |
 
 ## Structure
 

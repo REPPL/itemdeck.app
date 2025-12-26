@@ -13,7 +13,6 @@ import { CardSettingsTabs } from "./CardSettingsTabs";
 import { ThemeSettingsTabs } from "./ThemeSettingsTabs";
 import { ConfigSettingsTabs } from "./ConfigSettingsTabs";
 import { StorageSettingsTabs } from "./StorageSettingsTabs";
-import { SourceSettingsTabs } from "./SourceSettingsTabs";
 import {
   useSettingsStore,
   type ReduceMotionPreference,
@@ -36,8 +35,10 @@ interface SettingsPanelProps {
 
 /**
  * Tab configuration.
+ * Order: System | Theme | Cards | Config | Storage
+ * (Sources is now a subtab within Storage)
  */
-type TabId = "system" | "theme" | "cards" | "config" | "storage" | "sources";
+type TabId = "system" | "theme" | "cards" | "config" | "storage";
 
 interface Tab {
   id: TabId;
@@ -109,16 +110,6 @@ function StorageIcon() {
   );
 }
 
-function SourcesIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" />
-      <line x1="2" y1="12" x2="22" y2="12" />
-      <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-    </svg>
-  );
-}
-
 function CloseIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -169,10 +160,9 @@ function CloseIcon() {
 const tabs: Tab[] = [
   { id: "system", label: "System", icon: <SystemIcon /> },
   { id: "theme", label: "Theme", icon: <ThemeIcon /> },
-  { id: "config", label: "Config", icon: <ConfigIcon /> },
   { id: "cards", label: "Cards", icon: <CardIcon /> },
+  { id: "config", label: "Config", icon: <ConfigIcon /> },
   { id: "storage", label: "Storage", icon: <StorageIcon /> },
-  { id: "sources", label: "Sources", icon: <SourcesIcon /> },
 ];
 
 // Layout Mode - not yet implemented
@@ -347,9 +337,6 @@ export function SettingsPanel({
 
       case "storage":
         return <StorageSettingsTabs />;
-
-      case "sources":
-        return <SourceSettingsTabs />;
     }
   };
 

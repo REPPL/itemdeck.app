@@ -1,28 +1,254 @@
 /**
  * Storage settings tab content with sub-tabs.
  *
- * Provides UI for managing cached images and storage usage.
- * Sub-tabs: Images | Cache | About
+ * Provides UI for managing data sources, cached images, imports/exports, and storage info.
+ * Sub-tabs: Sources | Image Cache | Import/Export | About
  */
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, useCallback } from "react";
 import { useCacheStats, useCacheManagement, useImagePreloader, formatBytes } from "@/hooks/useImageCache";
 import { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { importCollection, exportCollectionWithFormat, type ExportFormat } from "@/lib/collectionExport";
 import { useEditsStore } from "@/stores/editsStore";
+import { useSourceStore, useSources } from "@/stores/sourceStore";
+import { useSourceHealth } from "@/hooks/useSourceHealth";
+import { SourceHealthIndicator } from "@/components/SourceHealth";
+import { PlusIcon, TrashIcon, CheckIcon, ExternalLinkIcon } from "@/components/Icons";
 import { exportEditsToFile, importEditsFromFile } from "@/utils/editExport";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-type StorageSubTab = "images" | "cache" | "edits" | "about";
+type StorageSubTab = "sources" | "cache" | "import-export" | "about";
 
 const subTabs: { id: StorageSubTab; label: string }[] = [
-  { id: "images", label: "Images" },
-  { id: "cache", label: "Cache" },
-  { id: "edits", label: "Edits" },
+  { id: "sources", label: "Sources" },
+  { id: "cache", label: "Image Cache" },
+  { id: "import-export", label: "Import/Export" },
   { id: "about", label: "About" },
 ];
+
+/**
+ * Source list item component.
+ */
+function SourceItem({ sourceId }: { sourceId: string }) {
+  const source = useSourceStore((state) => state.sources.find((s) => s.id === sourceId));
+  const activeSourceId = useSourceStore((state) => state.activeSourceId);
+  const defaultSourceId = useSourceStore((state) => state.defaultSourceId);
+  const setActiveSource = useSourceStore((state) => state.setActiveSource);
+  const setDefaultSource = useSourceStore((state) => state.setDefaultSource);
+  const removeSource = useSourceStore((state) => state.removeSource);
+
+  const { data: health, isLoading: isCheckingHealth } = useSourceHealth(
+    source?.url ?? "",
+    { enabled: Boolean(source?.url) }
+  );
+
+  if (!source) return null;
+
+  const isActive = activeSourceId === source.id;
+  const isDefault = defaultSourceId === source.id;
+
+  return (
+    <div
+      className={[
+        styles.sourceItem,
+        isActive ? styles.sourceItemActive : "",
+      ].filter(Boolean).join(" ")}
+    >
+      <div className={styles.sourceItemHeader}>
+        <div className={styles.sourceItemStatus}>
+          {isCheckingHealth ? (
+            <span className={styles.sourceItemLoading} />
+          ) : health ? (
+            <SourceHealthIndicator status={health.status} size="small" />
+          ) : null}
+        </div>
+        <div className={styles.sourceItemInfo}>
+          <span className={styles.sourceItemName}>
+            {source.name ?? source.url}
+          </span>
+          {source.name && (
+            <span className={styles.sourceItemUrl}>{source.url}</span>
+          )}
+        </div>
+        <div className={styles.sourceItemActions}>
+          {health?.latency && (
+            <span className={styles.sourceItemLatency}>{health.latency}ms</span>
+          )}
+        </div>
+      </div>
+
+      <div className={styles.sourceItemButtons}>
+        <button
+          type="button"
+          className={[
+            styles.sourceItemButton,
+            isActive ? styles.sourceItemButtonActive : "",
+          ].filter(Boolean).join(" ")}
+          onClick={() => { setActiveSource(source.id); }}
+          disabled={isActive}
+          title={isActive ? "Currently active" : "Set as active source"}
+        >
+          {isActive ? (
+            <>
+              <CheckIcon />
+              <span>Active</span>
+            </>
+          ) : (
+            <span>Use</span>
+          )}
+        </button>
+
+        <button
+          type="button"
+          className={[
+            styles.sourceItemButton,
+            isDefault ? styles.sourceItemButtonDefault : "",
+          ].filter(Boolean).join(" ")}
+          onClick={() => { setDefaultSource(source.id); }}
+          disabled={isDefault}
+          title={isDefault ? "Default source" : "Set as default on load"}
+        >
+          {isDefault ? "Default" : "Set Default"}
+        </button>
+
+        {!source.isBuiltIn && (
+          <button
+            type="button"
+            className={[styles.sourceItemButton, styles.sourceItemButtonDanger].join(" ")}
+            onClick={() => {
+              if (window.confirm(`Remove source "${source.name ?? source.url}"?`)) {
+                removeSource(source.id);
+              }
+            }}
+            title="Remove source"
+          >
+            <TrashIcon />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Add source form component.
+ */
+function AddSourceForm() {
+  const [url, setUrl] = useState("");
+  const [name, setName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isValidating, setIsValidating] = useState(false);
+
+  const addSource = useSourceStore((state) => state.addSource);
+  const sources = useSources();
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) {
+      setError("URL is required");
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(trimmedUrl);
+    } catch {
+      setError("Invalid URL format");
+      return;
+    }
+
+    // Check for duplicates
+    const normalizedUrl = trimmedUrl.replace(/\/$/, "");
+    if (sources.some((s) => s.url === normalizedUrl)) {
+      setError("Source already exists");
+      return;
+    }
+
+    setIsValidating(true);
+
+    try {
+      // Try to fetch the collection to validate
+      const testUrl = `${normalizedUrl}/collection.json`;
+      const response = await fetch(testUrl, {
+        method: "HEAD",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        setError(`Source not accessible (HTTP ${String(response.status)})`);
+        setIsValidating(false);
+        return;
+      }
+
+      // Add the source
+      addSource(normalizedUrl, name.trim() || undefined);
+      setUrl("");
+      setName("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to validate source");
+    } finally {
+      setIsValidating(false);
+    }
+  }, [url, name, sources, addSource]);
+
+  return (
+    <form className={styles.addSourceForm} onSubmit={(e) => { void handleSubmit(e); }}>
+      <div className={styles.formGroup}>
+        <label htmlFor="source-url" className={styles.label}>
+          Source URL
+        </label>
+        <input
+          id="source-url"
+          type="url"
+          className={styles.input}
+          placeholder="https://example.com/data"
+          value={url}
+          onChange={(e) => { setUrl(e.target.value); }}
+          disabled={isValidating}
+        />
+      </div>
+
+      <div className={styles.formGroup}>
+        <label htmlFor="source-name" className={styles.label}>
+          Name (optional)
+        </label>
+        <input
+          id="source-name"
+          type="text"
+          className={styles.input}
+          placeholder="My Collection"
+          value={name}
+          onChange={(e) => { setName(e.target.value); }}
+          disabled={isValidating}
+        />
+      </div>
+
+      {error && (
+        <p className={styles.formError}>{error}</p>
+      )}
+
+      <button
+        type="submit"
+        className={styles.primaryButton}
+        disabled={isValidating || !url.trim()}
+      >
+        {isValidating ? (
+          "Validating..."
+        ) : (
+          <>
+            <PlusIcon />
+            <span>Add Source</span>
+          </>
+        )}
+      </button>
+    </form>
+  );
+}
 
 /**
  * Storage settings tab component with sub-navigation.
@@ -32,12 +258,15 @@ export function StorageSettingsTabs() {
   const { clearCache, isClearing } = useCacheManagement();
   const { preload, isPreloading, progressPercent } = useImagePreloader();
   const { cards, collection } = useCollectionData();
-  const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("images");
+  const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("sources");
   const [showConfirm, setShowConfirm] = useState(false);
   const [showEditsRevertConfirm, setShowEditsRevertConfirm] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("json");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const editsFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Sources
+  const sources = useSources();
 
   // Edits store
   const edits = useEditsStore((s) => s.edits);
@@ -158,7 +387,32 @@ export function StorageSettingsTabs() {
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
-      case "images":
+      case "sources":
+        return (
+          <>
+            <h3 className={styles.sectionHeader}>Configured Sources</h3>
+            <p className={styles.sectionDescription}>
+              Manage your data sources. The active source provides the current collection.
+            </p>
+
+            <div className={styles.sourceList}>
+              {sources.map((source) => (
+                <SourceItem key={source.id} sourceId={source.id} />
+              ))}
+            </div>
+
+            <div className={styles.divider} />
+
+            <h3 className={styles.sectionHeader}>Add New Source</h3>
+            <p className={styles.sectionDescription}>
+              Add a remote collection URL. The URL should point to a directory containing collection.json.
+            </p>
+
+            <AddSourceForm />
+          </>
+        );
+
+      case "cache":
         return (
           <>
             {isLoading ? (
@@ -202,59 +456,7 @@ export function StorageSettingsTabs() {
 
             <div className={styles.divider} />
 
-            {/* Export */}
-            <div className={styles.row}>
-              <span className={styles.label}>Export Collection</span>
-              <div className={styles.buttonGroup}>
-                <select
-                  className={styles.formatSelect}
-                  value={exportFormat}
-                  onChange={handleFormatChange}
-                  aria-label="Export format"
-                >
-                  <option value="json">JSON</option>
-                  <option value="csv">CSV</option>
-                  <option value="markdown">Markdown</option>
-                </select>
-                <button
-                  type="button"
-                  className={styles.secondaryButton}
-                  onClick={handleExport}
-                  disabled={!collection || cards.length === 0}
-                >
-                  Export
-                </button>
-              </div>
-            </div>
-
-            {/* Import */}
-            <div className={styles.row}>
-              <span className={styles.label}>Import Collection</span>
-              <button
-                type="button"
-                className={styles.secondaryButton}
-                onClick={handleImportClick}
-              >
-                Import JSON
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileChange}
-                style={{ display: "none" }}
-              />
-            </div>
-
-            <div className={styles.helpText}>
-              Export saves the current collection. Import loads a previously exported collection.
-            </div>
-          </>
-        );
-
-      case "cache":
-        return (
-          <>
+            {/* Clear Cache */}
             <div className={styles.row}>
               <span className={styles.label}>
                 {showConfirm ? "Are you sure?" : "Clear image cache"}
@@ -297,16 +499,6 @@ export function StorageSettingsTabs() {
               re-downloaded when needed.
             </div>
 
-            <div className={styles.row}>
-              <span className={styles.label}>Cache Limit</span>
-              <span className={styles.value}>{formatBytes(DEFAULT_MAX_CACHE_SIZE)}</span>
-            </div>
-
-            <div className={styles.helpText}>
-              When the cache limit is reached, the oldest images are automatically
-              removed to make space for new ones (LRU eviction).
-            </div>
-
             <div className={styles.divider} />
 
             {/* Re-cache Images */}
@@ -330,19 +522,67 @@ export function StorageSettingsTabs() {
           </>
         );
 
-      case "edits":
+      case "import-export":
         return (
           <>
+            <h3 className={styles.sectionHeader}>Collection</h3>
+
+            {/* Export Collection */}
+            <div className={styles.row}>
+              <span className={styles.label}>Export Collection</span>
+              <div className={styles.buttonGroup}>
+                <select
+                  className={styles.formatSelect}
+                  value={exportFormat}
+                  onChange={handleFormatChange}
+                  aria-label="Export format"
+                >
+                  <option value="json">JSON</option>
+                  <option value="csv">CSV</option>
+                  <option value="markdown">Markdown</option>
+                </select>
+                <button
+                  type="button"
+                  className={styles.secondaryButton}
+                  onClick={handleExport}
+                  disabled={!collection || cards.length === 0}
+                >
+                  Export
+                </button>
+              </div>
+            </div>
+
+            {/* Import Collection */}
+            <div className={styles.row}>
+              <span className={styles.label}>Import Collection</span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleImportClick}
+              >
+                Import JSON
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileChange}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            <div className={styles.helpText}>
+              Export saves the current collection. Import loads a previously exported collection.
+            </div>
+
+            <div className={styles.divider} />
+
+            <h3 className={styles.sectionHeader}>Local Edits</h3>
+
             <div className={styles.row}>
               <span className={styles.label}>Modified Cards</span>
               <span className={styles.value}>{editCount}</span>
             </div>
-
-            <div className={styles.helpText}>
-              Local edits are stored in your browser. Export to backup.
-            </div>
-
-            <div className={styles.divider} />
 
             {/* Export Edits */}
             <div className={styles.row}>
@@ -423,6 +663,7 @@ export function StorageSettingsTabs() {
       case "about":
         return (
           <>
+            <h3 className={styles.sectionHeader}>Image Cache</h3>
             <div className={styles.helpText}>
               Images are automatically cached in your browser using IndexedDB
               storage for faster loading and offline access.
@@ -434,6 +675,11 @@ export function StorageSettingsTabs() {
             </div>
 
             <div className={styles.row}>
+              <span className={styles.label}>Cache Limit</span>
+              <span className={styles.value}>{formatBytes(DEFAULT_MAX_CACHE_SIZE)}</span>
+            </div>
+
+            <div className={styles.row}>
               <span className={styles.label}>Eviction Policy</span>
               <span className={styles.value}>LRU (Least Recently Used)</span>
             </div>
@@ -441,6 +687,28 @@ export function StorageSettingsTabs() {
             <div className={styles.helpText}>
               The cache persists across browser sessions. Clearing browser data
               or using private/incognito mode will clear the cache.
+            </div>
+
+            <div className={styles.divider} />
+
+            <h3 className={styles.sectionHeader}>Data Sources</h3>
+            <div className={styles.infoBox}>
+              <p>
+                <strong>Local Collection</strong> is the built-in source that reads from the app&apos;s data directory.
+              </p>
+              <p>
+                <strong>Remote sources</strong> can be any URL hosting a valid collection.json file.
+                Health checks run automatically to monitor source availability.
+              </p>
+              <a
+                href="https://github.com/your-repo/itemdeck#sources"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.infoLink}
+              >
+                Learn more about sources
+                <ExternalLinkIcon />
+              </a>
             </div>
           </>
         );

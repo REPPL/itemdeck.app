@@ -59,17 +59,54 @@ export function CardGrid() {
     };
   }, [displayConfig, fieldMapping]);
 
+  // Track selected card IDs for stable random selection (survives edits)
+  const [selectedCardIds, setSelectedCardIds] = useState<string[] | null>(null);
+
   // Apply random selection before shuffle/sort
+  // Use stable IDs to survive card edits
   const selectedCards = useMemo(() => {
     if (!randomSelectionEnabled || randomSelectionCount <= 0 || sourceCards.length === 0) {
       return sourceCards;
     }
-    // Limit to available cards
+
+    // If we have stable selected IDs, use them to filter
+    if (selectedCardIds) {
+      const idSet = new Set(selectedCardIds);
+      const filtered = sourceCards.filter(c => idSet.has(c.id));
+      // If selection is still valid (all IDs exist), use it
+      if (filtered.length === selectedCardIds.length) {
+        // Preserve the original selection order
+        return selectedCardIds.map(id => {
+          const card = filtered.find(c => c.id === id);
+          if (!card) throw new Error(`Card with id ${id} not found`);
+          return card;
+        });
+      }
+    }
+
+    // Otherwise, create new random selection and store IDs
     const count = Math.min(randomSelectionCount, sourceCards.length);
-    // Shuffle and take first N for random selection
     const shuffled = shuffle([...sourceCards]);
-    return shuffled.slice(0, count);
-  }, [sourceCards, randomSelectionEnabled, randomSelectionCount]);
+    const selected = shuffled.slice(0, count);
+    // Store stable IDs (effect will handle this)
+    return selected;
+  }, [sourceCards, randomSelectionEnabled, randomSelectionCount, selectedCardIds]);
+
+  // Update stable IDs when random selection changes
+  useEffect(() => {
+    if (randomSelectionEnabled && randomSelectionCount > 0 && sourceCards.length > 0) {
+      // Only set if we don't have stable IDs yet or count changed
+      if (selectedCardIds?.length !== Math.min(randomSelectionCount, sourceCards.length)) {
+        const count = Math.min(randomSelectionCount, sourceCards.length);
+        const shuffled = shuffle([...sourceCards]);
+        const newIds = shuffled.slice(0, count).map(c => c.id);
+        setSelectedCardIds(newIds);
+      }
+    } else {
+      setSelectedCardIds(null);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- sourceCards.length is sufficient, we don't want to re-shuffle on content changes
+  }, [randomSelectionEnabled, randomSelectionCount, sourceCards.length, selectedCardIds]);
 
   // Shuffle or sort cards based on settings
   const { cards: shuffledCards } = useShuffledCards(selectedCards, {
@@ -110,22 +147,42 @@ export function CardGrid() {
   }, []);
 
   // Track flipped card IDs in order (oldest first)
-  // When defaultCardFace is "front", all cards start flipped
   const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
 
-  // Initialise flipped state based on defaultCardFace setting
-  // When "front", flip all cards; when "back", unflip all
-  const prevDefaultFaceRef = useRef(defaultCardFace);
+  // Track previous setting to detect user changes
+  const prevDefaultFaceRef = useRef<string | null>(null);
+  // Track the card IDs we last initialized with (to detect actual changes)
+  const lastInitializedIdsRef = useRef<string | null>(null);
+
+  // Determine if cards are stable (not in the middle of random selection initialization)
+  // When random selection is enabled but selectedCardIds is null, we're still initializing
+  const cardsAreStable = !randomSelectionEnabled || selectedCardIds !== null;
+
+  // Apply initial flip state and handle setting changes
+  // Uses a single effect to avoid race conditions
   useEffect(() => {
-    if (defaultCardFace === "front") {
-      // Show all fronts: flip all cards
-      setFlippedCardIds(cards.map((c) => c.id));
-    } else if (prevDefaultFaceRef.current === "front") {
-      // Switching from front to back: unflip all
-      setFlippedCardIds([]);
+    if (cards.length === 0 || !cardsAreStable) return;
+
+    // Create a stable identifier for the current card set
+    const currentIdsKey = cards.map(c => c.id).join(',');
+    const isNewCardSet = lastInitializedIdsRef.current !== currentIdsKey;
+    const settingChanged = prevDefaultFaceRef.current !== null &&
+                          prevDefaultFaceRef.current !== defaultCardFace;
+
+    // Initialize or update based on what changed
+    if (isNewCardSet || settingChanged) {
+      if (defaultCardFace === "front") {
+        setFlippedCardIds(cards.map(c => c.id));
+      } else if (settingChanged) {
+        // Only clear if setting changed (not on initial load with "back")
+        setFlippedCardIds([]);
+      }
+      // If isNewCardSet and defaultCardFace is "back", flippedCardIds stays empty (correct)
     }
+
+    lastInitializedIdsRef.current = currentIdsKey;
     prevDefaultFaceRef.current = defaultCardFace;
-  }, [defaultCardFace, cards]);
+  }, [cards, defaultCardFace, cardsAreStable]);
 
   // Calculate number of columns for keyboard navigation
   const columns = useMemo(() => {
@@ -143,18 +200,21 @@ export function CardGrid() {
         // Unflip: remove from list
         return prev.filter(id => id !== cardId);
       } else {
-        // Flip: add to list, enforce maxVisibleCards
+        // Flip: add to list
         const newList = [...prev, cardId];
 
-        // Remove oldest cards if we exceed the limit
-        while (newList.length > maxVisibleCards) {
-          newList.shift(); // Remove oldest (first)
+        // Only enforce maxVisibleCards when default is "back"
+        // When default is "front", allow unlimited flipped cards
+        if (defaultCardFace === "back") {
+          while (newList.length > maxVisibleCards) {
+            newList.shift(); // Remove oldest (first)
+          }
         }
 
         return newList;
       }
     });
-  }, [maxVisibleCards]);
+  }, [maxVisibleCards, defaultCardFace]);
 
   // Handle selection from keyboard navigation
   const handleSelect = useCallback((index: number) => {

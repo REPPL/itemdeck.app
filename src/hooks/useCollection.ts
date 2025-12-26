@@ -273,14 +273,27 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
           }
         }
 
+        // Get explicit detailUrls or auto-generate Wikipedia link from title
+        const platformTitle = platform.title as string;
+        let platformDetailUrls = normaliseDetailUrls(
+          platform.detailUrls as string | { url: string } | { url: string }[] | undefined
+        );
+
+        // Auto-generate Wikipedia URL if no detailUrls specified
+        if (platformDetailUrls.length === 0 && platformTitle) {
+          const wikipediaTitle = platformTitle.replace(/ /g, "_");
+          platformDetailUrls = [{
+            url: `https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`,
+            source: "Wikipedia",
+          }];
+        }
+
         return {
           id: platform.id,
-          title: platform.title as string,
+          title: platformTitle,
           year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
           summary: platform.summary as string | undefined,
-          detailUrls: normaliseDetailUrls(
-            platform.detailUrls as string | { url: string } | { url: string }[] | undefined
-          ),
+          detailUrls: platformDetailUrls.length > 0 ? platformDetailUrls : undefined,
           additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined,
         };
       })() : undefined,

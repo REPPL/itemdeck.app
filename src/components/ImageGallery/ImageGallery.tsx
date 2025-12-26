@@ -181,6 +181,17 @@ export function ImageGallery({
     if (!hasMultipleImages) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
+      // Skip if typing in an input element
+      const target = event.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.tagName === "SELECT" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
       if (event.key === "ArrowLeft") {
         event.preventDefault();
         goToPrevious();

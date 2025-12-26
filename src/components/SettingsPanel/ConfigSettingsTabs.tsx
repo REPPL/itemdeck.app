@@ -2,9 +2,9 @@
  * ConfigSettingsTabs - Sub-tabbed interface for configuration settings.
  *
  * Top-level Configuration tab with sub-tabs:
- * - Display Order: Max Visible, Shuffle, Drag to Reorder, Sort By, Sort Direction
- * - Front Face: Footer Badge Field, Unranked Text
- * - Back Face: Subtitle Field, Logo Field
+ * - Display: Random Selection, Max Visible, Show Cards, Sort By, Sort Direction
+ * - Behaviour: Shuffle on Load, Drag to Reorder
+ * - Edit: Edit Mode toggle
  */
 
 import { useState, useCallback } from "react";
@@ -15,9 +15,6 @@ import {
   type DefaultCardFace,
 } from "@/stores/settingsStore";
 import {
-  SUBTITLE_FIELD_OPTIONS,
-  FOOTER_BADGE_FIELD_OPTIONS,
-  LOGO_FIELD_OPTIONS,
   SORT_FIELD_OPTIONS,
 } from "@/utils/fieldPathResolver";
 import { useCollectionData } from "@/context/CollectionDataContext";
@@ -36,19 +33,19 @@ const defaultFaceOptions: { value: DefaultCardFace; label: string }[] = [
   { value: "front", label: "Front" },
 ];
 
-type ConfigSubTab = "order" | "front" | "back";
+type ConfigSubTab = "display" | "behaviour" | "edit";
 
 const subTabs: { id: ConfigSubTab; label: string }[] = [
-  { id: "order", label: "Display" },
-  { id: "front", label: "Front Face" },
-  { id: "back", label: "Back Face" },
+  { id: "display", label: "Display" },
+  { id: "behaviour", label: "Behaviour" },
+  { id: "edit", label: "Edit" },
 ];
 
 /**
  * Sub-tabbed configuration settings interface.
  */
 export function ConfigSettingsTabs() {
-  const [activeSubTab, setActiveSubTab] = useState<ConfigSubTab>("order");
+  const [activeSubTab, setActiveSubTab] = useState<ConfigSubTab>("display");
   const { cards: allCards } = useCollectionData();
   const totalCards = allCards.length;
 
@@ -67,8 +64,6 @@ export function ConfigSettingsTabs() {
     setRandomSelectionEnabled,
     randomSelectionCount,
     setRandomSelectionCount,
-    rankPlaceholderText,
-    setRankPlaceholderText,
     fieldMapping,
     setFieldMapping,
     editModeEnabled,
@@ -88,13 +83,6 @@ export function ConfigSettingsTabs() {
     }
   }, [setDragModeEnabled, setDragFace]);
 
-  const handlePlaceholderChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRankPlaceholderText(event.target.value);
-    },
-    [setRankPlaceholderText]
-  );
-
   const handleFieldMappingChange = useCallback(
     (field: keyof FieldMappingConfig, value: string) => {
       setFieldMapping({ [field]: value });
@@ -104,135 +92,10 @@ export function ConfigSettingsTabs() {
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
-      case "order":
+      case "display":
         return (
           <>
-            <div className={styles.row}>
-              <span className={styles.label}>Max Visible</span>
-              <div className={styles.numberControl}>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
-                  aria-label="Decrease"
-                  disabled={maxVisibleCards <= 1}
-                >
-                  −
-                </button>
-                <span className={styles.numberValue}>{maxVisibleCards}</span>
-                <button
-                  type="button"
-                  className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
-                  aria-label="Increase"
-                  disabled={maxVisibleCards >= 10}
-                >
-                  +
-                </button>
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Shuffle on Load</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={shuffleOnLoad}
-                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Show Cards</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Default card face">
-                {defaultFaceOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      defaultCardFace === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setDefaultCardFace(value); }}
-                    role="radio"
-                    aria-checked={defaultCardFace === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Drag to Reorder</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
-                {dragModeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      effectiveDragMode === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleDragModeChange(value); }}
-                    role="radio"
-                    aria-checked={effectiveDragMode === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            {!shuffleOnLoad && (
-              <>
-                <div className={styles.row}>
-                  <span className={styles.label}>Sort By</span>
-                  <select
-                    className={styles.select}
-                    value={fieldMapping.sortField}
-                    onChange={(e) => { handleFieldMappingChange("sortField", e.target.value); }}
-                    aria-label="Sort field"
-                  >
-                    {SORT_FIELD_OPTIONS.map(({ value, label }) => (
-                      <option key={value} value={value}>{label}</option>
-                    ))}
-                  </select>
-                </div>
-                <div className={styles.row}>
-                  <span className={styles.label}>Sort Direction</span>
-                  <div className={styles.segmentedControl} role="radiogroup" aria-label="Sort direction">
-                    <button
-                      type="button"
-                      className={[
-                        styles.segmentButton,
-                        fieldMapping.sortDirection === "asc" ? styles.segmentButtonActive : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => { handleFieldMappingChange("sortDirection", "asc"); }}
-                      role="radio"
-                      aria-checked={fieldMapping.sortDirection === "asc"}
-                    >
-                      Asc
-                    </button>
-                    <button
-                      type="button"
-                      className={[
-                        styles.segmentButton,
-                        fieldMapping.sortDirection === "desc" ? styles.segmentButtonActive : "",
-                      ].filter(Boolean).join(" ")}
-                      onClick={() => { handleFieldMappingChange("sortDirection", "desc"); }}
-                      role="radio"
-                      aria-checked={fieldMapping.sortDirection === "desc"}
-                    >
-                      Desc
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Divider before Random Selection */}
-            <div className={styles.divider} />
-
-            {/* Random Selection Toggle */}
+            {/* Random Selection at the top */}
             <div className={styles.row}>
               <span className={styles.label}>Random Selection</span>
               <label className={styles.toggle}>
@@ -271,10 +134,157 @@ export function ConfigSettingsTabs() {
               </>
             )}
 
-            {/* Divider before Edit Mode */}
             <div className={styles.divider} />
 
-            {/* Edit Mode Toggle */}
+            <div className={styles.row}>
+              <span className={styles.label}>Max Visible</span>
+              <div className={styles.numberControl}>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
+                  aria-label="Decrease"
+                  disabled={maxVisibleCards <= 1}
+                >
+                  −
+                </button>
+                <span className={styles.numberValue}>{maxVisibleCards}</span>
+                <button
+                  type="button"
+                  className={styles.numberButton}
+                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
+                  aria-label="Increase"
+                  disabled={maxVisibleCards >= 10}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Show Cards</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Default card face">
+                {defaultFaceOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      defaultCardFace === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setDefaultCardFace(value); }}
+                    role="radio"
+                    aria-checked={defaultCardFace === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.row}>
+              <span className={shuffleOnLoad ? styles.labelDisabled : styles.label}>Sort By</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.sortField}
+                onChange={(e) => { handleFieldMappingChange("sortField", e.target.value); }}
+                aria-label="Sort field"
+                disabled={shuffleOnLoad}
+              >
+                {SORT_FIELD_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+            <div className={styles.row}>
+              <span className={shuffleOnLoad ? styles.labelDisabled : styles.label}>Sort Direction</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Sort direction">
+                <button
+                  type="button"
+                  className={[
+                    styles.segmentButton,
+                    fieldMapping.sortDirection === "asc" ? styles.segmentButtonActive : "",
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => { handleFieldMappingChange("sortDirection", "asc"); }}
+                  role="radio"
+                  aria-checked={fieldMapping.sortDirection === "asc"}
+                  disabled={shuffleOnLoad}
+                >
+                  Asc
+                </button>
+                <button
+                  type="button"
+                  className={[
+                    styles.segmentButton,
+                    fieldMapping.sortDirection === "desc" ? styles.segmentButtonActive : "",
+                  ].filter(Boolean).join(" ")}
+                  onClick={() => { handleFieldMappingChange("sortDirection", "desc"); }}
+                  role="radio"
+                  aria-checked={fieldMapping.sortDirection === "desc"}
+                  disabled={shuffleOnLoad}
+                >
+                  Desc
+                </button>
+              </div>
+            </div>
+            {shuffleOnLoad && (
+              <div className={styles.helpText}>
+                Sorting is disabled when Shuffle on Load is enabled (see Behaviour tab).
+              </div>
+            )}
+          </>
+        );
+
+      case "behaviour":
+        return (
+          <>
+            <div className={styles.row}>
+              <span className={styles.label}>Shuffle on Load</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={shuffleOnLoad}
+                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.helpText}>
+              Randomises card order each time the page loads.
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.row}>
+              <span className={styles.label}>Drag to Reorder</span>
+              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
+                {dragModeOptions.map(({ value, label }) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={[
+                      styles.segmentButton,
+                      effectiveDragMode === value ? styles.segmentButtonActive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { handleDragModeChange(value); }}
+                    role="radio"
+                    aria-checked={effectiveDragMode === value}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.helpText}>
+              Allows manually reordering cards by dragging.
+            </div>
+          </>
+        );
+
+      case "edit":
+        return (
+          <>
             <div className={styles.row}>
               <span className={styles.label}>Edit Mode</span>
               <label className={styles.toggle}>
@@ -289,68 +299,17 @@ export function ConfigSettingsTabs() {
             <div className={styles.helpText}>
               Enables editing of card data. Press E to toggle.
             </div>
-          </>
-        );
 
-      case "front":
-        return (
-          <>
-            <div className={styles.row}>
-              <span className={styles.label}>Footer Badge Field</span>
-              <select
-                className={styles.select}
-                value={fieldMapping.footerBadgeField}
-                onChange={(e) => { handleFieldMappingChange("footerBadgeField", e.target.value); }}
-                aria-label="Footer badge field"
-              >
-                {FOOTER_BADGE_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Unranked Text</span>
-              <input
-                type="text"
-                className={styles.textInput}
-                value={rankPlaceholderText}
-                onChange={handlePlaceholderChange}
-                placeholder="The one that got away!"
-                aria-label="Rank placeholder text"
-              />
-            </div>
-          </>
-        );
+            <div className={styles.divider} />
 
-      case "back":
-        return (
-          <>
-            <div className={styles.row}>
-              <span className={styles.label}>Subtitle Field</span>
-              <select
-                className={styles.select}
-                value={fieldMapping.subtitleField}
-                onChange={(e) => { handleFieldMappingChange("subtitleField", e.target.value); }}
-                aria-label="Subtitle field"
-              >
-                {SUBTITLE_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
+            <div className={styles.infoText}>
+              When edit mode is enabled, you can:
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Logo Field</span>
-              <select
-                className={styles.select}
-                value={fieldMapping.logoField}
-                onChange={(e) => { handleFieldMappingChange("logoField", e.target.value); }}
-                aria-label="Logo field"
-              >
-                {LOGO_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+            <ul className={styles.featureList}>
+              <li>Click the edit button on expanded cards</li>
+              <li>Modify card metadata (name, year, platform)</li>
+              <li>Export and import your edits</li>
+            </ul>
           </>
         );
     }

@@ -10,12 +10,12 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
-import { SourceIcon, isKnownSource } from "@/components/SourceIcon";
+import { SourceIcon, isKnownSource, getSourceShortName } from "@/components/SourceIcon";
 import { ExternalLinkIcon, CloseIcon, InfoIcon, EditIcon } from "@/components/Icons";
 import { EditForm } from "@/components/EditForm";
+import { InfoTooltip } from "@/components/InfoTooltip";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { useEditsStore } from "@/stores/editsStore";
 import { useUILabels } from "@/context/CollectionUIContext";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { isLightColour } from "@/utils/colourContrast";
@@ -103,8 +103,9 @@ export function CardExpanded({
   const cardBackgroundColour = currentCustomisation.cardBackgroundColour;
   const editModeEnabled = useSettingsStore((state) => state.editModeEnabled);
 
-  // Check if card has local edits
-  const cardHasEdits = useEditsStore((state) => state.hasEdits(card.id));
+  // Check if card has local edits (via _editedAt field added during merge)
+  const cardEditedAt = (card as unknown as Record<string, unknown>)._editedAt as number | undefined;
+  const cardHasEdits = cardEditedAt !== undefined;
 
   // Determine if background is light (needs dark text)
   const hasLightBackground = useMemo(() => {
@@ -205,6 +206,18 @@ export function CardExpanded({
 
   // Check if card has additional fields to display
   const hasAdditionalFields = additionalFields.length > 0;
+
+  // Format edit timestamp for display
+  const formattedEditDate = useMemo(() => {
+    if (!cardEditedAt) return null;
+    const date = new Date(cardEditedAt);
+    // Format as "Edited 26 Dec 2025" or similar
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  }, [cardEditedAt]);
 
   // Calculate animation origin
   const getOriginStyles = () => {
@@ -356,6 +369,9 @@ export function CardExpanded({
                   {card.detailUrls && card.detailUrls.length > 0 ? (
                     deduplicateLinksBySource(card.detailUrls).map((link, index) => {
                       const hasKnownIcon = isKnownSource(link.url);
+                      const sourceInfo = getSourceShortName(link.url);
+                      const displayName = sourceInfo?.shortName ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
+                      const fullName = sourceInfo?.title ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
                       return (
                         <a
                           key={index}
@@ -363,7 +379,7 @@ export function CardExpanded({
                           target="_blank"
                           rel="noopener noreferrer"
                           className={hasKnownIcon ? styles.sourceIconButton : styles.outlineButton}
-                          title={link.source ?? link.label ?? uiLabels.sourceButtonDefault}
+                          title={fullName}
                         >
                           {hasKnownIcon ? (
                             <>
@@ -372,7 +388,7 @@ export function CardExpanded({
                             </>
                           ) : (
                             <>
-                              <span>{link.source ?? link.label ?? uiLabels.sourceButtonDefault}</span>
+                              <span>{displayName}</span>
                               <ExternalLinkIcon />
                             </>
                           )}
@@ -430,7 +446,13 @@ export function CardExpanded({
                   >
                     <div className={styles.attributionHeader}>
                       <div className={styles.attributionContent}>
-                        <span className={styles.attributionLabel}>{uiLabels.imageSourceLabel}</span>
+                        <span className={styles.attributionLabel}>
+                          {card.imageUrls.length > 1
+                            ? uiLabels.imageSourceLabel
+                                .replace(/^Image\b/i, "Images")
+                                .replace(/\bSource$/i, "Sources")
+                            : uiLabels.imageSourceLabel}
+                        </span>
                         <p className={styles.attributionText}>{card.imageAttribution}</p>
                       </div>
                       <div className={styles.attributionActions}>
@@ -521,13 +543,24 @@ export function CardExpanded({
                     </button>
                   </div>
                   <dl className={styles.metadataList}>
-                    {additionalFields.map(({ key, label, value }) => (
+                    {additionalFields.map(({ key, label, value, description }) => (
                       <div key={key} className={styles.metadataItem}>
-                        <dt className={styles.metadataKey}>{label}</dt>
+                        <dt className={styles.metadataKey}>
+                          {label}
+                          {description && <InfoTooltip text={description} />}
+                        </dt>
                         <dd className={styles.metadataValue}>{value}</dd>
                       </div>
                     ))}
                   </dl>
+                  {/* Edit timestamp footer */}
+                  {formattedEditDate && (
+                    <div className={styles.moreFooter}>
+                      <span className={styles.editedTimestamp}>
+                        Edited {formattedEditDate}
+                      </span>
+                    </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -589,6 +622,9 @@ export function CardExpanded({
                     <div className={styles.platformOverlayFooter}>
                       {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => {
                         const hasKnownIcon = isKnownSource(link.url);
+                        const sourceInfo = getSourceShortName(link.url);
+                        const displayName = sourceInfo?.shortName ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
+                        const fullName = sourceInfo?.title ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
                         return (
                           <a
                             key={index}
@@ -596,7 +632,7 @@ export function CardExpanded({
                             target="_blank"
                             rel="noopener noreferrer"
                             className={hasKnownIcon ? styles.sourceIconButton : styles.platformOverlayLink}
-                            title={link.source ?? link.label ?? uiLabels.sourceButtonDefault}
+                            title={fullName}
                           >
                             {hasKnownIcon ? (
                               <>
@@ -605,7 +641,7 @@ export function CardExpanded({
                               </>
                             ) : (
                               <>
-                                <span>{link.source ?? link.label ?? uiLabels.sourceButtonDefault}</span>
+                                <span>{displayName}</span>
                                 <ExternalLinkIcon />
                               </>
                             )}

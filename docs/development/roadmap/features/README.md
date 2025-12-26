@@ -100,6 +100,27 @@ Feature specifications for Itemdeck development.
 | [F-051](./completed/F-051-edit-button-integration.md) | Edit Button Integration | ✅ Complete |
 | [F-052](./completed/F-052-edit-export-import.md) | Edit Export/Import | ✅ Complete |
 
+### v0.10.1 - UI Polish & Data Model Refinement
+
+*Bug-fix release - no individual feature files*
+
+| Fix | Description | Status |
+|-----|-------------|--------|
+| Gallery Rounded Corners | `border-radius: inherit` for nested elements | ✅ Complete |
+| Spacebar in EditForm | Stop keyboard event propagation in overlay | ✅ Complete |
+| Image Source Pluralisation | Dynamic pluralisation based on count | ✅ Complete |
+| Verdict Text Overflow | CSS line clamping (2 lines max) | ✅ Complete |
+| Edit Metadata Display | Simplified data model to single `_editedAt` field | ✅ Complete |
+
+### v0.10.5 - Field Descriptions & Demo Data
+
+| Feature | Description | Status |
+|---------|-------------|--------|
+| Field Description Infrastructure | Add descriptions to FIELD_DEFINITIONS | ✅ Complete |
+| InfoTooltip Component | CSS-only accessible tooltip component | ✅ Complete |
+| Platform Data Enhancement | Add MobyGames URLs to all 13 platforms | ✅ Complete |
+| Data Consistency Audit | Verify all games have required fields | ✅ Complete |
+
 ### v0.11.0 - Mechanics Foundation
 
 | ID | Feature | Status |

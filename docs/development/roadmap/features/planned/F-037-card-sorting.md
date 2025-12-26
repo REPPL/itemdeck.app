@@ -1,65 +1,95 @@
-# F-037: Card Sorting
+# F-037: Card Sorting (Expanded)
 
 ## Problem Statement
 
-Users may want to view cards in a specific order (newest first, alphabetical, by rating). The current display order is either source order or random (shuffle). Explicit sorting options would give users control over organisation.
+Users may want to view cards in a specific order (newest first, alphabetical, by rating, by platform). The current implementation has basic sorting via settings but lacks quick access and additional sort fields.
+
+## Current State
+
+Sorting **already exists** in `ConfigSettingsTabs.tsx`:
+- Sort field dropdown (order, title, year, playedSince)
+- Sort direction toggle (asc/desc)
+- Persists to localStorage via settingsStore
+
+This feature expands the existing implementation.
 
 ## Design Approach
 
-Add a sort dropdown/button group that allows sorting by various fields. Sort can be ascending or descending. Sorting animates cards to new positions using layout animation.
+1. **Expand sort field options** to include platform, rating, category
+2. **Add quick sort buttons** near the search bar for common fields
+3. **Consider multi-level sorting** (primary + secondary field)
 
-### Sort Options
+### Expanded Sort Options
 
-| Field | Description |
-|-------|-------------|
-| Title | Alphabetical A-Z / Z-A |
-| Year | Newest / Oldest first |
-| Date Added | Recently added first |
-| Random | Shuffle (existing feature) |
-| Custom | User-defined order (drag-and-drop) |
+| Field | Path | Description |
+|-------|------|-------------|
+| Order/Rank | `order` | Custom ordering (existing) |
+| Title | `title` | Alphabetical A-Z / Z-A |
+| Year | `year` | Release year |
+| Played Since | `playedSince` | When user started playing |
+| Platform | `platform.shortTitle` | **NEW** - Group by device |
+| Category | `categoryTitle` | **NEW** - Category name |
+| Rating | `rating.score` | **NEW** - User/external rating |
+| Random | (shuffle) | Shuffle (existing feature) |
 
-### UI Component
+### Quick Sort Buttons (Optional Enhancement)
 
 ```
-┌────────────────────────────┐
-│ Sort: [Title ▼] [↑↓]       │  ← Dropdown + direction toggle
-└────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│ Sort by: [Title] [Year ▼] [Platform] [Rating]   [↑↓ Asc]  │
+└────────────────────────────────────────────────────────────┘
 ```
 
-### Animation
+Active sort field highlighted; click toggles, double-click reverses.
 
-Cards animate to new positions using Framer Motion's layout animation (already in use for grid).
+### Multi-Level Sort (Optional Enhancement)
+
+```
+Primary: [Platform ▼]
+Secondary: [Rank ▼]
+```
+
+Sort by platform, then by rank within each platform.
+
+### Technical Implementation
+
+**Expand SORT_FIELD_OPTIONS in ConfigSettingsTabs.tsx:**
+```typescript
+const SORT_FIELD_OPTIONS = [
+  { value: "order", label: "Order/Rank" },
+  { value: "title", label: "Title" },
+  { value: "year", label: "Year" },
+  { value: "playedSince", label: "Played Since" },
+  { value: "platform.shortTitle", label: "Platform" },  // NEW
+  { value: "categoryTitle", label: "Category" },        // NEW
+  { value: "rating.score", label: "Rating" },           // NEW
+];
+```
 
 ## Implementation Tasks
 
-- [ ] Create `SortDropdown` component
-- [ ] Add sort direction toggle (asc/desc)
-- [ ] Implement `useSortedCards` hook
-- [ ] Add sort options for title, year, date added
-- [ ] Integrate shuffle as sort option
-- [ ] Coordinate with custom order (drag-and-drop)
-- [ ] Animate card position changes
-- [ ] Persist sort preference to storage
-- [ ] Add sort to URL params
-- [ ] Ensure dropdown is accessible
-- [ ] Write tests for sort logic
+- [ ] Expand `SORT_FIELD_OPTIONS` with platform, category, rating
+- [ ] Verify `createFieldSortComparator` handles new field paths
+- [ ] Add quick sort buttons near search bar (optional)
+- [ ] Add secondary sort field support (optional)
+- [ ] Animate card position changes (already works)
+- [ ] Ensure sort controls accessible
+- [ ] Write tests for expanded sort logic
 
 ## Success Criteria
 
-- [ ] Cards sort by selected field
+- [ ] Cards sort by platform, category, rating
+- [ ] Existing sort fields continue to work
 - [ ] Direction toggle switches asc/desc
 - [ ] Cards animate to new positions
-- [ ] Sort preference persists
-- [ ] Custom order preserved when selected
-- [ ] Shuffle integrated as sort option
-- [ ] Dropdown keyboard accessible
-- [ ] Sort change announced to screen readers
+- [ ] Sort preference persists to localStorage
+- [ ] Field path resolution works for nested fields
 
 ## Dependencies
 
 - **Requires**: v0.2.0 (card data)
-- **Recommends**: F-027 Shuffle by Default (integration)
-- **Related**: F-028 Card Drag and Drop (custom order)
+- **Uses**: `fieldPathResolver.ts` for nested field access
+- **Related**: F-036 Card Filtering (search bar placement)
 
 ## Complexity
 
@@ -67,15 +97,15 @@ Small
 
 ## Milestone
 
-v0.4.0
+v0.11.0
 
 ---
 
 ## Related Documentation
 
-- [Shuffle by Default](./F-027-shuffle-by-default.md)
+- [Shuffle by Default](../completed/F-027-shuffle-by-default.md)
 - [Card Drag and Drop](./F-028-card-drag-and-drop.md)
-- [v0.4.0 Milestone](../../milestones/v0.4.0.md)
+- [v0.11.0 Milestone](../../milestones/v0.11.0.md)
 
 ---
 

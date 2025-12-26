@@ -398,7 +398,7 @@ const DEFAULT_SETTINGS = {
   highContrast: false,
   titleDisplayMode: "truncate" as TitleDisplayMode,
   dragModeEnabled: true,
-  visualTheme: "retro" as VisualTheme,
+  visualTheme: "modern" as VisualTheme,
   cardBackStyle: "bitmap" as CardBackStyle,
   showRankBadge: true,
   showDeviceBadge: true,
@@ -603,7 +603,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 17,
+      version: 18,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -827,6 +827,10 @@ export const useSettingsStore = create<SettingsState>()(
             editModeEnabled: false,
           };
         }
+
+        // Handle migration from version 17 to 18 (change default theme to modern)
+        // Note: Existing users keep their current theme; this only affects new users
+        // No action needed for existing users - they keep their persisted visualTheme
 
         return state as unknown as SettingsState;
       },

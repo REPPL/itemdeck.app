@@ -85,24 +85,64 @@ const SOURCE_PATTERNS: {
   pattern: RegExp;
   Icon: React.ComponentType;
   title: string;
+  shortName: string;
 }[] = [
   {
     name: "wikipedia",
     pattern: /wikipedia\.org/i,
     Icon: WikipediaIcon,
     title: "Wikipedia",
+    shortName: "W",
   },
   {
     name: "mobygames",
     pattern: /mobygames\.com/i,
     Icon: MobyGamesIcon,
     title: "MobyGames",
+    shortName: "M",
   },
   {
     name: "ign",
     pattern: /ign\.com/i,
     Icon: IGNIcon,
     title: "IGN",
+    shortName: "IGN",
+  },
+];
+
+/**
+ * Additional source mappings for common sources without custom icons.
+ * These use the generic link icon but get short names for display.
+ */
+const ADDITIONAL_SOURCES: {
+  pattern: RegExp;
+  title: string;
+  shortName: string;
+}[] = [
+  {
+    pattern: /myabandonware\.com/i,
+    title: "My Abandonware",
+    shortName: "A",
+  },
+  {
+    pattern: /video-games-museum\.com/i,
+    title: "Video Games Museum",
+    shortName: "VGM",
+  },
+  {
+    pattern: /gamespot\.com/i,
+    title: "GameSpot",
+    shortName: "GS",
+  },
+  {
+    pattern: /metacritic\.com/i,
+    title: "Metacritic",
+    shortName: "MC",
+  },
+  {
+    pattern: /giantbomb\.com/i,
+    title: "Giant Bomb",
+    shortName: "GB",
   },
 ];
 
@@ -173,7 +213,45 @@ export function isKnownSource(url: string): boolean {
  */
 export function getSourceName(url: string): string | undefined {
   const match = SOURCE_PATTERNS.find((pattern) => pattern.pattern.test(url));
-  return match?.title;
+  if (match) return match.title;
+
+  const additionalMatch = ADDITIONAL_SOURCES.find((s) => s.pattern.test(url));
+  return additionalMatch?.title;
+}
+
+/**
+ * Get the short name for a source URL.
+ * Used for compact display with hover tooltip showing full name.
+ *
+ * @returns Object with shortName and title, or undefined if not a known source.
+ *
+ * @example
+ * ```tsx
+ * const info = getSourceShortName("https://www.myabandonware.com/game/example");
+ * // { shortName: "A", title: "My Abandonware" }
+ *
+ * const info = getSourceShortName("https://en.wikipedia.org/wiki/Example");
+ * // { shortName: "W", title: "Wikipedia" }
+ * ```
+ */
+export function getSourceShortName(
+  url: string
+): { shortName: string; title: string } | undefined {
+  // Check SOURCE_PATTERNS first (sources with icons)
+  for (const pattern of SOURCE_PATTERNS) {
+    if (pattern.pattern.test(url)) {
+      return { shortName: pattern.shortName, title: pattern.title };
+    }
+  }
+
+  // Check ADDITIONAL_SOURCES (sources without icons)
+  for (const source of ADDITIONAL_SOURCES) {
+    if (source.pattern.test(url)) {
+      return { shortName: source.shortName, title: source.title };
+    }
+  }
+
+  return undefined;
 }
 
 export default SourceIcon;

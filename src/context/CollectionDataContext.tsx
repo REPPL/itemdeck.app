@@ -79,10 +79,10 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
       if (!edit) return card;
 
       // Merge edit fields over source card
+      // _editedAt serves as both "has edits" indicator and timestamp
       return {
         ...card,
         ...edit.fields,
-        _hasEdits: true,
         _editedAt: edit.editedAt,
       } as DisplayCard;
     });

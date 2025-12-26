@@ -198,6 +198,7 @@ export function Card({
         data-card-id={card.id}
         data-card-size={cardSize}
         data-flipped={isFlipped}
+        data-flipping={isFlipping}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         role="button"

@@ -267,11 +267,19 @@ html.theme-switching * {
    Title Display Modes
    ============================================ */
 
-/* Wrap mode - allow multi-line titles */
+/* Truncate mode (default) - single line with ellipsis */
+[data-title-display="truncate"] {
+  --card-title-white-space: nowrap;
+  --card-title-overflow: hidden;
+  --card-title-text-overflow: ellipsis;
+  --card-title-line-clamp: 1;
+}
+
+/* Wrap mode - allow multi-line titles (max 2 lines) */
 [data-title-display="wrap"] {
   --card-title-white-space: normal;
-  --card-title-overflow: visible;
-  --card-title-text-overflow: clip;
+  --card-title-overflow: hidden;
+  --card-title-text-overflow: ellipsis;
   --card-title-line-clamp: 2;
 }
 

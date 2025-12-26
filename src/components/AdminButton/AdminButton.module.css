@@ -1,11 +1,12 @@
 /**
  * Admin button styles.
  *
- * Floating button with gear icon for accessing settings.
+ * Button with gear icon for accessing settings.
+ * Position is handled by parent flex container.
  */
 
 .button {
-  position: fixed;
+  position: relative; /* Positioned by parent flex container */
   width: 56px;
   height: 56px;
   display: flex;
@@ -18,7 +19,6 @@
   color: white;
   cursor: pointer;
   box-shadow: var(--elevation-3, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
-  z-index: 100;
   transition:
     background-color var(--transition-fast, 150ms),
     box-shadow var(--transition-fast, 150ms);
@@ -40,30 +40,6 @@
 }
 
 /* ============================================
-   Position Variants
-   ============================================ */
-
-.bottom-right {
-  bottom: var(--spacing-lg, 24px);
-  right: var(--spacing-lg, 24px);
-}
-
-.bottom-left {
-  bottom: var(--spacing-lg, 24px);
-  left: var(--spacing-lg, 24px);
-}
-
-.top-right {
-  top: var(--spacing-lg, 24px);
-  right: var(--spacing-lg, 24px);
-}
-
-.top-left {
-  top: var(--spacing-lg, 24px);
-  left: var(--spacing-lg, 24px);
-}
-
-/* ============================================
    Responsive
    ============================================ */
 
@@ -76,16 +52,6 @@
   .button svg {
     width: 24px;
     height: 24px;
-  }
-
-  .bottom-right {
-    bottom: var(--spacing-md, 16px);
-    right: var(--spacing-md, 16px);
-  }
-
-  .bottom-left {
-    bottom: var(--spacing-md, 16px);
-    left: var(--spacing-md, 16px);
   }
 }
 

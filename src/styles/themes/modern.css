@@ -100,9 +100,7 @@
 /* Smooth hover transitions */
 [data-visual-theme="modern"] button,
 [data-visual-theme="modern"] a {
-  transition: all var(--transition-fast) var(--easing-default);
-}
-
-[data-visual-theme="modern"] button:hover {
-  transform: translateY(-1px);
+  transition: background-color var(--transition-fast) var(--easing-default),
+              border-color var(--transition-fast) var(--easing-default),
+              color var(--transition-fast) var(--easing-default);
 }

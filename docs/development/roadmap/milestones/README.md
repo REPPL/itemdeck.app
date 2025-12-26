@@ -20,7 +20,9 @@ Release planning for Itemdeck v0.1.0 through v1.0.0.
 | [v0.8.1](./v0.8.1.md) | Random Selection & Accessibility | ✅ Complete | 4 |
 | [v0.9.0](./v0.9.0.md) | Remote Source Intelligence | ✅ Complete | 5 |
 | [v0.10.0](./v0.10.0.md) | Data Editing | ✅ Complete | 5 |
-| [v0.11.0](./v0.11.0.md) | Mechanics Foundation | 📋 Planned | 4 |
+| [v0.10.1](./v0.10.1.md) | UI Polish & Data Model Refinement | ✅ Complete | 5 bug fixes |
+| [v0.10.5](./v0.10.5.md) | Field Descriptions & Demo Data | ✅ Complete | 4 |
+| [v0.11.0](./v0.11.0.md) | Mechanics Foundation & Discovery | 📋 Planned | 9 |
 | [v0.12.0](./v0.12.0.md) | Core Mechanics | 📋 Planned | 3 |
 | [v0.13.0](./v0.13.0.md) | Advanced Mechanics | 📋 Planned | 2 |
 | [v1.0.0](./v1.0.0.md) | Multi-Collection | 📋 Planned | 1 |
@@ -70,7 +72,13 @@ v0.9.0 Remote Source ✅
 v0.10.0 Data Editing ✅
     │
     ▼
-v0.11.0 Mechanics Foundation 📋
+v0.10.1 UI Polish ✅
+    │
+    ▼
+v0.10.5 Field Descriptions ✅
+    │
+    ▼
+v0.11.0 Mechanics & Discovery 📋
     │
     ▼
 v0.12.0 Core Mechanics 📋

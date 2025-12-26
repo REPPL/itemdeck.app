@@ -1,14 +1,12 @@
 /**
  * Help button styles.
  *
- * Floating button positioned above the settings gear.
+ * Styled button for help/info. Position is handled by parent container.
  * Same style as AdminButton (gear icon).
  */
 
 .button {
-  position: fixed;
-  bottom: calc(var(--spacing-lg, 24px) + 56px + var(--spacing-sm, 12px));
-  right: var(--spacing-lg, 24px);
+  position: relative; /* Positioned by parent flex container */
   width: 56px;
   height: 56px;
   display: flex;
@@ -21,7 +19,6 @@
   color: white;
   cursor: pointer;
   box-shadow: var(--elevation-3, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
-  z-index: 100;
   transition:
     background-color var(--transition-fast, 150ms),
     box-shadow var(--transition-fast, 150ms);
@@ -48,8 +45,6 @@
 
 @media (max-width: 600px) {
   .button {
-    bottom: calc(var(--spacing-md, 16px) + 48px + var(--spacing-sm, 12px));
-    right: var(--spacing-md, 16px);
     width: 48px;
     height: 48px;
   }

@@ -65,41 +65,41 @@ const mergedCards = useMemo(() => {
 
 ### Phase 1: Store Creation
 
-- [ ] Create `src/stores/editsStore.ts`
-- [ ] Define `EntityEdit` interface
-- [ ] Implement `setField()` and `setFields()` actions
-- [ ] Implement `revertField()`, `revertEntity()`, `revertAll()` actions
-- [ ] Add Zustand persist middleware with `itemdeck-edits` key
+- [x] Create `src/stores/editsStore.ts`
+- [x] Define `EntityEdit` interface
+- [x] Implement `setField()` and `setFields()` actions
+- [x] Implement `revertField()`, `revertEntity()`, `revertAll()` actions
+- [x] Add Zustand persist middleware with `itemdeck-edits` key
 
 ### Phase 2: Selectors and Queries
 
-- [ ] Implement `getEdit(entityId)` selector
-- [ ] Implement `hasEdits(entityId)` selector
-- [ ] Implement `getEditedEntityIds()` for bulk operations
-- [ ] Implement `getTotalEditCount()` for UI badge
+- [x] Implement `getEdit(entityId)` selector
+- [x] Implement `hasEdits(entityId)` selector
+- [x] Implement `getEditedEntityIds()` for bulk operations
+- [x] Implement `getTotalEditCount()` for UI badge
 
 ### Phase 3: Collection Hook Integration
 
-- [ ] Modify `useCollection` to import `useEditsStore`
-- [ ] Merge edits with source data in memoised computation
-- [ ] Add `_hasEdits` flag to merged entities
-- [ ] Add `_editedAt` timestamp for sorting/filtering
+- [x] Modify `CollectionDataContext` to merge edits with source data
+- [x] Merge edits with source data in memoised computation
+- [x] Add `_hasEdits` flag to merged entities
+- [x] Add `_editedAt` timestamp for sorting/filtering
 
 ### Phase 4: Export/Import
 
-- [ ] Implement `exportEdits()` returning JSON structure
-- [ ] Implement `importEdits(data)` with validation
-- [ ] Add version field to export format
-- [ ] Validate imported data with Zod schema
+- [x] Implement `exportEdits()` returning JSON structure
+- [x] Implement `importEdits(data)` with validation
+- [x] Add version field to export format
+- [x] Validate imported data with Zod schema
 
 ## Success Criteria
 
-- [ ] Edits persist in localStorage across sessions
-- [ ] `useCollection` returns merged data with edits applied
-- [ ] Individual field revert works without affecting other fields
-- [ ] Entity revert clears all edits for that entity
-- [ ] Export produces valid JSON with version metadata
-- [ ] Import validates and applies edits correctly
+- [x] Edits persist in localStorage across sessions
+- [x] Collection returns merged data with edits applied
+- [x] Individual field revert works without affecting other fields
+- [x] Entity revert clears all edits for that entity
+- [x] Export produces valid JSON with version metadata
+- [x] Import validates and applies edits correctly
 
 ## Dependencies
 
@@ -129,4 +129,4 @@ const mergedCards = useMemo(() => {
 
 ---
 
-**Status**: Planned
+**Status**: Complete

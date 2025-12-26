@@ -42,6 +42,32 @@ Archive of completed feature implementations.
 | [F-034](./F-034-card-badges.md) | Card Badges | v0.3.0 |
 | [F-039](./F-039-responsive-typography.md) | Responsive Typography | v0.3.0 |
 
+### v0.7.0 - Schema Flexibility
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-020](./F-020-attribution-system.md) | Attribution Display Component | v0.7.0 |
+
+### v0.9.0 - Remote Source Intelligence
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-045](./F-045-remote-source-health-check.md) | Remote Source Health Check | v0.9.0 |
+| [F-046](./F-046-collection-discovery-ui.md) | Collection Discovery UI | v0.9.0 |
+| [F-047](./F-047-remote-source-management.md) | Remote Source Management | v0.9.0 |
+| [F-062](./F-062-collection-statistics.md) | Collection Statistics Summary | v0.9.0 |
+| [F-063](./F-063-collection-export.md) | Collection Export | v0.9.0 |
+
+### v0.10.0 - Data Editing
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-048](./F-048-edit-mode-toggle.md) | Edit Mode Toggle | v0.10.0 |
+| [F-049](./F-049-entity-edits-store.md) | Entity Edits Store | v0.10.0 |
+| [F-050](./F-050-edit-form-component.md) | Edit Form Component | v0.10.0 |
+| [F-051](./F-051-edit-button-integration.md) | Edit Button Integration | v0.10.0 |
+| [F-052](./F-052-edit-export-import.md) | Edit Export/Import | v0.10.0 |
+
 ## Moving Features Here
 
 When a feature is complete:

@@ -24,6 +24,10 @@ interface CardQuickActionsProps {
   onShare: () => void;
   /** Card title for share functionality */
   cardTitle: string;
+  /** Whether edit mode is enabled */
+  editModeEnabled?: boolean;
+  /** Callback when edit is clicked */
+  onEdit?: () => void;
 }
 
 /**
@@ -73,6 +77,8 @@ export function CardQuickActions({
   onFavouriteToggle,
   onShare,
   cardTitle,
+  editModeEnabled = false,
+  onEdit,
 }: CardQuickActionsProps) {
   const handleFavouriteClick = useCallback(
     (event: React.MouseEvent) => {
@@ -94,6 +100,14 @@ export function CardQuickActions({
     event.stopPropagation();
     // Link will navigate naturally
   }, []);
+
+  const handleEditClick = useCallback(
+    (event: React.MouseEvent) => {
+      event.stopPropagation();
+      onEdit?.();
+    },
+    [onEdit]
+  );
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent, action: () => void) => {
@@ -142,6 +156,20 @@ export function CardQuickActions({
           >
             <ShareIcon />
           </motion.button>
+
+          {/* Edit button (only when edit mode enabled) */}
+          {editModeEnabled && onEdit && (
+            <motion.button
+              className={styles.actionButton}
+              variants={buttonVariants}
+              onClick={handleEditClick}
+              onKeyDown={(e) => { handleKeyDown(e, onEdit); }}
+              aria-label="Edit card"
+              type="button"
+            >
+              <EditIcon />
+            </motion.button>
+          )}
 
           {/* External link */}
           {externalUrl && (
@@ -215,6 +243,23 @@ function ExternalLinkIcon() {
       <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
       <polyline points="15 3 21 3 21 9" />
       <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={styles.icon}
+      aria-hidden="true"
+    >
+      <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </svg>
   );
 }

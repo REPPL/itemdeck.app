@@ -57,41 +57,41 @@ Settings Panel → System Tab → Edit Mode Section
 
 ### Phase 1: Export Functionality
 
-- [ ] Create `src/utils/editExport.ts`
-- [ ] Implement `exportEditsToFile()` function
-- [ ] Generate filename with timestamp (e.g., `retro-games-edits-2025-12-25.json`)
-- [ ] Trigger browser download using Blob/URL
+- [x] Create `src/utils/editExport.ts`
+- [x] Implement `exportEditsToFile()` function
+- [x] Generate filename with timestamp (e.g., `itemdeck-edits-2025-12-25.json`)
+- [x] Trigger browser download using Blob/URL
 
 ### Phase 2: Import Functionality
 
-- [ ] Implement `importEditsFromFile(file: File)` function
-- [ ] Parse and validate JSON with Zod schema
-- [ ] Handle version compatibility (reject if version unsupported)
-- [ ] Merge or replace existing edits (user choice)
+- [x] Implement `importEditsFromFile(file: File)` function
+- [x] Parse and validate JSON with Zod schema
+- [x] Handle version compatibility (reject if version unsupported)
+- [x] Merge or replace existing edits (user choice via confirm dialog)
 
 ### Phase 3: Settings UI
 
-- [ ] Add "Local Edits" section to System tab
-- [ ] Show count of modified cards
-- [ ] Add Export button with download handler
-- [ ] Add Import button with file picker
-- [ ] Add "Revert All Edits" button with confirmation
+- [x] Add "Edits" sub-tab to Storage settings
+- [x] Show count of modified cards
+- [x] Add Export button with download handler
+- [x] Add Import button with file picker
+- [x] Add "Revert All Edits" button with confirmation
 
-### Phase 4: Import Options Modal
+### Phase 4: Import Options
 
-- [ ] Create import options modal
-- [ ] Show preview: "12 edits found"
-- [ ] Option: Merge with existing / Replace all
-- [ ] Confirm before applying
+- [x] Use confirm dialog for merge/replace choice
+- [x] Show preview of edit count in dialog
+- [x] Option: Merge with existing / Replace all
+- [x] Alert on success with count
 
 ## Success Criteria
 
-- [ ] Export creates downloadable JSON file
-- [ ] Export filename includes collection ID and timestamp
-- [ ] Import accepts valid JSON files
-- [ ] Import rejects invalid/incompatible files with error message
-- [ ] User can choose merge or replace on import
-- [ ] Revert All clears all edits with confirmation
+- [x] Export creates downloadable JSON file
+- [x] Export filename includes collection ID and timestamp
+- [x] Import accepts valid JSON files
+- [x] Import rejects invalid/incompatible files with error message
+- [x] User can choose merge or replace on import
+- [x] Revert All clears all edits with confirmation
 
 ## Dependencies
 
@@ -117,4 +117,4 @@ Settings Panel → System Tab → Edit Mode Section
 
 ---
 
-**Status**: Planned
+**Status**: Complete

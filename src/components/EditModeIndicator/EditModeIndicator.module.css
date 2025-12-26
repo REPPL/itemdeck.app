@@ -1,0 +1,43 @@
+/**
+ * Edit mode indicator styles.
+ */
+
+.indicator {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background-color: #f59e0b;
+  color: #1a1a1a;
+  border: none;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    transform 0.1s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.indicator:hover {
+  background-color: #d97706;
+}
+
+.indicator:focus-visible {
+  outline: 2px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.indicator:active {
+  transform: scale(0.98);
+}
+
+.label {
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}

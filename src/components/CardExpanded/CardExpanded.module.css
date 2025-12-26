@@ -55,6 +55,59 @@
 
 .rankBadge {
   /* Positioned on left side of header */
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editIndicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  background-color: #f59e0b;
+  color: #1a1a1a;
+  border-radius: 4px;
+}
+
+.headerButtons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.editButton {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(245, 158, 11, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-full, 50%);
+  color: #1a1a1a;
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms);
+}
+
+.editButton:hover {
+  background: #f59e0b;
+  border-color: #f59e0b;
+}
+
+.editButton:focus-visible {
+  outline: 2px solid var(--focus-colour, #4f9eff);
+  outline-offset: 2px;
+}
+
+.editButton svg {
+  width: 20px;
+  height: 20px;
 }
 
 .closeButton {

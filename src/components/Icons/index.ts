@@ -12,4 +12,5 @@ export {
   PlusIcon,
   TrashIcon,
   CheckIcon,
+  EditIcon,
 } from "./Icons";

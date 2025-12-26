@@ -10,14 +10,17 @@ import { useCacheStats, useCacheManagement, useImagePreloader, formatBytes } fro
 import { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { importCollection, exportCollectionWithFormat, type ExportFormat } from "@/lib/collectionExport";
+import { useEditsStore } from "@/stores/editsStore";
+import { exportEditsToFile, importEditsFromFile } from "@/utils/editExport";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-type StorageSubTab = "images" | "cache" | "about";
+type StorageSubTab = "images" | "cache" | "edits" | "about";
 
 const subTabs: { id: StorageSubTab; label: string }[] = [
   { id: "images", label: "Images" },
   { id: "cache", label: "Cache" },
+  { id: "edits", label: "Edits" },
   { id: "about", label: "About" },
 ];
 
@@ -31,8 +34,16 @@ export function StorageSettingsTabs() {
   const { cards, collection } = useCollectionData();
   const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("images");
   const [showConfirm, setShowConfirm] = useState(false);
+  const [showEditsRevertConfirm, setShowEditsRevertConfirm] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("json");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const editsFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Edits store
+  const edits = useEditsStore((s) => s.edits);
+  const revertAll = useEditsStore((s) => s.revertAll);
+  const importEdits = useEditsStore((s) => s.importEdits);
+  const editCount = Object.keys(edits).length;
 
   // Get all image URLs for re-caching
   const imageUrls = useMemo(() => {
@@ -99,6 +110,50 @@ export function StorageSettingsTabs() {
 
   const handleCancelClear = () => {
     setShowConfirm(false);
+  };
+
+  // Edits handlers
+  const handleExportEdits = () => {
+    exportEditsToFile(edits, "itemdeck");
+  };
+
+  const handleEditsImportClick = () => {
+    editsFileInputRef.current?.click();
+  };
+
+  const handleEditsFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    void (async () => {
+      try {
+        const imported = await importEditsFromFile(file);
+        const editCountStr = String(imported.editCount);
+        const action = window.confirm(
+          `Import ${editCountStr} edits?\n\nClick OK to merge with existing edits.\nClick Cancel to replace all edits.`
+        );
+        importEdits(imported, action ? "merge" : "replace");
+        alert(`Successfully imported ${editCountStr} edits.`);
+      } catch (error) {
+        alert(error instanceof Error ? error.message : "Failed to import edits");
+      }
+
+      // Reset input
+      e.target.value = "";
+    })();
+  };
+
+  const handleRevertAllEdits = () => {
+    if (showEditsRevertConfirm) {
+      revertAll();
+      setShowEditsRevertConfirm(false);
+    } else {
+      setShowEditsRevertConfirm(true);
+    }
+  };
+
+  const handleCancelRevert = () => {
+    setShowEditsRevertConfirm(false);
   };
 
   const renderSubTabContent = () => {
@@ -271,6 +326,96 @@ export function StorageSettingsTabs() {
 
             <div className={styles.helpText}>
               Re-downloads and caches all images. Useful if images appear broken.
+            </div>
+          </>
+        );
+
+      case "edits":
+        return (
+          <>
+            <div className={styles.row}>
+              <span className={styles.label}>Modified Cards</span>
+              <span className={styles.value}>{editCount}</span>
+            </div>
+
+            <div className={styles.helpText}>
+              Local edits are stored in your browser. Export to backup.
+            </div>
+
+            <div className={styles.divider} />
+
+            {/* Export Edits */}
+            <div className={styles.row}>
+              <span className={styles.label}>Export Edits</span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleExportEdits}
+                disabled={editCount === 0}
+              >
+                Export JSON
+              </button>
+            </div>
+
+            {/* Import Edits */}
+            <div className={styles.row}>
+              <span className={styles.label}>Import Edits</span>
+              <button
+                type="button"
+                className={styles.secondaryButton}
+                onClick={handleEditsImportClick}
+              >
+                Import JSON
+              </button>
+              <input
+                ref={editsFileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleEditsFileChange}
+                style={{ display: "none" }}
+              />
+            </div>
+
+            <div className={styles.divider} />
+
+            {/* Revert All */}
+            <div className={styles.row}>
+              <span className={styles.label}>
+                {showEditsRevertConfirm ? "Are you sure?" : "Revert All Edits"}
+              </span>
+              <div className={styles.buttonGroup}>
+                {showEditsRevertConfirm ? (
+                  <>
+                    <button
+                      type="button"
+                      className={styles.dangerButton}
+                      onClick={handleRevertAllEdits}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.cancelButton}
+                      onClick={handleCancelRevert}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    className={styles.dangerButton}
+                    onClick={handleRevertAllEdits}
+                    disabled={editCount === 0}
+                  >
+                    Revert All
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className={styles.helpText}>
+              This will discard all local changes and restore original data.
             </div>
           </>
         );

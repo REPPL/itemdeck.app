@@ -4,33 +4,37 @@ Features queued for future development.
 
 ## Contents
 
-### v0.4.0 - Performance
+### Performance (Unscheduled)
 - [F-014-virtual-scrolling.md](./F-014-virtual-scrolling.md)
 - [F-015-image-lazy-loading.md](./F-015-image-lazy-loading.md)
 - [F-016-bundle-optimisation.md](./F-016-bundle-optimisation.md)
 - [F-025-bundle-size-monitoring.md](./F-025-bundle-size-monitoring.md)
 
-### v0.5.0 - Visual Overhaul & Navigation
-- TBD
-
-### v0.6.0 - Quality & Security
+### Quality & Security (Unscheduled)
 - [F-017-testing-infrastructure.md](./F-017-testing-infrastructure.md)
 - [F-018-security-hardening.md](./F-018-security-hardening.md)
 - [F-019-accessibility-audit.md](./F-019-accessibility-audit.md)
-- [F-020-attribution-system.md](./F-020-attribution-system.md)
 - [F-026-component-storybook.md](./F-026-component-storybook.md)
 
-### v0.6.1 - UI Configuration & Settings Enhancement
-- [F-042-collection-display-driver.md](./F-042-collection-display-driver.md)
-- [F-043-settings-panel-subtabs.md](./F-043-settings-panel-subtabs.md)
-- [F-044-random-card-sampling.md](./F-044-random-card-sampling.md)
+### v0.11.0 - Mechanics Foundation
+- [F-053-mechanic-plugin-registry.md](./F-053-mechanic-plugin-registry.md)
+- [F-054-mechanic-context-provider.md](./F-054-mechanic-context-provider.md)
+- [F-055-mechanic-overlay-system.md](./F-055-mechanic-overlay-system.md)
+- [F-056-settings-mechanic-selector.md](./F-056-settings-mechanic-selector.md)
 
-### v0.9.0 - Remote Source Intelligence
-- [F-045-remote-source-health-check.md](./F-045-remote-source-health-check.md)
-- [F-046-collection-discovery-ui.md](./F-046-collection-discovery-ui.md)
-- [F-047-remote-source-management.md](./F-047-remote-source-management.md)
+### v0.12.0 - Core Mechanics
+- [F-057-memory-game-mechanic.md](./F-057-memory-game-mechanic.md)
+- [F-058-collection-mechanic.md](./F-058-collection-mechanic.md)
+- [F-061-snap-ranking-mechanic.md](./F-061-snap-ranking-mechanic.md)
 
-### Future
+### v0.13.0 - Advanced Mechanics
+- [F-059-competing-mechanic.md](./F-059-competing-mechanic.md)
+- [F-060-quiz-mechanic.md](./F-060-quiz-mechanic.md)
+
+### v1.0.0 - Multi-Collection
+- [F-064-collection-comparison.md](./F-064-collection-comparison.md)
+
+### Future/Unscheduled
 - [F-028-card-drag-and-drop.md](./F-028-card-drag-and-drop.md)
 - [F-031-fit-to-viewport.md](./F-031-fit-to-viewport.md)
 - [F-032-card-stack-view.md](./F-032-card-stack-view.md)

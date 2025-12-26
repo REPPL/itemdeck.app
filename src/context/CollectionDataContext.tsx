@@ -6,10 +6,11 @@
  * and ensures UI labels are available throughout the component tree.
  */
 
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useDefaultCollection, type DisplayCard, type CollectionResult } from "@/hooks/useCollection";
 import { CollectionUIProvider } from "./CollectionUIContext";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useEditsStore } from "@/stores/editsStore";
 import type { DisplayConfig } from "@/types/display";
 import type { CollectionConfig } from "@/types/schema";
 
@@ -60,6 +61,7 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
   const { data, isLoading, error } = useDefaultCollection();
   const applyCollectionDefaults = useSettingsStore((s) => s.applyCollectionDefaults);
   const hasAppliedDefaults = useSettingsStore((s) => s.hasAppliedCollectionDefaults);
+  const edits = useEditsStore((s) => s.edits);
 
   // Apply collection defaults for new users (only once)
   useEffect(() => {
@@ -68,8 +70,26 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
     }
   }, [data?.config, hasAppliedDefaults, applyCollectionDefaults]);
 
+  // Merge edits with source cards using overlay pattern
+  const mergedCards = useMemo(() => {
+    if (!data?.cards) return [];
+
+    return data.cards.map((card) => {
+      const edit = edits[card.id];
+      if (!edit) return card;
+
+      // Merge edit fields over source card
+      return {
+        ...card,
+        ...edit.fields,
+        _hasEdits: true,
+        _editedAt: edit.editedAt,
+      } as DisplayCard;
+    });
+  }, [data?.cards, edits]);
+
   const collectionData: CollectionData = {
-    cards: data?.cards ?? [],
+    cards: mergedCards,
     displayConfig: data?.displayConfig,
     config: data?.config,
     collection: data?.collection,

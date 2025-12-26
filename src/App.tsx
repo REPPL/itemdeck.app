@@ -10,6 +10,7 @@ import { HelpButton } from "@/components/HelpButton";
 import { HelpModal } from "@/components/HelpModal";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { StatisticsBar } from "@/components/Statistics";
+import { EditModeIndicator } from "@/components/EditModeIndicator";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -74,9 +75,17 @@ function AppContent() {
     }
   }, [shuffleOnLoad, setShuffleOnLoad]);
 
+  // Edit mode settings (must be before useGlobalKeyboard)
+  const editModeEnabled = useSettingsStore((state) => state.editModeEnabled);
+  const setEditModeEnabled = useSettingsStore((state) => state.setEditModeEnabled);
+
+  const handleEditModeToggle = useCallback(() => {
+    setEditModeEnabled(!editModeEnabled);
+  }, [editModeEnabled, setEditModeEnabled]);
+
   useAdminModeShortcut(handleSettingsToggle);
 
-  // Additional keyboard shortcuts: ?, S, R
+  // Additional keyboard shortcuts: ?, S, R, E
   useGlobalKeyboard({
     shortcuts: [
       {
@@ -93,6 +102,11 @@ function AppContent() {
       {
         key: "KeyR",
         handler: handleShuffle,
+        preventDefault: true,
+      },
+      {
+        key: "KeyE",
+        handler: handleEditModeToggle,
         preventDefault: true,
       },
     ],
@@ -155,6 +169,9 @@ function AppContent() {
           <CardGrid />
         </QueryErrorBoundary>
       </main>
+
+      {/* Edit mode indicator (top-right, shows when edit mode active) */}
+      <EditModeIndicator onClick={handleSettingsOpen} />
 
       {/* Floating buttons (bottom-right) */}
       <HelpButton onClick={() => { setHelpOpen(true); }} />

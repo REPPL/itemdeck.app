@@ -71,6 +71,8 @@ export function ConfigSettingsTabs() {
     setRankPlaceholderText,
     fieldMapping,
     setFieldMapping,
+    editModeEnabled,
+    setEditModeEnabled,
   } = useSettingsStore();
 
   // Compute effective drag mode from dragModeEnabled and dragFace
@@ -268,6 +270,25 @@ export function ConfigSettingsTabs() {
                 </div>
               </>
             )}
+
+            {/* Divider before Edit Mode */}
+            <div className={styles.divider} />
+
+            {/* Edit Mode Toggle */}
+            <div className={styles.row}>
+              <span className={styles.label}>Edit Mode</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={editModeEnabled}
+                  onChange={(e) => { setEditModeEnabled(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.helpText}>
+              Enables editing of card data. Press E to toggle.
+            </div>
           </>
         );
 

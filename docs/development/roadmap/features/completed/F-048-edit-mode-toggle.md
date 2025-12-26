@@ -51,39 +51,39 @@ Settings Panel → System Tab
 
 ### Phase 1: Store Update
 
-- [ ] Add `editModeEnabled: boolean` to `settingsStore`
-- [ ] Add `setEditModeEnabled(enabled: boolean)` action
-- [ ] Add version migration (v11) for new field
-- [ ] Default to `false`
+- [x] Add `editModeEnabled: boolean` to `settingsStore`
+- [x] Add `setEditModeEnabled(enabled: boolean)` action
+- [x] Add version migration (v17) for new field
+- [x] Default to `false`
 
 ### Phase 2: Settings UI
 
-- [ ] Add "Edit Mode" section to System tab in SettingsPanel
-- [ ] Create toggle switch with label and description
-- [ ] Add informational text about local-only storage
-- [ ] Style consistently with existing settings
+- [x] Add "Edit Mode" section to System tab in SettingsPanel
+- [x] Create toggle switch with label and description
+- [x] Add informational text about local-only storage
+- [x] Style consistently with existing settings
 
 ### Phase 3: Visual Indicator
 
-- [ ] Create `src/components/EditModeIndicator/EditModeIndicator.tsx`
-- [ ] Show "Edit Mode" badge in header when active
-- [ ] Use distinct colour (e.g., amber/yellow)
-- [ ] Add click handler to open settings
+- [x] Create `src/components/EditModeIndicator/EditModeIndicator.tsx`
+- [x] Show "Edit Mode" badge in header when active
+- [x] Use distinct colour (amber/yellow)
+- [x] Add click handler to open settings
 
 ### Phase 4: Keyboard Shortcut
 
-- [ ] Add `E` key handler to `useGlobalKeyboard` hook
-- [ ] Toggle `editModeEnabled` on keypress
-- [ ] Show toast notification when toggled
-- [ ] Ignore when focused on input/textarea
+- [x] Add `E` key handler to `useGlobalKeyboard` hook
+- [x] Toggle `editModeEnabled` on keypress
+- [x] Show toast notification when toggled
+- [x] Ignore when focused on input/textarea
 
 ## Success Criteria
 
-- [ ] Toggle persists across browser sessions
-- [ ] Visual indicator clearly shows when edit mode is active
-- [ ] Keyboard shortcut works from anywhere in the app
-- [ ] Settings UI matches existing design patterns
-- [ ] No edit buttons visible when edit mode is disabled
+- [x] Toggle persists across browser sessions
+- [x] Visual indicator clearly shows when edit mode is active
+- [x] Keyboard shortcut works from anywhere in the app
+- [x] Settings UI matches existing design patterns
+- [x] No edit buttons visible when edit mode is disabled
 
 ## Dependencies
 
@@ -111,4 +111,4 @@ Settings Panel → System Tab
 
 ---
 
-**Status**: Planned
+**Status**: Complete

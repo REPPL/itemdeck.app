@@ -348,6 +348,9 @@ interface SettingsState {
   /** Whether to show the statistics bar above the grid */
   showStatisticsBar: boolean;
 
+  /** Whether edit mode is enabled (allows editing entity data) */
+  editModeEnabled: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -377,6 +380,7 @@ interface SettingsState {
   setRandomSelectionCount: (count: number) => void;
   setDefaultCardFace: (face: DefaultCardFace) => void;
   setShowStatisticsBar: (show: boolean) => void;
+  setEditModeEnabled: (enabled: boolean) => void;
   resetToDefaults: () => void;
 }
 
@@ -418,6 +422,7 @@ const DEFAULT_SETTINGS = {
   randomSelectionCount: 10,
   defaultCardFace: "back" as DefaultCardFace,
   showStatisticsBar: true,
+  editModeEnabled: false,
 };
 
 /**
@@ -543,6 +548,10 @@ export const useSettingsStore = create<SettingsState>()(
         set({ showStatisticsBar });
       },
 
+      setEditModeEnabled: (editModeEnabled) => {
+        set({ editModeEnabled });
+      },
+
       applyCollectionDefaults: (config) => {
         set((state) => {
           // Only apply if not already applied
@@ -594,7 +603,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 16,
+      version: 17,
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         layout: state.layout,
@@ -624,6 +633,7 @@ export const useSettingsStore = create<SettingsState>()(
         randomSelectionCount: state.randomSelectionCount,
         defaultCardFace: state.defaultCardFace,
         showStatisticsBar: state.showStatisticsBar,
+        editModeEnabled: state.editModeEnabled,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -807,6 +817,14 @@ export const useSettingsStore = create<SettingsState>()(
           state = {
             ...state,
             showStatisticsBar: true,
+          };
+        }
+
+        // Handle migration from version 16 to 17 (add editModeEnabled)
+        if (version < 17) {
+          state = {
+            ...state,
+            editModeEnabled: false,
           };
         }
 

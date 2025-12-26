@@ -84,21 +84,21 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-045](./planned/F-045-remote-source-health-check.md) | Remote Source Health Check | 📋 Planned |
-| [F-046](./planned/F-046-collection-discovery-ui.md) | Collection Discovery UI | 📋 Planned |
-| [F-047](./planned/F-047-remote-source-management.md) | Remote Source Management | 📋 Planned |
-| [F-062](./planned/F-062-collection-statistics.md) | Collection Statistics Summary | 📋 Planned |
-| [F-063](./planned/F-063-collection-export.md) | Collection Export | 📋 Planned |
+| [F-045](./completed/F-045-remote-source-health-check.md) | Remote Source Health Check | ✅ Complete |
+| [F-046](./completed/F-046-collection-discovery-ui.md) | Collection Discovery UI | ✅ Complete |
+| [F-047](./completed/F-047-remote-source-management.md) | Remote Source Management | ✅ Complete |
+| [F-062](./completed/F-062-collection-statistics.md) | Collection Statistics Summary | ✅ Complete |
+| [F-063](./completed/F-063-collection-export.md) | Collection Export | ✅ Complete |
 
 ### v0.10.0 - Data Editing
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-048](./planned/F-048-edit-mode-toggle.md) | Edit Mode Toggle | 📋 Planned |
-| [F-049](./planned/F-049-entity-edits-store.md) | Entity Edits Store | 📋 Planned |
-| [F-050](./planned/F-050-edit-form-component.md) | Edit Form Component | 📋 Planned |
-| [F-051](./planned/F-051-edit-button-integration.md) | Edit Button Integration | 📋 Planned |
-| [F-052](./planned/F-052-edit-export-import.md) | Edit Export/Import | 📋 Planned |
+| [F-048](./completed/F-048-edit-mode-toggle.md) | Edit Mode Toggle | ✅ Complete |
+| [F-049](./completed/F-049-entity-edits-store.md) | Entity Edits Store | ✅ Complete |
+| [F-050](./completed/F-050-edit-form-component.md) | Edit Form Component | ✅ Complete |
+| [F-051](./completed/F-051-edit-button-integration.md) | Edit Button Integration | ✅ Complete |
+| [F-052](./completed/F-052-edit-export-import.md) | Edit Export/Import | ✅ Complete |
 
 ### v0.11.0 - Mechanics Foundation
 

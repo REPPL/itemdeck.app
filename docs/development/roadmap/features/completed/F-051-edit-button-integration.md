@@ -48,41 +48,40 @@ CardExpanded Modal
 
 ### Phase 1: CardQuickActions Update
 
-- [ ] Add Edit button to `CardQuickActions.tsx`
-- [ ] Conditionally render based on `editModeEnabled`
-- [ ] Use pencil icon (✎) consistent with indicator
-- [ ] Add `aria-label="Edit card"` for accessibility
-- [ ] Add onClick handler to open EditForm modal
+- [x] Add Edit button to `CardQuickActions.tsx`
+- [x] Conditionally render based on `editModeEnabled`
+- [x] Use EditIcon component consistent with indicator
+- [x] Add `aria-label="Edit card"` for accessibility
+- [x] Add onClick handler passed via props
 
 ### Phase 2: CardExpanded Update
 
-- [ ] Add Edit button to `CardExpanded.tsx` footer
-- [ ] Position alongside existing action buttons
-- [ ] Conditionally render based on `editModeEnabled`
-- [ ] Style consistently with existing footer buttons
+- [x] Add Edit button to `CardExpanded.tsx` header
+- [x] Position alongside close button
+- [x] Conditionally render based on `editModeEnabled`
+- [x] Style consistently with existing header buttons
 
 ### Phase 3: Modal State Management
 
-- [ ] Create `useEditModal` hook for managing edit modal state
-- [ ] Track which entity is being edited
-- [ ] Close edit modal cleanly from both entry points
-- [ ] Handle opening edit modal when CardExpanded is open
+- [x] Local state in CardExpanded for managing edit modal
+- [x] Track when edit modal is open
+- [x] Close edit modal cleanly
+- [x] Handle opening edit modal from within CardExpanded
 
 ### Phase 4: Edit Indicator on Cards
 
-- [ ] Add small pencil icon to cards with local edits
-- [ ] Position in corner (e.g., top-right)
-- [ ] Show regardless of edit mode (indicates changes exist)
-- [ ] Tooltip: "This card has local edits"
+- [x] Add "Edited" badge to CardExpanded header when card has edits
+- [x] Show regardless of edit mode (indicates changes exist)
+- [x] Styled with amber colour consistent with EditModeIndicator
 
 ## Success Criteria
 
-- [ ] Edit button appears in CardQuickActions when edit mode enabled
-- [ ] Edit button appears in CardExpanded footer when edit mode enabled
-- [ ] Clicking Edit opens EditForm modal with correct entity
-- [ ] Cards with edits show visual indicator (even when edit mode off)
-- [ ] Edit buttons have proper ARIA labels
-- [ ] Keyboard users can access Edit button
+- [x] Edit button appears in CardQuickActions when edit mode enabled
+- [x] Edit button appears in CardExpanded header when edit mode enabled
+- [x] Clicking Edit opens EditForm modal with correct entity
+- [x] Cards with edits show visual indicator (even when edit mode off)
+- [x] Edit buttons have proper ARIA labels
+- [x] Keyboard users can access Edit button
 
 ## Dependencies
 
@@ -109,4 +108,4 @@ CardExpanded Modal
 
 ---
 
-**Status**: Planned
+**Status**: Complete

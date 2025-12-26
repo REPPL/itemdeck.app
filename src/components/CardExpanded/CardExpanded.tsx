@@ -11,9 +11,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
 import { SourceIcon, isKnownSource } from "@/components/SourceIcon";
-import { ExternalLinkIcon, CloseIcon, InfoIcon } from "@/components/Icons";
+import { ExternalLinkIcon, CloseIcon, InfoIcon, EditIcon } from "@/components/Icons";
+import { EditForm } from "@/components/EditForm";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useEditsStore } from "@/stores/editsStore";
 import { useUILabels } from "@/context/CollectionUIContext";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { isLightColour } from "@/utils/colourContrast";
@@ -86,6 +88,7 @@ export function CardExpanded({
   const [detailsExpanded, setDetailsExpanded] = useState(false);
   const [showAttribution, setShowAttribution] = useState(false);
   const [platformExpanded, setPlatformExpanded] = useState(false);
+  const [editFormOpen, setEditFormOpen] = useState(false);
 
   // Get settings from store
   const visualTheme = useSettingsStore((state) => state.visualTheme);
@@ -98,6 +101,10 @@ export function CardExpanded({
   const overlayAnimationEnabled = currentCustomisation.overlayAnimation;
   const verdictAnimationStyle = currentCustomisation.verdictAnimationStyle;
   const cardBackgroundColour = currentCustomisation.cardBackgroundColour;
+  const editModeEnabled = useSettingsStore((state) => state.editModeEnabled);
+
+  // Check if card has local edits
+  const cardHasEdits = useEditsStore((state) => state.hasEdits(card.id));
 
   // Determine if background is light (needs dark text)
   const hasLightBackground = useMemo(() => {
@@ -145,8 +152,18 @@ export function CardExpanded({
       setDetailsExpanded(false);
       setShowAttribution(false);
       setPlatformExpanded(false);
+      setEditFormOpen(false);
     }
   }, [isOpen, autoExpandMore, additionalFields.length]);
+
+  // Handle edit button click
+  const handleEditClick = useCallback(() => {
+    setEditFormOpen(true);
+  }, []);
+
+  const handleEditFormClose = useCallback(() => {
+    setEditFormOpen(false);
+  }, []);
 
   // Escape key to close
   useEffect(() => {
@@ -237,19 +254,39 @@ export function CardExpanded({
               e.stopPropagation();
             }}
           >
-            {/* Header row: Rank badge (left) and Close button (right) */}
+            {/* Header row: Rank badge (left) and buttons (right) */}
             <div className={styles.headerRow}>
               <div className={styles.rankBadge}>
                 <RankBadge rank={card.order ?? null} size="large" />
+                {/* Edit indicator badge when card has local edits */}
+                {cardHasEdits && (
+                  <span className={styles.editIndicator} title="This card has local edits">
+                    <EditIcon size={12} />
+                  </span>
+                )}
               </div>
-              <button
-                type="button"
-                className={styles.closeButton}
-                onClick={onClose}
-                aria-label="Close"
-              >
-                <CloseIcon />
-              </button>
+              <div className={styles.headerButtons}>
+                {/* Edit button (only shown when edit mode is enabled) */}
+                {editModeEnabled && (
+                  <button
+                    type="button"
+                    className={styles.editButton}
+                    onClick={handleEditClick}
+                    aria-label="Edit card"
+                    title="Edit card"
+                  >
+                    <EditIcon size={20} />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={styles.closeButton}
+                  onClick={onClose}
+                  aria-label="Close"
+                >
+                  <CloseIcon />
+                </button>
+              </div>
             </div>
 
             {/* Image gallery */}
@@ -586,7 +623,15 @@ export function CardExpanded({
     </AnimatePresence>
   );
 
-  return createPortal(content, document.body);
+  return (
+    <>
+      {createPortal(content, document.body)}
+      {/* Edit form modal */}
+      {editFormOpen && (
+        <EditForm card={card} onClose={handleEditFormClose} />
+      )}
+    </>
+  );
 }
 
 export default CardExpanded;

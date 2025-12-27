@@ -34,6 +34,9 @@ interface AdminButtonProps {
 
   /** Position of the button */
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+
+  /** Whether the button is disabled */
+  disabled?: boolean;
 }
 
 /**
@@ -54,6 +57,7 @@ interface AdminButtonProps {
 export function AdminButton({
   onClick,
   position = "bottom-right",
+  disabled = false,
 }: AdminButtonProps) {
   const positionStyles: Record<string, string> = {
     "bottom-right": styles["bottom-right"] ?? "",
@@ -66,14 +70,19 @@ export function AdminButton({
   return (
     <motion.button
       type="button"
-      className={[styles.button, positionClass].filter(Boolean).join(" ")}
+      className={[
+        styles.button,
+        positionClass,
+        disabled ? styles.buttonDisabled : "",
+      ].filter(Boolean).join(" ")}
       onClick={onClick}
+      disabled={disabled}
       aria-label="Open settings"
       initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: disabled ? 0.4 : 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 25 }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={disabled ? {} : { scale: 1.1 }}
+      whileTap={disabled ? {} : { scale: 0.95 }}
     >
       <GearIcon />
     </motion.button>

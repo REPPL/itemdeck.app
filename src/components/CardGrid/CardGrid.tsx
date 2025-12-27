@@ -1,15 +1,22 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { Card } from "@/components/Card/Card";
 import { DraggableCardGrid } from "@/components/DraggableCardGrid";
+import { SearchBar } from "@/components/SearchBar";
+import { CardGroup } from "@/components/CardGroup";
+import { CardListItem } from "@/components/CardListItem";
+import { CardCompactItem } from "@/components/CardCompactItem";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { createFieldSortComparator } from "@/utils/fieldPathResolver";
+import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
+import { useMemoryStore } from "@/mechanics/memory/store";
+import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { CardDisplayConfig } from "@/types/display";
+import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./CardGrid.module.css";
 
 const GAP = 16; // var(--grid-gap) = 1rem = 16px
@@ -38,9 +45,28 @@ export function CardGrid() {
   const randomSelectionCount = useSettingsStore((state) => state.randomSelectionCount);
   const defaultCardFace = useSettingsStore((state) => state.defaultCardFace);
   const cardSizePreset = useSettingsStore((state) => state.cardSizePreset);
+
+  // v0.11.0: Search & Filter state
+  const searchQuery = useSettingsStore((state) => state.searchQuery);
+  const searchFields = useSettingsStore((state) => state.searchFields);
+  const searchScope = useSettingsStore((state) => state.searchScope);
+  const activeFilters = useSettingsStore((state) => state.activeFilters);
+  const groupByField = useSettingsStore((state) => state.groupByField);
+  const collapsedGroups = useSettingsStore((state) => state.collapsedGroups);
+  const layout = useSettingsStore((state) => state.layout);
+  const showSearchBar = useSettingsStore((state) => state.showSearchBar);
+
+  // v0.11.0: Mechanics integration
+  const { mechanic, state: mechanicState } = useMechanicContext();
+  const mechanicCardActions = useMechanicCardActions();
+
   const containerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
+
+  // Track flipped card IDs in order (oldest first)
+  // Declared early because filteredCards depends on it for "visible" search scope
+  const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
 
   // Merge settings-based field mapping with collection displayConfig
   // Settings take precedence for user overrides
@@ -132,22 +158,253 @@ export function CardGrid() {
     );
   }, [shuffledCards, shuffleOnLoad, fieldMapping.sortField, fieldMapping.sortDirection]);
 
+  // Helper function to check if a card matches a single search term
+  const cardMatchesTerm = useCallback((card: DisplayCard, term: string): boolean => {
+    const lowerTerm = term.toLowerCase();
+    return searchFields.some((field) => {
+      const value = resolveFieldPath(card as unknown as Record<string, unknown>, field);
+      if (value === null || value === undefined) return false;
+      const strValue = typeof value === "object" ? JSON.stringify(value) : String(value as string | number | boolean);
+      return strValue.toLowerCase().includes(lowerTerm);
+    });
+  }, [searchFields]);
+
+  // Parse boolean search query into tokens
+  // Supports: AND, OR, NOT/-prefix, "exact phrases"
+  const parseSearchQuery = useCallback((query: string): { type: "and" | "or" | "not" | "term"; value: string }[] => {
+    const tokens: { type: "and" | "or" | "not" | "term"; value: string }[] = [];
+    const trimmed = query.trim();
+    if (!trimmed) return tokens;
+
+    // Match quoted phrases, operators (AND/OR/NOT), -prefixed terms, or regular words
+    const regex = /"([^"]+)"|(\bAND\b|\bOR\b|\bNOT\b)|(-\S+)|(\S+)/gi;
+    let match;
+
+    while ((match = regex.exec(trimmed)) !== null) {
+      if (match[1]) {
+        // Quoted phrase
+        tokens.push({ type: "term", value: match[1] });
+      } else if (match[2]) {
+        // Boolean operator
+        const op = match[2].toUpperCase();
+        if (op === "AND") tokens.push({ type: "and", value: "" });
+        else if (op === "OR") tokens.push({ type: "or", value: "" });
+        else if (op === "NOT") tokens.push({ type: "not", value: "" });
+      } else if (match[3]) {
+        // -prefixed term (NOT shorthand)
+        tokens.push({ type: "not", value: "" });
+        tokens.push({ type: "term", value: match[3].slice(1) });
+      } else if (match[4]) {
+        // Regular term
+        tokens.push({ type: "term", value: match[4] });
+      }
+    }
+
+    return tokens;
+  }, []);
+
+  // Helper function to apply text search with boolean operators to a card array
+  // Supports: AND, OR, NOT/-prefix, "exact phrases"
+  // Default operator between terms is AND
+  const applySearch = useCallback((cardsToSearch: DisplayCard[], query: string): DisplayCard[] => {
+    if (!query.trim()) return cardsToSearch;
+
+    const tokens = parseSearchQuery(query);
+    if (tokens.length === 0) return cardsToSearch;
+
+    return cardsToSearch.filter((card) => {
+      let result: boolean | null = null; // null = not yet set
+      let pendingOp: "and" | "or" = "and"; // Default operator
+      let negateNext = false;
+
+      for (const token of tokens) {
+        if (token.type === "and") {
+          pendingOp = "and";
+        } else if (token.type === "or") {
+          pendingOp = "or";
+        } else if (token.type === "not") {
+          negateNext = true;
+        } else if (token.type === "term" && token.value) {
+          let matches = cardMatchesTerm(card, token.value);
+          if (negateNext) {
+            matches = !matches;
+            negateNext = false;
+          }
+
+          if (result === null) {
+            // First term - just set the result
+            result = matches;
+          } else if (pendingOp === "and") {
+            result = result && matches;
+          } else {
+            result = result || matches;
+          }
+          // Reset to default AND for implicit operators between terms
+          pendingOp = "and";
+        }
+      }
+
+      return result ?? true; // If no terms, return true (show all)
+    });
+  }, [parseSearchQuery, cardMatchesTerm]);
+
+  // v0.11.0: Apply search and filter
+  // searchScope: "all" = search all cards in the current set
+  // searchScope: "visible" = search only face-up (flipped) cards
+  const filteredCards = useMemo(() => {
+    let result: DisplayCard[];
+
+    if (searchScope === "visible" && searchQuery.trim()) {
+      // Search only within face-up (flipped) cards
+      const faceUpCards = sortedCards.filter(card => flippedCardIds.includes(card.id));
+      result = applySearch(faceUpCards, searchQuery);
+    } else {
+      // Search all cards in the current set
+      result = applySearch(sortedCards, searchQuery);
+    }
+
+    // Apply active filters
+    for (const filter of activeFilters) {
+      if (filter.values.length === 0) continue;
+      result = result.filter((card) => {
+        const value = resolveFieldPath(card as unknown as Record<string, unknown>, filter.field);
+        if (value === null || value === undefined) return false;
+        const strValue = typeof value === "object" ? JSON.stringify(value) : String(value as string | number | boolean);
+        return filter.values.includes(strValue);
+      });
+    }
+
+    return result;
+  }, [sortedCards, searchQuery, searchScope, applySearch, activeFilters, flippedCardIds]);
+
   // Apply custom order if set (from drag and drop)
-  const cards = useMemo(() => {
-    if (!customOrder) return sortedCards;
-    const cardMap = new Map(sortedCards.map((c) => [c.id, c]));
+  const baseCards = useMemo(() => {
+    if (!customOrder) return filteredCards;
+    const cardMap = new Map(filteredCards.map((c) => [c.id, c]));
     return customOrder
       .map((id) => cardMap.get(id))
       .filter((c): c is NonNullable<typeof c> => c !== undefined);
-  }, [sortedCards, customOrder]);
+  }, [filteredCards, customOrder]);
+
+  // Get resetCount from mechanic state to trigger re-shuffle on reset
+  const mechanicResetCount = (mechanicState as { resetCount?: number } | null)?.resetCount;
+
+  // Get memory game settings
+  const memoryPairCount = useMemoryStore((s) => s.pairCount);
+
+  // v0.11.0: Transform cards for active mechanic
+  // For memory game: duplicate cards and shuffle to create pairs
+  const cards = useMemo(() => {
+    if (!mechanic) return baseCards;
+
+    // Memory game needs pairs of cards
+    if (mechanic.manifest.id === "memory") {
+      // Use the configured pair count from settings, limited to available cards
+      const maxPairs = Math.min(
+        Math.floor(baseCards.length),
+        memoryPairCount
+      );
+      const selectedForPairs = baseCards.slice(0, maxPairs);
+
+      // Duplicate each card with unique ID suffix for matching
+      const pairedCards: DisplayCard[] = [];
+      for (const card of selectedForPairs) {
+        // Original card
+        pairedCards.push({ ...card, id: `${card.id}-a` });
+        // Duplicate for pair
+        pairedCards.push({ ...card, id: `${card.id}-b` });
+      }
+
+      // Shuffle the paired cards
+      return shuffle(pairedCards);
+    }
+
+    return baseCards;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [baseCards, mechanic, mechanicResetCount, memoryPairCount]); // mechanicResetCount triggers re-shuffle on reset
+
+  // v0.11.0: Initialize mechanic game state when cards change
+  useEffect(() => {
+    if (mechanic?.manifest.id === "memory" && cards.length > 0) {
+      // Initialize memory game with card IDs
+      const memoryState = mechanic.getState() as unknown as { initGame?: (ids: string[]) => void };
+      if (typeof memoryState.initGame === "function") {
+        memoryState.initGame(cards.map((c) => c.id));
+      }
+    }
+  }, [mechanic, cards]);
 
   // Handle reorder from drag and drop
   const handleReorder = useCallback((newOrder: string[]) => {
     setCustomOrder(newOrder);
   }, []);
 
-  // Track flipped card IDs in order (oldest first)
-  const [flippedCardIds, setFlippedCardIds] = useState<string[]>([]);
+  // v0.11.0: Group cards by field
+  const groupedCards = useMemo(() => {
+    if (!groupByField || groupByField === "none") {
+      return null; // No grouping
+    }
+
+    const groups = new Map<string, DisplayCard[]>();
+    for (const card of cards) {
+      let groupKey: string;
+      if (groupByField === "decade") {
+        // Special handling for decade grouping
+        const year = resolveFieldPath(card as unknown as Record<string, unknown>, "year");
+        if (year !== null && year !== undefined) {
+          const yearNum = Number(year);
+          groupKey = `${String(Math.floor(yearNum / 10) * 10)}s`;
+        } else {
+          groupKey = "Unknown";
+        }
+      } else {
+        const value = resolveFieldPath(card as unknown as Record<string, unknown>, groupByField);
+        if (value !== null && value !== undefined) {
+          groupKey = typeof value === "object" ? JSON.stringify(value) : String(value as string | number | boolean);
+        } else {
+          groupKey = "Unknown";
+        }
+      }
+
+      const existing = groups.get(groupKey);
+      if (existing) {
+        existing.push(card);
+      } else {
+        groups.set(groupKey, [card]);
+      }
+    }
+
+    // Convert to array and sort by group key
+    return Array.from(groups.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, groupCards]) => ({ key, cards: groupCards }));
+  }, [cards, groupByField]);
+
+  // Compute filter options for SearchBar
+  const filterOptions = useMemo(() => {
+    const platforms = new Set<string>();
+    const years = new Set<number>();
+    const genres = new Set<string>();
+
+    for (const card of sourceCards) {
+      const platformValue = resolveFieldPath(card as unknown as Record<string, unknown>, "platform.shortTitle");
+      if (platformValue && typeof platformValue === "string") platforms.add(platformValue);
+
+      const yearValue = resolveFieldPath(card as unknown as Record<string, unknown>, "year");
+      if (yearValue !== null && yearValue !== undefined) years.add(Number(yearValue));
+
+      const genresValue = resolveFieldPath(card as unknown as Record<string, unknown>, "genres");
+      if (Array.isArray(genresValue)) {
+        genresValue.forEach((g: unknown) => genres.add(String(g)));
+      }
+    }
+
+    return {
+      platforms: Array.from(platforms).sort(),
+      years: Array.from(years).sort((a, b) => b - a),
+      genres: Array.from(genres).sort(),
+    };
+  }, [sourceCards]);
 
   // Track previous setting to detect user changes
   const prevDefaultFaceRef = useRef<string | null>(null);
@@ -192,7 +449,21 @@ export function CardGrid() {
   }, [containerWidth, cardDimensions.width]);
 
   // Handle card flip with maxVisibleCards enforcement
+  // When mechanic is active, delegate to mechanic's onClick handler
   const handleFlip = useCallback((cardId: string) => {
+    // If mechanic is active, use its card actions
+    if (mechanicCardActions) {
+      // Check if card can be interacted with
+      if (mechanicCardActions.canInteract && !mechanicCardActions.canInteract(cardId)) {
+        return;
+      }
+      if (mechanicCardActions.onClick) {
+        mechanicCardActions.onClick(cardId);
+      }
+      return;
+    }
+
+    // Default flip behaviour
     setFlippedCardIds(prev => {
       const isCurrentlyFlipped = prev.includes(cardId);
 
@@ -214,7 +485,7 @@ export function CardGrid() {
         return newList;
       }
     });
-  }, [maxVisibleCards, defaultCardFace]);
+  }, [maxVisibleCards, defaultCardFace, mechanicCardActions]);
 
   // Handle selection from keyboard navigation
   const handleSelect = useCallback((index: number) => {
@@ -240,7 +511,7 @@ export function CardGrid() {
   }, [gridRef]);
 
   // Track container width
-  // Re-run when dragModeEnabled changes so we measure when switching back to regular grid
+  // Re-run when dragModeEnabled, layout, or mechanic changes so we measure when switching views
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -258,7 +529,7 @@ export function CardGrid() {
     return () => {
       resizeObserver.disconnect();
     };
-  }, [dragModeEnabled]);
+  }, [dragModeEnabled, layout, mechanic]);
 
   // Calculate grid layout
   const calculateLayout = () => {
@@ -312,8 +583,15 @@ export function CardGrid() {
       const pos = positions[index];
       if (!pos) return null;
 
-      const isFlipped = flippedCardIds.includes(card.id);
+      // When mechanic is active, use its highlight state for flip display
+      // For memory game: cards are "flipped" when they're highlighted by the mechanic
+      const isFlipped = mechanicCardActions?.isHighlighted
+        ? mechanicCardActions.isHighlighted(card.id)
+        : flippedCardIds.includes(card.id);
       const tabIndex = getTabIndex(index);
+
+      // Get CardOverlay component from active mechanic
+      const CardOverlay = mechanic?.CardOverlay;
 
       return (
         <div
@@ -322,6 +600,8 @@ export function CardGrid() {
           style={{
             left: `${String(pos.left)}px`,
             top: `${String(pos.top)}px`,
+            width: `${String(cardDimensions.width)}px`,
+            height: `${String(cardDimensions.height)}px`,
           }}
           role="gridcell"
         >
@@ -338,42 +618,171 @@ export function CardGrid() {
             displayConfig={mergedDisplayConfig}
             cardSize={cardSizePreset}
           />
+          {/* Render mechanic card overlay */}
+          {CardOverlay && <CardOverlay cardId={card.id} />}
         </div>
       );
     });
   };
 
-  // Render draggable grid when drag mode is enabled
-  if (dragModeEnabled && !isLoading && !error && cards.length > 0) {
+  // Render draggable grid when drag mode is enabled AND layout is grid
+  // (drag mode only works with grid layout)
+  // Disable drag mode when a mechanic is active - mechanics control card interaction
+  if (dragModeEnabled && !mechanic && layout === "grid" && !isLoading && !error && cards.length > 0) {
     return (
-      <DraggableCardGrid
-        cards={cards}
-        onReorder={handleReorder}
-        cardWidth={cardDimensions.width}
-        gap={GAP}
-        flippedCardIds={flippedCardIds}
-        onFlip={handleFlip}
-        showRankBadge={showRankBadge}
-        showFooterBadge={showFooterBadge}
-        rankPlaceholderText={rankPlaceholderText}
-        dragFace={dragFace}
-        cardBackDisplay={cardBackDisplay}
-        displayConfig={mergedDisplayConfig}
-        cardSize={cardSizePreset}
-      />
+      <>
+        {showSearchBar && !mechanic && (
+          <SearchBar
+            totalCards={sourceCards.length}
+            filteredCount={cards.length}
+            filterOptions={filterOptions}
+          />
+        )}
+        <DraggableCardGrid
+          cards={cards}
+          onReorder={handleReorder}
+          cardWidth={cardDimensions.width}
+          gap={GAP}
+          flippedCardIds={flippedCardIds}
+          onFlip={handleFlip}
+          showRankBadge={showRankBadge}
+          showFooterBadge={showFooterBadge}
+          rankPlaceholderText={rankPlaceholderText}
+          dragFace={dragFace}
+          cardBackDisplay={cardBackDisplay}
+          displayConfig={mergedDisplayConfig}
+          cardSize={cardSizePreset}
+        />
+      </>
     );
   }
 
+  // Render list view
+  if (layout === "list" && !isLoading && !error) {
+    return (
+      <>
+        {showSearchBar && !mechanic && (
+          <SearchBar
+            totalCards={sourceCards.length}
+            filteredCount={cards.length}
+            filterOptions={filterOptions}
+          />
+        )}
+        <div className={styles.listContainer}>
+          {groupedCards ? (
+            groupedCards.map((group) => (
+              <CardGroup
+                key={group.key}
+                groupKey={group.key}
+                cardCount={group.cards.length}
+                isCollapsed={collapsedGroups.includes(group.key)}
+              >
+                {group.cards.map((card, idx) => (
+                  <CardListItem
+                    key={card.id}
+                    card={card}
+                    cardNumber={idx + 1}
+                  />
+                ))}
+              </CardGroup>
+            ))
+          ) : (
+            cards.map((card, idx) => (
+              <CardListItem
+                key={card.id}
+                card={card}
+                cardNumber={idx + 1}
+              />
+            ))
+          )}
+          {cards.length === 0 && (
+            <div className={styles.empty}>No cards to display</div>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  // Render compact view
+  if (layout === "compact" && !isLoading && !error) {
+    return (
+      <>
+        {showSearchBar && !mechanic && (
+          <SearchBar
+            totalCards={sourceCards.length}
+            filteredCount={cards.length}
+            filterOptions={filterOptions}
+          />
+        )}
+        <div className={styles.compactContainer}>
+          {groupedCards ? (
+            groupedCards.map((group) => (
+              <CardGroup
+                key={group.key}
+                groupKey={group.key}
+                cardCount={group.cards.length}
+                isCollapsed={collapsedGroups.includes(group.key)}
+              >
+                <div className={styles.compactGrid}>
+                  {group.cards.map((card, idx) => (
+                    <CardCompactItem
+                      key={card.id}
+                      card={card}
+                      cardNumber={idx + 1}
+                    />
+                  ))}
+                </div>
+              </CardGroup>
+            ))
+          ) : (
+            <div className={styles.compactGrid}>
+              {cards.map((card, idx) => (
+                <CardCompactItem
+                  key={card.id}
+                  card={card}
+                  cardNumber={idx + 1}
+                />
+              ))}
+            </div>
+          )}
+          {cards.length === 0 && (
+            <div className={styles.empty}>No cards to display</div>
+          )}
+        </div>
+      </>
+    );
+  }
+
+  // Get GridOverlay component from active mechanic
+  const GridOverlay = mechanic?.GridOverlay;
+
+  // Default grid view
   return (
-    <section
-      ref={containerRef}
-      className={styles.grid}
-      style={{ minHeight: `${String(containerHeight)}px` }}
-      role="grid"
-      aria-label="Card collection"
-      onKeyDown={handleKeyDown}
-    >
-      {renderContent()}
-    </section>
+    <>
+      {/* Mechanic top overlay (stats bar, etc.) */}
+      {GridOverlay && <GridOverlay position="top" />}
+
+      {/* SearchBar hidden when mechanic is active (game info bar takes precedence) */}
+      {showSearchBar && !mechanic && (
+        <SearchBar
+          totalCards={sourceCards.length}
+          filteredCount={cards.length}
+          filterOptions={filterOptions}
+        />
+      )}
+      <section
+        ref={containerRef}
+        className={styles.grid}
+        style={{ minHeight: `${String(containerHeight)}px` }}
+        role="grid"
+        aria-label="Card collection"
+        onKeyDown={handleKeyDown}
+      >
+        {renderContent()}
+      </section>
+
+      {/* Mechanic bottom overlay (completion modal, etc.) */}
+      {GridOverlay && <GridOverlay position="bottom" />}
+    </>
   );
 }

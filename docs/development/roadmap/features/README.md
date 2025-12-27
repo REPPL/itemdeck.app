@@ -46,12 +46,10 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
+| [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
 | [F-025](./planned/F-025-bundle-size-monitoring.md) | Bundle Size Monitoring | 📋 Planned |
 | [F-031](./planned/F-031-fit-to-viewport.md) | Fit to Viewport Mode | 📋 Planned |
-| [F-036](./planned/F-036-card-filtering.md) | Card Filtering | 📋 Planned |
-| [F-037](./planned/F-037-card-sorting.md) | Card Sorting | 📋 Planned |
 | [F-040](./planned/F-040-touch-gestures.md) | Touch Gestures | 📋 Planned |
-| [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
 
 ### v0.5.0 - Schema Design
 
@@ -128,22 +126,27 @@ Feature specifications for Itemdeck development.
 | [F-035](./completed/F-035-card-quick-actions.md) | Card Quick Actions | ✅ Complete |
 | [F-038](./completed/F-038-card-carousel-mode.md) | Card Carousel Mode | ✅ Complete |
 
-### v0.11.0 - Mechanics Foundation
+### v0.11.0 - Mechanics Foundation & Discovery
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-053](./planned/F-053-mechanic-plugin-registry.md) | Mechanic Plugin Registry | 📋 Planned |
-| [F-054](./planned/F-054-mechanic-context-provider.md) | Mechanic Context Provider | 📋 Planned |
-| [F-055](./planned/F-055-mechanic-overlay-system.md) | Mechanic Overlay System | 📋 Planned |
-| [F-056](./planned/F-056-settings-mechanic-selector.md) | Settings Mechanic Selector | 📋 Planned |
+| [F-036](./completed/F-036-card-filtering.md) | Card Filtering (with Search) | ✅ Complete |
+| [F-053](./completed/F-053-mechanic-plugin-registry.md) | Mechanic Plugin Registry | ✅ Complete |
+| [F-054](./completed/F-054-mechanic-context-provider.md) | Mechanic Context Provider | ✅ Complete |
+| [F-055](./completed/F-055-mechanic-overlay-system.md) | Mechanic Overlay System | ✅ Complete |
+| [F-056](./completed/F-056-settings-mechanic-selector.md) | Settings Mechanic Selector | ✅ Complete |
+| [F-065](./completed/F-065-card-grouping.md) | Card Grouping | ✅ Complete |
+| [F-066](./completed/F-066-view-mode-toggle.md) | View Mode Toggle | ✅ Complete |
 
 ### v0.12.0 - Core Mechanics
 
 | ID | Feature | Status |
 |----|---------|--------|
+| [F-037](./planned/F-037-card-sorting.md) | Card Sorting (Expanded) | 📋 Planned |
 | [F-057](./planned/F-057-memory-game-mechanic.md) | Memory Game Mechanic | 📋 Planned |
 | [F-058](./planned/F-058-collection-mechanic.md) | Collection Mechanic | 📋 Planned |
 | [F-061](./planned/F-061-snap-ranking-mechanic.md) | Snap Ranking Mechanic | 📋 Planned |
+| [F-067](./planned/F-067-statistics-dashboard.md) | Statistics Dashboard | 📋 Planned |
 
 ### v0.13.0 - Advanced Mechanics
 

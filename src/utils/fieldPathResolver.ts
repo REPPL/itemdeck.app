@@ -44,8 +44,8 @@ export const FOOTER_BADGE_FIELD_OPTIONS: FieldOption[] = [
 ];
 
 export const LOGO_FIELD_OPTIONS: FieldOption[] = [
-  { value: "platform.logoUrl", label: "Platform Logo" },
-  { value: "logoUrl", label: "Card Logo" },
+  { value: "logoUrl", label: "Platform Logo" },
+  { value: "images[type=logo][0].url", label: "Card Logo" },
   { value: "none", label: "None (App Logo)" },
 ];
 
@@ -55,15 +55,46 @@ export const SORT_FIELD_OPTIONS: FieldOption[] = [
   { value: "title", label: "Title" },
   { value: "year", label: "Year" },
   { value: "playedSince", label: "Played Since" },
+  { value: "platform.shortTitle", label: "Platform" },
+  { value: "categoryTitle", label: "Category" },
+  { value: "rating.score", label: "Rating" },
 ];
+
+/**
+ * Available fields for grouping cards.
+ */
+export const GROUP_BY_FIELD_OPTIONS: FieldOption[] = [
+  { value: "none", label: "None" },
+  { value: "categoryTitle", label: "Platform" },
+  { value: "year", label: "Year" },
+  { value: "decade", label: "Decade" },
+  { value: "genres[0]", label: "Genre" },
+];
+
+/**
+ * Parse a field path segment that may contain array bracket notation.
+ *
+ * @param segment - A path segment like "field" or "field[0]" or "[0]"
+ * @returns Object with property name and optional array index
+ */
+function parsePathSegment(segment: string): { prop: string | null; index: number | null } {
+  // Handle bracket notation: "field[0]" or "[0]"
+  const bracketMatch = /^([^[]*)\[(\d+)\]$/.exec(segment);
+  if (bracketMatch) {
+    const prop = bracketMatch[1] ?? null;
+    const index = parseInt(bracketMatch[2] ?? "", 10);
+    return { prop, index };
+  }
+  return { prop: segment, index: null };
+}
 
 /**
  * Resolve a field path from an entity object.
  *
- * Supports dot notation for nested properties.
+ * Supports dot notation for nested properties and bracket notation for arrays.
  *
  * @param entity - The entity object to resolve from
- * @param fieldPath - Dot-separated field path (e.g., "platform.shortTitle")
+ * @param fieldPath - Field path (e.g., "platform.shortTitle", "genres[0]")
  * @returns The resolved value or undefined if not found
  *
  * @example
@@ -72,6 +103,10 @@ export const SORT_FIELD_OPTIONS: FieldOption[] = [
  * resolveFieldPath(entity, "platform.shortTitle"); // "Switch"
  * resolveFieldPath(entity, "platform.title"); // "Nintendo Switch"
  * resolveFieldPath(entity, "title"); // undefined
+ *
+ * const entityWithArray = { genres: ["Action", "RPG"] };
+ * resolveFieldPath(entityWithArray, "genres[0]"); // "Action"
+ * resolveFieldPath(entityWithArray, "genres[1]"); // "RPG"
  * ```
  */
 export function resolveFieldPath(
@@ -94,17 +129,35 @@ export function resolveFieldPath(
       return undefined;
     }
 
+    const { prop, index } = parsePathSegment(part);
+
     // Check in _resolved first for relationship fields
     const obj = current as Record<string, unknown>;
     if (parts[0] === part && obj._resolved && typeof obj._resolved === "object") {
       const resolved = obj._resolved as Record<string, unknown>;
-      if (part in resolved) {
-        current = resolved[part];
+      if (prop && prop in resolved) {
+        current = resolved[prop];
+        // Apply array index if present
+        if (index !== null && Array.isArray(current)) {
+          current = current[index];
+        }
         continue;
       }
     }
 
-    current = obj[part];
+    // Access property if specified
+    if (prop) {
+      current = obj[prop];
+    }
+
+    // Apply array index if present
+    if (index !== null) {
+      if (Array.isArray(current)) {
+        current = current[index];
+      } else {
+        return undefined;
+      }
+    }
   }
 
   return current;

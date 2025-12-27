@@ -12,21 +12,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--colour-primary, #4f9eff);
-  border: none;
+  /* Solid background for iOS Safari compatibility */
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-full, 50%);
-  colour: white;
-  color: white;
+  color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   box-shadow: var(--elevation-3, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
   transition:
     background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    color var(--transition-fast, 150ms),
     box-shadow var(--transition-fast, 150ms);
+  /* iOS Safari GPU layer */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
 }
 
-.button:hover {
-  background: var(--colour-primary-hover, #3b8bef);
+/* Apply backdrop blur only on desktop browsers */
+@supports (backdrop-filter: blur(8px)) and (not (-webkit-touch-callout: none)) {
+  .button {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.button:hover:not(:disabled) {
+  background: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  color: #fff;
   box-shadow: var(--elevation-4, 0 20px 25px -5px rgba(0, 0, 0, 0.35));
+}
+
+/* Disabled state */
+.buttonDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .button:focus-visible {

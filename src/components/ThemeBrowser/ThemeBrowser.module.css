@@ -1,0 +1,89 @@
+/**
+ * ThemeBrowser styles.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--colour-text, #fff);
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.6));
+  background: transparent;
+  border: 1px solid var(--colour-border, rgba(255, 255, 255, 0.2));
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+  color: var(--colour-text, #fff);
+  border-color: var(--colour-text, #fff);
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.refreshButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+.loading,
+.error,
+.empty {
+  margin: 0;
+  padding: 1rem;
+  font-size: 0.875rem;
+  text-align: center;
+  border-radius: 0.375rem;
+}
+
+.loading {
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.6));
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.error {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+.empty {
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.5));
+  background: rgba(255, 255, 255, 0.03);
+}

@@ -11,7 +11,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
+  /* Use global overlay transparency setting */
+  background: var(--overlay-transparency-background, rgba(0, 0, 0, 0.5));
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
   z-index: 1100;

@@ -111,6 +111,10 @@ export function Card({
   const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
   const cardBackgroundColour = themeCustomisations[visualTheme].cardBackgroundColour;
 
+  // Check if card has local edits (via _editedAt field added during merge)
+  const cardEditedAt = (card as unknown as Record<string, unknown>)._editedAt as number | undefined;
+  const cardHasEdits = cardEditedAt !== undefined;
+
   // Resolve field values using display configuration
   // Cast card to ResolvedEntity for field path resolution
   const entity = card as unknown as ResolvedEntity;
@@ -141,12 +145,23 @@ export function Card({
 
 
   // Resolve back face values
+  // When displayConfig is provided:
+  //   - backConfig.logo = "logoUrl" → Platform Logo (default)
+  //   - backConfig.logo = "images[type=logo][0].url" → Card Logo
+  //   - backConfig.logo = undefined → None (use app logo)
+  // When displayConfig is NOT provided, fall back to card.logoUrl (Platform Logo)
   const resolvedLogoUrl = useMemo(() => {
+    // If displayConfig exists but logo is undefined → "None" was selected → use app logo
+    if (displayConfig && backConfig?.logo === undefined) {
+      return undefined;
+    }
+    // If logo path is configured, resolve it
     if (backConfig?.logo) {
       return resolveFieldPathAsString(entity, backConfig.logo) || card.logoUrl;
     }
+    // No displayConfig at all → use platform logo (default)
     return card.logoUrl;
-  }, [entity, backConfig?.logo, card.logoUrl]);
+  }, [displayConfig, entity, backConfig?.logo, card.logoUrl]);
 
   // Resolve footer badge (device) - use field path if configured
   const resolvedDevice = useMemo(() => {
@@ -239,6 +254,7 @@ export function Card({
               showDragHandle={showFrontDragHandle}
               dragHandleProps={frontDragHandleProps}
               isFlipping={isFlipping}
+              hasEdits={cardHasEdits}
             />
           }
         />

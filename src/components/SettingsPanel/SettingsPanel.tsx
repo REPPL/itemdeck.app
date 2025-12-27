@@ -13,6 +13,7 @@ import { CardSettingsTabs } from "./CardSettingsTabs";
 import { ThemeSettingsTabs } from "./ThemeSettingsTabs";
 import { ConfigSettingsTabs } from "./ConfigSettingsTabs";
 import { StorageSettingsTabs } from "./StorageSettingsTabs";
+// MechanicsTab moved to dedicated MechanicPanel
 import {
   useSettingsStore,
   type ReduceMotionPreference,
@@ -36,7 +37,7 @@ interface SettingsPanelProps {
 /**
  * Tab configuration.
  * Order: System | Theme | Cards | Config | Storage
- * (Sources is now a subtab within Storage)
+ * (Mechanics moved to dedicated panel)
  */
 type TabId = "system" | "theme" | "cards" | "config" | "storage";
 
@@ -109,6 +110,8 @@ function StorageIcon() {
     </svg>
   );
 }
+
+// MechanicsIcon moved to MechanicPanel
 
 function CloseIcon() {
   return (
@@ -196,10 +199,12 @@ export function SettingsPanel({
     highContrast,
     showHelpButton,
     showSettingsButton,
+    showSearchBar,
     setReduceMotion,
     setHighContrast,
     setShowHelpButton,
     setShowSettingsButton,
+    setShowSearchBar,
     resetToDefaults,
   } = useSettingsStore();
 
@@ -301,6 +306,17 @@ export function SettingsPanel({
                   type="checkbox"
                   checked={showSettingsButton}
                   onChange={(e) => { setShowSettingsButton(e.target.checked); }}
+                />
+                <span className={styles.toggleSlider} />
+              </label>
+            </div>
+            <div className={styles.row}>
+              <span className={styles.label}>Show Search Bar</span>
+              <label className={styles.toggle}>
+                <input
+                  type="checkbox"
+                  checked={showSearchBar}
+                  onChange={(e) => { setShowSearchBar(e.target.checked); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>

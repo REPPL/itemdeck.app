@@ -23,7 +23,7 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.10.1](./milestones/v0.10.1.md) | UI Polish & Data Model | ✅ Complete |
 | [v0.10.5](./milestones/v0.10.5.md) | Field Descriptions & Demo Data | ✅ Complete |
 | [v0.10.6](./milestones/v0.10.6.md) | Documentation Sync | ✅ Complete |
-| [v0.11.0](./milestones/v0.11.0.md) | Mechanics Foundation | 📋 Planned |
+| [v0.11.0](./milestones/v0.11.0.md) | Mechanics Foundation & Discovery | ✅ Complete |
 | [v0.12.0](./milestones/v0.12.0.md) | Core Mechanics | 📋 Planned |
 | [v0.13.0](./milestones/v0.13.0.md) | Advanced Mechanics | 📋 Planned |
 | [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
@@ -67,8 +67,8 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-033 | Card Elevation System | v0.3.0 | ✅ Complete |
 | F-034 | Card Badges | v0.3.0 | ✅ Complete |
 | F-035 | Card Quick Actions | v0.10.6 | ✅ Complete |
-| F-036 | Card Filtering | v0.4.0 | 📋 Planned |
-| F-037 | Card Sorting | v0.4.0 | 📋 Planned |
+| F-036 | Card Filtering | v0.11.0 | ✅ Complete |
+| F-037 | Card Sorting (Expanded) | v0.12.0 | 📋 Planned |
 | F-038 | Card Carousel Mode | v0.10.6 | ✅ Complete |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | 📋 Planned |
@@ -84,10 +84,10 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-050 | Edit Form Component | v0.10.0 | ✅ Complete |
 | F-051 | Edit Button Integration | v0.10.0 | ✅ Complete |
 | F-052 | Edit Export/Import | v0.10.0 | ✅ Complete |
-| F-053 | Mechanic Plugin Registry | v0.11.0 | 📋 Planned |
-| F-054 | Mechanic Context Provider | v0.11.0 | 📋 Planned |
-| F-055 | Mechanic Overlay System | v0.11.0 | 📋 Planned |
-| F-056 | Settings Mechanic Selector | v0.11.0 | 📋 Planned |
+| F-053 | Mechanic Plugin Registry | v0.11.0 | ✅ Complete |
+| F-054 | Mechanic Context Provider | v0.11.0 | ✅ Complete |
+| F-055 | Mechanic Overlay System | v0.11.0 | ✅ Complete |
+| F-056 | Settings Mechanic Selector | v0.11.0 | ✅ Complete |
 | F-057 | Memory Game Mechanic | v0.12.0 | 📋 Planned |
 | F-058 | Collection Mechanic | v0.12.0 | 📋 Planned |
 | F-059 | Competing Mechanic | v0.13.0 | 📋 Planned |
@@ -96,6 +96,9 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-062 | Collection Statistics | v0.9.0 | ✅ Complete |
 | F-063 | Collection Export | v0.9.0 | ✅ Complete |
 | F-064 | Collection Comparison | v1.0.0 | 📋 Planned |
+| F-065 | Card Grouping | v0.11.0 | ✅ Complete |
+| F-066 | View Mode Toggle | v0.11.0 | ✅ Complete |
+| F-067 | Statistics Dashboard | v0.12.0 | 📋 Planned |
 
 ## Contents
 

@@ -19,8 +19,8 @@ interface InfoTooltipProps {
  */
 export function InfoTooltip({ text, className }: InfoTooltipProps) {
   const wrapperClass = className
-    ? `${styles.tooltipWrapper} ${className}`
-    : styles.tooltipWrapper;
+    ? `${styles.tooltipWrapper ?? ""} ${className}`
+    : (styles.tooltipWrapper ?? "");
 
   return (
     <span className={wrapperClass}>

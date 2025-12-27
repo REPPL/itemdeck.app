@@ -74,6 +74,8 @@ interface CardFrontProps {
   dragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   /** Whether the card is currently flipping (hides drag handle during animation) */
   isFlipping?: boolean;
+  /** Whether the card has local edits */
+  hasEdits?: boolean;
 }
 
 /**
@@ -100,6 +102,7 @@ export function CardFront({
   showDragHandle = false,
   dragHandleProps,
   isFlipping = false,
+  hasEdits = false,
 }: CardFrontProps) {
   // Hide unranked badge on small cards to prevent overflow
   const shouldShowRankBadge = showRankBadge && (rank !== null || cardSize !== "small");
@@ -125,6 +128,10 @@ export function CardFront({
             placeholderText={rankPlaceholderText}
             size="small"
           />
+          {/* Edit indicator shown when card has local edits - simple dot */}
+          {hasEdits && (
+            <span className={styles.editIndicator} title="This card has local edits" />
+          )}
         </div>
       )}
 

@@ -13,7 +13,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.7);
+  /* Use global overlay transparency setting */
+  background: var(--overlay-transparency-background, rgba(0, 0, 0, 0.5));
   z-index: 1000;
   padding: var(--spacing-lg, 24px);
 }
@@ -59,20 +60,32 @@
 
 .rankBadge {
   /* Positioned on left side of header */
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
 }
 
 .editIndicator {
+  /* Small dot indicator in the top-right corner of the rank badge */
+  position: absolute;
+  top: -4px;
+  right: -4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  background-color: #f59e0b;
+  width: 16px;
+  height: 16px;
+  background: #f59e0b;
   color: #1a1a1a;
-  border-radius: 4px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+.editIndicator svg {
+  width: 10px;
+  height: 10px;
 }
 
 .headerButtons {

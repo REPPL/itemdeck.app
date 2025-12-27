@@ -133,30 +133,40 @@ interface CollectionResult {
 }
 
 /**
- * Format attribution from structured Image object.
+ * Format attribution from structured Image objects.
+ * Collects all unique attributions from all images.
  */
 function formatAttribution(images: Image[] | undefined): string | undefined {
   if (!images || images.length === 0) {
     return undefined;
   }
 
-  const firstWithAttribution = images.find((img) => img.attribution);
-  if (!firstWithAttribution?.attribution) {
-    return undefined;
+  // Collect all unique attributions
+  const attributions: string[] = [];
+  const seen = new Set<string>();
+
+  for (const img of images) {
+    if (!img.attribution) continue;
+
+    const attr = img.attribution;
+    const parts: string[] = [];
+
+    if (attr.source) {
+      parts.push(`Image from ${attr.source}`);
+    }
+
+    if (attr.author) {
+      parts.push(`by ${attr.author}`);
+    }
+
+    const attrStr = parts.join(" ");
+    if (attrStr && !seen.has(attrStr)) {
+      seen.add(attrStr);
+      attributions.push(attrStr);
+    }
   }
 
-  const attr = firstWithAttribution.attribution;
-  const parts: string[] = [];
-
-  if (attr.source) {
-    parts.push(`Image from ${attr.source}`);
-  }
-
-  if (attr.author) {
-    parts.push(`by ${attr.author}`);
-  }
-
-  return parts.length > 0 ? parts.join(" ") : undefined;
+  return attributions.length > 0 ? attributions.join("; ") : undefined;
 }
 
 /**

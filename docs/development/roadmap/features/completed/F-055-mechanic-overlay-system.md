@@ -106,4 +106,4 @@ Add overlay slots to Card and CardGrid components that render mechanic-provided 
 
 ---
 
-**Status**: Planned
+**Status**: Complete

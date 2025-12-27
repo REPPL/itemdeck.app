@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
@@ -8,6 +8,9 @@ import { SettingsPanel } from "@/components/SettingsPanel";
 import { AdminButton } from "@/components/AdminButton";
 import { HelpButton } from "@/components/HelpButton";
 import { HelpModal } from "@/components/HelpModal";
+import { MechanicButton } from "@/components/MechanicButton";
+import { MechanicPanel } from "@/components/MechanicPanel";
+import { SearchButton } from "@/components/SearchButton";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { StatisticsBar } from "@/components/Statistics";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
@@ -15,6 +18,7 @@ import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
 import { CollectionDataProvider } from "@/context/CollectionDataContext";
+import { MechanicProvider } from "@/mechanics";
 import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
 import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
@@ -30,6 +34,7 @@ function AppContent() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [mechanicPanelOpen, setMechanicPanelOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
 
@@ -146,9 +151,48 @@ function AppContent() {
   const showHelpButton = useSettingsStore((state) => state.showHelpButton);
   const showSettingsButton = useSettingsStore((state) => state.showSettingsButton);
 
+  // Search bar state
+  const showSearchBar = useSettingsStore((state) => state.showSearchBar);
+  const searchBarMinimised = useSettingsStore((state) => state.searchBarMinimised);
+  const setSearchBarMinimised = useSettingsStore((state) => state.setSearchBarMinimised);
+
+  // Active mechanic state
+  const activeMechanicId = useSettingsStore((state) => state.activeMechanicId);
+
+  // Track pre-mechanic state for restoration
+  const preMechanicStateRef = useRef<{
+    settingsOpen: boolean;
+    searchBarMinimised: boolean;
+  } | null>(null);
+
+  // When a mechanic activates, save current state and close panels
+  useEffect(() => {
+    if (activeMechanicId) {
+      // Save current state before mechanic
+      preMechanicStateRef.current = {
+        settingsOpen,
+        searchBarMinimised,
+      };
+      // Close panels during game
+      setSettingsOpen(false);
+      setSearchBarMinimised(true);
+    } else if (preMechanicStateRef.current) {
+      // Restore state when mechanic deactivates
+      const { settingsOpen: wasSettingsOpen, searchBarMinimised: wasMinimised } = preMechanicStateRef.current;
+      setSettingsOpen(wasSettingsOpen);
+      setSearchBarMinimised(wasMinimised);
+      preMechanicStateRef.current = null;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeMechanicId]); // Only react to mechanic changes
+
   const handleStatisticsBarDismiss = useCallback(() => {
     setShowStatisticsBar(false);
   }, [setShowStatisticsBar]);
+
+  const handleSearchButtonClick = useCallback(() => {
+    setSearchBarMinimised(false);
+  }, [setSearchBarMinimised]);
 
   return (
     <div className={styles.app}>
@@ -179,18 +223,38 @@ function AppContent() {
       <EditModeIndicator onClick={handleSettingsOpen} />
 
       {/* Floating buttons (bottom-right, stacked from bottom) */}
-      {(showHelpButton || showSettingsButton) && (
-        <div className={styles.floatingButtons}>
-          {/* Settings button appears at bottom (first in column-reverse) */}
-          {showSettingsButton && (
-            <AdminButton onClick={handleSettingsOpen} />
-          )}
-          {/* Help button appears above settings (or at bottom if settings hidden) */}
-          {showHelpButton && (
-            <HelpButton onClick={() => { setHelpOpen(true); }} />
-          )}
-        </div>
-      )}
+      {/* All buttons stay visible - disabled when search bar is open */}
+      {/* Order from top to bottom: Help, Games, Search, Settings */}
+      {/* Using column-reverse, so DOM order is: Settings, Search, Games, Help */}
+      <div className={styles.floatingButtons}>
+        {/* Settings button at bottom (first in column-reverse) */}
+        {showSettingsButton && (
+          <AdminButton
+            onClick={handleSettingsOpen}
+            disabled={Boolean(activeMechanicId) || !searchBarMinimised}
+          />
+        )}
+        {/* Search button - toggles SearchBar, only show if search feature enabled */}
+        {/* Disabled when search bar is open (like other buttons) */}
+        {showSearchBar && (
+          <SearchButton
+            onClick={searchBarMinimised ? handleSearchButtonClick : () => { setSearchBarMinimised(true); }}
+            disabled={Boolean(activeMechanicId) || !searchBarMinimised}
+          />
+        )}
+        {/* Games/Mechanic button - disabled when search bar open */}
+        <MechanicButton
+          onClick={() => { setMechanicPanelOpen(true); }}
+          disabled={!searchBarMinimised}
+        />
+        {/* Help button at top (last in column-reverse) - disabled when search bar open */}
+        {showHelpButton && (
+          <HelpButton
+            onClick={() => { setHelpOpen(true); }}
+            disabled={!searchBarMinimised}
+          />
+        )}
+      </div>
 
       {/* Settings panel */}
       <SettingsPanel
@@ -204,6 +268,12 @@ function AppContent() {
       <HelpModal
         isOpen={helpOpen}
         onClose={() => { setHelpOpen(false); }}
+      />
+
+      {/* Mechanic panel */}
+      <MechanicPanel
+        isOpen={mechanicPanelOpen}
+        onClose={() => { setMechanicPanelOpen(false); }}
       />
 
       <OfflineIndicator />
@@ -225,7 +295,9 @@ function App() {
       <SettingsProvider>
         <MotionProvider>
           <CollectionDataProvider>
-            <AppContent />
+            <MechanicProvider>
+              <AppContent />
+            </MechanicProvider>
           </CollectionDataProvider>
         </MotionProvider>
       </SettingsProvider>

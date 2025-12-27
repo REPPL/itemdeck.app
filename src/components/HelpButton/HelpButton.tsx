@@ -32,6 +32,8 @@ function QuestionIcon() {
 interface HelpButtonProps {
   /** Callback when button is clicked */
   onClick: () => void;
+  /** Whether the button is disabled */
+  disabled?: boolean;
 }
 
 /**
@@ -45,18 +47,19 @@ interface HelpButtonProps {
  * <HelpButton onClick={() => setHelpOpen(true)} />
  * ```
  */
-export function HelpButton({ onClick }: HelpButtonProps) {
+export function HelpButton({ onClick, disabled }: HelpButtonProps) {
   return (
     <motion.button
       type="button"
-      className={styles.button}
+      className={[styles.button, disabled ? styles.buttonDisabled : ""].filter(Boolean).join(" ")}
       onClick={onClick}
+      disabled={disabled}
       aria-label="Help and keyboard shortcuts"
       initial={{ opacity: 0, scale: 0.5 }}
-      animate={{ opacity: 1, scale: 1 }}
+      animate={{ opacity: disabled ? 0.4 : 1, scale: 1 }}
       transition={{ type: "spring", stiffness: 400, damping: 25, delay: 0.1 }}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.95 }}
+      whileHover={disabled ? {} : { scale: 1.1 }}
+      whileTap={disabled ? {} : { scale: 0.95 }}
     >
       <QuestionIcon />
     </motion.button>

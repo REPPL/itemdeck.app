@@ -61,6 +61,21 @@
   outline-offset: 2px;
 }
 
+/* Global setting section (between theme picker and sub-tabs) */
+.globalSetting {
+  padding: var(--spacing-md) 0;
+  border-top: 1px solid var(--colour-border-light);
+  border-bottom: 1px solid var(--colour-border-light);
+  margin-bottom: var(--spacing-sm);
+}
+
+.settingHint {
+  margin: var(--spacing-xs) 0 0 0;
+  font-size: var(--text-xs);
+  color: var(--colour-text-muted);
+  text-align: center;
+}
+
 /* Sub-tabs wrapper with separator */
 .subTabsWrapper {
   position: relative;

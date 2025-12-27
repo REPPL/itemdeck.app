@@ -9,7 +9,8 @@
   align-items: center;
   justify-content: center;
   padding: var(--spacing-lg);
-  background: var(--overlay-background);
+  /* Use global overlay transparency setting */
+  background: var(--overlay-transparency-background, rgba(0, 0, 0, 0.5));
   z-index: 1000;
   animation: fadeIn var(--transition-fast) ease-out;
 }

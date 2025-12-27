@@ -351,6 +351,55 @@ interface SettingsState {
   /** Whether edit mode is enabled (allows editing entity data) */
   editModeEnabled: boolean;
 
+  /** Whether to show the search bar */
+  showSearchBar: boolean;
+
+  /** Whether the search bar is minimised to a button */
+  searchBarMinimised: boolean;
+
+  // ============================================================================
+  // v0.11.0: Search & Filter State
+  // ============================================================================
+
+  /** Current search query text */
+  searchQuery: string;
+
+  /** Fields to search in (e.g., ['title', 'summary', 'verdict']) */
+  searchFields: string[];
+
+  /** Search scope: 'all' searches all cards, 'visible' searches only filtered/selected cards */
+  searchScope: "all" | "visible";
+
+  /** Active filters as field-values pairs */
+  activeFilters: { field: string; values: string[] }[];
+
+  // ============================================================================
+  // v0.11.0: Grouping State
+  // ============================================================================
+
+  /** Field to group cards by (null = no grouping) */
+  groupByField: string | null;
+
+  /** List of collapsed group keys */
+  collapsedGroups: string[];
+
+  // ============================================================================
+  // v0.11.0: Mechanics State
+  // ============================================================================
+
+  /** Currently active mechanic ID (null = no mechanic active) */
+  activeMechanicId: string | null;
+
+  // ============================================================================
+  // v0.11.0: External Theme State
+  // ============================================================================
+
+  /** Whether external themes have been loaded */
+  externalThemesLoaded: boolean;
+
+  /** Currently selected external theme ID (null = using built-in) */
+  selectedExternalThemeId: string | null;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -381,7 +430,32 @@ interface SettingsState {
   setDefaultCardFace: (face: DefaultCardFace) => void;
   setShowStatisticsBar: (show: boolean) => void;
   setEditModeEnabled: (enabled: boolean) => void;
+  setShowSearchBar: (show: boolean) => void;
+  setSearchBarMinimised: (minimised: boolean) => void;
+  toggleSearchBarMinimised: () => void;
   resetToDefaults: () => void;
+
+  // v0.11.0: Search & Filter Actions
+  setSearchQuery: (query: string) => void;
+  setSearchFields: (fields: string[]) => void;
+  setSearchScope: (scope: "all" | "visible") => void;
+  setFilter: (field: string, values: string[]) => void;
+  clearFilter: (field: string) => void;
+  clearAllFilters: () => void;
+  clearSearch: () => void;
+
+  // v0.11.0: Grouping Actions
+  setGroupByField: (field: string | null) => void;
+  toggleGroupCollapse: (groupKey: string) => void;
+  expandAllGroups: () => void;
+  collapseAllGroups: (groupKeys: string[]) => void;
+
+  // v0.11.0: Mechanics Actions
+  setActiveMechanicId: (id: string | null) => void;
+
+  // v0.11.0: External Theme Actions
+  setExternalThemesLoaded: (loaded: boolean) => void;
+  setSelectedExternalThemeId: (id: string | null) => void;
 }
 
 /**
@@ -423,7 +497,30 @@ const DEFAULT_SETTINGS = {
   defaultCardFace: "back" as DefaultCardFace,
   showStatisticsBar: true,
   editModeEnabled: false,
+  showSearchBar: true,
+  searchBarMinimised: false,
+  // v0.11.0: Search & Filter defaults
+  searchQuery: "",
+  searchFields: ["title", "summary", "verdict"],
+  searchScope: "all" as const,
+  activeFilters: [],
+  // v0.11.0: Grouping defaults
+  groupByField: null,
+  collapsedGroups: [],
+  // v0.11.0: Mechanics defaults
+  activeMechanicId: null,
+  // v0.11.0: External Theme defaults
+  externalThemesLoaded: false,
+  selectedExternalThemeId: null,
 };
+
+// Check for reset parameter in URL - force clear localStorage
+if (typeof window !== "undefined" && window.location.search.includes("reset=1")) {
+  localStorage.removeItem("itemdeck-settings");
+  // Remove the parameter and reload
+  window.history.replaceState({}, "", window.location.pathname);
+  window.location.reload();
+}
 
 /**
  * Settings store with localStorage persistence.
@@ -552,6 +649,18 @@ export const useSettingsStore = create<SettingsState>()(
         set({ editModeEnabled });
       },
 
+      setShowSearchBar: (showSearchBar) => {
+        set({ showSearchBar });
+      },
+
+      setSearchBarMinimised: (searchBarMinimised) => {
+        set({ searchBarMinimised });
+      },
+
+      toggleSearchBarMinimised: () => {
+        set((state) => ({ searchBarMinimised: !state.searchBarMinimised }));
+      },
+
       applyCollectionDefaults: (config) => {
         set((state) => {
           // Only apply if not already applied
@@ -600,11 +709,102 @@ export const useSettingsStore = create<SettingsState>()(
       resetToDefaults: () => {
         set(DEFAULT_SETTINGS);
       },
+
+      // v0.11.0: Search & Filter Actions
+      setSearchQuery: (searchQuery) => {
+        set({ searchQuery });
+      },
+
+      setSearchFields: (searchFields) => {
+        set({ searchFields });
+      },
+
+      setSearchScope: (searchScope) => {
+        set({ searchScope });
+      },
+
+      setFilter: (field, values) => {
+        set((state) => {
+          const existingIndex = state.activeFilters.findIndex((f) => f.field === field);
+          if (existingIndex >= 0) {
+            // Update existing filter
+            const newFilters = [...state.activeFilters];
+            if (values.length === 0) {
+              // Remove filter if no values
+              newFilters.splice(existingIndex, 1);
+            } else {
+              newFilters[existingIndex] = { field, values };
+            }
+            return { activeFilters: newFilters };
+          } else if (values.length > 0) {
+            // Add new filter
+            return { activeFilters: [...state.activeFilters, { field, values }] };
+          }
+          return state;
+        });
+      },
+
+      clearFilter: (field) => {
+        set((state) => ({
+          activeFilters: state.activeFilters.filter((f) => f.field !== field),
+        }));
+      },
+
+      clearAllFilters: () => {
+        set({ activeFilters: [] });
+      },
+
+      clearSearch: () => {
+        set({ searchQuery: "", activeFilters: [] });
+      },
+
+      // v0.11.0: Grouping Actions
+      setGroupByField: (groupByField) => {
+        set({ groupByField, collapsedGroups: [] }); // Reset collapsed when changing group
+      },
+
+      toggleGroupCollapse: (groupKey) => {
+        set((state) => {
+          if (state.collapsedGroups.includes(groupKey)) {
+            return { collapsedGroups: state.collapsedGroups.filter((k) => k !== groupKey) };
+          } else {
+            return { collapsedGroups: [...state.collapsedGroups, groupKey] };
+          }
+        });
+      },
+
+      expandAllGroups: () => {
+        set({ collapsedGroups: [] });
+      },
+
+      collapseAllGroups: (groupKeys) => {
+        set({ collapsedGroups: groupKeys });
+      },
+
+      // v0.11.0: Mechanics Actions
+      setActiveMechanicId: (activeMechanicId) => {
+        set({ activeMechanicId });
+      },
+
+      // v0.11.0: External Theme Actions
+      setExternalThemesLoaded: (externalThemesLoaded) => {
+        set({ externalThemesLoaded });
+      },
+
+      setSelectedExternalThemeId: (selectedExternalThemeId) => {
+        set({ selectedExternalThemeId });
+      },
     }),
     {
       name: "itemdeck-settings",
-      version: 18,
+      version: 23,
       storage: createJSONStorage(() => localStorage),
+      // Force-clear activeMechanicId after rehydration - games should never auto-start
+      onRehydrateStorage: () => (state) => {
+        if (state?.activeMechanicId) {
+          state.activeMechanicId = null;
+        }
+      },
       partialize: (state) => ({
         layout: state.layout,
         cardSizePreset: state.cardSizePreset,
@@ -634,6 +834,15 @@ export const useSettingsStore = create<SettingsState>()(
         defaultCardFace: state.defaultCardFace,
         showStatisticsBar: state.showStatisticsBar,
         editModeEnabled: state.editModeEnabled,
+        showSearchBar: state.showSearchBar,
+        searchBarMinimised: state.searchBarMinimised,
+        // v0.11.0: New persisted fields
+        searchFields: state.searchFields,
+        searchScope: state.searchScope,
+        groupByField: state.groupByField,
+        // Note: activeMechanicId is intentionally NOT persisted
+        // Games should start fresh on page reload
+        selectedExternalThemeId: state.selectedExternalThemeId,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -831,6 +1040,49 @@ export const useSettingsStore = create<SettingsState>()(
         // Handle migration from version 17 to 18 (change default theme to modern)
         // Note: Existing users keep their current theme; this only affects new users
         // No action needed for existing users - they keep their persisted visualTheme
+
+        // Handle migration from version 18 to 19 (v0.11.0: Search, Filter, Grouping, Mechanics, External Themes)
+        if (version < 19) {
+          state = {
+            ...state,
+            searchFields: DEFAULT_SETTINGS.searchFields,
+            groupByField: null,
+            activeMechanicId: null,
+            selectedExternalThemeId: null,
+          };
+        }
+
+        // Handle migration from version 19 to 20 (add showSearchBar)
+        if (version < 20) {
+          state = {
+            ...state,
+            showSearchBar: true,
+          };
+        }
+
+        // Handle migration from version 20 to 21 (add searchScope)
+        if (version < 21) {
+          state = {
+            ...state,
+            searchScope: "all",
+          };
+        }
+
+        // Handle migration from version 21 to 22 (add searchBarMinimised)
+        if (version < 22) {
+          state = {
+            ...state,
+            searchBarMinimised: false,
+          };
+        }
+
+        // Handle migration from version 22 to 23 (clear activeMechanicId - no longer persisted)
+        if (version < 23) {
+          // Remove activeMechanicId from persisted state
+          // Games should start fresh on page reload
+          const { activeMechanicId: _, ...rest } = state;
+          state = rest;
+        }
 
         return state as unknown as SettingsState;
       },

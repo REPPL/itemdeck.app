@@ -114,4 +114,4 @@ Each mechanic shows:
 
 ---
 
-**Status**: Planned
+**Status**: Complete

@@ -48,3 +48,28 @@
   color: var(--colour-text-muted);
   font-size: 1rem;
 }
+
+/* v0.11.0: List view container */
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-gap, 1rem);
+  width: 100%;
+  padding: var(--grid-gap, 1rem);
+}
+
+/* v0.11.0: Compact view container */
+.compactContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--grid-gap, 1rem);
+  width: 100%;
+  padding: var(--grid-gap, 1rem);
+}
+
+/* v0.11.0: Compact grid within groups */
+.compactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 0.5rem;
+}

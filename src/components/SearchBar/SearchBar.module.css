@@ -1,0 +1,408 @@
+/**
+ * SearchBar styles.
+ *
+ * Floating search bar with controls for filtering, grouping, and view modes.
+ * Styled to match the game info bar overlay.
+ * Supports minimised state that collapses to a floating button.
+ */
+
+.container {
+  position: fixed;
+  bottom: 1rem;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  left: 1rem;
+  left: calc(1rem + env(safe-area-inset-left, 0px));
+  right: 1rem;
+  right: calc(1rem + env(safe-area-inset-right, 0px));
+  z-index: 110;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  /* Solid background for iOS Safari compatibility */
+  background: #1a1a1a;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  /* iOS Safari GPU layer */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+  /* Explicit visibility for iOS */
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+
+/* Animation only on desktop */
+@media (hover: hover) {
+  .container {
+    animation: expandIn 0.2s ease-out;
+  }
+}
+
+/* Only apply backdrop blur on non-iOS (feature detection) */
+@supports (backdrop-filter: blur(8px)) and (not (-webkit-touch-callout: none)) {
+  .container {
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+  }
+}
+
+@keyframes expandIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Top row: View controls on left, result count + minimise on right */
+.topRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.5rem;
+}
+
+.topRowLeft {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topRowRight {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+/* Minimise button in the top right */
+.minimiseButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.minimiseButton:hover {
+  /* Hardcoded white - search bar always has dark background */
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.minimiseButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+/* Search row */
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.5);
+  pointer-events: none;
+}
+
+.searchIcon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.input {
+  width: 100%;
+  padding: 0.5rem 2.5rem 0.5rem 2.5rem;
+  font-size: 0.875rem;
+  /* Hardcoded white - search bar always has dark background */
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input::placeholder {
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.input:focus {
+  border-color: var(--colour-accent, #3b82f6);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.clearButton {
+  position: absolute;
+  right: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.5);
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.15s ease, background-color 0.15s ease;
+}
+
+.clearButton:hover {
+  /* Hardcoded white - search bar always has dark background */
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.clearButton svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.scopeButton {
+  /* Fixed width to prevent size change between All/Visible */
+  width: 4rem;
+  padding: 0.375rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  text-align: center;
+  letter-spacing: 0.05em;
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.scopeButton:hover {
+  /* Hardcoded white - search bar always has dark background */
+  color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.scopeButtonActive {
+  color: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  background: rgba(59, 130, 246, 0.1);
+}
+
+/* Bottom row: Filter chips on left, result count on right */
+.bottomRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 1.5rem;
+}
+
+.resultCount {
+  margin-left: auto;
+  font-size: 0.75rem;
+  /* Hardcoded light color - search bar always has dark background */
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+/* ============================================
+   Minimised state: floating button
+   ============================================ */
+
+.minimisedButton {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.2s ease;
+  animation: buttonIn 0.25s ease-out;
+}
+
+@keyframes buttonIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.minimisedButton:hover {
+  background: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  color: #fff;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.35);
+  transform: scale(1.05);
+}
+
+.minimisedButton:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+.minimisedButton svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Active indicator dot when search/filter is active */
+.activeIndicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 12px;
+  height: 12px;
+  background: var(--colour-accent, #3b82f6);
+  border: 2px solid white;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* ============================================
+   Responsive adjustments
+   ============================================ */
+
+@media (max-width: 640px) {
+  .container {
+    bottom: 0.5rem;
+    left: 0.5rem;
+    right: 0.5rem; /* Full width on mobile */
+    padding: 0.625rem 1rem;
+  }
+
+  .topRow {
+    flex-wrap: wrap;
+  }
+
+  .topRowLeft {
+    flex-wrap: wrap;
+  }
+
+  .topRowRight {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .searchRow {
+    flex-wrap: wrap;
+  }
+
+  .searchWrapper {
+    flex: 1 1 100%;
+  }
+
+  .scopeButton {
+    flex-shrink: 0;
+  }
+
+  .bottomRow {
+    flex-wrap: wrap;
+  }
+
+  .resultCount {
+    text-align: right;
+  }
+
+  .minimisedButton {
+    width: 48px;
+    height: 48px;
+  }
+
+  .minimisedButton svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .activeIndicator {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .container {
+    animation: none;
+  }
+
+  .minimisedButton {
+    animation: none;
+    transition: none;
+  }
+
+  .minimiseButton {
+    transition: none;
+  }
+
+  .activeIndicator {
+    animation: none;
+  }
+}

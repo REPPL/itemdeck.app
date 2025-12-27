@@ -34,11 +34,12 @@ import {
   type DetailTransparencyPreset,
   type OverlayStyle,
 } from "@/stores/settingsStore";
+import { ThemeBrowser } from "@/components/ThemeBrowser";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 import themeStyles from "./ThemeSettingsTabs.module.css";
 
-type ThemeSubTab = "style" | "colours" | "detail" | "animations";
+type ThemeSubTab = "style" | "colours" | "detail" | "animations" | "browse";
 
 const themeOptions: { value: VisualTheme; label: string }[] = [
   { value: "minimal", label: "Minimal" },
@@ -51,6 +52,7 @@ const subTabs: { id: ThemeSubTab; label: string }[] = [
   { id: "colours", label: "Colours" },
   { id: "detail", label: "Detail View" },
   { id: "animations", label: "Animations" },
+  { id: "browse", label: "Browse" },
 ];
 
 const borderRadiusOptions: { value: BorderRadiusPreset; label: string }[] = [
@@ -332,26 +334,6 @@ export function ThemeSettingsTabs() {
         return (
           <>
             <div className={styles.row}>
-              <span className={styles.label}>Transparency</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Detail transparency">
-                {transparencyOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      currentCustomisation.detailTransparency === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleTransparencyChange(value); }}
-                    role="radio"
-                    aria-checked={currentCustomisation.detailTransparency === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.row}>
               <span className={styles.label}>Footer Style</span>
               <div className={styles.segmentedControl} role="radiogroup" aria-label="Footer style">
                 {overlayStyleOptions.map(({ value, label }) => (
@@ -469,6 +451,9 @@ export function ThemeSettingsTabs() {
             </div>
           </>
         );
+
+      case "browse":
+        return <ThemeBrowser />;
     }
   };
 
@@ -493,6 +478,33 @@ export function ThemeSettingsTabs() {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Global overlay transparency setting */}
+      <div className={themeStyles.globalSetting}>
+        <div className={styles.row}>
+          <span className={styles.label}>Overlay Transparency</span>
+          <div className={styles.segmentedControl} role="radiogroup" aria-label="Overlay transparency">
+            {transparencyOptions.map(({ value, label }) => (
+              <button
+                key={value}
+                type="button"
+                className={[
+                  styles.segmentButton,
+                  currentCustomisation.detailTransparency === value ? styles.segmentButtonActive : "",
+                ].filter(Boolean).join(" ")}
+                onClick={() => { handleTransparencyChange(value); }}
+                role="radio"
+                aria-checked={currentCustomisation.detailTransparency === value}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <p className={themeStyles.settingHint}>
+          Applies to Detail View, Search, Games, and Help overlays
+        </p>
       </div>
 
       {/* Sub-tab navigation */}

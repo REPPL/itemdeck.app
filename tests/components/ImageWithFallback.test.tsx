@@ -95,8 +95,8 @@ describe("ImageSkeleton", () => {
 });
 
 describe("ImageWithFallback", () => {
-  it("shows title placeholder as base layer", () => {
-    render(
+  it("shows coloured placeholder as base layer", () => {
+    const { container } = render(
       <ImageWithFallback
         src="https://example.com/image.jpg"
         alt="Test image"
@@ -104,8 +104,11 @@ describe("ImageWithFallback", () => {
       />
     );
 
-    // The placeholder with title is always visible as the base layer
-    expect(screen.getByText("Test")).toBeInTheDocument();
+    // The placeholder with coloured background is always visible as the base layer
+    // Title text is NOT shown (card overlay displays title instead)
+    const placeholder = container.querySelector('[class*="placeholder"]');
+    expect(placeholder).toBeInTheDocument();
+    expect(placeholder).toHaveStyle({ backgroundColor: expect.any(String) });
   });
 
   it("shows image after successful load", async () => {
@@ -126,8 +129,8 @@ describe("ImageWithFallback", () => {
     });
   });
 
-  it("shows placeholder when image fails to load", async () => {
-    render(
+  it("shows coloured placeholder when image fails to load", async () => {
+    const { container } = render(
       <ImageWithFallback
         src="https://example.com/broken.jpg"
         alt="Test image"
@@ -138,11 +141,13 @@ describe("ImageWithFallback", () => {
     const img = screen.getByRole("img", { name: "Test image" });
     fireEvent.error(img);
 
-    // When image fails, the img element is removed and title placeholder shows through
+    // When image fails, the img element is removed and coloured placeholder shows through
     await waitFor(() => {
       expect(screen.queryByRole("img", { name: "Test image" })).not.toBeInTheDocument();
     });
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
+    // Coloured placeholder remains visible (title shown in card overlay, not here)
+    const placeholder = container.querySelector('[class*="placeholder"]');
+    expect(placeholder).toBeInTheDocument();
   });
 
   it("tries fallback image before placeholder", async () => {
@@ -165,8 +170,8 @@ describe("ImageWithFallback", () => {
     });
   });
 
-  it("shows placeholder when fallback also fails", async () => {
-    render(
+  it("shows coloured placeholder when fallback also fails", async () => {
+    const { container } = render(
       <ImageWithFallback
         src="https://example.com/broken.jpg"
         alt="Test image"
@@ -187,11 +192,13 @@ describe("ImageWithFallback", () => {
     // Trigger error on fallback image
     fireEvent.error(img);
 
-    // When fallback fails, img element is removed and title placeholder shows through
+    // When fallback fails, img element is removed and coloured placeholder shows through
     await waitFor(() => {
       expect(screen.queryByRole("img", { name: "Test image" })).not.toBeInTheDocument();
     });
-    expect(screen.getByText("Test Title")).toBeInTheDocument();
+    // Coloured placeholder remains visible (title shown in card overlay, not here)
+    const placeholder = container.querySelector('[class*="placeholder"]');
+    expect(placeholder).toBeInTheDocument();
   });
 
   it("applies custom className", () => {

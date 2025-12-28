@@ -2,12 +2,15 @@
 
 Learning-oriented guides for beginners. Start here if you're new to Itemdeck.
 
-## Getting Started
+## Available Tutorials
 
 1. **[Getting Started](getting-started.md)** - Your first steps with Itemdeck
-2. **[Your First Collection](first-collection.md)** - Create and explore a collection
-3. **[Playing Memory Game](playing-memory-game.md)** - Learn the mechanics system
-4. **[Customising Themes](customising-themes.md)** - Personalise the visual style
+
+### Coming Soon
+
+- Your First Collection - Create and explore a collection
+- Playing Memory Game - Learn the mechanics system
+- Customising Themes - Personalise the visual style
 
 ## What's the Difference?
 

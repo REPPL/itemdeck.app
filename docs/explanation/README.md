@@ -4,9 +4,11 @@ Background information and conceptual understanding. Learn why things work the w
 
 ## Core Concepts
 
-- **[Data Sources](data-sources.md)** - How collections and sources work
-- **[Mechanics System](mechanics-system.md)** - Games and interactive modes
-- **[Theme Architecture](theme-architecture.md)** - Visual themes and customisation
+### Coming Soon
+
+- Data Sources - How collections and sources work
+- Mechanics System - Games and interactive modes
+- Theme Architecture - Visual themes and customisation
 
 ## Understanding Itemdeck
 

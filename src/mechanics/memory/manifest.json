@@ -1,0 +1,15 @@
+{
+  "id": "memory",
+  "name": "Memory Game",
+  "version": "1.0.0",
+  "description": "Match pairs of cards by flipping them to reveal their faces. Test your memory by finding all matching pairs with the fewest attempts.",
+  "entrypoint": "./index.tsx",
+  "minCards": 4,
+  "maxCards": 52,
+  "author": {
+    "name": "itemdeck",
+    "url": "https://github.com/itemdeck"
+  },
+  "keywords": ["memory", "matching", "pairs", "game"],
+  "licence": "GPL-3.0"
+}

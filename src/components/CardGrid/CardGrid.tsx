@@ -9,7 +9,8 @@ import { useCollectionData } from "@/context/CollectionDataContext";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
-import { useSettingsStore } from "@/stores/settingsStore";
+import { useFitToViewport } from "@/hooks/useFitToViewport";
+import { useSettingsStore, CARD_ASPECT_RATIOS } from "@/stores/settingsStore";
 import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
 import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
@@ -17,6 +18,9 @@ import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import type { CardDisplayConfig } from "@/types/display";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./CardGrid.module.css";
+
+/** Minimum card width for fit-to-viewport mode */
+const FIT_MIN_WIDTH = 80;
 
 const GAP = 16; // var(--grid-gap) = 1rem = 16px
 
@@ -46,6 +50,7 @@ export function CardGrid() {
   const randomSelectionCount = useSettingsStore((state) => state.randomSelectionCount);
   const defaultCardFace = useSettingsStore((state) => state.defaultCardFace);
   const cardSizePreset = useSettingsStore((state) => state.cardSizePreset);
+  const cardAspectRatio = useSettingsStore((state) => state.cardAspectRatio);
 
   // v0.11.0: Search & Filter state
   const searchQuery = useSettingsStore((state) => state.searchQuery);
@@ -62,6 +67,7 @@ export function CardGrid() {
   const mechanicCardActions = useMechanicCardActions();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const fitContainerRef = useRef<HTMLDivElement>(null);
   const [containerWidth, setContainerWidth] = useState(0);
   const [customOrder, setCustomOrder] = useState<string[] | null>(null);
 
@@ -348,6 +354,27 @@ export function CardGrid() {
     setCustomOrder(newOrder);
   }, []);
 
+  // v0.12.5: Fit-to-viewport layout calculation
+  const isFitMode = layout === "fit";
+  const fitResult = useFitToViewport(fitContainerRef, {
+    cardCount: cards.length,
+    minWidth: FIT_MIN_WIDTH,
+    aspectRatio: CARD_ASPECT_RATIOS[cardAspectRatio],
+    gap: GAP,
+    enabled: isFitMode,
+  });
+
+  // Effective card dimensions: use fit dimensions in fit mode, otherwise use settings
+  const effectiveDimensions = useMemo(() => {
+    if (isFitMode && fitResult.cardWidth > 0) {
+      return {
+        width: fitResult.cardWidth,
+        height: fitResult.cardHeight,
+      };
+    }
+    return cardDimensions;
+  }, [isFitMode, fitResult.cardWidth, fitResult.cardHeight, cardDimensions]);
+
   // v0.11.0: Group cards by field
   const groupedCards = useMemo(() => {
     if (!groupByField || groupByField === "none") {
@@ -453,9 +480,9 @@ export function CardGrid() {
   // Calculate number of columns for keyboard navigation
   const columns = useMemo(() => {
     if (containerWidth === 0) return 1;
-    const cardWidth = cardDimensions.width;
+    const cardWidth = effectiveDimensions.width;
     return Math.max(1, Math.floor((containerWidth + GAP) / (cardWidth + GAP)));
-  }, [containerWidth, cardDimensions.width]);
+  }, [containerWidth, effectiveDimensions.width]);
 
   // Handle card flip with maxVisibleCards enforcement
   // When mechanic is active, delegate to mechanic's onClick handler
@@ -546,8 +573,8 @@ export function CardGrid() {
       return { positions: [] as { left: number; top: number }[], rows: 0 };
     }
 
-    const cardWidth = cardDimensions.width;
-    const cardHeight = cardDimensions.height;
+    const cardWidth = effectiveDimensions.width;
+    const cardHeight = effectiveDimensions.height;
 
     // Calculate total grid width and offset to centre
     const totalGridWidth = columns * cardWidth + (columns - 1) * GAP;
@@ -570,7 +597,7 @@ export function CardGrid() {
 
   const { positions, rows } = calculateLayout();
   const containerHeight = rows > 0
-    ? rows * cardDimensions.height + (rows - 1) * GAP
+    ? rows * effectiveDimensions.height + (rows - 1) * GAP
     : 200;
 
   // Render loading/error/empty states inside the grid container
@@ -609,8 +636,8 @@ export function CardGrid() {
           style={{
             left: `${String(pos.left)}px`,
             top: `${String(pos.top)}px`,
-            width: `${String(cardDimensions.width)}px`,
-            height: `${String(cardDimensions.height)}px`,
+            width: `${String(effectiveDimensions.width)}px`,
+            height: `${String(effectiveDimensions.height)}px`,
           }}
           role="gridcell"
         >
@@ -650,7 +677,7 @@ export function CardGrid() {
         <DraggableCardGrid
           cards={cards}
           onReorder={handleReorder}
-          cardWidth={cardDimensions.width}
+          cardWidth={effectiveDimensions.width}
           gap={GAP}
           flippedCardIds={flippedCardIds}
           onFlip={handleFlip}
@@ -764,6 +791,43 @@ export function CardGrid() {
 
   // Get GridOverlay component from active mechanic
   const GridOverlay = mechanic?.GridOverlay;
+
+  // v0.12.5: Fit-to-viewport view - fills available space without scrolling
+  if (isFitMode && !isLoading && !error) {
+    return (
+      <>
+        {/* Mechanic top overlay (stats bar, etc.) */}
+        {GridOverlay && <GridOverlay position="top" />}
+
+        {/* SearchBar hidden when mechanic is active (game info bar takes precedence) */}
+        {showSearchBar && !mechanic && (
+          <SearchBar
+            totalCards={sourceCards.length}
+            filteredCount={cards.length}
+            filterOptions={filterOptions}
+          />
+        )}
+        <div
+          ref={fitContainerRef}
+          className={styles.fitContainer}
+        >
+          <section
+            ref={containerRef}
+            className={styles.grid}
+            style={{ minHeight: `${String(containerHeight)}px` }}
+            role="grid"
+            aria-label="Card collection"
+            onKeyDown={handleKeyDown}
+          >
+            {renderContent()}
+          </section>
+        </div>
+
+        {/* Mechanic bottom overlay (completion modal, etc.) */}
+        {GridOverlay && <GridOverlay position="bottom" />}
+      </>
+    );
+  }
 
   // Default grid view
   return (

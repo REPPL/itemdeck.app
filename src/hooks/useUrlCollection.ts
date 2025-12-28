@@ -2,16 +2,25 @@
  * Hook to parse URL path for collection routing.
  *
  * Supports multiple URL patterns:
- * - /gh?u=REPPL&collection=commercials - Query params (preferred)
+ * - /gh?u=REPPL&c=my_games - Short query params (preferred)
+ * - /gh?u=REPPL&c=retro/my_games - Nested folder support
+ * - /gh?u=REPPL&collection=commercials - Full query params
+ * - /gh/REPPL/c/my_games - Clean path format
+ * - /gh/REPPL/c/retro/my_games - Nested path format
  * - /gh/{username}/ - Opens picker with username prefilled
- * - /gh/{username}/collection/{folder}/ - Loads collection directly
+ * - /gh/{username}/collection/{folder}/ - Legacy path format
  * - ?collection=full-url - Legacy full URL format
+ *
+ * Path type indicators:
+ * - /c/ = collection
+ * - /m/ = mechanic (future)
+ * - /t/ = theme (future)
  *
  * @example
  * ```
- * itemdeck.app/gh?u=REPPL&collection=commercials
- * itemdeck.app/gh/REPPL/
- * itemdeck.app/gh/REPPL/collection/retro-games/
+ * itemdeck.app/gh?u=REPPL&c=retro-games
+ * itemdeck.app/gh/REPPL/c/retro-games
+ * itemdeck.app/gh/REPPL/c/retro/my_games
  * itemdeck.app/?collection=https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/commercials
  * ```
  */
@@ -41,9 +50,12 @@ export interface UrlCollectionInfo {
  * Parse the current URL for collection routing.
  *
  * Supports multiple formats:
- * 1. Provider URL: /gh?u=REPPL&collection=commercials (preferred)
- * 2. Path-based: /gh/REPPL/collection/commercials/ (legacy)
- * 3. Legacy full URL: ?collection=https://cdn.jsdelivr.net/...
+ * 1. Provider URL: /gh?u=REPPL&c=my_games (preferred, short)
+ * 2. Provider URL: /gh?u=REPPL&collection=my_games (full)
+ * 3. Path-based: /gh/REPPL/c/my_games (new clean format)
+ * 4. Path-based: /gh/REPPL/c/retro/my_games (nested folders)
+ * 5. Path-based: /gh/REPPL/collection/my_games/ (legacy)
+ * 6. Legacy full URL: ?collection=https://cdn.jsdelivr.net/...
  *
  * @param pathname - URL pathname
  * @param searchParams - URL search parameters
@@ -68,8 +80,15 @@ export function parseUrlPath(
     };
   }
 
-  // 2. Check for provider URL format: /gh?u=REPPL&collection=commercials
-  const providerResult = parseProviderUrl(pathname, params);
+  // 2. Check for provider URL format: /gh?u=REPPL&c=my_games or /gh?u=REPPL&collection=my_games
+  // Support 'c' as alias for 'collection'
+  const normalizedParams = new URLSearchParams(params);
+  const shortCollection = params.get("c");
+  if (shortCollection && !params.get("collection")) {
+    normalizedParams.set("collection", shortCollection);
+  }
+
+  const providerResult = parseProviderUrl(pathname, normalizedParams);
   if (providerResult) {
     const { providerId, params: providerParams } = providerResult;
     const collectionUrl = buildCollectionUrl(providerId, providerParams);
@@ -86,7 +105,7 @@ export function parseUrlPath(
     }
   }
 
-  // 3. Check for path-based format: /gh/REPPL/collection/commercials/
+  // 3. Check for path-based formats: /gh/REPPL/...
   const ghMatch = /^\/gh\/([^/]+)\/?(.*)$/.exec(pathname);
 
   if (!ghMatch) {
@@ -103,12 +122,28 @@ export function parseUrlPath(
   const username = ghMatch[1] ?? null;
   const rest = ghMatch[2] ?? "";
 
-  // Check for /collection/{folder}/ pattern
-  const collectionMatch = /^collection\/([^/]+)\/?$/.exec(rest);
+  // 4. Check for new short format: /c/{path} (supports nested folders)
+  const shortPathMatch = /^c\/(.+?)\/?$/.exec(rest);
+  if (shortPathMatch) {
+    const folder = shortPathMatch[1] ?? null;
+    const collectionUrl = username && folder
+      ? buildCollectionUrl("gh", { u: username, collection: folder })
+      : null;
 
-  if (collectionMatch) {
-    const folder = collectionMatch[1] ?? null;
-    // Build collection URL from path parameters
+    return {
+      hasGitHubPath: true,
+      username,
+      folder,
+      directLoad: true,
+      collectionUrl,
+      providerId: "gh",
+    };
+  }
+
+  // 5. Check for legacy format: /collection/{folder}/ (single folder only)
+  const legacyPathMatch = /^collection\/([^/]+)\/?$/.exec(rest);
+  if (legacyPathMatch) {
+    const folder = legacyPathMatch[1] ?? null;
     const collectionUrl = username && folder
       ? buildCollectionUrl("gh", { u: username, collection: folder })
       : null;

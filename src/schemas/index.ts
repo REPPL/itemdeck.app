@@ -61,3 +61,18 @@ export {
   type AppConfig,
   type DeepPartialAppConfig,
 } from "./config.schema";
+
+// v0.12.5: Mechanic manifest schema
+export {
+  mechanicManifestSchema,
+  mechanicAuthorSchema,
+  mechanicRegistrySchema,
+  mechanicRegistryEntrySchema,
+  validateMechanicManifest,
+  safeValidateMechanicManifest,
+  formatManifestValidationError,
+  type MechanicManifest,
+  type MechanicAuthor,
+  type MechanicRegistry,
+  type MechanicRegistryEntry,
+} from "./mechanic-manifest.schema";

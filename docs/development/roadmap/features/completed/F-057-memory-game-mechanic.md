@@ -142,4 +142,4 @@ Create a Memory mechanic that transforms the grid into a matching game.
 
 ---
 
-**Status**: Planned
+**Status**: Completed (v0.11.0)

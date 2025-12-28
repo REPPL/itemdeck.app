@@ -97,4 +97,4 @@ v0.4.0
 
 ---
 
-**Status**: Planned
+**Status**: Completed (v0.12.5)

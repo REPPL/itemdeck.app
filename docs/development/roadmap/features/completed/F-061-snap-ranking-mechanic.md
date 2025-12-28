@@ -179,4 +179,4 @@ Create a Snap Ranking mechanic inspired by viral social media ranking trends.
 
 ---
 
-**Status**: Planned
+**Status**: Completed (v0.12.5)

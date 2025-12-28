@@ -86,6 +86,21 @@ const layoutOptions: { value: LayoutType; label: string; icon: React.ReactNode }
       </svg>
     ),
   },
+  {
+    value: "fit",
+    label: "Fit",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" aria-hidden="true">
+        {/* Arrows pointing outward to corners */}
+        <path d="M3 3h5v2H5.41l4.3 4.29-1.42 1.42L4 6.41V9H2V3h1z" />
+        <path d="M21 3h-5v2h2.59l-4.3 4.29 1.42 1.42L20 6.41V9h2V3h-1z" />
+        <path d="M3 21h5v-2H5.41l4.3-4.29-1.42-1.42L4 17.59V15H2v6h1z" />
+        <path d="M21 21h-5v-2h2.59l-4.3-4.29 1.42-1.42L20 17.59V15h2v6h-1z" />
+        {/* Centre card */}
+        <rect x="8" y="8" width="8" height="8" rx="1" />
+      </svg>
+    ),
+  },
 ];
 
 /**

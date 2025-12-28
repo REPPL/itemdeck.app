@@ -73,3 +73,15 @@
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 0.5rem;
 }
+
+/* v0.12.5: Fit-to-viewport container */
+.fitContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 120px); /* Account for header and padding */
+  overflow: hidden;
+  padding: var(--grid-gap, 1rem);
+}

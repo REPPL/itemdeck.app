@@ -1,0 +1,14 @@
+{
+  "id": "snap-ranking",
+  "name": "Snap Ranking",
+  "version": "1.0.0",
+  "description": "Rate cards instantly with quick tier decisions. Build a tier list by rating each card S/A/B/C/D/F as it appears. No second chances - your first instinct is final!",
+  "entrypoint": "./index.tsx",
+  "minCards": 5,
+  "author": {
+    "name": "itemdeck",
+    "url": "https://github.com/itemdeck"
+  },
+  "keywords": ["ranking", "tier-list", "rating", "snap-decision", "game"],
+  "licence": "GPL-3.0"
+}

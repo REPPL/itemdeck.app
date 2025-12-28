@@ -68,7 +68,7 @@ Now that you know the basics:
 1. **[Keyboard Shortcuts](../guides/keyboard-shortcuts.md)** - Master efficient navigation
 2. **[Search and Filters](../guides/search-and-filters.md)** - Find items quickly
 
-*More tutorials coming soon: Your First Collection, Playing Memory Game, Customising Themes*
+For more tutorials, see the [Tutorials Index](README.md).
 
 ---
 

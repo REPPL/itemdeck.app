@@ -37,7 +37,7 @@ export interface CollectionConfigForDefaults {
 /**
  * Layout type options.
  */
-export type LayoutType = "grid" | "list" | "compact";
+export type LayoutType = "grid" | "list" | "compact" | "fit";
 
 /**
  * Reduce motion preference.

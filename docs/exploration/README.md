@@ -1,6 +1,6 @@
-# Research Documentation
+# Exploration Documentation
 
-This directory contains research documents exploring design patterns, technical approaches, and best practices relevant to the ItemDeck project.
+This directory contains exploratory research into design patterns, user experience approaches, and best practices. These are user-facing explorations distinct from technical implementation research in `development/research/`.
 
 ---
 
@@ -48,7 +48,7 @@ Research documents serve as:
 
 ## Related Documentation
 
-- [Design Documentation](../design/) - Actual design specifications and wireframes
+- [Development Research](../development/research/) - Technical implementation research
 - [Development Documentation](../development/) - Technical implementation details
 
 ---

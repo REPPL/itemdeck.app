@@ -20,7 +20,11 @@ Create daily log files: `YYYY-MM-DD.md`
 
 ## Logs
 
-*No time logs yet.*
+| Log | Period | Total |
+|-----|--------|-------|
+| [2025-milestone-summary.md](./2025-milestone-summary.md) | v0.1.0 - v0.11.1 | 250h |
+
+Daily logs will be added from v0.12.0 onwards.
 
 ---
 

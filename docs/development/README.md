@@ -23,8 +23,14 @@ Central hub for Itemdeck development planning, roadmap, and process documentatio
 | [v0.4.0 Performance](./roadmap/milestones/v0.4.0.md) | ✅ Complete | Virtualisation, lazy loading, drag |
 | [v0.5.0 Schema Design](./roadmap/milestones/v0.5.0.md) | ✅ Complete | JSON Schema, Entity-Relationship |
 | [v0.6.0 Schema Loader](./roadmap/milestones/v0.6.0.md) | ✅ Complete | Loaders, resolvers, migration |
-| [v0.7.0 Schema Flexibility](./roadmap/milestones/v0.7.0.md) | 📋 Planned | Schema types, Zod, field discovery |
-| v0.8.0 Visual Overhaul | 📋 Planned | UI overhaul, navigation |
+| [v0.7.0 Schema Flexibility](./roadmap/milestones/v0.7.0.md) | ✅ Complete | Schema types, Zod, field discovery |
+| [v0.8.0 Visual Overhaul](./roadmap/milestones/v0.8.0.md) | ✅ Complete | UI overhaul, caching, navigation |
+| [v0.9.0 Remote Sources](./roadmap/milestones/v0.9.0.md) | ✅ Complete | Source intelligence, discovery |
+| [v0.10.0 Data Editing](./roadmap/milestones/v0.10.0.md) | ✅ Complete | Edit mode, overlay store |
+| [v0.11.0 Mechanics](./roadmap/milestones/v0.11.0.md) | ✅ Complete | Plugin architecture, memory game |
+| [v0.11.1 UX Polish](./roadmap/milestones/v0.11.1.md) | 🔄 In Progress | Settings redesign, YouTube, docs |
+| [v0.12.0 Core Mechanics](./roadmap/milestones/v0.12.0.md) | 📋 Planned | Additional game mechanics |
+| [v0.13.0 Advanced](./roadmap/milestones/v0.13.0.md) | 📋 Planned | Competing, quiz mechanics |
 
 ## Directory Structure
 
@@ -49,7 +55,8 @@ development/
 
 ## Key Resources
 
-- [Research Documentation](../research/) - Technical research informing decisions
+- [Technical Research](./research/) - Implementation research
+- [Exploration Research](../exploration/) - Design explorations
 - [Project Standards](../../.claude/CLAUDE.md) - Development conventions
 - [Setup Prompts](../prompts/setup/) - Original specifications
 
@@ -58,4 +65,4 @@ development/
 ## Related Documentation
 
 - [Documentation Hub](../README.md)
-- [Research Index](../research/README.md)
+- [Research Index](./research/README.md)

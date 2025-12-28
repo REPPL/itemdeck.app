@@ -52,3 +52,4 @@ npm run lint
 
 - [Setup Prompts](./prompts/setup/) - Original specifications
 - [Development Documentation](./development/) - Technical docs
+- [Exploration Research](./exploration/) - Design pattern research

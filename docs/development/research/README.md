@@ -110,6 +110,7 @@ For each topic:
 
 ## Related Documentation
 
+- [Exploration Research](../../exploration/) - User-facing design explorations
 - [Project Standards](../../.claude/CLAUDE.md)
 - [Design Specification](../prompts/setup/v2.md)
 - [Documentation Hub](../README.md)

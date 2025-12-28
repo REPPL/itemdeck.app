@@ -8,6 +8,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useCollectionData } from "@/context/CollectionDataContext";
+import { useSourceStore } from "@/stores/sourceStore";
 import { computeCollectionStats, formatStatsSummary } from "@/utils/collectionStats";
 import styles from "./CollectionToast.module.css";
 
@@ -28,6 +29,14 @@ export function CollectionToast({
   const { cards, isLoading, error } = useCollectionData();
   const [visible, setVisible] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+
+  // Get active source name for display
+  const activeSourceId = useSourceStore((s) => s.activeSourceId);
+  const sources = useSourceStore((s) => s.sources);
+  const collectionName = useMemo(() => {
+    const source = sources.find((s) => s.id === activeSourceId);
+    return source?.name ?? source?.mpmFolder ?? "Collection";
+  }, [sources, activeSourceId]);
 
   const stats = useMemo(() => {
     if (cards.length === 0) return null;
@@ -66,18 +75,17 @@ export function CollectionToast({
   return (
     <AnimatePresence>
       {visible && (
-        <>
-          {/* Backdrop with blur */}
-          <motion.div
-            className={styles.backdrop}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            onClick={handleDismiss}
-            aria-hidden="true"
-          />
-          {/* Toast content */}
+        /* Backdrop with blur - also serves as centering container */
+        <motion.div
+          className={styles.backdrop}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={handleDismiss}
+          role="presentation"
+        >
+          {/* Toast content - centred via parent flexbox */}
           <motion.div
             className={styles.toast}
             initial={{ opacity: 0, scale: 0.9 }}
@@ -86,13 +94,14 @@ export function CollectionToast({
             transition={{ duration: 0.2, delay: 0.05 }}
             role="status"
             aria-live="polite"
-            onClick={handleDismiss}
+            onClick={(e) => { e.stopPropagation(); handleDismiss(); }}
           >
             <span className={styles.icon} aria-hidden="true">✓</span>
+            <span className={styles.title}>{collectionName}</span>
             <span className={styles.message}>{summary}</span>
             <span className={styles.hint}>Click to dismiss</span>
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

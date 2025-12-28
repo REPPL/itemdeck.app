@@ -1,0 +1,63 @@
+/**
+ * Memory game settings styles.
+ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.settingRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+}
+
+.settingLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text-secondary, #666);
+}
+
+.segmentedControl {
+  display: flex;
+  gap: 2px;
+  background: var(--colour-bg-tertiary, #f0f0f0);
+  border-radius: 8px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.segmentButton {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text-secondary, #666);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.segmentButton:hover:not(:disabled) {
+  background: var(--colour-bg-secondary, #e8e8e8);
+  color: var(--colour-text-primary, #333);
+}
+
+.segmentButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.segmentButtonActive {
+  background: var(--colour-bg-primary, #fff);
+  color: var(--colour-text-primary, #333);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.segmentButtonActive:hover:not(:disabled) {
+  background: var(--colour-bg-primary, #fff);
+}

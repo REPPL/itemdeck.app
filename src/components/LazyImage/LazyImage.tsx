@@ -142,6 +142,7 @@ export function LazyImage({
           className={imageClasses}
           loading="lazy"
           decoding="async"
+          draggable="false"
           {...props}
         />
       )}

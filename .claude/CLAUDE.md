@@ -1,6 +1,6 @@
-# Itemdeck Project Standards
+# itemdeck.app Project Standards
 
-**Scope:** Project-specific standards for itemdeck
+**Scope:** Project-specific standards for itemdeck.app
 
 **Inherits from:**
 - `~/.claude/` - Global essentials
@@ -11,7 +11,7 @@
 
 ## Project Overview
 
-**itemdeck** is a responsive grid for displaying card collections.
+**itemdeck.app** is an interactive card collection viewer for displaying, exploring, and playing with collections.
 
 ---
 

@@ -145,6 +145,39 @@
 }
 
 /* ============================================
+   Dark Mode
+   ============================================ */
+
+/* Dark mode - attribute selectors work with CSS Modules */
+[data-colour-scheme="dark"] .dialog,
+[data-theme="dark"] .dialog {
+  background: #1a1a1a;
+  color: #f5f5f5;
+}
+
+[data-colour-scheme="dark"] .title,
+[data-theme="dark"] .title {
+  color: #f5f5f5;
+}
+
+[data-colour-scheme="dark"] .message,
+[data-theme="dark"] .message {
+  color: #b0b0b0;
+}
+
+[data-colour-scheme="dark"] .cancelButton,
+[data-theme="dark"] .cancelButton {
+  background: #0f0f0f;
+  color: #f5f5f5;
+  border-color: #333333;
+}
+
+[data-colour-scheme="dark"] .cancelButton:hover,
+[data-theme="dark"] .cancelButton:hover {
+  background: #2a2a2a;
+}
+
+/* ============================================
    Reduced Motion
    ============================================ */
 

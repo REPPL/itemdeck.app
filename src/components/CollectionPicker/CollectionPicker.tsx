@@ -79,6 +79,7 @@ export function CollectionPicker({ onSelect, initialUsername }: CollectionPicker
           src={appLogo}
           alt="itemdeck logo"
           className={styles.logo}
+          draggable="false"
         />
         <h1 className={styles.title}>itemdeck</h1>
         <p className={styles.subtitle}>Select a collection to view</p>

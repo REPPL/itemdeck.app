@@ -1,8 +1,34 @@
 import { useState } from "react";
-import appLogo from "@/assets/placeholder-logo.svg";
 import { isLightColour } from "@/utils/colourContrast";
 import type { CardBackDisplay } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
+
+/**
+ * App logo icon (card deck).
+ * Inline SVG to support currentColor inheritance for theme-aware colouring.
+ */
+function AppLogoIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 100 100"
+      fill="currentColor"
+      aria-hidden="true"
+      className={className}
+    >
+      <g opacity="0.9">
+        {/* Back card (offset) */}
+        <rect x="18" y="12" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.4"/>
+        {/* Middle card (offset) */}
+        <rect x="24" y="18" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.6"/>
+        {/* Front card */}
+        <rect x="30" y="24" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="3"/>
+        {/* Diamond symbol on front card */}
+        <path d="M55 44 L65 59 L55 74 L45 59 Z" fill="currentColor" opacity="0.8"/>
+      </g>
+    </svg>
+  );
+}
 
 /**
  * Drag handle grip icon (6 dots arranged in 2x3 pattern).
@@ -38,6 +64,8 @@ interface CardBackProps {
   isFlipping?: boolean;
   /** Background colour for contrast calculation */
   backgroundColour?: string;
+  /** Whether to use app logo as default (when user selects app-logo background) */
+  useAppLogo?: boolean;
 }
 
 /**
@@ -52,12 +80,15 @@ export function CardBack({
   dragHandleProps,
   isFlipping = false,
   backgroundColour,
+  useAppLogo = false,
 }: CardBackProps) {
   const [hasError, setHasError] = useState(false);
 
-  // Use platform logo, fall back to app logo if none provided or on error
-  const logoSrc = (logoUrl && !hasError) ? logoUrl : appLogo;
-  const showLogo = display === "logo" || display === "both";
+  // Show logo if:
+  // 1. Display mode includes logo ("logo" or "both"), OR
+  // 2. A logoUrl is explicitly provided (platform-logo or card-logo background), OR
+  // 3. useAppLogo is true (app-logo background selected)
+  const showLogo = display === "logo" || display === "both" || logoUrl !== undefined || useAppLogo;
 
   // Determine if background is light (needs dark text/icons)
   const hasLightBackground = backgroundColour ? isLightColour(backgroundColour) : false;
@@ -66,6 +97,11 @@ export function CardBack({
   const handleError = () => {
     setHasError(true);
   };
+
+  // Determine what logo to show:
+  // - If external logoUrl provided and hasn't errored, use <img>
+  // - Otherwise use inline AppLogoIcon (supports currentColor)
+  const shouldUseExternalLogo = logoUrl && !hasError;
 
   // Don't render anything if display is "none"
   if (display === "none") {
@@ -79,8 +115,10 @@ export function CardBack({
     showDragHandle ? styles.hasDragHandle : "",
   ].filter(Boolean).join(" ");
 
-  // Hide drag handle during flip animation
-  const shouldShowDragHandle = showDragHandle && !isFlipping;
+  // Drag handle is always visible when showDragHandle is true
+  // but becomes inactive (no event handlers) during flip animation
+  const shouldShowDragHandle = showDragHandle;
+  const isDragHandleActive = showDragHandle && !isFlipping;
 
   return (
     <div
@@ -89,21 +127,28 @@ export function CardBack({
     >
       {showLogo && (
         <div className={styles.logoContainer}>
-          <img
-            className={styles.logo}
-            src={logoSrc}
-            alt=""
-            aria-hidden="true"
-            draggable="false"
-            onError={handleError}
-          />
+          {shouldUseExternalLogo ? (
+            <img
+              className={styles.logo}
+              src={logoUrl}
+              alt=""
+              aria-hidden="true"
+              draggable="false"
+              onError={handleError}
+            />
+          ) : (
+            <AppLogoIcon className={styles.logo} />
+          )}
         </div>
       )}
-      {/* Drag handle indicator at bottom - hidden during flip animation */}
+      {/* Drag handle indicator at bottom - always visible but inactive during flip */}
       {shouldShowDragHandle && (
         <div
-          className={styles.dragHandle}
-          {...dragHandleProps}
+          className={[
+            styles.dragHandle,
+            !isDragHandleActive ? styles.dragHandleInactive : "",
+          ].filter(Boolean).join(" ")}
+          {...(isDragHandleActive ? dragHandleProps : {})}
           aria-label="Drag to reorder"
         >
           <DragGripIcon />

@@ -201,10 +201,10 @@ function applyThemeCustomisation(
   if (cardBackBackgroundImage && cardBackBackgroundMode && cardBackBackgroundMode !== "none") {
     root.style.setProperty("--card-back-background-image", `url("${cardBackBackgroundImage}")`);
     // For tiled mode: use 80px size to ensure visible tiling on cards of any size
-    // For full mode: cover to stretch and fill the entire card
+    // For full mode: 110% to zoom in slightly beyond cover, ensuring no gaps at edges
     root.style.setProperty(
       "--card-back-background-size",
-      cardBackBackgroundMode === "full" ? "cover" : "80px"
+      cardBackBackgroundMode === "full" ? "110%" : "80px"
     );
     root.style.setProperty(
       "--card-back-background-repeat",

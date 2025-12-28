@@ -1,18 +1,12 @@
 /**
  * MechanicPanel - Dedicated panel for game mechanics selection and control.
  * Separate from Settings to emphasise that mechanics change the app's behaviour.
+ * ADR-020: Uses mechanic.Settings component instead of direct store imports.
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { mechanicRegistry, useMechanicContext } from "@/mechanics";
-import {
-  useMemoryStore,
-  DIFFICULTY_SETTINGS,
-  PAIR_COUNT_OPTIONS,
-  type MemoryDifficulty,
-  type PairCount,
-} from "@/mechanics/memory/store";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { MechanicManifest } from "@/mechanics";
 import styles from "./MechanicPanel.module.css";
@@ -59,14 +53,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
   const [error, setError] = useState<string | null>(null);
 
   const activeMechanicId = useSettingsStore((s) => s.activeMechanicId);
-  const { activateMechanic, deactivateMechanic } = useMechanicContext();
-
-  // Memory game settings
-  const memoryDifficulty = useMemoryStore((s) => s.difficulty);
-  const memoryPairCount = useMemoryStore((s) => s.pairCount);
-  const setMemoryDifficulty = useMemoryStore((s) => s.setDifficulty);
-  const setMemoryPairCount = useMemoryStore((s) => s.setPairCount);
-  const resetMemoryGame = useMemoryStore((s) => s.resetGame);
+  const { mechanic: activeMechanicInstance, state: mechanicState, activateMechanic, deactivateMechanic } = useMechanicContext();
 
   // Load all mechanics on mount
   useEffect(() => {
@@ -138,21 +125,25 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
     [activateMechanic, deactivateMechanic, onClose]
   );
 
-  // Handle difficulty change - reset game with new settings
-  const handleDifficultyChange = useCallback((difficulty: MemoryDifficulty) => {
-    setMemoryDifficulty(difficulty);
-    resetMemoryGame();
-  }, [setMemoryDifficulty, resetMemoryGame]);
+  // ADR-020: Get settings from active mechanic via interface
+  // Depend on mechanicState to re-render when settings change
+  const mechanicSettings = activeMechanicInstance?.getSettings
+    ? activeMechanicInstance.getSettings()
+    : null;
+  // Force dependency on mechanicState for reactivity
+  void mechanicState;
 
-  // Handle pair count change - reset game with new settings
-  const handlePairCountChange = useCallback((count: PairCount) => {
-    setMemoryPairCount(count);
-    resetMemoryGame();
-  }, [setMemoryPairCount, resetMemoryGame]);
+  // ADR-020: Handle settings change via mechanic interface
+  const handleSettingsChange = useCallback((newSettings: Partial<unknown>) => {
+    if (activeMechanicInstance?.setSettings) {
+      activeMechanicInstance.setSettings(newSettings);
+    }
+  }, [activeMechanicInstance]);
 
   if (!isOpen) return null;
 
   const activeMechanic = mechanics.find((m) => m.id === activeMechanicId);
+  const MechanicSettings = activeMechanicInstance?.Settings;
 
   return createPortal(
     <div className={styles.overlay}>
@@ -203,45 +194,14 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                     </button>
                   </div>
 
-                  {/* Memory game settings */}
-                  {activeMechanicId === "memory" && (
+                  {/* ADR-020: Mechanic-provided settings UI */}
+                  {MechanicSettings && mechanicSettings !== null && (
                     <div className={styles.gameSettings}>
-                      <div className={styles.settingRow}>
-                        <span className={styles.settingLabel}>Difficulty</span>
-                        <div className={styles.segmentedControl}>
-                          {(Object.entries(DIFFICULTY_SETTINGS) as [MemoryDifficulty, { label: string; flipDelay: number }][]).map(([key, { label }]) => (
-                            <button
-                              key={key}
-                              type="button"
-                              className={[
-                                styles.segmentButton,
-                                memoryDifficulty === key ? styles.segmentButtonActive : "",
-                              ].filter(Boolean).join(" ")}
-                              onClick={() => { handleDifficultyChange(key); }}
-                            >
-                              {label}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <div className={styles.settingRow}>
-                        <span className={styles.settingLabel}>Pairs</span>
-                        <div className={styles.segmentedControl}>
-                          {PAIR_COUNT_OPTIONS.map((count) => (
-                            <button
-                              key={count}
-                              type="button"
-                              className={[
-                                styles.segmentButton,
-                                memoryPairCount === count ? styles.segmentButtonActive : "",
-                              ].filter(Boolean).join(" ")}
-                              onClick={() => { handlePairCountChange(count); }}
-                            >
-                              {count}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      <MechanicSettings
+                        settings={mechanicSettings as Record<string, unknown>}
+                        onChange={handleSettingsChange}
+                        disabled={false}
+                      />
                     </div>
                   )}
                 </div>

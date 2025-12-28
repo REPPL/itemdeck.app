@@ -202,6 +202,8 @@ interface NavigationHubProps {
   showSettingsButton?: boolean;
   /** Whether the Search button is visible */
   showSearchBar?: boolean;
+  /** Whether the View button is visible */
+  showViewButton?: boolean;
   /** Whether to hide the entire hub (e.g., when Search or View overlays are open) */
   hidden?: boolean;
 }
@@ -227,6 +229,7 @@ export function NavigationHub({
   showHelpButton = true,
   showSettingsButton = true,
   showSearchBar = true,
+  showViewButton = true,
   hidden = false,
 }: NavigationHubProps) {
   // Store state
@@ -386,23 +389,25 @@ export function NavigationHub({
             )}
 
             {/* View - index 3 (furthest from Navigation, last to appear) */}
-            <motion.button
-              type="button"
-              className={getButtonClass(styles.button, styles.buttonSecondary, (disabled || isMechanicActive) && styles.buttonDisabled)}
-              onClick={onViewClick}
-              disabled={disabled || isMechanicActive}
-              aria-label="Change view mode and grouping"
-              title="View options"
-              custom={3}
-              variants={buttonVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              whileHover={disabled || isMechanicActive ? {} : { scale: 1.1 }}
-              whileTap={disabled || isMechanicActive ? {} : { scale: 0.95 }}
-            >
-              <ViewIcon />
-            </motion.button>
+            {showViewButton && (
+              <motion.button
+                type="button"
+                className={getButtonClass(styles.button, styles.buttonSecondary, (disabled || isMechanicActive) && styles.buttonDisabled)}
+                onClick={onViewClick}
+                disabled={disabled || isMechanicActive}
+                aria-label="Change view mode and grouping"
+                title="View options"
+                custom={3}
+                variants={buttonVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                whileHover={disabled || isMechanicActive ? {} : { scale: 1.1 }}
+                whileTap={disabled || isMechanicActive ? {} : { scale: 0.95 }}
+              >
+                <ViewIcon />
+              </motion.button>
+            )}
           </>
         )}
       </AnimatePresence>

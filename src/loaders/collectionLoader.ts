@@ -3,6 +3,8 @@
  *
  * Loads and parses collection definitions from JSON files.
  * Supports Zod validation for v2 schemas with helpful error messages.
+ *
+ * @see F-091: Entity Auto-Discovery (GitHub API fallback)
  */
 
 import type {
@@ -16,6 +18,10 @@ import {
   safeValidateCollectionDefinition,
   formatValidationError,
 } from "@/schemas/v2";
+import {
+  discoverEntitiesViaGitHub,
+  isJsDelivrGitHubUrl,
+} from "./githubDiscovery";
 
 /**
  * Load a collection definition from a path.
@@ -100,8 +106,9 @@ function extractEntityIds(data: unknown, pluralType: string): string[] {
  * Supports multiple patterns in order:
  * 1. `{type}s/index.json` - Index file listing entity IDs to load (plural folder)
  * 2. `{type}s/_index.json` - Alternative index file location
- * 3. `{type}s.json` - Plural form single file with array
- * 4. `{type}.json` - Single file with array of entities
+ * 3. GitHub API auto-discovery - List directory via GitHub Contents API (F-091)
+ * 4. `{type}s.json` - Plural form single file with array
+ * 5. `{type}.json` - Single file with array of entities
  *
  * For index-based loading, the index file can contain:
  * - An array of entity IDs: `["id1", "id2", ...]`
@@ -153,7 +160,27 @@ export async function loadEntities(
     }
   }
 
-  // Pattern 2: Try plural form single file
+  // Pattern 2: GitHub API auto-discovery (F-091)
+  // Only works for jsDelivr GitHub CDN URLs
+  const entityDirectoryUrl = `${basePath}/${pluralType}`;
+  if (isJsDelivrGitHubUrl(entityDirectoryUrl)) {
+    try {
+      const discoveredIds = await discoverEntitiesViaGitHub(entityDirectoryUrl);
+
+      if (discoveredIds && discoveredIds.length > 0) {
+        // Load individual entity files using discovered IDs
+        const entities = await loadEntitiesFromDirectory(
+          entityDirectoryUrl,
+          discoveredIds
+        );
+        return entities;
+      }
+    } catch {
+      // GitHub API discovery failed, continue to next pattern
+    }
+  }
+
+  // Pattern 3: Try plural form single file
   const pluralFileUrl = `${basePath}/${entityType}s.json`;
 
   try {

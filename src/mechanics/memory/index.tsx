@@ -6,7 +6,9 @@
 
 import { useMemoryStore } from "./store";
 import { MemoryCardOverlay, MemoryGridOverlay } from "./components";
+import { MemorySettingsPanel } from "./Settings";
 import type { Mechanic, CardActions } from "../types";
+import type { MemorySettings } from "./types";
 
 /**
  * Memory game icon.
@@ -35,7 +37,7 @@ function MemoryIcon({ className }: { className?: string }) {
 /**
  * Memory game mechanic implementation.
  */
-export const memoryMechanic: Mechanic = {
+export const memoryMechanic: Mechanic<MemorySettings> = {
   manifest: {
     id: "memory",
     name: "Memory Game",
@@ -81,6 +83,33 @@ export const memoryMechanic: Mechanic = {
 
   CardOverlay: MemoryCardOverlay,
   GridOverlay: MemoryGridOverlay,
+  Settings: MemorySettingsPanel,
+
+  // ADR-020: Settings accessor pattern
+  defaultSettings: {
+    difficulty: "easy",
+    pairCount: 6,
+  },
+
+  getSettings: () => {
+    const state = useMemoryStore.getState();
+    return {
+      difficulty: state.difficulty,
+      pairCount: state.pairCount,
+    };
+  },
+
+  setSettings: (settings) => {
+    const store = useMemoryStore.getState();
+    if (settings.difficulty !== undefined) {
+      store.setDifficulty(settings.difficulty);
+    }
+    if (settings.pairCount !== undefined) {
+      store.setPairCount(settings.pairCount);
+    }
+    // Reset game when settings change
+    store.resetGame();
+  },
 };
 
 export { useMemoryStore };

@@ -12,7 +12,7 @@
  * v0.11.5: Dynamic field options based on collection data.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   useSettingsStore,
   type TitleDisplayMode,
@@ -25,6 +25,9 @@ import { useBackgroundOptions } from "@/hooks/useBackgroundOptions";
 import { useAvailableFields } from "@/hooks/useAvailableFields";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
+
+/** Threshold for small screens (iPhone) - matches getResponsiveCardSizeDefault */
+const SMALL_SCREEN_THRESHOLD = 600;
 
 type CardSubTab = "layout" | "front" | "back";
 
@@ -56,6 +59,27 @@ const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
  */
 export function CardSettingsTabs() {
   const [activeSubTab, setActiveSubTab] = useState<CardSubTab>("layout");
+  const [isSmallScreen, setIsSmallScreen] = useState(
+    typeof window !== "undefined" && window.innerWidth < SMALL_SCREEN_THRESHOLD
+  );
+
+  // Track window resize to update available card sizes
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(window.innerWidth < SMALL_SCREEN_THRESHOLD);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => { window.removeEventListener("resize", handleResize); };
+  }, []);
+
+  // Filter card size options - hide "large" on small screens (iPhone)
+  const availableCardSizeOptions = useMemo(() => {
+    if (isSmallScreen) {
+      return cardSizeOptions.filter((opt) => opt.value !== "large");
+    }
+    return cardSizeOptions;
+  }, [isSmallScreen]);
 
   // Get available background options based on collection data
   const { builtIn, collection, app } = useBackgroundOptions();
@@ -107,7 +131,7 @@ export function CardSettingsTabs() {
             <div className={styles.row}>
               <span className={styles.label}>Size</span>
               <div className={styles.segmentedControl} role="radiogroup" aria-label="Card size">
-                {cardSizeOptions.map(({ value, label }) => (
+                {availableCardSizeOptions.map(({ value, label }) => (
                   <button
                     key={value}
                     type="button"

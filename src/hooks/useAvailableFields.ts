@@ -52,9 +52,9 @@ function isDisplayableValue(value: unknown): boolean {
  */
 function extractFields(
   obj: Record<string, unknown>,
-  prefix: string = "",
-  maxDepth: number = 2,
-  currentDepth: number = 0
+  prefix = "",
+  maxDepth = 2,
+  currentDepth = 0
 ): string[] {
   if (currentDepth >= maxDepth) return [];
 
@@ -73,7 +73,7 @@ function extractFields(
       fields.push(...extractFields(value as Record<string, unknown>, fieldPath, maxDepth, currentDepth + 1));
     } else if (Array.isArray(value) && value.length > 0) {
       // Check first element of arrays
-      const first = value[0];
+      const first: unknown = value[0];
       if (isDisplayableValue(first)) {
         fields.push(`${fieldPath}[0]`);
       }
@@ -156,6 +156,7 @@ export function useAvailableFields() {
     }
 
     // Sort fields: numeric and common sort candidates
+    // Include title, year, platform, category, rating, and any numeric fields
     const sortFields: FieldOption[] = [
       { value: "order", label: "Order/Rank" },
       ...allFields.filter((f) =>
@@ -163,7 +164,16 @@ export function useAvailableFields() {
         f.value === "title" ||
         f.value === "year" ||
         f.value === "playedSince" ||
-        f.value.includes("rating")
+        f.value === "categoryTitle" ||
+        f.value === "categoryShort" ||
+        f.value.includes("rating") ||
+        f.value.includes("score") ||
+        // Platform fields
+        f.value.startsWith("platform.") ||
+        // Any numeric-looking field
+        f.value.includes("count") ||
+        f.value.includes("rank") ||
+        f.value.includes("order")
       ),
     ];
 

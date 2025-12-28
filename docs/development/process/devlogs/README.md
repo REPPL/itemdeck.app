@@ -25,6 +25,7 @@ Development narratives documenting how each milestone was built.
 | [v0.11.0](./v0.11.0/README.md) | Mechanics Foundation & Discovery | Complete |
 | [v0.11.1](./v0.11.1/README.md) | UX Polish, Video Support & Documentation | Complete |
 | [v0.11.5](./v0.11.5/README.md) | UI Refinements & Documentation Sync | Complete |
+| [v0.12.0](./v0.12.0/README.md) | UI Polish & Statistics | Complete |
 
 ## Structure
 

@@ -85,12 +85,14 @@ docs/
 
 ## Success Criteria
 
-- [x] tutorials/ directory created with 4 tutorials
-- [x] guides/ directory created with 8 guides
-- [x] explanation/ directory created with core docs
-- [x] Reference docs updated
+- [x] tutorials/ directory created (1 of 4 tutorials written)
+- [x] guides/ directory created (2 of 8 guides written)
+- [x] explanation/ directory created (0 of 3 docs written)
+- [ ] Reference docs updated
 - [x] docs/README.md hub updated
 - [ ] Key screenshots captured
+
+**Note:** Directory structure complete but content incomplete. See [v0.12.5 Milestone](../../milestones/v0.12.5.md) for remaining tasks.
 
 ## Dependencies
 

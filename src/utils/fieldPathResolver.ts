@@ -122,29 +122,69 @@ export const GROUP_BY_FIELD_OPTIONS: FieldOption[] = [
 ];
 
 /**
+ * Parsed segment result.
+ */
+interface ParsedSegment {
+  /** Property name (null if segment is just brackets) */
+  prop: string | null;
+  /** Numeric array index (null if not present or using filter) */
+  index: number | null;
+  /** Filter expression (e.g., { key: "type", value: "logo" }) */
+  filter: { key: string; value: string } | null;
+}
+
+/**
  * Parse a field path segment that may contain array bracket notation.
  *
- * @param segment - A path segment like "field" or "field[0]" or "[0]"
- * @returns Object with property name and optional array index
+ * Supports:
+ * - "field" → { prop: "field", index: null, filter: null }
+ * - "field[0]" → { prop: "field", index: 0, filter: null }
+ * - "[0]" → { prop: null, index: 0, filter: null }
+ * - "field[key=value]" → { prop: "field", index: null, filter: { key, value } }
+ * - "field[key=value][0]" → { prop: "field", index: 0, filter: { key, value } }
+ *
+ * @param segment - A path segment like "field" or "field[0]" or "field[type=logo][0]"
+ * @returns Object with property name, optional array index, and optional filter
  */
-function parsePathSegment(segment: string): { prop: string | null; index: number | null } {
-  // Handle bracket notation: "field[0]" or "[0]"
-  const bracketMatch = /^([^[]*)\[(\d+)\]$/.exec(segment);
-  if (bracketMatch) {
-    const prop = bracketMatch[1] ?? null;
-    const index = parseInt(bracketMatch[2] ?? "", 10);
-    return { prop, index };
+function parsePathSegment(segment: string): ParsedSegment {
+  let prop: string | null = segment;
+  let index: number | null = null;
+  let filter: { key: string; value: string } | null = null;
+
+  // Extract property name (everything before first bracket)
+  const propMatch = /^([^[]*)?/.exec(segment);
+  if (propMatch && propMatch[1]) {
+    prop = propMatch[1];
+  } else if (segment.startsWith("[")) {
+    prop = null;
   }
-  return { prop: segment, index: null };
+
+  // Extract filter expression: [key=value]
+  const filterMatch = /\[([^=\]]+)=([^\]]+)\]/.exec(segment);
+  if (filterMatch) {
+    filter = {
+      key: filterMatch[1] ?? "",
+      value: filterMatch[2] ?? "",
+    };
+  }
+
+  // Extract numeric index: [0] (must be numeric, not a filter)
+  const indexMatch = /\[(\d+)\](?![^\[])/.exec(segment);
+  if (indexMatch) {
+    index = parseInt(indexMatch[1] ?? "", 10);
+  }
+
+  return { prop, index, filter };
 }
 
 /**
  * Resolve a field path from an entity object.
  *
- * Supports dot notation for nested properties and bracket notation for arrays.
+ * Supports dot notation for nested properties, bracket notation for arrays,
+ * and filter expressions for finding items in arrays by property value.
  *
  * @param entity - The entity object to resolve from
- * @param fieldPath - Field path (e.g., "platform.shortTitle", "genres[0]")
+ * @param fieldPath - Field path (e.g., "platform.shortTitle", "genres[0]", "images[type=logo][0].url")
  * @returns The resolved value or undefined if not found
  *
  * @example
@@ -157,6 +197,9 @@ function parsePathSegment(segment: string): { prop: string | null; index: number
  * const entityWithArray = { genres: ["Action", "RPG"] };
  * resolveFieldPath(entityWithArray, "genres[0]"); // "Action"
  * resolveFieldPath(entityWithArray, "genres[1]"); // "RPG"
+ *
+ * const entityWithImages = { images: [{ type: "cover", url: "cover.jpg" }, { type: "logo", url: "logo.png" }] };
+ * resolveFieldPath(entityWithImages, "images[type=logo][0].url"); // "logo.png"
  * ```
  */
 export function resolveFieldPath(
@@ -179,7 +222,7 @@ export function resolveFieldPath(
       return undefined;
     }
 
-    const { prop, index } = parsePathSegment(part);
+    const { prop, index, filter } = parsePathSegment(part);
 
     // Check in _resolved first for relationship fields
     const obj = current as Record<string, unknown>;
@@ -187,6 +230,14 @@ export function resolveFieldPath(
       const resolved = obj._resolved as Record<string, unknown>;
       if (prop && prop in resolved) {
         current = resolved[prop];
+        // Apply filter if present
+        if (filter && Array.isArray(current)) {
+          current = current.filter((item: unknown) =>
+            item !== null &&
+            typeof item === "object" &&
+            (item as Record<string, unknown>)[filter.key] === filter.value
+          );
+        }
         // Apply array index if present
         if (index !== null && Array.isArray(current)) {
           current = current[index];
@@ -198,6 +249,15 @@ export function resolveFieldPath(
     // Access property if specified
     if (prop) {
       current = obj[prop];
+    }
+
+    // Apply filter if present (e.g., images[type=logo] filters to items where type === "logo")
+    if (filter && Array.isArray(current)) {
+      current = current.filter((item: unknown) =>
+        item !== null &&
+        typeof item === "object" &&
+        (item as Record<string, unknown>)[filter.key] === filter.value
+      );
     }
 
     // Apply array index if present

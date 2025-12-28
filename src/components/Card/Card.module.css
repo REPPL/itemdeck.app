@@ -14,8 +14,12 @@
   /* 3D perspective */
   perspective: 1000px;
 
-  /* Card appearance */
-  border-radius: var(--card-border-radius);
+  /* Default scale factors (overridden by data-card-size) */
+  --card-border-radius-scale: 1;
+  --card-border-width-scale: 1;
+
+  /* Card appearance - border radius scales with card size */
+  border-radius: calc(var(--card-border-radius) * var(--card-border-radius-scale));
   overflow: visible;
 
   /* For layout animation - don't interfere with FLIP transforms */
@@ -70,6 +74,29 @@
   box-shadow: none;
 }
 
+/* ============================================
+   Card Size Scaling
+   Border radius scales with card size
+   ============================================ */
+
+/* Small cards: smaller border radius (50% of base) */
+.card[data-card-size="small"] {
+  --card-border-radius-scale: 0.5;
+  --card-border-width-scale: 0.5;
+}
+
+/* Medium cards: use base border radius and width */
+.card[data-card-size="medium"] {
+  --card-border-radius-scale: 1;
+  --card-border-width-scale: 1;
+}
+
+/* Large cards: larger border radius and width (150% of base) */
+.card[data-card-size="large"] {
+  --card-border-radius-scale: 1.5;
+  --card-border-width-scale: 1.5;
+}
+
 .card.elevated {
   box-shadow: var(--elevation-3);
   transform: translateY(-4px) scale(1.02);
@@ -101,7 +128,7 @@
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  border-radius: var(--card-border-radius);
+  border-radius: calc(var(--card-border-radius) * var(--card-border-radius-scale, 1));
 }
 
 /* Shared face styles */
@@ -113,10 +140,11 @@
   height: 100%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden; /* Safari */
-  border-radius: var(--card-border-radius);
+  border-radius: calc(var(--card-border-radius) * var(--card-border-radius-scale, 1));
   overflow: hidden;
   box-shadow: var(--shadow-card);
-  border: var(--card-border-width, 0) solid var(--card-border-colour, rgba(255, 255, 255, 0.2));
+  /* Border width scales with card size */
+  border: calc(var(--card-border-width, 0) * var(--card-border-width-scale, 1)) solid var(--card-border-colour, rgba(255, 255, 255, 0.2));
   transition: box-shadow var(--transition-normal);
 }
 
@@ -163,11 +191,13 @@
 .logo {
   max-width: 100%;
   max-height: 100%;
-  width: auto;
-  height: auto;
+  /* Set explicit size for inline SVGs (they need dimensions) */
+  width: 80px;
+  height: 80px;
   object-fit: contain;
   /* For inline SVGs, inherit colour from parent */
   fill: currentColor;
+  color: inherit;
 }
 
 /* When drag handle is present, adjust logo container to centre in non-draggable area */
@@ -490,6 +520,21 @@
 
 .dragHandle:hover .dragGripIcon {
   opacity: 1;
+}
+
+/* Inactive state - visible but not interactive (during flip animation) */
+.dragHandleInactive {
+  cursor: default;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.dragHandleInactive:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dragHandleInactive .dragGripIcon {
+  opacity: 0.4;
 }
 
 /* ============================================

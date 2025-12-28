@@ -138,6 +138,7 @@ export function YouTubeEmbed({
           src={getYouTubeThumbnail(videoId, "hqdefault")}
           alt={`Thumbnail for ${title}`}
           loading="lazy"
+          draggable="false"
         />
         <div className={styles.playButton}>
           <PlayIcon />

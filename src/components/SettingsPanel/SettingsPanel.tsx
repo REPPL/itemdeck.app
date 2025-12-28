@@ -18,8 +18,6 @@ import { AppearanceSettingsTabs } from "./AppearanceSettingsTabs";
 import { CollectionsTab } from "./CollectionsTab";
 import { DataTab } from "./DataTab";
 import { SettingsSearch } from "./SettingsSearch";
-import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { useSettingsStore } from "@/stores/settingsStore";
 import { useViewportSize } from "@/hooks/useViewportSize";
 import styles from "./SettingsPanel.module.css";
 
@@ -124,23 +122,6 @@ export function SettingsPanel({
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("quick");
   const [activeSubTab, setActiveSubTab] = useState<string | undefined>(undefined);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
-
-  const { resetToDefaults } = useSettingsStore();
-
-  // Handle reset with confirmation
-  const handleResetClick = useCallback(() => {
-    setShowResetConfirm(true);
-  }, []);
-
-  const handleResetConfirm = useCallback(() => {
-    resetToDefaults();
-    setShowResetConfirm(false);
-  }, [resetToDefaults]);
-
-  const handleResetCancel = useCallback(() => {
-    setShowResetConfirm(false);
-  }, []);
 
   // Viewport size for responsive behaviour
   const { width } = useViewportSize();
@@ -290,9 +271,6 @@ export function SettingsPanel({
 
         <footer className={styles.footer}>
           <div className={styles.footerButtons}>
-            <button type="button" className={styles.resetButton} onClick={handleResetClick}>
-              Reset
-            </button>
             <div className={styles.footerRight}>
               <button type="button" className={styles.cancelButton} onClick={onClose}>
                 Cancel
@@ -304,17 +282,6 @@ export function SettingsPanel({
           </div>
         </footer>
 
-        {/* Reset confirmation dialog */}
-        <ConfirmDialog
-          isOpen={showResetConfirm}
-          title="Reset Settings"
-          message="This will reset all settings to their default values. This action cannot be undone."
-          confirmLabel="Reset"
-          cancelLabel="Cancel"
-          variant="danger"
-          onConfirm={handleResetConfirm}
-          onCancel={handleResetCancel}
-        />
       </div>
     </div>
   );

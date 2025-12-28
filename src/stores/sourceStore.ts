@@ -64,6 +64,8 @@ interface SourceState {
   addSource: (url: string, name?: string) => string;
   /** Add a MyPlausibleMe source */
   addMyPlausibleMeSource: (username: string, folder: string, name?: string) => string;
+  /** Add a source from a collection URL (from provider system) */
+  addSourceFromUrl: (url: string, providerId?: string | null, username?: string | null, folder?: string | null) => string;
   /** Remove a source by ID */
   removeSource: (id: string) => void;
   /** Update a source */
@@ -86,34 +88,11 @@ function generateId(): string {
 }
 
 /**
- * Built-in MyPlausibleMe sources.
+ * Built-in sources array.
+ * Empty by design - collections are discovered dynamically from
+ * REPPL/MyPlausibleMe via the CollectionPicker.
  */
-const RETRO_GAMES_SOURCE: Source = {
-  id: "reppl-retro-games",
-  url: "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games",
-  name: "Retro Games",
-  addedAt: new Date(0),
-  isBuiltIn: true,
-  sourceType: "myplausibleme",
-  mpmUsername: "REPPL",
-  mpmFolder: "retro-games",
-};
-
-const RETRO_ADVERTS_SOURCE: Source = {
-  id: "reppl-retro-adverts",
-  url: "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-adverts",
-  name: "Retro Adverts",
-  addedAt: new Date(0),
-  isBuiltIn: true,
-  sourceType: "myplausibleme",
-  mpmUsername: "REPPL",
-  mpmFolder: "retro-adverts",
-};
-
-/**
- * All built-in sources.
- */
-const BUILT_IN_SOURCES: Source[] = [RETRO_GAMES_SOURCE, RETRO_ADVERTS_SOURCE];
+const BUILT_IN_SOURCES: Source[] = [];
 
 /**
  * Source management store.
@@ -122,8 +101,8 @@ export const useSourceStore = create<SourceState>()(
   persist(
     (set, get) => ({
       sources: BUILT_IN_SOURCES,
-      activeSourceId: "reppl-retro-games",
-      defaultSourceId: "reppl-retro-games",
+      activeSourceId: null,
+      defaultSourceId: null,
 
       addSource: (url: string, name?: string) => {
         const id = generateId();
@@ -174,6 +153,55 @@ export const useSourceStore = create<SourceState>()(
           sourceType: "myplausibleme",
           mpmUsername: username,
           mpmFolder: folder,
+        };
+
+        set((state) => ({
+          sources: [...state.sources, newSource],
+        }));
+
+        return id;
+      },
+
+      addSourceFromUrl: (
+        url: string,
+        providerId?: string | null,
+        username?: string | null,
+        folder?: string | null
+      ) => {
+        const normalizedUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+
+        // Check if this URL already exists
+        const existingSource = get().sources.find(
+          (s) => s.url === normalizedUrl
+        );
+
+        if (existingSource) {
+          return existingSource.id;
+        }
+
+        const id = generateId();
+
+        // Determine source type based on provider
+        const sourceType: SourceType = providerId === "gh" ? "myplausibleme" : "legacy";
+
+        // Generate name from username/folder or extract from URL
+        let name: string;
+        if (username && folder) {
+          name = `${username}/${folder}`;
+        } else {
+          // Extract collection name from URL (last path segment)
+          const pathParts = normalizedUrl.split("/").filter(Boolean);
+          name = pathParts[pathParts.length - 1] ?? "Collection";
+        }
+
+        const newSource: Source = {
+          id,
+          url: normalizedUrl,
+          name,
+          addedAt: new Date(),
+          sourceType,
+          mpmUsername: username ?? undefined,
+          mpmFolder: folder ?? undefined,
         };
 
         set((state) => ({
@@ -303,13 +331,12 @@ export const useSourceStore = create<SourceState>()(
         let activeSourceId = persistedState.activeSourceId ?? current.activeSourceId;
         let defaultSourceId = persistedState.defaultSourceId ?? current.defaultSourceId;
 
-        // If active source doesn't exist, fall back to first built-in
-        const firstBuiltIn = BUILT_IN_SOURCES[0];
-        if (!sources.find((s) => s.id === activeSourceId) && firstBuiltIn) {
-          activeSourceId = firstBuiltIn.id;
+        // If active source doesn't exist, fall back to first available (or null if none)
+        if (!sources.find((s) => s.id === activeSourceId)) {
+          activeSourceId = sources[0]?.id ?? null;
         }
-        if (!sources.find((s) => s.id === defaultSourceId) && firstBuiltIn) {
-          defaultSourceId = firstBuiltIn.id;
+        if (!sources.find((s) => s.id === defaultSourceId)) {
+          defaultSourceId = sources[0]?.id ?? null;
         }
 
         return {
@@ -325,14 +352,14 @@ export const useSourceStore = create<SourceState>()(
 
 /**
  * Hook to get the current active source URL.
+ * Returns empty string if no source is selected.
  */
 export function useActiveSourceUrl(): string {
   return useSourceStore((state) => {
     const activeSource = state.sources.find(
       (s) => s.id === state.activeSourceId
     );
-    const fallbackUrl = BUILT_IN_SOURCES[0]?.url ?? "";
-    return activeSource?.url ?? fallbackUrl;
+    return activeSource?.url ?? "";
   });
 }
 

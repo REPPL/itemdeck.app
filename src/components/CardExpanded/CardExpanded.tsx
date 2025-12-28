@@ -17,6 +17,7 @@ import { EditForm } from "@/components/EditForm";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { isYouTubeUrl, extractYouTubeId, getYouTubeThumbnail } from "@/types/media";
 import { useUILabels } from "@/context/CollectionUIContext";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { isLightColour } from "@/utils/colourContrast";
@@ -334,9 +335,19 @@ export function CardExpanded({
                   aria-label="View full gallery"
                 >
                   <img
-                    src={card.imageUrls[0]}
+                    src={(() => {
+                      const firstUrl = card.imageUrls[0];
+                      if (!firstUrl) return "";
+                      // If first media is YouTube, use its thumbnail
+                      if (isYouTubeUrl(firstUrl)) {
+                        const videoId = extractYouTubeId(firstUrl);
+                        return videoId ? getYouTubeThumbnail(videoId, "mqdefault") : "";
+                      }
+                      return firstUrl;
+                    })()}
                     alt={card.title}
                     className={styles.compactThumbnailImage}
+                    draggable="false"
                   />
                   <span className={styles.compactThumbnailExpand}>
                     <ImageIcon size={16} />

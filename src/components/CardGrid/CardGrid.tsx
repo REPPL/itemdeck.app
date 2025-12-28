@@ -11,7 +11,6 @@ import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
-import { useMemoryStore } from "@/mechanics/memory/store";
 import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -291,8 +290,16 @@ export function CardGrid() {
   // Get resetCount from mechanic state to trigger re-shuffle on reset
   const mechanicResetCount = (mechanicState as { resetCount?: number } | null)?.resetCount;
 
-  // Get memory game settings
-  const memoryPairCount = useMemoryStore((s) => s.pairCount);
+  // ADR-020: Get memory game settings through mechanic interface (not direct store import)
+  // mechanicState dependency ensures re-render when settings change via mechanic store
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoryPairCount = useMemo(() => {
+    if (mechanic?.manifest.id === "memory" && mechanic.getSettings) {
+      const settings = mechanic.getSettings() as { pairCount?: number };
+      return settings.pairCount ?? 6;
+    }
+    return 6; // Default
+  }, [mechanic, mechanicState]);
 
   // v0.11.0: Transform cards for active mechanic
   // For memory game: duplicate cards and shuffle to create pairs

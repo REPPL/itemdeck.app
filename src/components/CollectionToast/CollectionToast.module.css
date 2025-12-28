@@ -5,7 +5,7 @@
  * Centred on screen with backdrop blur.
  */
 
-/* Backdrop overlay */
+/* Backdrop overlay - also serves as centering container */
 .backdrop {
   position: fixed;
   inset: 0;
@@ -13,14 +13,18 @@
   background: rgba(0, 0, 0, 0.5);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
+
+  /* Flexbox centering for reliable mobile support */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-md, 16px);
 }
 
-/* Toast container - centred on screen */
+/* Toast container - centred via parent flexbox */
 .toast {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  /* Remove fixed positioning - parent handles centering */
+  position: relative;
   z-index: 1000;
 
   display: flex;
@@ -69,10 +73,18 @@
   font-weight: 700;
 }
 
+.title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--colour-text-primary, #111);
+}
+
 .message {
-  font-size: 1.125rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 400;
   line-height: 1.4;
+  color: var(--colour-text-secondary, #6b7280);
 }
 
 .hint {
@@ -84,8 +96,9 @@
 /* Mobile adjustments */
 @media (max-width: 600px) {
   .toast {
-    padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
-    min-width: 240px;
+    padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+    min-width: 200px;
+    max-width: calc(100vw - 32px); /* 16px margin each side */
   }
 
   .icon {
@@ -94,17 +107,41 @@
     font-size: 1.25rem;
   }
 
-  .message {
+  .title {
     font-size: 1rem;
+  }
+
+  .message {
+    font-size: 0.85rem;
+    word-break: break-word;
+  }
+
+  .hint {
+    font-size: 0.7rem;
   }
 }
 
 /* Dark mode */
 [data-theme="dark"] .toast,
 [data-colour-scheme="dark"] .toast {
-  background: var(--colour-surface, #1f2937);
-  border-color: var(--colour-border, #374151);
-  color: var(--colour-text-primary, #f9fafb);
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .title,
+[data-colour-scheme="dark"] .title {
+  color: #f9fafb;
+}
+
+[data-theme="dark"] .message,
+[data-colour-scheme="dark"] .message {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .hint,
+[data-colour-scheme="dark"] .hint {
+  color: #6b7280;
 }
 
 [data-theme="dark"] .backdrop,

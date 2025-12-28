@@ -150,5 +150,23 @@ export function useBackgroundOptions(): {
   }, [cards]);
 }
 
+/**
+ * Get the field path for a logo background option.
+ * Used by Card component to resolve logo URL from entity data.
+ *
+ * @param optionValue - The background option value (e.g., "platform-logo", "card-logo")
+ * @returns The field path to resolve, or undefined if not a logo type
+ */
+export function getLogoFieldPath(optionValue: string): string | undefined {
+  // Check collection logos first
+  const collectionOption = COLLECTION_BACKGROUNDS.find((opt) => opt.value === optionValue);
+  if (collectionOption?.fieldPath) {
+    return collectionOption.fieldPath;
+  }
+
+  // App logo or built-in patterns don't have a field path
+  return undefined;
+}
+
 // Re-export for backwards compatibility
 export { BUILT_IN_BACKGROUNDS, COLLECTION_BACKGROUNDS, APP_LOGO_BACKGROUND };

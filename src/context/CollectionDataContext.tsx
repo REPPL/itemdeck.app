@@ -9,7 +9,7 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
 import { useLocalCollection, type DisplayCard, type CollectionResult } from "@/hooks/useCollection";
 import { CollectionUIProvider } from "./CollectionUIContext";
-import { useSettingsStore } from "@/stores/settingsStore";
+import { useSettingsStore, computeSmartSelectionDefault } from "@/stores/settingsStore";
 import { useEditsStore } from "@/stores/editsStore";
 import { useActiveSourceUrl } from "@/stores/sourceStore";
 import type { DisplayConfig } from "@/types/display";
@@ -65,6 +65,8 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
   // Load collection from the active source
   const { data, isLoading, error } = useLocalCollection({ basePath: sourceUrl });
   const applyCollectionDefaults = useSettingsStore((s) => s.applyCollectionDefaults);
+  const applyCollectionSettings = useSettingsStore((s) => s.applyCollectionSettings);
+  const setRandomSelectionCount = useSettingsStore((s) => s.setRandomSelectionCount);
   const hasAppliedDefaults = useSettingsStore((s) => s.hasAppliedCollectionDefaults);
   const edits = useEditsStore((s) => s.edits);
 
@@ -74,6 +76,22 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
       applyCollectionDefaults(data.config);
     }
   }, [data?.config, hasAppliedDefaults, applyCollectionDefaults]);
+
+  // Apply collection-specific settings from settings.json (every load)
+  // Uses sourceUrl as the sourceId for tracking which collection's defaults have been applied
+  useEffect(() => {
+    if (data?.settings && sourceUrl) {
+      applyCollectionSettings(sourceUrl, data.settings);
+    }
+  }, [data?.settings, sourceUrl, applyCollectionSettings]);
+
+  // Apply smart default for random selection count based on collection size
+  useEffect(() => {
+    if (data?.cards && data.cards.length > 0) {
+      const smartDefault = computeSmartSelectionDefault(data.cards.length);
+      setRandomSelectionCount(smartDefault);
+    }
+  }, [data?.cards?.length, setRandomSelectionCount]);
 
   // Merge edits with source cards using overlay pattern
   const mergedCards = useMemo(() => {

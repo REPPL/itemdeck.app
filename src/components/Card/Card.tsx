@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { getLogoFieldPath } from "@/hooks/useBackgroundOptions";
 import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
@@ -99,7 +100,7 @@ export function Card({
   frontDragHandleProps,
   backDragHandleProps,
 }: CardProps) {
-  const { cardDimensions, settings } = useSettingsContext();
+  const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
@@ -122,7 +123,6 @@ export function Card({
   // Cast card to ResolvedEntity for field path resolution
   const entity = card as unknown as ResolvedEntity;
   const frontConfig = displayConfig?.front;
-  const backConfig = displayConfig?.back;
 
   // Resolve front face values with fallbacks to direct props
   const resolvedTitle = useMemo(() => {
@@ -147,29 +147,43 @@ export function Card({
   }, [entity, frontConfig?.badge, card.rank]);
 
 
+  // Determine if app logo should be used as background
+  const useAppLogo = cardBackBackground === "app-logo";
+
   // Resolve back face values
-  // When cardBackBackground is "app-logo" → always use app logo (undefined forces fallback)
-  // When displayConfig is provided:
-  //   - backConfig.logo = "logoUrl" → Platform Logo (default)
-  //   - backConfig.logo = "images[type=logo][0].url" → Card Logo
-  //   - backConfig.logo = undefined → None (use app logo)
-  // When displayConfig is NOT provided, fall back to card.logoUrl (Platform Logo)
+  // The cardBackBackground setting determines which logo to display:
+  // - "app-logo" → Always use app logo (useAppLogo=true tells CardBack to show it)
+  // - "platform-logo" → Use logoUrl field (platform logo from relationship)
+  // - "card-logo" → Use images[type=logo][0].url field (logo image on the card itself)
+  // - Built-in patterns (full-*, tiled-*) → Don't show logo, CSS handles the background
   const resolvedLogoUrl = useMemo(() => {
-    // If "app-logo" is selected in settings, always use app logo
+    // If "app-logo" is selected, return undefined - CardBack will use the default app logo
     if (cardBackBackground === "app-logo") {
       return undefined;
     }
-    // If displayConfig exists but logo is undefined → "None" was selected → use app logo
-    if (displayConfig && backConfig?.logo === undefined) {
+
+    // Get the field path for this background option
+    const logoFieldPath = getLogoFieldPath(cardBackBackground);
+
+    // If there's a field path, resolve it from the entity
+    if (logoFieldPath) {
+      const resolved = resolveFieldPathAsString(entity, logoFieldPath);
+      if (resolved) {
+        return resolved;
+      }
+      // Fall back to card.logoUrl if resolution fails
+      return card.logoUrl;
+    }
+
+    // Built-in patterns (full-*, tiled-*) don't show a logo
+    // The CSS background image handles the pattern
+    if (cardBackBackground.startsWith("full-") || cardBackBackground.startsWith("tiled-")) {
       return undefined;
     }
-    // If logo path is configured, resolve it
-    if (backConfig?.logo) {
-      return resolveFieldPathAsString(entity, backConfig.logo) || card.logoUrl;
-    }
-    // No displayConfig at all → use platform logo (default)
+
+    // Default: use platform logo
     return card.logoUrl;
-  }, [cardBackBackground, displayConfig, entity, backConfig?.logo, card.logoUrl]);
+  }, [cardBackBackground, entity, card.logoUrl]);
 
   // Resolve footer badge (device) - use field path if configured
   const resolvedDevice = useMemo(() => {
@@ -239,12 +253,13 @@ export function Card({
           onFlipComplete={() => { setIsFlipping(false); }}
           back={
             <CardBack
-              logoUrl={cardBackBackground === "app-logo" ? undefined : (resolvedLogoUrl ?? settings.card.logoUrl)}
+              logoUrl={resolvedLogoUrl}
               display={cardBackDisplay}
               showDragHandle={showBackDragHandle}
               dragHandleProps={backDragHandleProps}
               isFlipping={isFlipping}
               backgroundColour={cardBackgroundColour}
+              useAppLogo={useAppLogo}
             />
           }
           front={

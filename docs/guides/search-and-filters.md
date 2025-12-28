@@ -127,5 +127,6 @@ By default, search applies to all cards. When filters are active, you can limit 
 ## Related Documentation
 
 - [Keyboard Shortcuts](keyboard-shortcuts.md)
-- [View Modes](view-modes.md)
 - [Getting Started](../tutorials/getting-started.md)
+
+*View Modes guide coming soon*

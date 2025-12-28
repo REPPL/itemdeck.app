@@ -82,6 +82,7 @@ export function ImageWithFallback({
           loading={loading}
           onLoad={handleLoad}
           onError={handleError}
+          draggable="false"
         />
       )}
     </div>

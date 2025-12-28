@@ -7,7 +7,7 @@
  * - Edit: Edit Mode toggle
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import {
   useSettingsStore,
   type FieldMappingConfig,
@@ -16,8 +16,10 @@ import {
 } from "@/stores/settingsStore";
 import {
   SORT_FIELD_OPTIONS,
+  type FieldOption,
 } from "@/utils/fieldPathResolver";
 import { useCollectionData } from "@/context/CollectionDataContext";
+import { useAvailableFields } from "@/hooks/useAvailableFields";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -48,6 +50,22 @@ export function ConfigSettingsTabs() {
   const [activeSubTab, setActiveSubTab] = useState<ConfigSubTab>("display");
   const { cards: allCards } = useCollectionData();
   const totalCards = allCards.length;
+  const { sortFields: dynamicSortFields } = useAvailableFields();
+
+  // Merge static options with dynamically discovered fields, removing duplicates
+  const sortFieldOptions = useMemo((): FieldOption[] => {
+    const staticValues = new Set(SORT_FIELD_OPTIONS.map((opt) => opt.value));
+    const merged = [...SORT_FIELD_OPTIONS];
+
+    // Add dynamic fields that aren't already in static options
+    for (const field of dynamicSortFields) {
+      if (!staticValues.has(field.value)) {
+        merged.push(field);
+      }
+    }
+
+    return merged;
+  }, [dynamicSortFields]);
 
   const {
     shuffleOnLoad,
@@ -192,7 +210,7 @@ export function ConfigSettingsTabs() {
                 aria-label="Sort field"
                 disabled={shuffleOnLoad}
               >
-                {SORT_FIELD_OPTIONS.map(({ value, label }) => (
+                {sortFieldOptions.map(({ value, label }) => (
                   <option key={value} value={value}>{label}</option>
                 ))}
               </select>

@@ -109,9 +109,11 @@ export function useGlobalKeyboard(options: UseGlobalKeyboardOptions) {
   useEffect(() => {
     if (!enabled) return;
 
-    window.addEventListener("keydown", handleKeyDown);
+    // Use capture phase to intercept before browser's default handlers
+    // This is especially important for Cmd-R which triggers browser reload
+    window.addEventListener("keydown", handleKeyDown, true);
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown, true);
     };
   }, [enabled, handleKeyDown]);
 }

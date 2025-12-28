@@ -24,8 +24,10 @@ import type { DisplayConfig } from "@/types/display";
 import type { RatingValue } from "@/types/rating";
 import type { DetailLink } from "@/types/links";
 import type { UILabels } from "@/context/CollectionUIContext";
+import type { CollectionSettings } from "@/types/collectionSettings";
 import { normaliseRating } from "@/types/rating";
 import { normaliseDetailUrls } from "@/types/links";
+import { loadCollectionSettings } from "@/loaders/settingsLoader";
 
 /**
  * Local data source configuration.
@@ -130,6 +132,9 @@ interface CollectionResult {
 
   /** Collection configuration defaults */
   config?: CollectionConfig;
+
+  /** Collection-specific settings (from settings.json) */
+  settings?: CollectionSettings;
 }
 
 /**
@@ -176,7 +181,12 @@ function formatAttribution(images: Image[] | undefined): string | undefined {
  * @returns Collection result with display cards
  */
 async function fetchCollection(basePath: string): Promise<CollectionResult> {
-  const loaded = await loadCollection(basePath);
+  // Load collection and settings in parallel
+  const [loaded, settings] = await Promise.all([
+    loadCollection(basePath),
+    loadCollectionSettings(basePath),
+  ]);
+
   const context = createResolverContext(loaded.definition, loaded.entities);
 
   // Resolve relationships for primary entities
@@ -418,6 +428,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
     displayConfig: loaded.definition.display,
     uiLabels: loaded.definition.uiLabels,
     config: loaded.definition.config,
+    settings: settings ?? undefined,
   };
 }
 

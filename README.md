@@ -1,38 +1,47 @@
 <p align="center">
-  <img src="docs/assets/img/logo.png" alt="Itemdeck Logo" width="200">
+  <img src="docs/assets/img/logo.png" alt="itemdeck.app Logo" width="200">
 </p>
 
-<h1 align="center">Itemdeck</h1>
+<h1 align="center">itemdeck.app</h1>
 
 <p align="center">
-  <strong>Adaptive Card Grid Application</strong><br>
-  A browser-based card display system using a "Memory game" visual metaphor.
+  <strong>Interactive Card Collection Viewer</strong><br>
+  Display, explore, and play with card collections from any GitHub repository.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-v0.11.1-brightgreen" alt="Status: v0.11.1">
   <img src="https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen" alt="Node.js >= 20.0.0">
   <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript Strict">
-  <br>
   <a href="https://claude.ai/claude-code"><img src="https://img.shields.io/badge/Built_with-Claude_Code-6B5CE7?logo=anthropic" alt="Built with Claude Code"></a>
 </p>
 
 ---
 
-## Overview
+## What is itemdeck.app?
 
-Cards are arranged in a responsive grid with smooth repositioning animation. Each card maintains fixed dimensions and displays a card-back design with centred logo and optional year text. This is the foundation scaffold for a larger card-based application.
+itemdeck.app is a browser-based card display system that loads collections from GitHub repositories. Perfect for:
+
+- **Collectors** - Browse and organise your collections
+- **Curators** - Share themed collections with others
+- **Gamers** - Play memory games with your cards
 
 <p align="center">
-  <img src="docs/assets/img/screenshot.gif" alt="Itemdeck Demo" width="600">
+  <img src="docs/assets/img/screenshot.gif" alt="itemdeck.app Demo" width="600">
 </p>
 
-## Prerequisites
+## Features
 
-- **Node.js** 20.0.0 or higher
-- **npm** (included with Node.js)
+- **Card Display** - Responsive grid with smooth animations and flip effects
+- **Multiple Views** - Grid, Stack, Carousel, and Fit-to-Viewport layouts
+- **Discovery Tools** - Search, filter by category/platform/year, and grouping
+- **Gaming Mechanics** - Memory game with more mechanics coming soon
+- **Remote Collections** - Load any GitHub-hosted collection via URL
+- **Keyboard Navigation** - Full keyboard support with customisable shortcuts
+- **Theme Support** - Light, dark, and high contrast modes
+- **Offline Caching** - Collections cached locally for fast reloading
+- **Accessibility** - WCAG 2.1 AA compliant with reduced motion support
 
-## Getting Started
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -44,63 +53,35 @@ npm run dev
 # Open http://localhost:5173 in your browser
 ```
 
-## Available Scripts
+### Load a Collection
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Start development server with hot reload |
-| `npm run build` | Build for production |
-| `npm run preview` | Preview production build locally |
-| `npm run typecheck` | Run TypeScript type checking |
-| `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Run ESLint with auto-fix |
-| `npm run format` | Format code with Prettier |
-| `npm run format:check` | Check code formatting |
-
-## Architecture
-
-### Technology Stack
-
-- **React 18** - UI framework with functional components and hooks
-- **TypeScript** - Type-safe JavaScript with strict mode
-- **Vite** - Fast build tool and dev server
-- **CSS Modules** - Scoped component styling
-- **Absolute Positioning** - JavaScript-calculated layout with CSS transitions
-
-### Project Structure
+Add a collection URL parameter to load remote collections:
 
 ```
-src/
-├── main.tsx                    # Application entry point
-├── App.tsx                     # Root component
-├── components/
-│   ├── Card/                   # Individual card display
-│   ├── CardGrid/               # Responsive grid layout
-│   ├── MenuButton/             # Menu toggle button
-│   └── Sidebar/                # Sliding sidebar panel
-├── context/
-│   └── SettingsContext.tsx     # Card settings provider
-├── hooks/
-│   ├── useCardData.ts          # Data fetching hook
-│   └── useSettingsContext.ts   # Settings context hook
-├── types/
-│   ├── card.ts                 # Card data interface
-│   └── settings.ts             # Settings interfaces
-├── data/
-│   └── cards.mock.ts           # Mock data for development
-└── styles/
-    └── global.css              # CSS reset and custom properties
+http://localhost:5173/?collection=https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games
 ```
-
-### Key Features
-
-- **Smooth Animation**: Cards animate to new positions when window is resized
-- **Fixed Card Dimensions**: Cards maintain exact size (300×420px default)
-- **Centred Grid**: Equal spacing on all sides
-- **Animated Sidebar**: Grows from menu button to full-height panel
-- **Type Safety**: Full TypeScript coverage with strict mode
 
 ## Documentation
 
-- [Setup Prompt v1](./docs/prompts/setup/README.md) - Original AI setup specification
-- [Setup Prompt v2](./docs/prompts/setup/v2.md) - Updated specification with design decisions
+- **[Getting Started](./docs/tutorials/getting-started.md)** - Quick start tutorial
+- **[Keyboard Shortcuts](./docs/guides/keyboard-shortcuts.md)** - Navigation reference
+- **[Search and Filters](./docs/guides/search-and-filters.md)** - Finding cards
+- **[Schema Reference](./docs/reference/schemas/)** - Collection data format
+
+## Contributing
+
+For developers and contributors:
+
+- **[Development Guide](./docs/development/README.md)** - Technical documentation
+- **[Available Scripts](./docs/development/scripts.md)** - npm commands
+- **[Architecture](./docs/development/architecture.md)** - Project structure and patterns
+- **[Roadmap](./docs/development/roadmap/)** - Planned features
+
+## Requirements
+
+- **Node.js** 20.0.0 or higher
+- **npm** (included with Node.js)
+
+## Licence
+
+MIT

@@ -1,14 +1,14 @@
-# Getting Started with Itemdeck
+# Getting Started with itemdeck.app
 
-Welcome to Itemdeck! This tutorial will walk you through the basics of using the application.
+Welcome to itemdeck.app! This tutorial will walk you through the basics of using the application.
 
-## What is Itemdeck?
+## What is itemdeck.app?
 
-Itemdeck is a responsive card grid viewer for displaying collections. You can use it to browse games, books, media collections, or any other items you want to catalogue and explore.
+itemdeck.app is a responsive card grid viewer for displaying collections. You can use it to browse games, books, media collections, or any other items you want to catalogue and explore.
 
 ## The Main Interface
 
-When you first open Itemdeck, you'll see:
+When you first open itemdeck.app, you'll see:
 
 1. **Card Grid** - The main area showing your collection as cards
 2. **View Mode Toggle** - Bottom-left corner, switch between Grid/List/Compact views
@@ -65,9 +65,10 @@ Click the gear icon (bottom-right) or press `S` to open Settings. Here you can:
 
 Now that you know the basics:
 
-1. **[Your First Collection](first-collection.md)** - Set up and explore a collection
-2. **[Keyboard Shortcuts](../guides/keyboard-shortcuts.md)** - Master efficient navigation
-3. **[Search and Filters](../guides/search-and-filters.md)** - Find items quickly
+1. **[Keyboard Shortcuts](../guides/keyboard-shortcuts.md)** - Master efficient navigation
+2. **[Search and Filters](../guides/search-and-filters.md)** - Find items quickly
+
+*More tutorials coming soon: Your First Collection, Playing Memory Game, Customising Themes*
 
 ---
 

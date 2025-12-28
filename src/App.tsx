@@ -13,6 +13,8 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { CollectionPicker } from "@/components/CollectionPicker";
 import { CollectionToast } from "@/components/CollectionToast";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
+import { StatisticsBar } from "@/components/Statistics";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -39,23 +41,41 @@ function AppContent() {
   const [viewPopoverOpen, setViewPopoverOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
+  const [showReloadDialog, setShowReloadDialog] = useState(false);
 
   // URL-based collection loading
   const urlCollection = useUrlCollection();
   const addMyPlausibleMeSource = useSourceStore((s) => s.addMyPlausibleMeSource);
+  const addSourceFromUrl = useSourceStore((s) => s.addSourceFromUrl);
   const setActiveSource = useSourceStore((s) => s.setActiveSource);
+  const activeSourceId = useSourceStore((s) => s.activeSourceId);
 
   // Collection picker state (F-087)
   // Skip picker if URL specifies direct load
   const [pickerDismissed, setPickerDismissed] = useState(false);
   const [urlHandled, setUrlHandled] = useState(false);
 
-  // Handle direct URL loading (e.g., /gh/REPPL/collection/retro-games/)
+  // Handle direct URL loading
+  // Supports: /gh?u=REPPL&collection=commercials (provider format)
+  //           /gh/REPPL/collection/retro-games/ (path format)
+  //           ?collection=https://... (legacy format)
   useEffect(() => {
     if (urlHandled) return;
 
-    if (urlCollection.directLoad && urlCollection.username && urlCollection.folder) {
-      // Direct load: add source and skip picker
+    // Provider URL format or legacy full URL format
+    if (urlCollection.directLoad && urlCollection.collectionUrl) {
+      const sourceId = addSourceFromUrl(
+        urlCollection.collectionUrl,
+        urlCollection.providerId,
+        urlCollection.username,
+        urlCollection.folder
+      );
+      setActiveSource(sourceId);
+      setPickerDismissed(true);
+      clearUrlPath();
+      setUrlHandled(true);
+    } else if (urlCollection.directLoad && urlCollection.username && urlCollection.folder) {
+      // Path-based format without collectionUrl (legacy path format)
       const sourceId = addMyPlausibleMeSource(
         urlCollection.username,
         urlCollection.folder
@@ -68,10 +88,13 @@ function AppContent() {
       // Just username in URL: will be passed to picker
       setUrlHandled(true);
     }
-  }, [urlCollection, urlHandled, addMyPlausibleMeSource, setActiveSource]);
+  }, [urlCollection, urlHandled, addMyPlausibleMeSource, addSourceFromUrl, setActiveSource]);
 
-  // Show picker on every startup until user selects (unless URL direct load)
-  const showCollectionPicker = !pickerDismissed && !urlCollection.directLoad;
+  // Show picker on startup unless:
+  // 1. Already dismissed in this session
+  // 2. URL specifies direct load
+  // 3. Already have an active source (persisted from previous session)
+  const showCollectionPicker = !pickerDismissed && !urlCollection.directLoad && !activeSourceId;
 
   const handleCollectionSelect = useCallback((_sourceId: string) => {
     // Source is already added and set as active by the picker
@@ -130,9 +153,52 @@ function AppContent() {
     setEditModeEnabled(!editModeEnabled);
   }, [editModeEnabled, setEditModeEnabled]);
 
+  // Soft refresh handlers (Cmd-R)
+  const clearAllFilters = useSettingsStore((state) => state.clearAllFilters);
+
+  // Listen for early keyboard interception event from main.tsx
+  useEffect(() => {
+    const handleReloadRequest = () => {
+      setShowReloadDialog(true);
+    };
+
+    window.addEventListener("app:reload-request", handleReloadRequest);
+    return () => {
+      window.removeEventListener("app:reload-request", handleReloadRequest);
+    };
+  }, []);
+
+  const handleReloadConfirm = useCallback(() => {
+    setShowReloadDialog(false);
+
+    // Soft refresh: reset transient state without full page reload
+    // 1. Clear search and filters
+    clearAllFilters();
+
+    // 2. Close all panels/overlays
+    setSettingsOpen(false);
+    setHelpOpen(false);
+    setMechanicPanelOpen(false);
+    setViewPopoverOpen(false);
+    setSidebarOpen(false);
+
+    // 3. Trigger re-shuffle by toggling shuffleOnLoad
+    if (shuffleOnLoad) {
+      setShuffleOnLoad(false);
+      setTimeout(() => {
+        setShuffleOnLoad(true);
+      }, 10);
+    }
+  }, [clearAllFilters, shuffleOnLoad, setShuffleOnLoad]);
+
+  const handleReloadCancel = useCallback(() => {
+    setShowReloadDialog(false);
+  }, []);
+
   useAdminModeShortcut(handleSettingsToggle);
 
   // Additional keyboard shortcuts: ?, S, R, E
+  // Note: Cmd-R/Ctrl-R is handled in main.tsx for early interception
   useGlobalKeyboard({
     shortcuts: [
       {
@@ -189,11 +255,20 @@ function AppContent() {
   // Button visibility settings
   const showHelpButton = useSettingsStore((state) => state.showHelpButton);
   const showSettingsButton = useSettingsStore((state) => state.showSettingsButton);
+  const showViewButton = useSettingsStore((state) => state.showViewButton);
 
   // Search bar state
   const showSearchBar = useSettingsStore((state) => state.showSearchBar);
   const searchBarMinimised = useSettingsStore((state) => state.searchBarMinimised);
   const setSearchBarMinimised = useSettingsStore((state) => state.setSearchBarMinimised);
+
+  // Statistics bar state
+  const showStatisticsBar = useSettingsStore((state) => state.showStatisticsBar);
+  const setShowStatisticsBar = useSettingsStore((state) => state.setShowStatisticsBar);
+
+  const handleStatisticsDismiss = useCallback(() => {
+    setShowStatisticsBar(false);
+  }, [setShowStatisticsBar]);
 
   // Active mechanic state
   const activeMechanicId = useSettingsStore((state) => state.activeMechanicId);
@@ -261,6 +336,10 @@ function AppContent() {
 
       {/* Main content */}
       <main id="main-content" className={styles.main}>
+        {/* Statistics bar (shows above card grid when enabled and loaded) */}
+        {loadingComplete && showStatisticsBar && (
+          <StatisticsBar onDismiss={handleStatisticsDismiss} />
+        )}
         <QueryErrorBoundary>
           <CardGrid />
         </QueryErrorBoundary>
@@ -284,6 +363,7 @@ function AppContent() {
           showHelpButton={showHelpButton}
           showSettingsButton={showSettingsButton}
           showSearchBar={showSearchBar}
+          showViewButton={showViewButton}
           hidden={!searchBarMinimised || viewPopoverOpen}
         />
       )}
@@ -320,6 +400,18 @@ function AppContent() {
       {import.meta.env.DEV && devtoolsEnabled && (
         <ReactQueryDevtools initialIsOpen={false} />
       )}
+
+      {/* Soft refresh confirmation dialog (Cmd-R/Ctrl-R) */}
+      <ConfirmDialog
+        isOpen={showReloadDialog}
+        title="Reset View?"
+        message="This will clear your search, filters, and re-shuffle the cards. Your settings and edits are preserved."
+        confirmLabel="Reset"
+        cancelLabel="Cancel"
+        variant="warning"
+        onConfirm={handleReloadConfirm}
+        onCancel={handleReloadCancel}
+      />
     </div>
   );
 }

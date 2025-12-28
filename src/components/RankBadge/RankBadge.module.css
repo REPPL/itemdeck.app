@@ -26,22 +26,27 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-/* Size variants - larger for prominence */
-/* small size matches InfoButton height (40px) */
+/* Size variants - scaled relative to card size */
+/* small: compact for small cards on mobile */
 .small {
-  min-height: 40px;
-  padding: 8px 12px;
-  font-size: 1rem;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  gap: 2px;
+  border-radius: var(--radius-sm, 4px);
 }
 
+/* medium: default for medium cards (previous "large" sizing) */
 .medium {
-  padding: 6px 12px;
-  font-size: 1.1rem;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+  gap: 3px;
 }
 
+/* large: prominent for large cards */
 .large {
-  padding: 8px 16px;
-  font-size: 1.3rem;
+  padding: 8px 14px;
+  font-size: 1.1rem;
+  gap: 4px;
 }
 
 /* Star icons container */
@@ -57,6 +62,11 @@
   width: 1em;
   height: 1em;
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* Hide stars on small size to save space */
+.small .stars {
+  display: none;
 }
 
 /* Rank number */

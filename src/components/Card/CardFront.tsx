@@ -133,7 +133,7 @@ export function CardFront({
           <RankBadge
             rank={rank ?? null}
             placeholderText={rankPlaceholderText}
-            size="small"
+            size={cardSize}
           />
           {/* Edit indicator shown when card has local edits - simple dot */}
           {hasEdits && (

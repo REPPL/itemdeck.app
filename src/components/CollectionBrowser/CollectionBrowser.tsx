@@ -52,6 +52,7 @@ export function CollectionCard({
             src={collection.thumbnail}
             alt=""
             loading="lazy"
+            draggable="false"
           />
         </div>
       )}

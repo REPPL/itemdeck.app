@@ -1,0 +1,24 @@
+{
+  "id": "gh",
+  "name": "GitHub",
+  "description": "GitHub repositories via jsDelivr CDN",
+  "cdn": {
+    "baseUrl": "https://cdn.jsdelivr.net/gh",
+    "pattern": "{user}/{repo}@{branch}/{dataPath}/{collection}"
+  },
+  "defaults": {
+    "repo": "MyPlausibleMe",
+    "branch": "main",
+    "dataPath": "data/collections"
+  },
+  "params": {
+    "required": ["u", "collection"],
+    "optional": ["repo", "branch"],
+    "mapping": {
+      "u": "user",
+      "collection": "collection",
+      "repo": "repo",
+      "branch": "branch"
+    }
+  }
+}

@@ -254,11 +254,44 @@ export type CardAspectRatio = "3:4" | "5:7" | "1:1";
 /**
  * Card size preset pixel widths.
  */
+/**
+ * Card size widths in pixels.
+ *
+ * Optimised for different device sizes:
+ * - small: 130px - iPhone vertical (2 cards per row with gap on 320px+ screens)
+ * - medium: 260px - iPad horizontal (comfortable viewing)
+ * - large: 360px - Studio Display (utilise large screen)
+ */
 export const CARD_SIZE_WIDTHS: Record<CardSizePreset, number> = {
-  small: 160,
-  medium: 220,
-  large: 300,
+  small: 130,
+  medium: 260,
+  large: 360,
 };
+
+/**
+ * Get the responsive default card size based on screen width.
+ *
+ * @returns "small" for mobile (<600px), "medium" otherwise
+ */
+export function getResponsiveCardSizeDefault(): CardSizePreset {
+  if (typeof window !== "undefined" && window.innerWidth < 600) {
+    return "small";
+  }
+  return "medium";
+}
+
+/**
+ * Compute smart default for random selection count based on collection size.
+ *
+ * Returns 50% of cards, minimum 8 (if deck > 8), otherwise the deck size.
+ *
+ * @param totalCards - Total number of cards in the collection
+ * @returns Smart default for selection count
+ */
+export function computeSmartSelectionDefault(totalCards: number): number {
+  if (totalCards <= 8) return totalCards;
+  return Math.max(8, Math.ceil(totalCards * 0.5));
+}
 
 /**
  * Card aspect ratio values (height/width).
@@ -531,10 +564,10 @@ interface SettingsState {
  */
 const DEFAULT_SETTINGS = {
   layout: "grid" as LayoutType,
-  cardSizePreset: "medium" as CardSizePreset,
+  cardSizePreset: getResponsiveCardSizeDefault(),
   cardAspectRatio: "5:7" as CardAspectRatio,
   maxVisibleCards: 2,
-  cardBackDisplay: "year" as CardBackDisplay,
+  cardBackDisplay: "logo" as CardBackDisplay,
   shuffleOnLoad: true,
   reduceMotion: "system" as ReduceMotionPreference,
   highContrast: false,

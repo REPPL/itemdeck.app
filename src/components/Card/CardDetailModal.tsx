@@ -30,6 +30,7 @@ export function CardDetailModal({ card, isOpen, onClose }: CardDetailModalProps)
             alt={card.title}
             className={styles.image}
             loading="lazy"
+            draggable="false"
           />
         </div>
 

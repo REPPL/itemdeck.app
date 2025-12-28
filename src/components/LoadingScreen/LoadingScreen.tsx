@@ -189,21 +189,25 @@ export function LoadingScreen({
 
   // Build contextual status text (must be before early returns to maintain hook order)
   const statusText = useMemo(() => {
-    const baseText = phase === "collection"
-      ? "Loading collection..."
-      : phase === "consent"
-      ? "Waiting for permission..."
-      : phase === "images"
-      ? `Caching images... ${String(Math.round(progressPercent))}%`
-      : "Ready!";
-
-    // Add GitHub context if available
-    if (githubUsername && phase === "collection") {
-      return `Loading from ${githubUsername}'s collection...`;
+    // Add collection name context when available
+    if (phase === "collection") {
+      if (githubUsername) {
+        return `Loading from ${githubUsername}'s collection...`;
+      }
+      return "Loading collection...";
     }
 
-    return baseText;
-  }, [phase, progressPercent, githubUsername]);
+    if (phase === "consent") {
+      return "Waiting for permission...";
+    }
+
+    if (phase === "images") {
+      const displayName = collectionName ?? "images";
+      return `Caching ${displayName}... ${String(Math.round(progressPercent))}%`;
+    }
+
+    return "Ready!";
+  }, [phase, progressPercent, githubUsername, collectionName]);
 
   const mainContainerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
 
@@ -238,6 +242,7 @@ export function LoadingScreen({
               alt={`${githubUsername}'s GitHub avatar`}
               className={styles.githubAvatar}
               loading="eager"
+              draggable="false"
             />
             <span className={styles.githubUsername}>{githubUsername}</span>
             {collectionName && (

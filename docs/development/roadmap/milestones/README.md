@@ -26,7 +26,8 @@ Release planning for Itemdeck v0.1.0 through v1.0.0.
 | [v0.11.0](./v0.11.0.md) | Mechanics Foundation & Discovery | ✅ Complete | 9 |
 | [v0.11.1](./v0.11.1.md) | UX Polish, Video Support & Documentation | ✅ Complete | 7 |
 | [v0.11.5](./v0.11.5.md) | UI Refinements & Documentation Sync | ✅ Complete | 6 |
-| [v0.12.0](./v0.12.0.md) | Core Mechanics | 📋 Planned | 3 |
+| [v0.12.0](./v0.12.0.md) | UI Polish & Statistics | ✅ Complete | 14 fixes + 3 components |
+| [v0.12.5](./v0.12.5.md) | Core Mechanics & Documentation | 📋 Planned | 6 features + 12 docs |
 | [v0.13.0](./v0.13.0.md) | Advanced Mechanics | 📋 Planned | 2 |
 | [v1.0.0](./v1.0.0.md) | Multi-Collection | 📋 Planned | 1 |
 
@@ -93,7 +94,10 @@ v0.11.1 UX Polish & Video ✅
 v0.11.5 UI Refinements ✅
     │
     ▼
-v0.12.0 Core Mechanics 📋
+v0.12.0 UI Polish & Statistics ✅
+    │
+    ▼
+v0.12.5 Core Mechanics & Docs 📋
     │
     ▼
 v0.13.0 Advanced Mechanics 📋

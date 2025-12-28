@@ -85,9 +85,23 @@ export interface GridOverlayProps {
 }
 
 /**
- * Full mechanic interface.
+ * Props for mechanic settings component.
+ * @see ADR-020 for settings isolation pattern
  */
-export interface Mechanic {
+export interface MechanicSettingsProps<TSettings = unknown> {
+  /** Current settings values */
+  settings: TSettings;
+  /** Callback to update settings */
+  onChange: (settings: Partial<TSettings>) => void;
+  /** Whether settings are disabled (e.g., during active game) */
+  disabled?: boolean;
+}
+
+/**
+ * Full mechanic interface.
+ * @template TSettings - Type of mechanic-specific settings
+ */
+export interface Mechanic<TSettings = unknown> {
   /** Mechanic metadata */
   manifest: MechanicManifest;
   /** Lifecycle hooks */
@@ -102,11 +116,19 @@ export interface Mechanic {
   CardOverlay?: ComponentType<CardOverlayProps>;
   /** Optional grid overlay component */
   GridOverlay?: ComponentType<GridOverlayProps>;
-  /** Optional settings component */
-  Settings?: ComponentType;
+  /** Optional settings component with props */
+  Settings?: ComponentType<MechanicSettingsProps<TSettings>>;
+  /** Get current mechanic settings (ADR-020) */
+  getSettings?: () => TSettings;
+  /** Update mechanic settings (ADR-020) */
+  setSettings?: (settings: Partial<TSettings>) => void;
+  /** Default settings values */
+  defaultSettings?: TSettings;
 }
 
 /**
  * Factory function for lazy loading mechanics.
+ * Uses explicit any for Settings component to allow typed mechanics.
  */
-export type MechanicFactory = () => Promise<Mechanic>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type MechanicFactory = () => Promise<Mechanic<any>>;

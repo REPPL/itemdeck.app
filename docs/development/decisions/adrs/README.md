@@ -25,6 +25,7 @@ Documented architectural decisions for Itemdeck.
 | [017](./ADR-017-mechanic-state-management.md) | Use Scoped Zustand Stores per mechanic | Accepted | [R-005-gaming-mechanics-state](../../research/R-005-gaming-mechanics-state.md) |
 | [018](./ADR-018-mechanic-ui-overlay.md) | Use Slot Props for mechanic overlays | Accepted | [R-005-gaming-mechanics-state](../../research/R-005-gaming-mechanics-state.md) |
 | [019](./ADR-019-configuration-first-mechanics.md) | Use Configuration-First Mechanics | Accepted | [R-009-mechanic-app-integration](../../research/R-009-mechanic-app-integration.md) |
+| [020](./ADR-020-mechanic-settings-isolation.md) | Use Settings Accessor for mechanic isolation | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
 
 ## ADR Template
 

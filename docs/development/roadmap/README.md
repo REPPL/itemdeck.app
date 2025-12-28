@@ -100,13 +100,13 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-065 | Card Grouping | v0.11.0 | ✅ Complete |
 | F-066 | View Mode Toggle | v0.11.0 | ✅ Complete |
 | F-067 | Statistics Dashboard | v0.12.0 | 📋 Planned |
-| F-068 | Memory Game Status Bar Relocation | v0.11.1 | 🔄 In Progress |
-| F-069 | YouTube Video Gallery Support | v0.11.1 | 📋 Planned |
-| F-070 | Image Retrieval Validation | v0.11.1 | 📋 Planned |
-| F-071 | MyPlausibleMe Strict URL Format | v0.11.1 | 📋 Planned |
-| F-072 | Settings Panel Redesign | v0.11.1 | 📋 Planned |
-| F-073 | User Documentation Suite | v0.11.1 | 📋 Planned |
-| F-074 | Destructive Action Button Styling | v0.11.1 | 📋 Planned |
+| F-068 | Memory Game Status Bar Relocation | v0.11.1 | ✅ Complete |
+| F-069 | YouTube Video Gallery Support | v0.11.1 | ✅ Complete |
+| F-070 | Image Retrieval Validation | v0.11.1 | ✅ Complete |
+| F-071 | MyPlausibleMe Strict URL Format | v0.11.1 | ✅ Complete |
+| F-072 | Settings Panel Redesign | v0.11.1 | ✅ Complete |
+| F-073 | User Documentation Suite | v0.11.1 | 🔄 In Progress |
+| F-074 | Destructive Action Button Styling | v0.11.1 | ✅ Complete |
 
 ## Contents
 

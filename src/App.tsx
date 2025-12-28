@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
@@ -22,7 +22,6 @@ import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
 import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
 import { useSettingsStore } from "@/stores/settingsStore";
-import { useSourceStore } from "@/stores/sourceStore";
 import "@/styles/themes";
 import styles from "./App.module.css";
 
@@ -40,16 +39,11 @@ function AppContent() {
   const [loadingComplete, setLoadingComplete] = useState(false);
 
   // Collection picker state (F-087)
-  const sources = useSourceStore((s) => s.sources);
+  // Always show picker on startup until dismissed or a collection is selected
   const [pickerDismissed, setPickerDismissed] = useState(false);
 
-  // Check if user has only built-in sources (no custom sources added)
-  const hasOnlyBuiltInSources = useMemo(() => {
-    return sources.every((s) => s.isBuiltIn === true);
-  }, [sources]);
-
-  // Show picker if user has only built-in sources and hasn't dismissed it
-  const showCollectionPicker = hasOnlyBuiltInSources && !pickerDismissed;
+  // Show picker on every startup until user selects or dismisses
+  const showCollectionPicker = !pickerDismissed;
 
   const handleCollectionSelect = useCallback((_sourceId: string) => {
     // Source is already added and set as active by the picker

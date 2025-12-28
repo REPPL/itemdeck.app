@@ -26,6 +26,7 @@ Post-milestone reflections and lessons learned.
 | [v0.11.1](./v0.11.1/README.md) | UX Polish, Video Support & Documentation | Complete |
 | [v0.11.5](./v0.11.5/README.md) | UI Refinements & Documentation Sync | Complete |
 | [v0.12.0](./v0.12.0/README.md) | UI Polish & Statistics | Complete |
+| [v0.12.5](./v0.12.5/README.md) | URL Simplification, Plugin-Ready Architecture & Snap Ranking | Complete |
 
 ## Structure
 

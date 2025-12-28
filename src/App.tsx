@@ -1,17 +1,16 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { CardGrid } from "@/components/CardGrid/CardGrid";
 import { Sidebar } from "@/components/Sidebar/Sidebar";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import { QueryErrorBoundary } from "@/components/QueryErrorBoundary";
 import { SettingsPanel } from "@/components/SettingsPanel";
-import { AdminButton } from "@/components/AdminButton";
-import { HelpButton } from "@/components/HelpButton";
 import { HelpModal } from "@/components/HelpModal";
-import { MechanicButton } from "@/components/MechanicButton";
 import { MechanicPanel } from "@/components/MechanicPanel";
-import { SearchButton } from "@/components/SearchButton";
+import { NavigationHub } from "@/components/NavigationHub";
+import { ViewPopover } from "@/components/ViewPopover";
 import { LoadingScreen } from "@/components/LoadingScreen";
+import { CollectionPicker } from "@/components/CollectionPicker";
 import { StatisticsBar } from "@/components/Statistics";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
 import { ConfigProvider } from "@/context/ConfigContext";
@@ -23,6 +22,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
 import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useSourceStore } from "@/stores/sourceStore";
 import "@/styles/themes";
 import styles from "./App.module.css";
 
@@ -35,8 +35,32 @@ function AppContent() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [mechanicPanelOpen, setMechanicPanelOpen] = useState(false);
+  const [viewPopoverOpen, setViewPopoverOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
+
+  // Collection picker state (F-087)
+  const sources = useSourceStore((s) => s.sources);
+  const [pickerDismissed, setPickerDismissed] = useState(false);
+
+  // Check if user has only built-in sources (no custom sources added)
+  const hasOnlyBuiltInSources = useMemo(() => {
+    return sources.every((s) => s.isBuiltIn === true);
+  }, [sources]);
+
+  // Show picker if user has only built-in sources and hasn't dismissed it
+  const showCollectionPicker = hasOnlyBuiltInSources && !pickerDismissed;
+
+  const handleCollectionSelect = useCallback((_sourceId: string) => {
+    // Source is already added and set as active by the picker
+    // Just dismiss the picker
+    setPickerDismissed(true);
+  }, []);
+
+  const handlePickerDismiss = useCallback(() => {
+    // User chose to skip - use default built-in source
+    setPickerDismissed(true);
+  }, []);
 
   const handleLoadingComplete = useCallback(() => {
     setLoadingComplete(true);
@@ -194,6 +218,10 @@ function AppContent() {
     setSearchBarMinimised(false);
   }, [setSearchBarMinimised]);
 
+  const handleViewClick = useCallback(() => {
+    setViewPopoverOpen((prev) => !prev);
+  }, []);
+
   return (
     <div className={styles.app}>
       {/* Skip to main content link (accessibility) */}
@@ -201,8 +229,16 @@ function AppContent() {
         Skip to content
       </a>
 
-      {/* Loading screen (shows during initial load) */}
-      {!loadingComplete && (
+      {/* Collection picker (shows on startup if no custom sources) */}
+      {showCollectionPicker && (
+        <CollectionPicker
+          onSelect={handleCollectionSelect}
+          onDismiss={handlePickerDismiss}
+        />
+      )}
+
+      {/* Loading screen (shows during initial load, after picker) */}
+      {!showCollectionPicker && !loadingComplete && (
         <LoadingScreen onComplete={handleLoadingComplete} />
       )}
 
@@ -222,39 +258,22 @@ function AppContent() {
       {/* Edit mode indicator (top-right, shows when edit mode active) */}
       <EditModeIndicator onClick={handleSettingsOpen} />
 
-      {/* Floating buttons (bottom-right, stacked from bottom) */}
-      {/* All buttons stay visible - disabled when search bar is open */}
-      {/* Order from top to bottom: Help, Games, Search, Settings */}
-      {/* Using column-reverse, so DOM order is: Settings, Search, Games, Help */}
-      <div className={styles.floatingButtons}>
-        {/* Settings button at bottom (first in column-reverse) */}
-        {showSettingsButton && (
-          <AdminButton
-            onClick={handleSettingsOpen}
-            disabled={Boolean(activeMechanicId) || !searchBarMinimised}
-          />
-        )}
-        {/* Search button - toggles SearchBar, only show if search feature enabled */}
-        {/* Disabled when search bar is open (like other buttons) */}
-        {showSearchBar && (
-          <SearchButton
-            onClick={searchBarMinimised ? handleSearchButtonClick : () => { setSearchBarMinimised(true); }}
-            disabled={Boolean(activeMechanicId) || !searchBarMinimised}
-          />
-        )}
-        {/* Games/Mechanic button - disabled when search bar open */}
-        <MechanicButton
-          onClick={() => { setMechanicPanelOpen(true); }}
+      {/* Navigation Hub (bottom-right) */}
+      {/* Replaces individual floating buttons with collapsible navigation */}
+      {/* Hidden during collection picker and loading to avoid z-index issues */}
+      {!showCollectionPicker && loadingComplete && (
+        <NavigationHub
+          onHelpClick={() => { setHelpOpen(true); }}
+          onSearchClick={handleSearchButtonClick}
+          onGamesClick={() => { setMechanicPanelOpen(true); }}
+          onSettingsClick={handleSettingsOpen}
+          onViewClick={handleViewClick}
           disabled={!searchBarMinimised}
+          showHelpButton={showHelpButton}
+          showSettingsButton={showSettingsButton}
+          showSearchBar={showSearchBar}
         />
-        {/* Help button at top (last in column-reverse) - disabled when search bar open */}
-        {showHelpButton && (
-          <HelpButton
-            onClick={() => { setHelpOpen(true); }}
-            disabled={!searchBarMinimised}
-          />
-        )}
-      </div>
+      )}
 
       {/* Settings panel */}
       <SettingsPanel
@@ -274,6 +293,12 @@ function AppContent() {
       <MechanicPanel
         isOpen={mechanicPanelOpen}
         onClose={() => { setMechanicPanelOpen(false); }}
+      />
+
+      {/* View popover */}
+      <ViewPopover
+        isOpen={viewPopoverOpen}
+        onClose={() => { setViewPopoverOpen(false); }}
       />
 
       <OfflineIndicator />

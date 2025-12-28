@@ -14,7 +14,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { FilterChips } from "./FilterChips";
 import { GroupByDropdown } from "./GroupByDropdown";
-import { ViewModeToggle } from "./ViewModeToggle";
 import styles from "./SearchBar.module.css";
 
 interface SearchBarProps {
@@ -177,10 +176,9 @@ export function SearchBar({
 
   return (
     <div className={styles.container}>
-      {/* Top row: View controls on left, minimise on right */}
+      {/* Top row: Group by on left, minimise on right */}
       <div className={styles.topRow}>
         <div className={styles.topRowLeft}>
-          <ViewModeToggle />
           <GroupByDropdown />
         </div>
         <div className={styles.topRowRight}>

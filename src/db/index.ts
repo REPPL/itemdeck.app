@@ -10,7 +10,7 @@ import { openDB, type DBSchema, type IDBPDatabase } from "idb";
 /**
  * Schema version for migrations.
  */
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 /**
  * Database name.
@@ -64,6 +64,25 @@ export interface CacheMetadata {
 }
 
 /**
+ * Image validation result stored in IndexedDB.
+ *
+ * @see F-079: Image validation IndexedDB persistence
+ */
+export interface ValidationEntry {
+  /** Image URL (key) */
+  url: string;
+
+  /** Whether the image is valid/accessible */
+  valid: boolean;
+
+  /** When the validation was performed */
+  validatedAt: number;
+
+  /** Error message if validation failed */
+  error?: string;
+}
+
+/**
  * IndexedDB schema definition.
  */
 interface ItemdeckDB extends DBSchema {
@@ -82,6 +101,15 @@ interface ItemdeckDB extends DBSchema {
   metadata: {
     key: string;
     value: CacheMetadata;
+  };
+
+  /** Image validation results (F-079) */
+  validations: {
+    key: string;
+    value: ValidationEntry;
+    indexes: {
+      "by-validated-at": number;
+    };
   };
 }
 
@@ -110,6 +138,12 @@ export async function getDB(): Promise<IDBPDatabase<ItemdeckDB>> {
 
         // Create metadata store
         db.createObjectStore("metadata", { keyPath: "key" });
+      }
+
+      // Version 2: Add validations store (F-079)
+      if (oldVersion < 2) {
+        const validationStore = db.createObjectStore("validations", { keyPath: "url" });
+        validationStore.createIndex("by-validated-at", "validatedAt");
       }
     },
     blocked() {

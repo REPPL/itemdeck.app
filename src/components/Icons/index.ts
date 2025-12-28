@@ -13,4 +13,7 @@ export {
   TrashIcon,
   CheckIcon,
   EditIcon,
+  WarningIcon,
+  ImageIcon,
+  ExpandIcon,
 } from "./Icons";

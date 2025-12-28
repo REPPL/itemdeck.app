@@ -68,6 +68,17 @@ Archive of completed feature implementations.
 | [F-051](./F-051-edit-button-integration.md) | Edit Button Integration | v0.10.0 |
 | [F-052](./F-052-edit-export-import.md) | Edit Export/Import | v0.10.0 |
 
+### v0.11.1 - UX Polish, Video Support & Settings Redesign
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-068](./F-068-memory-status-bar-relocation.md) | Memory Game Status Bar Relocation | v0.11.1 |
+| [F-069](./F-069-youtube-video-support.md) | YouTube Video Gallery Support | v0.11.1 |
+| [F-070](./F-070-image-retrieval-validation.md) | Image Retrieval Validation | v0.11.1 |
+| [F-071](./F-071-myplausibleme-url-format.md) | MyPlausibleMe Strict URL Format | v0.11.1 |
+| [F-072](./F-072-settings-panel-redesign.md) | Settings Panel Redesign (4 tabs) | v0.11.1 |
+| [F-074](./F-074-destructive-action-styling.md) | Destructive Action Button Styling | v0.11.1 |
+
 ## Moving Features Here
 
 When a feature is complete:

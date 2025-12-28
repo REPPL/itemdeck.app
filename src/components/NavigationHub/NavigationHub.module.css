@@ -1,0 +1,180 @@
+/**
+ * NavigationHub styles.
+ *
+ * Collapsible navigation hub with expand/collapse animation.
+ * Help button always visible at top, Navigation toggle at bottom.
+ * Expandable buttons stack between them with staggered animation.
+ */
+
+.container {
+  position: fixed;
+  bottom: 24px;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  right: 24px;
+  right: calc(24px + env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column-reverse; /* Bottom button first in DOM, stacks upward */
+  gap: 12px;
+  z-index: 100;
+  /* iOS Safari fix */
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+@media (max-width: 600px) {
+  .container {
+    bottom: 16px;
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    right: 16px;
+    right: calc(16px + env(safe-area-inset-right, 0px));
+  }
+}
+
+/* Base button styles - shared across all navigation buttons */
+.button {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Solid background for iOS Safari compatibility */
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full, 50%);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  box-shadow: var(--elevation-3, 0 10px 15px -3px rgba(0, 0, 0, 0.3));
+  transition:
+    background-color var(--transition-fast, 150ms),
+    border-color var(--transition-fast, 150ms),
+    color var(--transition-fast, 150ms),
+    box-shadow var(--transition-fast, 150ms),
+    transform var(--transition-fast, 150ms);
+  /* iOS Safari GPU layer */
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Apply backdrop blur only on desktop browsers */
+@supports (backdrop-filter: blur(8px)) and (not (-webkit-touch-callout: none)) {
+  .button {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+  }
+}
+
+.button:hover:not(:disabled) {
+  background: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  color: #fff;
+  box-shadow: var(--elevation-4, 0 20px 25px -5px rgba(0, 0, 0, 0.35));
+}
+
+.button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: 2px;
+}
+
+.button svg {
+  width: 28px;
+  height: 28px;
+}
+
+/* Disabled state */
+.buttonDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Navigation toggle button - special styling when expanded */
+.navToggle[aria-expanded="true"] {
+  background: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  color: #fff;
+}
+
+.navToggle[aria-expanded="true"]:hover:not(:disabled) {
+  background: var(--colour-primary-hover, #1d4ed8);
+  border-color: var(--colour-primary-hover, #1d4ed8);
+}
+
+/* Navigation toggle icon wrapper */
+.navToggleIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Expanded state styling */
+.navToggleExpanded {
+  background: var(--colour-accent, #3b82f6);
+  border-color: var(--colour-accent, #3b82f6);
+  color: #fff;
+}
+
+.navToggleExpanded:hover:not(:disabled) {
+  background: var(--colour-primary-hover, #1d4ed8);
+  border-color: var(--colour-primary-hover, #1d4ed8);
+}
+
+/* Expandable button wrapper - handles animation */
+.expandableWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Active indicator (for search/mechanic buttons) */
+.indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 10px;
+  height: 10px;
+  background: var(--colour-success, #22c55e);
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.5);
+}
+
+/* Mechanic active state */
+.buttonActive {
+  background: var(--colour-success, #22c55e);
+  border-color: var(--colour-success, #22c55e);
+  color: #fff;
+}
+
+.buttonActive:hover:not(:disabled) {
+  background: #16a34a;
+  border-color: #16a34a;
+}
+
+/* ============================================
+   Responsive
+   ============================================ */
+
+@media (max-width: 600px) {
+  .button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .button svg {
+    width: 24px;
+    height: 24px;
+  }
+}
+
+/* ============================================
+   Reduced Motion
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  .button {
+    transition: none;
+  }
+
+  .navToggle svg {
+    transition: none;
+  }
+}

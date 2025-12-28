@@ -237,9 +237,24 @@ export function getPrimaryImageUrl(
 }
 
 /**
+ * Check if a string is a valid absolute URL.
+ */
+function isValidUrl(url: string): boolean {
+  return url.startsWith("http://") || url.startsWith("https://");
+}
+
+/**
  * Get all image URLs from an entity.
  *
- * @param images - Array of images
+ * Handles various data formats:
+ * - Image objects: { url: "..." }
+ * - Plain string URLs: "https://..."
+ * - Mixed arrays of both
+ *
+ * Only returns valid absolute URLs (http/https).
+ * Invalid or relative URLs are filtered out.
+ *
+ * @param images - Array of images or URLs
  * @returns Array of URLs
  */
 export function getImageUrls(images: Image[] | undefined): string[] {
@@ -247,7 +262,20 @@ export function getImageUrls(images: Image[] | undefined): string[] {
     return [];
   }
 
-  return images.map((img) => img.url);
+  return images
+    .map((img) => {
+      // Handle plain string URLs
+      if (typeof img === "string") {
+        return isValidUrl(img) ? img : null;
+      }
+      // Handle Image objects with url property
+      if (img && typeof img === "object" && typeof img.url === "string") {
+        return isValidUrl(img.url) ? img.url : null;
+      }
+      // Skip invalid entries
+      return null;
+    })
+    .filter((url): url is string => url !== null);
 }
 
 /**

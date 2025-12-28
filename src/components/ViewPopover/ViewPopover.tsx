@@ -1,0 +1,268 @@
+/**
+ * ViewPopover component.
+ *
+ * Popover for changing view mode and grouping options.
+ * Opened from the View button in NavigationHub.
+ *
+ * @see F-086: View Button with Popover
+ */
+
+import { useCallback, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useSettingsStore, type LayoutType } from "@/stores/settingsStore";
+import { GROUP_BY_FIELD_OPTIONS } from "@/utils/fieldPathResolver";
+import styles from "./ViewPopover.module.css";
+
+// ============================================================================
+// Icons
+// ============================================================================
+
+function GridIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="3" y="4" width="18" height="4" rx="1" />
+      <rect x="3" y="10" width="18" height="4" rx="1" />
+      <rect x="3" y="16" width="18" height="4" rx="1" />
+    </svg>
+  );
+}
+
+function CompactIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <rect x="3" y="3" width="5" height="5" rx="0.5" />
+      <rect x="9.5" y="3" width="5" height="5" rx="0.5" />
+      <rect x="16" y="3" width="5" height="5" rx="0.5" />
+      <rect x="3" y="9.5" width="5" height="5" rx="0.5" />
+      <rect x="9.5" y="9.5" width="5" height="5" rx="0.5" />
+      <rect x="16" y="9.5" width="5" height="5" rx="0.5" />
+      <rect x="3" y="16" width="5" height="5" rx="0.5" />
+      <rect x="9.5" y="16" width="5" height="5" rx="0.5" />
+      <rect x="16" y="16" width="5" height="5" rx="0.5" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="3"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+// ============================================================================
+// Constants
+// ============================================================================
+
+const viewModes: { type: LayoutType; icon: React.ReactNode; label: string }[] = [
+  { type: "grid", icon: <GridIcon />, label: "Grid" },
+  { type: "list", icon: <ListIcon />, label: "List" },
+  { type: "compact", icon: <CompactIcon />, label: "Compact" },
+];
+
+// ============================================================================
+// Animation
+// ============================================================================
+
+const popoverVariants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.9,
+    y: 10,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 400,
+      damping: 25,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.9,
+    y: 10,
+    transition: {
+      duration: 0.15,
+    },
+  },
+};
+
+// ============================================================================
+// Types
+// ============================================================================
+
+interface ViewPopoverProps {
+  /** Whether the popover is open */
+  isOpen: boolean;
+  /** Callback to close the popover */
+  onClose: () => void;
+}
+
+// ============================================================================
+// Component
+// ============================================================================
+
+/**
+ * ViewPopover component.
+ *
+ * A popover menu for changing view mode (Grid/List/Compact) and
+ * grouping options (None/Platform/Year/Decade/Genre).
+ */
+export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Store state
+  const layout = useSettingsStore((state) => state.layout);
+  const setLayout = useSettingsStore((state) => state.setLayout);
+  const groupByField = useSettingsStore((state) => state.groupByField);
+  const setGroupByField = useSettingsStore((state) => state.setGroupByField);
+
+  // Handle view mode change
+  const handleViewModeChange = useCallback(
+    (type: LayoutType) => {
+      setLayout(type);
+    },
+    [setLayout]
+  );
+
+  // Handle grouping change
+  const handleGroupChange = useCallback(
+    (value: string) => {
+      setGroupByField(value === "none" ? null : value);
+    },
+    [setGroupByField]
+  );
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
+  // Focus first option when opened
+  useEffect(() => {
+    if (isOpen && popoverRef.current) {
+      const firstButton = popoverRef.current.querySelector("button");
+      if (firstButton) {
+        firstButton.focus();
+      }
+    }
+  }, [isOpen]);
+
+  // Helper to build class names
+  const getOptionClass = (isActive: boolean) =>
+    [styles.option, isActive && styles.optionActive].filter(Boolean).join(" ");
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          {/* Invisible overlay for click-outside */}
+          <div
+            className={styles.overlay}
+            onClick={onClose}
+            aria-hidden="true"
+          />
+
+          {/* Popover content */}
+          <motion.div
+            ref={popoverRef}
+            className={styles.popover}
+            role="dialog"
+            aria-label="View options"
+            variants={popoverVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+          >
+            {/* View Mode Section */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>View Mode</h3>
+              <ul className={styles.optionList} role="listbox" aria-label="Select view mode">
+                {viewModes.map(({ type, icon, label }) => (
+                  <li key={type}>
+                    <button
+                      type="button"
+                      className={getOptionClass(layout === type)}
+                      onClick={() => { handleViewModeChange(type); }}
+                      role="option"
+                      aria-selected={layout === type}
+                    >
+                      <span className={styles.optionIcon}>{icon}</span>
+                      <span className={styles.optionLabel}>{label}</span>
+                      <span className={styles.checkmark}>
+                        <CheckIcon />
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Grouping Section */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>Group By</h3>
+              <ul className={styles.optionList} role="listbox" aria-label="Select grouping">
+                {GROUP_BY_FIELD_OPTIONS.map(({ value, label }) => {
+                  const isActive = (groupByField ?? "none") === value;
+                  return (
+                    <li key={value}>
+                      <button
+                        type="button"
+                        className={getOptionClass(isActive)}
+                        onClick={() => { handleGroupChange(value); }}
+                        role="option"
+                        aria-selected={isActive}
+                      >
+                        <span className={styles.optionLabel}>{label}</span>
+                        <span className={styles.checkmark}>
+                          <CheckIcon />
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
+export default ViewPopover;

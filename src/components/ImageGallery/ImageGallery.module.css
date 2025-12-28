@@ -50,6 +50,15 @@
   object-position: top center;
 }
 
+/* Video container for YouTube embeds */
+.videoContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
 /* ============================================
    Navigation Buttons
    ============================================ */
@@ -157,6 +166,17 @@
   background: white;
 }
 
+/* Video dot indicator - slightly different styling to indicate video content */
+.dotVideo {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: transparent;
+}
+
+.dotVideo.dotActive {
+  background: white;
+  border-color: white;
+}
+
 /* ============================================
    Touch Devices
    ============================================ */
@@ -168,6 +188,66 @@
 }
 
 /* ============================================
+   Loading State
+   ============================================ */
+
+.loadingState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.loadingSpinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--colour-accent, #3b82f6);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.7));
+}
+
+/* ============================================
+   Empty State
+   ============================================ */
+
+.emptyState {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 8px);
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  opacity: 0.5;
+}
+
+.emptyText {
+  font-size: var(--text-sm, 0.875rem);
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.7));
+  text-align: center;
+  padding: 0 var(--spacing-md, 16px);
+}
+
+/* ============================================
    Reduced Motion
    ============================================ */
 
@@ -175,5 +255,11 @@
   .navButton,
   .dot {
     transition: none;
+  }
+
+  .loadingSpinner {
+    animation: none;
+    border-top-color: var(--colour-accent, #3b82f6);
+    border-right-color: var(--colour-accent, #3b82f6);
   }
 }

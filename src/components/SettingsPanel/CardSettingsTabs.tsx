@@ -162,6 +162,22 @@ export function CardSettingsTabs() {
               </div>
             </div>
             <div className={styles.row}>
+              <span className={styles.label}>Subtitle Field</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.subtitleField}
+                onChange={(e) => { handleFieldMappingChange("subtitleField", e.target.value); }}
+                aria-label="Subtitle field"
+              >
+                {SUBTITLE_FIELD_OPTIONS.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.row}>
               <span className={styles.label}>Show Rank Badge</span>
               <label className={styles.toggle}>
                 <input
@@ -216,22 +232,6 @@ export function CardSettingsTabs() {
       case "back":
         return (
           <>
-            <div className={styles.row}>
-              <span className={styles.label}>Subtitle Field</span>
-              <select
-                className={styles.select}
-                value={fieldMapping.subtitleField}
-                onChange={(e) => { handleFieldMappingChange("subtitleField", e.target.value); }}
-                aria-label="Subtitle field"
-              >
-                {SUBTITLE_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.divider} />
-
             <div className={styles.row}>
               <span className={styles.label}>Show Logo</span>
               <label className={styles.toggle}>

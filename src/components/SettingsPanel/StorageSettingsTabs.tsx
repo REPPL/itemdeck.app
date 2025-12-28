@@ -5,7 +5,7 @@
  * Sub-tabs: Sources | Image Cache | Import/Export | About
  */
 
-import { useState, useRef, useMemo, useCallback } from "react";
+import { useState, useRef, useMemo, useEffect } from "react";
 import { useCacheStats, useCacheManagement, useImagePreloader, formatBytes } from "@/hooks/useImageCache";
 import { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
 import { useCollectionData } from "@/context/CollectionDataContext";
@@ -14,8 +14,9 @@ import { useEditsStore } from "@/stores/editsStore";
 import { useSourceStore, useSources } from "@/stores/sourceStore";
 import { useSourceHealth } from "@/hooks/useSourceHealth";
 import { SourceHealthIndicator } from "@/components/SourceHealth";
-import { PlusIcon, TrashIcon, CheckIcon, ExternalLinkIcon } from "@/components/Icons";
+import { TrashIcon, CheckIcon, ExternalLinkIcon, WarningIcon } from "@/components/Icons";
 import { exportEditsToFile, importEditsFromFile } from "@/utils/editExport";
+import { AddMyPlausibleMeForm } from "./AddMyPlausibleMeForm";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -67,6 +68,12 @@ function SourceItem({ sourceId }: { sourceId: string }) {
         <div className={styles.sourceItemInfo}>
           <span className={styles.sourceItemName}>
             {source.name ?? source.url}
+            {source.sourceType === "legacy" && (
+              <span className={styles.legacyBadge} title="Legacy source format">
+                <WarningIcon size={12} />
+                Legacy
+              </span>
+            )}
           </span>
           {source.name && (
             <span className={styles.sourceItemUrl}>{source.url}</span>
@@ -133,132 +140,26 @@ function SourceItem({ sourceId }: { sourceId: string }) {
 }
 
 /**
- * Add source form component.
- */
-function AddSourceForm() {
-  const [url, setUrl] = useState("");
-  const [name, setName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isValidating, setIsValidating] = useState(false);
-
-  const addSource = useSourceStore((state) => state.addSource);
-  const sources = useSources();
-
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const trimmedUrl = url.trim();
-    if (!trimmedUrl) {
-      setError("URL is required");
-      return;
-    }
-
-    // Basic URL validation
-    try {
-      new URL(trimmedUrl);
-    } catch {
-      setError("Invalid URL format");
-      return;
-    }
-
-    // Check for duplicates
-    const normalizedUrl = trimmedUrl.replace(/\/$/, "");
-    if (sources.some((s) => s.url === normalizedUrl)) {
-      setError("Source already exists");
-      return;
-    }
-
-    setIsValidating(true);
-
-    try {
-      // Try to fetch the collection to validate
-      const testUrl = `${normalizedUrl}/collection.json`;
-      const response = await fetch(testUrl, {
-        method: "HEAD",
-        cache: "no-store",
-      });
-
-      if (!response.ok) {
-        setError(`Source not accessible (HTTP ${String(response.status)})`);
-        setIsValidating(false);
-        return;
-      }
-
-      // Add the source
-      addSource(normalizedUrl, name.trim() || undefined);
-      setUrl("");
-      setName("");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to validate source");
-    } finally {
-      setIsValidating(false);
-    }
-  }, [url, name, sources, addSource]);
-
-  return (
-    <form className={styles.addSourceForm} onSubmit={(e) => { void handleSubmit(e); }}>
-      <div className={styles.formGroup}>
-        <label htmlFor="source-url" className={styles.label}>
-          Source URL
-        </label>
-        <input
-          id="source-url"
-          type="url"
-          className={styles.input}
-          placeholder="https://example.com/data"
-          value={url}
-          onChange={(e) => { setUrl(e.target.value); }}
-          disabled={isValidating}
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label htmlFor="source-name" className={styles.label}>
-          Name (optional)
-        </label>
-        <input
-          id="source-name"
-          type="text"
-          className={styles.input}
-          placeholder="My Collection"
-          value={name}
-          onChange={(e) => { setName(e.target.value); }}
-          disabled={isValidating}
-        />
-      </div>
-
-      {error && (
-        <p className={styles.formError}>{error}</p>
-      )}
-
-      <button
-        type="submit"
-        className={styles.primaryButton}
-        disabled={isValidating || !url.trim()}
-      >
-        {isValidating ? (
-          "Validating..."
-        ) : (
-          <>
-            <PlusIcon />
-            <span>Add Source</span>
-          </>
-        )}
-      </button>
-    </form>
-  );
-}
-
-/**
  * Storage settings tab component with sub-navigation.
  */
-export function StorageSettingsTabs() {
+interface StorageSettingsTabsProps {
+  /** Initial sub-tab to navigate to (from search) */
+  initialSubTab?: string;
+}
+
+export function StorageSettingsTabs({ initialSubTab }: StorageSettingsTabsProps) {
   const { data: stats, isLoading, refetch } = useCacheStats(DEFAULT_MAX_CACHE_SIZE);
   const { clearCache, isClearing } = useCacheManagement();
   const { preload, isPreloading, progressPercent } = useImagePreloader();
   const { cards, collection } = useCollectionData();
   const [activeSubTab, setActiveSubTab] = useState<StorageSubTab>("sources");
+
+  // Handle navigation from search
+  useEffect(() => {
+    if (initialSubTab && subTabs.some((t) => t.id === initialSubTab)) {
+      setActiveSubTab(initialSubTab as StorageSubTab);
+    }
+  }, [initialSubTab]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showEditsRevertConfirm, setShowEditsRevertConfirm] = useState(false);
   const [exportFormat, setExportFormat] = useState<ExportFormat>("json");
@@ -403,12 +304,12 @@ export function StorageSettingsTabs() {
 
             <div className={styles.divider} />
 
-            <h3 className={styles.sectionHeader}>Add New Source</h3>
+            <h3 className={styles.sectionHeader}>Add MyPlausibleMe Collection</h3>
             <p className={styles.sectionDescription}>
-              Add a remote collection URL. The URL should point to a directory containing collection.json.
+              Add a collection from a MyPlausibleMe repository on GitHub.
             </p>
 
-            <AddSourceForm />
+            <AddMyPlausibleMeForm />
           </>
         );
 

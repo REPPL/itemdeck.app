@@ -7,6 +7,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { isMyPlausibleMeUrl } from "@/config/dataSource";
 
 /**
  * Storage key for sources.
@@ -16,7 +17,12 @@ const STORAGE_KEY = "itemdeck-sources";
 /**
  * Current store version for migrations.
  */
-const STORE_VERSION = 1;
+const STORE_VERSION = 2;
+
+/**
+ * Source type indicating how the source was added.
+ */
+export type SourceType = "local" | "myplausibleme" | "legacy";
 
 /**
  * Source configuration.
@@ -34,6 +40,12 @@ export interface Source {
   lastHealthCheck?: Date;
   /** Whether this is a built-in source */
   isBuiltIn?: boolean;
+  /** Source type (local, myplausibleme, or legacy) */
+  sourceType?: SourceType;
+  /** MyPlausibleMe username (if sourceType is myplausibleme) */
+  mpmUsername?: string;
+  /** MyPlausibleMe folder (if sourceType is myplausibleme) */
+  mpmFolder?: string;
 }
 
 /**
@@ -48,8 +60,10 @@ interface SourceState {
   defaultSourceId: string | null;
 
   // Actions
-  /** Add a new source */
+  /** Add a new source (legacy - use addMyPlausibleMeSource for new sources) */
   addSource: (url: string, name?: string) => string;
+  /** Add a MyPlausibleMe source */
+  addMyPlausibleMeSource: (username: string, folder: string, name?: string) => string;
   /** Remove a source by ID */
   removeSource: (id: string) => void;
   /** Update a source */
@@ -72,15 +86,34 @@ function generateId(): string {
 }
 
 /**
- * Built-in local source.
+ * Built-in MyPlausibleMe sources.
  */
-const LOCAL_SOURCE: Source = {
-  id: "local",
-  url: "/data",
-  name: "Local Collection",
+const RETRO_GAMES_SOURCE: Source = {
+  id: "reppl-retro-games",
+  url: "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-games",
+  name: "Retro Games",
   addedAt: new Date(0),
   isBuiltIn: true,
+  sourceType: "myplausibleme",
+  mpmUsername: "REPPL",
+  mpmFolder: "retro-games",
 };
+
+const RETRO_ADVERTS_SOURCE: Source = {
+  id: "reppl-retro-adverts",
+  url: "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/retro-adverts",
+  name: "Retro Adverts",
+  addedAt: new Date(0),
+  isBuiltIn: true,
+  sourceType: "myplausibleme",
+  mpmUsername: "REPPL",
+  mpmFolder: "retro-adverts",
+};
+
+/**
+ * All built-in sources.
+ */
+const BUILT_IN_SOURCES: Source[] = [RETRO_GAMES_SOURCE, RETRO_ADVERTS_SOURCE];
 
 /**
  * Source management store.
@@ -88,17 +121,46 @@ const LOCAL_SOURCE: Source = {
 export const useSourceStore = create<SourceState>()(
   persist(
     (set, get) => ({
-      sources: [LOCAL_SOURCE],
-      activeSourceId: "local",
-      defaultSourceId: "local",
+      sources: BUILT_IN_SOURCES,
+      activeSourceId: "reppl-retro-games",
+      defaultSourceId: "reppl-retro-games",
 
       addSource: (url: string, name?: string) => {
         const id = generateId();
+        const normalizedUrl = url.endsWith("/") ? url.slice(0, -1) : url;
+
+        // Determine source type based on URL format
+        const sourceType: SourceType = isMyPlausibleMeUrl(normalizedUrl)
+          ? "myplausibleme"
+          : "legacy";
+
         const newSource: Source = {
           id,
-          url: url.endsWith("/") ? url.slice(0, -1) : url,
+          url: normalizedUrl,
           name,
           addedAt: new Date(),
+          sourceType,
+        };
+
+        set((state) => ({
+          sources: [...state.sources, newSource],
+        }));
+
+        return id;
+      },
+
+      addMyPlausibleMeSource: (username: string, folder: string, name?: string) => {
+        const id = generateId();
+        const url = `https://cdn.jsdelivr.net/gh/${username}/MyPlausibleMe@main/data/collections/${folder}`;
+
+        const newSource: Source = {
+          id,
+          url,
+          name: name ?? `${username}/${folder}`,
+          addedAt: new Date(),
+          sourceType: "myplausibleme",
+          mpmUsername: username,
+          mpmFolder: folder,
         };
 
         set((state) => ({
@@ -189,11 +251,18 @@ export const useSourceStore = create<SourceState>()(
       merge: (persisted, current) => {
         const persistedState = persisted as Partial<SourceState>;
 
-        // Ensure local source always exists
+        // Start with persisted sources
         let sources = persistedState.sources ?? current.sources;
-        if (!sources.find((s) => s.id === "local")) {
-          sources = [LOCAL_SOURCE, ...sources];
+
+        // Ensure all built-in sources exist
+        for (const builtIn of BUILT_IN_SOURCES) {
+          if (!sources.find((s) => s.id === builtIn.id)) {
+            sources = [builtIn, ...sources];
+          }
         }
+
+        // Remove old local source if present (migrated to MyPlausibleMe)
+        sources = sources.filter((s) => s.id !== "local");
 
         // Ensure date objects are properly hydrated
         sources = sources.map((s) => ({
@@ -204,11 +273,24 @@ export const useSourceStore = create<SourceState>()(
             : undefined,
         }));
 
+        // Validate active/default source IDs exist
+        let activeSourceId = persistedState.activeSourceId ?? current.activeSourceId;
+        let defaultSourceId = persistedState.defaultSourceId ?? current.defaultSourceId;
+
+        // If active source doesn't exist, fall back to first built-in
+        const firstBuiltIn = BUILT_IN_SOURCES[0];
+        if (!sources.find((s) => s.id === activeSourceId) && firstBuiltIn) {
+          activeSourceId = firstBuiltIn.id;
+        }
+        if (!sources.find((s) => s.id === defaultSourceId) && firstBuiltIn) {
+          defaultSourceId = firstBuiltIn.id;
+        }
+
         return {
           ...current,
           sources,
-          activeSourceId: persistedState.activeSourceId ?? current.activeSourceId,
-          defaultSourceId: persistedState.defaultSourceId ?? current.defaultSourceId,
+          activeSourceId,
+          defaultSourceId,
         };
       },
     }
@@ -223,7 +305,8 @@ export function useActiveSourceUrl(): string {
     const activeSource = state.sources.find(
       (s) => s.id === state.activeSourceId
     );
-    return activeSource?.url ?? "/data";
+    const fallbackUrl = BUILT_IN_SOURCES[0]?.url ?? "";
+    return activeSource?.url ?? fallbackUrl;
   });
 }
 

@@ -32,6 +32,7 @@ export type FieldType =
   | "array"
   | "object"
   | "images"
+  | "videos"      // Array of video URLs (e.g., YouTube)
   | "rating"      // v2: Structured rating with source metadata
   | "detailUrls"; // v2: Multiple detail links with sources
 

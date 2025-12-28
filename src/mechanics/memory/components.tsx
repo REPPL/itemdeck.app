@@ -51,6 +51,9 @@ export function MemoryCardOverlay({ cardId }: CardOverlayProps) {
 /**
  * Grid overlay for memory game.
  * Shows score, timer, and controls.
+ *
+ * F-068: Top position hidden during active play for focus mode.
+ * Stats shown in bottom bar only after game completion.
  */
 export function MemoryGridOverlay({ position }: GridOverlayProps) {
   const isComplete = useMemoryStore((s) => s.isComplete);
@@ -59,6 +62,7 @@ export function MemoryGridOverlay({ position }: GridOverlayProps) {
   const matchedPairs = useMemoryStore((s) => s.matchedPairs);
   const cardIds = useMemoryStore((s) => s.cardIds);
   const startTime = useMemoryStore((s) => s.startTime);
+  const endTime = useMemoryStore((s) => s.endTime);
   const resetGame = useMemoryStore((s) => s.resetGame);
   const { deactivateMechanic } = useMechanicContext();
 
@@ -73,72 +77,99 @@ export function MemoryGridOverlay({ position }: GridOverlayProps) {
     resetGame();
   }, [resetGame]);
 
-  // Calculate elapsed time
+  // Calculate elapsed time (use endTime if complete, otherwise current time)
+  const endTimestamp = isComplete && endTime ? endTime : Date.now();
   const elapsedSeconds = startTime
-    ? Math.floor((Date.now() - startTime) / 1000)
+    ? Math.floor((endTimestamp - startTime) / 1000)
     : 0;
   const minutes = Math.floor(elapsedSeconds / 60);
   const seconds = elapsedSeconds % 60;
   const timeString = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 
+  // F-068: No overlay during active play - pure focus mode
   if (position === "top") {
-    return (
-      <div className={styles.statsBar}>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Pairs</span>
-          <span className={styles.statValue}>{foundPairs}/{totalPairs}</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Attempts</span>
-          <span className={styles.statValue}>{attempts}</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Score</span>
-          <span className={styles.statValue}>{score}</span>
-        </div>
-        <div className={styles.stat}>
-          <span className={styles.statLabel}>Time</span>
-          <span className={styles.statValue}>{timeString}</span>
-        </div>
-        <button
-          type="button"
-          className={styles.exitButton}
-          onClick={handleExit}
-        >
-          Exit
-        </button>
-      </div>
-    );
+    return null;
   }
 
-  // Bottom position - game complete modal
+  // Bottom position - stats bar on completion + modal
   return (
-    <AnimatePresence>
-      {isComplete && (
-        <motion.div
-          className={styles.completeModal}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.9 }}
-        >
-          <div className={styles.completeContent}>
-            <h2 className={styles.completeTitle}>🎉 Complete!</h2>
-            <p className={styles.completeStats}>
-              You found all {totalPairs} pairs in {attempts} attempts!
-            </p>
-            <p className={styles.completeScore}>
-              Final Score: {score}
-            </p>
+    <>
+      {/* Bottom stats bar - appears after completion */}
+      <AnimatePresence>
+        {isComplete && (
+          <motion.div
+            className={styles.bottomStatsBar}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+          >
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Pairs</span>
+              <span className={styles.statValue}>{foundPairs}/{totalPairs}</span>
+            </div>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Attempts</span>
+              <span className={styles.statValue}>{attempts}</span>
+            </div>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Score</span>
+              <span className={styles.statValue}>{score}</span>
+            </div>
+            <div className={styles.stat}>
+              <span className={styles.statLabel}>Time</span>
+              <span className={styles.statValue}>{timeString}</span>
+            </div>
             <button
               type="button"
-              className={styles.playAgainButton}
-              onClick={handlePlayAgain}
+              className={styles.exitButton}
+              onClick={handleExit}
             >
-              Play Again
+              Exit
             </button>
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Completion modal */}
+      <AnimatePresence>
+        {isComplete && (
+          <motion.div
+            className={styles.completeModal}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+          >
+            <div className={styles.completeContent}>
+              <h2 className={styles.completeTitle}>🎉 Complete!</h2>
+              <p className={styles.completeStats}>
+                You found all {totalPairs} pairs in {attempts} attempts!
+              </p>
+              <p className={styles.completeTime}>
+                Time: {timeString}
+              </p>
+              <p className={styles.completeScore}>
+                Final Score: {score}
+              </p>
+              <div className={styles.completeActions}>
+                <button
+                  type="button"
+                  className={styles.playAgainButton}
+                  onClick={handlePlayAgain}
+                >
+                  Play Again
+                </button>
+                <button
+                  type="button"
+                  className={styles.exitButtonModal}
+                  onClick={handleExit}
+                >
+                  Exit
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

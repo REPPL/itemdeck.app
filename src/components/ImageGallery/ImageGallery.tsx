@@ -1,13 +1,16 @@
 /**
  * Image gallery component with swipe support.
  *
- * Displays multiple images with navigation arrows (desktop) and
- * swipe gestures (touch devices).
+ * Displays multiple images and YouTube videos with navigation arrows (desktop)
+ * and swipe gestures (touch devices).
  */
 
-import { useCallback, useState, useEffect } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTouchGestures } from "@/hooks/useTouchGestures";
+import { useValidatedImages } from "@/hooks/useImageValidation";
+import { parseMediaUrls, type MediaItem } from "@/types/media";
+import { YouTubeEmbed } from "./YouTubeEmbed";
 import styles from "./ImageGallery.module.css";
 
 /**
@@ -70,6 +73,9 @@ interface ImageGalleryProps {
   /** Whether to zoom first image to fill (cover) or show at original size (contain) */
   zoomImage?: boolean;
 
+  /** Whether to validate images before displaying (filters out unreachable URLs) */
+  validateImages?: boolean;
+
   /** Additional class name for the container */
   className?: string;
 }
@@ -83,11 +89,16 @@ interface ImageGalleryProps {
  * - Dot indicators at bottom
  * - Smooth CSS transitions between images
  * - Keyboard navigation (left/right arrows)
+ * - YouTube video support (auto-detected from URL)
  *
  * @example
  * ```tsx
  * <ImageGallery
- *   images={card.imageUrls}
+ *   images={[
+ *     "https://example.com/cover.jpg",
+ *     "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+ *     "https://example.com/screenshot.jpg"
+ *   ]}
  *   alt={card.title}
  *   showArrows
  *   showDots
@@ -102,18 +113,45 @@ export function ImageGallery({
   showArrows = true,
   showDots = true,
   zoomImage = true,
+  validateImages = false,
   className,
 }: ImageGalleryProps) {
+  // Validate images if enabled (filters out unreachable URLs)
+  const {
+    validImages,
+    isLoading: isValidating,
+    invalidCount,
+  } = useValidatedImages(images, { enabled: validateImages });
+
+  // Use validated images if validation is enabled, otherwise use raw images
+  const activeImages = validateImages ? validImages : images;
+
+  // Parse URLs into media items (detect YouTube vs images)
+  const mediaItems = useMemo(
+    () => parseMediaUrls(activeImages),
+    [activeImages]
+  );
+
   // Internal state for uncontrolled mode
   const [internalIndex, setInternalIndex] = useState(0);
 
-  // Build display images array:
-  // Index 0: first image (zoomed/cover)
-  // Index 1: first image again (original size/contain)
-  // Index 2+: remaining images (original size/contain)
-  const displayImages = images.length > 0
-    ? [images[0], ...images]
-    : images;
+  // Build display items array:
+  // For images: duplicate first item (zoomed/cover at index 0, original at index 1+)
+  // For videos: no duplication (videos don't benefit from zoom)
+  const displayItems = useMemo((): MediaItem[] => {
+    if (mediaItems.length === 0) return [];
+    const firstItem = mediaItems[0];
+    if (!firstItem) return [];
+
+    // Only duplicate first item if it's an image (zoom feature)
+    // Videos should not be duplicated
+    if (firstItem.type === "image") {
+      return [firstItem, ...mediaItems];
+    }
+
+    // For videos (YouTube etc.), just return items as-is
+    return mediaItems;
+  }, [mediaItems]);
 
   // Use controlled or internal index
   const currentIndex = controlledIndex ?? internalIndex;
@@ -131,27 +169,27 @@ export function ImageGallery({
   // Navigation direction for animation
   const [direction, setDirection] = useState(0);
 
-  // Use displayImages for navigation (includes duplicated first image)
-  const totalImages = displayImages.length;
-  const hasMultipleImages = totalImages > 1;
+  // Use displayItems for navigation (includes duplicated first item)
+  const totalItems = displayItems.length;
+  const hasMultipleItems = totalItems > 1;
 
   // Check if at boundaries (no wrap-around)
   const isAtFirst = currentIndex === 0;
-  const isAtLast = currentIndex === totalImages - 1;
+  const isAtLast = currentIndex === totalItems - 1;
 
-  // Navigate to previous image (no wrap-around)
+  // Navigate to previous item (no wrap-around)
   const goToPrevious = useCallback(() => {
-    if (!hasMultipleImages || isAtFirst) return;
+    if (!hasMultipleItems || isAtFirst) return;
     setDirection(-1);
     setCurrentIndex(currentIndex - 1);
-  }, [currentIndex, hasMultipleImages, isAtFirst, setCurrentIndex]);
+  }, [currentIndex, hasMultipleItems, isAtFirst, setCurrentIndex]);
 
-  // Navigate to next image (no wrap-around)
+  // Navigate to next item (no wrap-around)
   const goToNext = useCallback(() => {
-    if (!hasMultipleImages || isAtLast) return;
+    if (!hasMultipleItems || isAtLast) return;
     setDirection(1);
     setCurrentIndex(currentIndex + 1);
-  }, [currentIndex, hasMultipleImages, isAtLast, setCurrentIndex]);
+  }, [currentIndex, hasMultipleItems, isAtLast, setCurrentIndex]);
 
   // Navigate to specific index
   const goToIndex = useCallback(
@@ -165,12 +203,12 @@ export function ImageGallery({
 
   // Touch gestures for swipe navigation
   const { handlers: touchHandlers } = useTouchGestures({
-    enabled: hasMultipleImages,
+    enabled: hasMultipleItems,
     swipeThreshold: 50,
-    onSwipe: (direction) => {
-      if (direction === "left") {
+    onSwipe: (swipeDir) => {
+      if (swipeDir === "left") {
         goToNext();
-      } else if (direction === "right") {
+      } else if (swipeDir === "right") {
         goToPrevious();
       }
     },
@@ -178,7 +216,7 @@ export function ImageGallery({
 
   // Keyboard navigation
   useEffect(() => {
-    if (!hasMultipleImages) return;
+    if (!hasMultipleItems) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       // Skip if typing in an input element
@@ -205,7 +243,7 @@ export function ImageGallery({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [hasMultipleImages, goToPrevious, goToNext]);
+  }, [hasMultipleItems, goToPrevious, goToNext]);
 
   // Animation variants
   const slideVariants = {
@@ -227,41 +265,96 @@ export function ImageGallery({
 
   const containerClass = [styles.gallery, className].filter(Boolean).join(" ");
 
+  // Show loading state while validating images
+  if (validateImages && isValidating) {
+    return (
+      <div className={containerClass} role="region" aria-label="Image gallery">
+        <div className={styles.loadingState}>
+          <div className={styles.loadingSpinner} aria-hidden="true" />
+          <span className={styles.loadingText}>Validating images...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty state if no valid media
+  if (mediaItems.length === 0) {
+    return (
+      <div className={containerClass} role="region" aria-label="Media gallery">
+        <div className={styles.emptyState}>
+          <span className={styles.emptyIcon} aria-hidden="true">🖼️</span>
+          <span className={styles.emptyText}>
+            {validateImages && invalidCount > 0
+              ? `${String(invalidCount)} image${invalidCount === 1 ? "" : "s"} unavailable`
+              : "No media to display"}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  // Get current media item (guaranteed to exist due to mediaItems.length check above)
+  const currentItem = displayItems[currentIndex];
+  if (!currentItem) {
+    return null;
+  }
+
   return (
     <div
       className={containerClass}
       role="region"
-      aria-label="Image gallery"
+      aria-label="Media gallery"
       aria-roledescription="carousel"
     >
       <div className={styles.imageContainer} {...touchHandlers}>
         <AnimatePresence initial={false} custom={direction} mode="popLayout">
-          <motion.img
-            key={currentIndex}
-            src={displayImages[currentIndex]}
-            alt={`${alt} (${String(currentIndex + 1)} of ${String(totalImages)})`}
-            className={[
-              styles.image,
-              // First image: use cover if zoomImage is true, otherwise contain
-              // Other images: always use contain
-              currentIndex === 0 && zoomImage ? styles.imageCover : styles.imageContain,
-            ].join(" ")}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{
-              x: { type: "spring", stiffness: 300, damping: 30 },
-              opacity: { duration: 0.2 },
-            }}
-            draggable={false}
-          />
+          {currentItem.type === "youtube" && currentItem.videoId ? (
+            <motion.div
+              key={`video-${String(currentIndex)}`}
+              className={styles.videoContainer}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+            >
+              <YouTubeEmbed
+                videoId={currentItem.videoId}
+                title={`${alt} video (${String(currentIndex + 1)} of ${String(totalItems)})`}
+              />
+            </motion.div>
+          ) : (
+            <motion.img
+              key={`image-${String(currentIndex)}`}
+              src={currentItem.url}
+              alt={`${alt} (${String(currentIndex + 1)} of ${String(totalItems)})`}
+              className={[
+                styles.image,
+                // First item: use cover if zoomImage is true and it's an image
+                // Other items: always use contain
+                currentIndex === 0 && zoomImage ? styles.imageCover : styles.imageContain,
+              ].join(" ")}
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.2 },
+              }}
+              draggable={false}
+            />
+          )}
         </AnimatePresence>
       </div>
 
       {/* Navigation arrows (desktop) */}
-      {showArrows && hasMultipleImages && (
+      {showArrows && hasMultipleItems && (
         <>
           <button
             type="button"
@@ -295,19 +388,23 @@ export function ImageGallery({
       )}
 
       {/* Dot indicators */}
-      {showDots && hasMultipleImages && (
-        <div className={styles.dots} role="tablist" aria-label="Gallery images">
-          {displayImages.map((_, index) => (
+      {showDots && hasMultipleItems && (
+        <div className={styles.dots} role="tablist" aria-label="Gallery media">
+          {displayItems.map((item, index) => (
             <button
               key={index}
               type="button"
-              className={[styles.dot, index === currentIndex ? styles.dotActive : ""].filter(Boolean).join(" ")}
+              className={[
+                styles.dot,
+                index === currentIndex ? styles.dotActive : "",
+                item.type === "youtube" ? styles.dotVideo : "",
+              ].filter(Boolean).join(" ")}
               onClick={() => {
                 goToIndex(index);
               }}
               role="tab"
               aria-selected={index === currentIndex}
-              aria-label={`Go to image ${String(index + 1)}`}
+              aria-label={`Go to ${item.type === "youtube" ? "video" : "image"} ${String(index + 1)}`}
             />
           ))}
         </div>

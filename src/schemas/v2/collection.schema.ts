@@ -100,6 +100,7 @@ export const fieldTypeSchema = z.enum([
   "array",
   "object",
   "images",
+  "videos",
   "rating",
   "detailUrls",
 ]);

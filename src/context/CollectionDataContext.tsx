@@ -7,10 +7,11 @@
  */
 
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from "react";
-import { useDefaultCollection, type DisplayCard, type CollectionResult } from "@/hooks/useCollection";
+import { useLocalCollection, type DisplayCard, type CollectionResult } from "@/hooks/useCollection";
 import { CollectionUIProvider } from "./CollectionUIContext";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useEditsStore } from "@/stores/editsStore";
+import { useActiveSourceUrl } from "@/stores/sourceStore";
 import type { DisplayConfig } from "@/types/display";
 import type { CollectionConfig } from "@/types/schema";
 
@@ -58,7 +59,11 @@ interface CollectionDataProviderProps {
  * ```
  */
 export function CollectionDataProvider({ children }: CollectionDataProviderProps) {
-  const { data, isLoading, error } = useDefaultCollection();
+  // Get the active source URL from the source store
+  const sourceUrl = useActiveSourceUrl();
+
+  // Load collection from the active source
+  const { data, isLoading, error } = useLocalCollection({ basePath: sourceUrl });
   const applyCollectionDefaults = useSettingsStore((s) => s.applyCollectionDefaults);
   const hasAppliedDefaults = useSettingsStore((s) => s.hasAppliedCollectionDefaults);
   const edits = useEditsStore((s) => s.edits);

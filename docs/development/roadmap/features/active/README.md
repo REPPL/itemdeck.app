@@ -1,10 +1,12 @@
 # Active Features
 
-Features currently in development.
+Features currently in progress for the active milestone.
 
-## Currently Active
+## v0.11.1 - UX Polish, Video Support & Documentation
 
-*No features currently in active development.*
+| ID | Feature | Complexity | Status |
+|----|---------|------------|--------|
+| [F-073](./F-073-user-documentation.md) | User Documentation Suite | Large | 🔄 In Progress |
 
 ## Moving Features Here
 
@@ -17,5 +19,7 @@ When starting work on a feature:
 
 ## Related Documentation
 
+- [Milestone v0.11.1](../../milestones/v0.11.1.md)
 - [Features Index](../README.md)
+- [Completed Features](../completed/)
 - [Planned Features](../planned/)

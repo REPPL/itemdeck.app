@@ -195,6 +195,47 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
     const primaryImage = getPrimaryImage(images);
     const primaryImageUrl = primaryImage?.url ?? placeholder(entity.id);
 
+    // Include video URLs in the gallery (support for YouTube videos)
+    // Check for 'video' field (single URL or object) or 'videos' field (array)
+    // Handle both string URLs, objects with url property, and bare video IDs
+    const extractVideoUrl = (v: unknown): string | undefined => {
+      let url: string | undefined;
+
+      if (typeof v === "string") {
+        url = v;
+      } else if (v && typeof v === "object" && "url" in v) {
+        const urlValue = (v as { url: unknown }).url;
+        if (typeof urlValue === "string") {
+          url = urlValue;
+        }
+      }
+
+      if (!url) return undefined;
+
+      // Already a valid absolute URL
+      if (url.startsWith("http://") || url.startsWith("https://")) {
+        return url;
+      }
+
+      // Check if it looks like a YouTube video ID (11 chars, alphanumeric with - and _)
+      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+        return `https://www.youtube.com/watch?v=${url}`;
+      }
+
+      // Skip other relative or invalid URLs
+      return undefined;
+    };
+
+    const videoUrl = extractVideoUrl(entity.video);
+    const rawVideosArray = entity.videos as unknown[] | undefined;
+    const videoUrls: string[] = [
+      ...(videoUrl ? [videoUrl] : []),
+      ...(rawVideosArray?.map(extractVideoUrl).filter((u): u is string => u !== undefined) ?? []),
+    ];
+
+    // Combine image URLs with video URLs for the gallery
+    const allMediaUrls = [...imageUrls, ...videoUrls];
+
     // Get resolved platform
     const platform = entity._resolved?.platform as ResolvedEntity | undefined;
 
@@ -244,7 +285,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       summary: entity.summary as string | undefined,
       detailUrl: entity.detailUrl as string | undefined,
       imageUrl: primaryImageUrl,
-      imageUrls: imageUrls.length > 0 ? imageUrls : [placeholder(entity.id)],
+      imageUrls: allMediaUrls.length > 0 ? allMediaUrls : [placeholder(entity.id)],
       // v2 terminology
       categoryTitle: platform?.title as string | undefined,
       categoryShort,
@@ -267,7 +308,21 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
       _resolved: entity._resolved,
       // v2 additions
       rating,
-      detailUrls: detailUrls.length > 0 ? detailUrls : undefined,
+      // Include video URL as a YouTube link in detailUrls
+      detailUrls: (() => {
+        const urls: DetailLink[] = [...detailUrls];
+        // Add video URL as a YouTube link if present
+        if (videoUrl) {
+          urls.push({ url: videoUrl, source: "YouTube" });
+        }
+        // Add all video URLs from videos array
+        for (const url of videoUrls) {
+          if (url !== videoUrl) {
+            urls.push({ url, source: "YouTube" });
+          }
+        }
+        return urls.length > 0 ? urls : undefined;
+      })(),
       primaryImage,
       // Category/platform info for expanded view
       categoryInfo: platform ? (() => {

@@ -11,7 +11,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ImageGallery } from "@/components/ImageGallery";
 import { RankBadge } from "@/components/RankBadge";
 import { SourceIcon, isKnownSource, getSourceShortName } from "@/components/SourceIcon";
-import { ExternalLinkIcon, CloseIcon, InfoIcon, EditIcon } from "@/components/Icons";
+import { SourcesOverlay } from "@/components/SourcesOverlay";
+import { ExternalLinkIcon, CloseIcon, InfoIcon, EditIcon, ImageIcon } from "@/components/Icons";
 import { EditForm } from "@/components/EditForm";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
@@ -19,6 +20,7 @@ import { useSettingsStore } from "@/stores/settingsStore";
 import { useUILabels } from "@/context/CollectionUIContext";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { isLightColour } from "@/utils/colourContrast";
+import { useViewportSize, getViewportMode, type ViewportMode } from "@/hooks/useViewportSize";
 import type { DisplayCard } from "@/hooks/useCollection";
 import type { DetailLink } from "@/types/links";
 import styles from "./CardExpanded.module.css";
@@ -89,6 +91,14 @@ export function CardExpanded({
   const [showAttribution, setShowAttribution] = useState(false);
   const [platformExpanded, setPlatformExpanded] = useState(false);
   const [editFormOpen, setEditFormOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [sourcesOverlayOpen, setSourcesOverlayOpen] = useState(false);
+
+  // Viewport size for responsive layout
+  const { width, height } = useViewportSize();
+  const viewportMode: ViewportMode = getViewportMode(width, height);
+  const isCompactMode = viewportMode === "compact";
+  const isMediumMode = viewportMode === "medium";
 
   // Get settings from store
   const visualTheme = useSettingsStore((state) => state.visualTheme);
@@ -154,8 +164,19 @@ export function CardExpanded({
       setShowAttribution(false);
       setPlatformExpanded(false);
       setEditFormOpen(false);
+      setLightboxOpen(false);
+      setSourcesOverlayOpen(false);
     }
   }, [isOpen, autoExpandMore, additionalFields.length]);
+
+  // Handle thumbnail click in compact mode
+  const handleThumbnailClick = useCallback(() => {
+    setLightboxOpen(true);
+  }, []);
+
+  const handleLightboxClose = useCallback(() => {
+    setLightboxOpen(false);
+  }, []);
 
   // Handle edit button click
   const handleEditClick = useCallback(() => {
@@ -302,44 +323,95 @@ export function CardExpanded({
               </div>
             </div>
 
-            {/* Image gallery */}
-            <div className={styles.galleryContainer}>
-              <ImageGallery
-                images={card.imageUrls}
-                alt={card.title}
-                showArrows
-                showDots
-                zoomImage={zoomImage}
-              />
-              {/* Platform button inside gallery, bottom right - inactive when overlay is shown */}
-              {card.categoryInfo && (
+            {/* Image gallery (full) or thumbnail (compact mode) */}
+            {isCompactMode ? (
+              /* Compact mode: Inline thumbnail with title */
+              <div className={styles.compactHeader}>
                 <button
                   type="button"
-                  className={[
-                    styles.galleryPlatformButton,
-                    platformExpanded ? styles.galleryPlatformButtonInactive : "",
-                  ].filter(Boolean).join(" ")}
-                  onClick={() => { setPlatformExpanded(!platformExpanded); }}
-                  aria-expanded={platformExpanded}
-                  aria-controls="platform-overlay"
+                  className={styles.compactThumbnail}
+                  onClick={handleThumbnailClick}
+                  aria-label="View full gallery"
                 >
-                  <span>{card.categoryInfo.title}</span>
-                  <InfoIcon />
+                  <img
+                    src={card.imageUrls[0]}
+                    alt={card.title}
+                    className={styles.compactThumbnailImage}
+                  />
+                  <span className={styles.compactThumbnailExpand}>
+                    <ImageIcon size={16} />
+                    {card.imageUrls.length > 1 && (
+                      <span className={styles.compactThumbnailCount}>
+                        +{card.imageUrls.length - 1}
+                      </span>
+                    )}
+                  </span>
                 </button>
-              )}
-            </div>
-
-            {/* Card info */}
-            <div className={styles.info}>
-              {/* Title and year row */}
-              <header className={styles.header}>
-                <div className={styles.headerLeft}>
+                <div className={styles.compactTitleGroup}>
                   <h2 id="expanded-card-title" className={styles.title}>
                     {card.title}
                   </h2>
                   {card.year && <span className={styles.year}>{card.year}</span>}
+                  {card.categoryInfo && (
+                    <button
+                      type="button"
+                      className={styles.compactPlatformButton}
+                      onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                      aria-expanded={platformExpanded}
+                      aria-controls="platform-overlay"
+                    >
+                      {card.categoryInfo.title}
+                    </button>
+                  )}
                 </div>
-              </header>
+              </div>
+            ) : (
+              /* Standard/Medium mode: Full gallery */
+              <div
+                className={[
+                  styles.galleryContainer,
+                  isMediumMode ? styles.galleryContainerMedium : "",
+                ].filter(Boolean).join(" ")}
+              >
+                <ImageGallery
+                  images={card.imageUrls}
+                  alt={card.title}
+                  showArrows
+                  showDots
+                  zoomImage={zoomImage}
+                />
+                {/* Platform button inside gallery, bottom right - inactive when overlay is shown */}
+                {card.categoryInfo && (
+                  <button
+                    type="button"
+                    className={[
+                      styles.galleryPlatformButton,
+                      platformExpanded ? styles.galleryPlatformButtonInactive : "",
+                    ].filter(Boolean).join(" ")}
+                    onClick={() => { setPlatformExpanded(!platformExpanded); }}
+                    aria-expanded={platformExpanded}
+                    aria-controls="platform-overlay"
+                  >
+                    <span>{card.categoryInfo.title}</span>
+                    <InfoIcon />
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Card info */}
+            <div className={styles.info}>
+              {/* Title and year row - only shown in non-compact mode */}
+              {!isCompactMode && (
+                <header className={styles.header}>
+                  <div className={styles.headerLeft}>
+                    <h2 id="expanded-card-title" className={styles.title}>
+                      {card.title}
+                    </h2>
+                    {card.year && <span className={styles.year}>{card.year}</span>}
+                  </div>
+                </header>
+              )}
 
               {/* Divider */}
               <div className={styles.divider} />
@@ -349,9 +421,10 @@ export function CardExpanded({
                 <p className={styles.summary}>{card.summary}</p>
               )}
 
-              {/* Footer row: Left group (Acknowledgement + Source) | Right (More) */}
+              {/* Footer row: Left group (Acknowledgement + Sources) | Right (More) */}
               <div className={styles.footer}>
                 <div className={styles.footerLeft}>
+                  {/* Image acknowledgement button */}
                   {card.imageAttribution && (
                     <button
                       type="button"
@@ -365,57 +438,24 @@ export function CardExpanded({
                       <InfoIcon />
                     </button>
                   )}
-                  {/* Show detail URLs deduplicated by source */}
-                  {card.detailUrls && card.detailUrls.length > 0 ? (
-                    deduplicateLinksBySource(card.detailUrls).map((link, index) => {
-                      const hasKnownIcon = isKnownSource(link.url);
-                      const sourceInfo = getSourceShortName(link.url);
-                      const displayName = sourceInfo?.shortName ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
-                      const fullName = sourceInfo?.title ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
-                      return (
-                        <a
-                          key={index}
-                          href={link.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={hasKnownIcon ? styles.sourceIconButton : styles.outlineButton}
-                          title={fullName}
-                        >
-                          {hasKnownIcon ? (
-                            <>
-                              <SourceIcon url={link.url} source={link.source} className={styles.sourceIconSvg} />
-                              <ExternalLinkIcon />
-                            </>
-                          ) : (
-                            <>
-                              <span>{displayName}</span>
-                              <ExternalLinkIcon />
-                            </>
-                          )}
-                        </a>
-                      );
-                    })
-                  ) : card.detailUrl ? (
-                    <a
-                      href={card.detailUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className={isKnownSource(card.detailUrl) ? styles.sourceIconButton : styles.outlineButton}
-                      title={uiLabels.sourceButtonDefault}
+
+                  {/* Consolidated Sources button (F-084) */}
+                  {((card.detailUrls && card.detailUrls.length > 0) || card.detailUrl) && (
+                    <button
+                      type="button"
+                      className={styles.outlineButton}
+                      onClick={() => { setSourcesOverlayOpen(!sourcesOverlayOpen); }}
+                      aria-expanded={sourcesOverlayOpen}
+                      aria-controls="sources-overlay"
                     >
-                      {isKnownSource(card.detailUrl) ? (
-                        <>
-                          <SourceIcon url={card.detailUrl} className={styles.sourceIconSvg} />
-                          <ExternalLinkIcon />
-                        </>
-                      ) : (
-                        <>
-                          <span>{uiLabels.sourceButtonDefault}</span>
-                          <ExternalLinkIcon />
-                        </>
-                      )}
-                    </a>
-                  ) : null}
+                      <span>
+                        {card.detailUrls && card.detailUrls.length > 1
+                          ? "Sources"
+                          : "Source"}
+                      </span>
+                      <ExternalLinkIcon />
+                    </button>
+                  )}
                 </div>
 
                 {/* More/Verdict button - primary style on right */}
@@ -486,6 +526,18 @@ export function CardExpanded({
                       </div>
                     </div>
                   </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Sources overlay (F-084) */}
+              <AnimatePresence>
+                {sourcesOverlayOpen && (
+                  <SourcesOverlay
+                    detailUrls={card.detailUrls ?? (card.detailUrl ? [{ url: card.detailUrl }] : [])}
+                    isOpen={sourcesOverlayOpen}
+                    onClose={() => { setSourcesOverlayOpen(false); }}
+                    animationEnabled={overlayAnimationEnabled}
+                  />
                 )}
               </AnimatePresence>
 
@@ -659,6 +711,47 @@ export function CardExpanded({
     </AnimatePresence>
   );
 
+  // Lightbox content for compact mode
+  const lightboxContent = (
+    <AnimatePresence>
+      {lightboxOpen && (
+        <motion.div
+          className={styles.lightbox}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={handleLightboxClose}
+        >
+          <motion.div
+            className={styles.lightboxContent}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            transition={{ type: "spring" as const, stiffness: 300, damping: 25 }}
+            onClick={(e) => { e.stopPropagation(); }}
+          >
+            <ImageGallery
+              images={card.imageUrls}
+              alt={card.title}
+              showArrows
+              showDots
+              zoomImage={zoomImage}
+            />
+            <button
+              type="button"
+              className={styles.lightboxClose}
+              onClick={handleLightboxClose}
+              aria-label="Close gallery"
+            >
+              <CloseIcon />
+            </button>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+
   return (
     <>
       {createPortal(content, document.body)}
@@ -666,6 +759,8 @@ export function CardExpanded({
       {editFormOpen && (
         <EditForm card={card} onClose={handleEditFormClose} />
       )}
+      {/* Lightbox for compact mode gallery */}
+      {createPortal(lightboxContent, document.body)}
     </>
   );
 }

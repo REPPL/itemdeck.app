@@ -46,28 +46,83 @@ export async function loadCollectionDefinition(
 }
 
 /**
+ * Extract entity IDs from index file data.
+ *
+ * Supports two formats:
+ * - Array format: `["id1", "id2", ...]`
+ * - Object format: `{ "entityTypePlural": ["id1", "id2", ...] }`
+ *
+ * @param data - Parsed JSON data from index file
+ * @param pluralType - Plural form of entity type (used as key in object format)
+ * @returns Array of entity ID strings
+ */
+function extractEntityIds(data: unknown, pluralType: string): string[] {
+  // Format 1: Direct array
+  if (Array.isArray(data)) {
+    return data.filter((id): id is string => typeof id === "string");
+  }
+
+  // Format 2: Object with entity type key
+  if (typeof data === "object" && data !== null) {
+    const record = data as Record<string, unknown>;
+
+    // Try plural form key (e.g., "adverts")
+    if (pluralType in record && Array.isArray(record[pluralType])) {
+      return (record[pluralType] as unknown[]).filter(
+        (id): id is string => typeof id === "string"
+      );
+    }
+
+    // Try singular form key (e.g., "advert") - just in case
+    const singularType = pluralType.replace(/s$/, "");
+    if (singularType in record && Array.isArray(record[singularType])) {
+      return (record[singularType] as unknown[]).filter(
+        (id): id is string => typeof id === "string"
+      );
+    }
+
+    // Try common keys like "items", "entities", "ids"
+    for (const key of ["items", "entities", "ids"]) {
+      if (key in record && Array.isArray(record[key])) {
+        return (record[key] as unknown[]).filter(
+          (id): id is string => typeof id === "string"
+        );
+      }
+    }
+  }
+
+  return [];
+}
+
+/**
  * Load entities of a specific type from a collection.
  *
  * Supports multiple patterns in order:
- * 1. `{type}/index.json` - Index file listing entity IDs to load
- * 2. `{type}/_index.json` - Alternative index file location
+ * 1. `{type}s/index.json` - Index file listing entity IDs to load (plural folder)
+ * 2. `{type}s/_index.json` - Alternative index file location
  * 3. `{type}s.json` - Plural form single file with array
  * 4. `{type}.json` - Single file with array of entities
  *
- * For index-based loading, the index file should contain an array of entity IDs.
- * Individual entities are then loaded from `{type}/{id}.json`.
+ * For index-based loading, the index file can contain:
+ * - An array of entity IDs: `["id1", "id2", ...]`
+ * - An object with entity type key: `{ "entityTypes": ["id1", "id2", ...] }`
+ *
+ * Individual entities are then loaded from `{type}s/{id}.json`.
  *
  * @param basePath - Base path to the collection directory
- * @param entityType - Type of entities to load
+ * @param entityType - Type of entities to load (singular form, e.g., "advert")
  * @returns Array of entities
  */
 export async function loadEntities(
   basePath: string,
   entityType: string
 ): Promise<Entity[]> {
+  // Pluralise entity type for folder name
+  const pluralType = `${entityType}s`;
+
   // Pattern 1: Try index.json in entity type directory
-  const indexUrl = `${basePath}/${entityType}s/index.json`;
-  const altIndexUrl = `${basePath}/${entityType}s/_index.json`;
+  const indexUrl = `${basePath}/${pluralType}/index.json`;
+  const altIndexUrl = `${basePath}/${pluralType}/_index.json`;
 
   // Try index-based loading first
   for (const url of [indexUrl, altIndexUrl]) {
@@ -80,11 +135,14 @@ export async function loadEntities(
         if (contentType?.includes("application/json")) {
           const indexData = (await response.json()) as unknown;
 
-          if (Array.isArray(indexData)) {
+          // Extract entity IDs from either array or object format
+          const entityIds = extractEntityIds(indexData, pluralType);
+
+          if (entityIds.length > 0) {
             // Load individual entity files
             const entities = await loadEntitiesFromDirectory(
-              `${basePath}/${entityType}s`,
-              indexData as string[]
+              `${basePath}/${pluralType}`,
+              entityIds
             );
             return entities;
           }

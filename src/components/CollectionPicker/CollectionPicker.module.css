@@ -1,0 +1,239 @@
+/**
+ * CollectionPicker styles.
+ *
+ * @see F-087: Collection Discovery & Startup Picker
+ */
+
+.container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--colour-background);
+  padding: var(--spacing-lg);
+}
+
+.picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 480px;
+  width: 100%;
+  padding: var(--spacing-xl);
+  background: var(--colour-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 var(--spacing-xs);
+  color: var(--colour-text-primary);
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--colour-text-secondary);
+  margin: 0 0 var(--spacing-lg);
+}
+
+/* Username form */
+.usernameForm {
+  width: 100%;
+  margin-bottom: var(--spacing-lg);
+}
+
+.usernameLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text-secondary);
+}
+
+.usernameInputGroup {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+
+.usernameInput {
+  flex: 1;
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 1rem;
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  background: var(--colour-background);
+  color: var(--colour-text-primary);
+  transition: border-color 0.15s ease;
+}
+
+.usernameInput:focus {
+  outline: none;
+  border-color: var(--colour-primary);
+  box-shadow: 0 0 0 2px var(--colour-primary-alpha-20);
+}
+
+.usernameButton {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  background: var(--colour-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.usernameButton:hover:not(:disabled) {
+  background: var(--colour-primary-hover);
+}
+
+.usernameButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Loading state */
+.loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  color: var(--colour-text-secondary);
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--colour-border);
+  border-top-color: var(--colour-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error state */
+.error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  background: var(--colour-error-background, #fef2f2);
+  border-radius: var(--radius-md);
+  color: var(--colour-error, #dc2626);
+  width: 100%;
+  text-align: center;
+}
+
+.retryButton {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.875rem;
+  background: transparent;
+  color: var(--colour-error, #dc2626);
+  border: 1px solid var(--colour-error, #dc2626);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.retryButton:hover {
+  background: var(--colour-error, #dc2626);
+  color: white;
+}
+
+/* Collections list */
+.collectionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: var(--spacing-xs);
+}
+
+.collectionCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: var(--colour-background);
+  border: 1px solid var(--colour-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.collectionCard:hover {
+  border-color: var(--colour-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.collectionName {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--colour-text-primary);
+}
+
+.collectionDescription {
+  font-size: 0.875rem;
+  color: var(--colour-text-secondary);
+  line-height: 1.4;
+}
+
+.collectionItemCount {
+  font-size: 0.75rem;
+  color: var(--colour-text-tertiary);
+  background: var(--colour-surface-hover);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* Skip button */
+.skipButton {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: 0.875rem;
+  color: var(--colour-text-tertiary);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+}
+
+.skipButton:hover {
+  color: var(--colour-text-secondary);
+}
+
+/* Theme variants */
+.retro {
+  /* Retro theme specific */
+}
+
+.modern {
+  /* Modern theme specific */
+}
+
+.minimal {
+  /* Minimal theme specific */
+}
+
+/* Dark mode adjustments */
+[data-theme="dark"] .error {
+  background: rgba(220, 38, 38, 0.1);
+}

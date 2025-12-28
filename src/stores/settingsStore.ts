@@ -400,6 +400,13 @@ interface SettingsState {
   /** Currently selected external theme ID (null = using built-in) */
   selectedExternalThemeId: string | null;
 
+  // ============================================================================
+  // v0.11.2: Navigation Hub State
+  // ============================================================================
+
+  /** Whether the navigation hub is expanded */
+  navExpanded: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -456,6 +463,30 @@ interface SettingsState {
   // v0.11.0: External Theme Actions
   setExternalThemesLoaded: (loaded: boolean) => void;
   setSelectedExternalThemeId: (id: string | null) => void;
+
+  // v0.11.2: Navigation Hub Actions
+  setNavExpanded: (expanded: boolean) => void;
+  toggleNavExpanded: () => void;
+
+  // ============================================================================
+  // v0.11.2: Cache Consent State (F-080)
+  // ============================================================================
+
+  /** Global cache consent preference: 'always' | 'ask' | 'never' */
+  cacheConsentPreference: "always" | "ask" | "never";
+
+  /** Source IDs that have been granted cache consent */
+  cacheConsentGranted: string[];
+
+  /** Source IDs that have been denied cache consent */
+  cacheConsentDenied: string[];
+
+  // v0.11.2: Cache Consent Actions
+  setCacheConsentPreference: (preference: "always" | "ask" | "never") => void;
+  grantCacheConsent: (sourceId: string) => void;
+  denyCacheConsent: (sourceId: string) => void;
+  revokeCacheConsent: (sourceId: string) => void;
+  hasCacheConsent: (sourceId: string) => boolean;
 }
 
 /**
@@ -512,6 +543,12 @@ const DEFAULT_SETTINGS = {
   // v0.11.0: External Theme defaults
   externalThemesLoaded: false,
   selectedExternalThemeId: null,
+  // v0.11.2: Navigation Hub defaults
+  navExpanded: false,
+  // v0.11.2: Cache Consent defaults (F-080)
+  cacheConsentPreference: "ask" as const,
+  cacheConsentGranted: [] as string[],
+  cacheConsentDenied: [] as string[],
 };
 
 // Check for reset parameter in URL - force clear localStorage
@@ -527,7 +564,7 @@ if (typeof window !== "undefined" && window.location.search.includes("reset=1"))
  */
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...DEFAULT_SETTINGS,
 
       setLayout: (layout) => {
@@ -794,10 +831,57 @@ export const useSettingsStore = create<SettingsState>()(
       setSelectedExternalThemeId: (selectedExternalThemeId) => {
         set({ selectedExternalThemeId });
       },
+
+      // v0.11.2: Navigation Hub Actions
+      setNavExpanded: (navExpanded) => {
+        set({ navExpanded });
+      },
+
+      toggleNavExpanded: () => {
+        set((state) => ({ navExpanded: !state.navExpanded }));
+      },
+
+      // v0.11.2: Cache Consent Actions (F-080)
+      setCacheConsentPreference: (cacheConsentPreference) => {
+        set({ cacheConsentPreference });
+      },
+
+      grantCacheConsent: (sourceId) => {
+        set((state) => ({
+          cacheConsentGranted: state.cacheConsentGranted.includes(sourceId)
+            ? state.cacheConsentGranted
+            : [...state.cacheConsentGranted, sourceId],
+          cacheConsentDenied: state.cacheConsentDenied.filter((id) => id !== sourceId),
+        }));
+      },
+
+      denyCacheConsent: (sourceId) => {
+        set((state) => ({
+          cacheConsentDenied: state.cacheConsentDenied.includes(sourceId)
+            ? state.cacheConsentDenied
+            : [...state.cacheConsentDenied, sourceId],
+          cacheConsentGranted: state.cacheConsentGranted.filter((id) => id !== sourceId),
+        }));
+      },
+
+      revokeCacheConsent: (sourceId) => {
+        set((state) => ({
+          cacheConsentGranted: state.cacheConsentGranted.filter((id) => id !== sourceId),
+          cacheConsentDenied: state.cacheConsentDenied.filter((id) => id !== sourceId),
+        }));
+      },
+
+      hasCacheConsent: (sourceId) => {
+        const state = get();
+        if (state.cacheConsentPreference === "always") return true;
+        if (state.cacheConsentPreference === "never") return false;
+        // "ask" mode: check per-source consent
+        return state.cacheConsentGranted.includes(sourceId);
+      },
     }),
     {
       name: "itemdeck-settings",
-      version: 23,
+      version: 25,
       storage: createJSONStorage(() => localStorage),
       // Force-clear activeMechanicId after rehydration - games should never auto-start
       onRehydrateStorage: () => (state) => {
@@ -843,6 +927,12 @@ export const useSettingsStore = create<SettingsState>()(
         // Note: activeMechanicId is intentionally NOT persisted
         // Games should start fresh on page reload
         selectedExternalThemeId: state.selectedExternalThemeId,
+        // v0.11.2: Navigation Hub
+        navExpanded: state.navExpanded,
+        // v0.11.2: Cache Consent (F-080)
+        cacheConsentPreference: state.cacheConsentPreference,
+        cacheConsentGranted: state.cacheConsentGranted,
+        cacheConsentDenied: state.cacheConsentDenied,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -1082,6 +1172,24 @@ export const useSettingsStore = create<SettingsState>()(
           // Games should start fresh on page reload
           const { activeMechanicId: _, ...rest } = state;
           state = rest;
+        }
+
+        // Handle migration from version 23 to 24 (v0.11.2: Navigation Hub)
+        if (version < 24) {
+          state = {
+            ...state,
+            navExpanded: false,
+          };
+        }
+
+        // Handle migration from version 24 to 25 (v0.11.2: Cache Consent F-080)
+        if (version < 25) {
+          state = {
+            ...state,
+            cacheConsentPreference: "ask" as const,
+            cacheConsentGranted: [] as string[],
+            cacheConsentDenied: [] as string[],
+          };
         }
 
         return state as unknown as SettingsState;

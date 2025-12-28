@@ -82,6 +82,9 @@ interface RankBadgeProps {
 
   /** Size variant */
   size?: "small" | "medium" | "large";
+
+  /** Whether to show ordinal suffix (1st, 2nd, 3rd) and star icons. Default: true */
+  showOrdinal?: boolean;
 }
 
 /**
@@ -113,6 +116,7 @@ export function RankBadge({
   rank,
   placeholderText,
   size = "medium",
+  showOrdinal = true,
 }: RankBadgeProps) {
   // Get default from collection context, allow prop override
   const uiLabels = useUILabels();
@@ -141,12 +145,16 @@ export function RankBadge({
   // Use explicit check for valid positive rank to avoid issues with 0 or falsy values
   const isValidRank = rank !== null && rank > 0;
 
-  // Order: "1st ★★★" (text before stars)
+  // Order: "1st ★★★" (text before stars) - only if showOrdinal is true
   const content = isValidRank ? (
     <>
       <span className={styles.rankNumber}>{rank}</span>
-      <span className={styles.ordinal}>{getOrdinalSuffix(rank)}</span>
-      <RankStars rank={rank} />
+      {showOrdinal && (
+        <>
+          <span className={styles.ordinal}>{getOrdinalSuffix(rank)}</span>
+          <RankStars rank={rank} />
+        </>
+      )}
     </>
   ) : (
     <span className={styles.placeholder}>{displayPlaceholder}</span>

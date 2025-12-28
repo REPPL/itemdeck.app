@@ -84,4 +84,4 @@ v0.4.0
 
 ---
 
-**Status**: Planned
+**Status**: Completed

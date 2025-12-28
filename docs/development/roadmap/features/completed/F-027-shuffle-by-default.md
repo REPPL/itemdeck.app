@@ -75,4 +75,4 @@ v0.3.0
 
 ---
 
-**Status**: Planned
+**Status**: Completed

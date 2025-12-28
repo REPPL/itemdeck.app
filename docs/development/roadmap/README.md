@@ -24,8 +24,10 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.10.5](./milestones/v0.10.5.md) | Field Descriptions & Demo Data | ✅ Complete |
 | [v0.10.6](./milestones/v0.10.6.md) | Documentation Sync | ✅ Complete |
 | [v0.11.0](./milestones/v0.11.0.md) | Mechanics Foundation & Discovery | ✅ Complete |
-| [v0.11.1](./milestones/v0.11.1.md) | UX Polish, Video & Documentation | 🔄 In Progress |
-| [v0.12.0](./milestones/v0.12.0.md) | Core Mechanics | 📋 Planned |
+| [v0.11.1](./milestones/v0.11.1.md) | UX Polish, Video & Documentation | ✅ Complete |
+| [v0.11.5](./milestones/v0.11.5.md) | UI Refinements & Field Mapping | ✅ Complete |
+| [v0.12.0](./milestones/v0.12.0.md) | UI Polish & Statistics | ✅ Complete |
+| [v0.12.5](./milestones/v0.12.5.md) | URL Simplification & Snap Ranking | ✅ Complete |
 | [v0.13.0](./milestones/v0.13.0.md) | Advanced Mechanics | 📋 Planned |
 | [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
 

@@ -28,8 +28,10 @@ Central hub for Itemdeck development planning, roadmap, and process documentatio
 | [v0.9.0 Remote Sources](./roadmap/milestones/v0.9.0.md) | ✅ Complete | Source intelligence, discovery |
 | [v0.10.0 Data Editing](./roadmap/milestones/v0.10.0.md) | ✅ Complete | Edit mode, overlay store |
 | [v0.11.0 Mechanics](./roadmap/milestones/v0.11.0.md) | ✅ Complete | Plugin architecture, memory game |
-| [v0.11.1 UX Polish](./roadmap/milestones/v0.11.1.md) | 🔄 In Progress | Settings redesign, YouTube, docs |
-| [v0.12.0 Core Mechanics](./roadmap/milestones/v0.12.0.md) | 📋 Planned | Additional game mechanics |
+| [v0.11.1 UX Polish](./roadmap/milestones/v0.11.1.md) | ✅ Complete | Settings redesign, YouTube, docs |
+| [v0.11.5 UI Refinements](./roadmap/milestones/v0.11.5.md) | ✅ Complete | UI refinements, field mapping |
+| [v0.12.0 UI Polish](./roadmap/milestones/v0.12.0.md) | ✅ Complete | UI polish, statistics, dark mode |
+| [v0.12.5 Plugin Architecture](./roadmap/milestones/v0.12.5.md) | ✅ Complete | URL simplification, Snap Ranking |
 | [v0.13.0 Advanced](./roadmap/milestones/v0.13.0.md) | 📋 Planned | Competing, quiz mechanics |
 
 ## Directory Structure

@@ -46,10 +46,10 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-016](./planned/F-016-bundle-optimisation.md) | Bundle Optimisation | 📋 Planned |
-| [F-025](./planned/F-025-bundle-size-monitoring.md) | Bundle Size Monitoring | 📋 Planned |
-| [F-031](./planned/F-031-fit-to-viewport.md) | Fit to Viewport Mode | 📋 Planned |
-| [F-040](./planned/F-040-touch-gestures.md) | Touch Gestures | 📋 Planned |
+| [F-016](./completed/F-016-bundle-optimisation.md) | Bundle Optimisation | ✅ Complete |
+| [F-025](./completed/F-025-bundle-size-monitoring.md) | Bundle Size Monitoring | ✅ Complete |
+| [F-031](./completed/F-031-fit-to-viewport.md) | Fit to Viewport Mode | ✅ Complete |
+| [F-040](./completed/F-040-touch-gestures.md) | Touch Gestures | ✅ Complete |
 
 ### v0.5.0 - Schema Design
 
@@ -71,6 +71,18 @@ Feature specifications for Itemdeck development.
 | [F-020](./completed/F-020-attribution-system.md) | Attribution Display Component | ✅ Complete |
 | - | Demo Data Migration (81 games, individual files) | ✅ Complete |
 | - | Schema v2 Reference Documentation | ✅ Complete |
+
+### v0.8.0 - Visual Overhaul & Caching
+
+*Configuration and caching milestone - no individual feature files (infrastructure-based)*
+
+### v0.8.1 - Random Selection & Accessibility
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-042](./completed/F-042-collection-display-driver.md) | Collection Display Driver | ✅ Complete |
+| [F-043](./completed/F-043-settings-panel-subtabs.md) | Settings Panel Sub-tabs | ✅ Complete |
+| [F-044](./completed/F-044-random-card-sampling.md) | Random Card Sampling | ✅ Complete |
 
 ### v0.9.0 - Remote Source Intelligence
 
@@ -138,6 +150,20 @@ Feature specifications for Itemdeck development.
 | [F-065](./completed/F-065-card-grouping.md) | Card Grouping | ✅ Complete |
 | [F-066](./completed/F-066-view-mode-toggle.md) | View Mode Toggle | ✅ Complete |
 
+### v0.11.1 - UX Polish, Video & Documentation
+
+| ID | Feature | Status |
+|----|---------|--------|
+| [F-068](./completed/F-068-memory-status-bar-relocation.md) | Memory Game Status Bar Relocation | ✅ Complete |
+| [F-069](./completed/F-069-youtube-video-support.md) | YouTube Video Gallery Support | ✅ Complete |
+| [F-070](./completed/F-070-image-retrieval-validation.md) | Image Retrieval Validation | ✅ Complete |
+| [F-071](./completed/F-071-myplausibleme-url-format.md) | MyPlausibleMe Strict URL Format | ✅ Complete |
+| [F-072](./completed/F-072-settings-panel-redesign.md) | Settings Panel Redesign | ✅ Complete |
+| [F-073](./completed/F-073-user-documentation.md) | User Documentation Suite | ✅ Complete |
+| [F-074](./completed/F-074-destructive-action-styling.md) | Destructive Action Button Styling | ✅ Complete |
+| [F-017](./completed/F-017-testing-infrastructure.md) | Testing Infrastructure | ✅ Complete |
+| [F-018](./completed/F-018-security-hardening.md) | Security Hardening | ✅ Complete |
+
 ### v0.12.0 - Core Mechanics
 
 | ID | Feature | Status |
@@ -165,11 +191,11 @@ Feature specifications for Itemdeck development.
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-017](./planned/F-017-testing-infrastructure.md) | Testing Infrastructure | 📋 Planned |
-| [F-018](./planned/F-018-security-hardening.md) | Security Hardening | 📋 Planned |
 | [F-019](./planned/F-019-accessibility-audit.md) | Accessibility Audit | 📋 Planned |
 | [F-026](./planned/F-026-component-storybook.md) | Component Storybook | 📋 Planned |
 | [F-041](./planned/F-041-card-animations-polish.md) | Card Animation Polish | 📋 Planned |
+| [F-081](./planned/F-081-settings-json-export.md) | Settings JSON Export/Import | 📋 Planned |
+| [F-082](./planned/F-082-theme-json-export.md) | Theme Customisation Export/Import | 📋 Planned |
 
 ## Status Legend
 

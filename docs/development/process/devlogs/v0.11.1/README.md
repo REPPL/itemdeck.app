@@ -330,6 +330,6 @@ export const useSettingsSearch = (settings: Setting[]) => {
 ## Related Documentation
 
 - [v0.11.1 Milestone](../../roadmap/milestones/v0.11.1.md)
-- [v0.11.1 Retrospective](../retrospectives/v0.11.1/README.md)
+- [v0.11.1 Retrospective](../../retrospectives/v0.11.1/README.md)
 - [R-010: Settings UX Patterns](../../research/R-010-settings-ux-patterns.md)
 - [v0.11.0 Devlog](../v0.11.0/README.md)

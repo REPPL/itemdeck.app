@@ -10,7 +10,7 @@
 import { useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettingsStore, type LayoutType } from "@/stores/settingsStore";
-import { GROUP_BY_FIELD_OPTIONS } from "@/utils/fieldPathResolver";
+import { useAvailableGroupFields } from "@/hooks/useAvailableGroupFields";
 import styles from "./ViewPopover.module.css";
 
 // ============================================================================
@@ -66,6 +66,23 @@ function CheckIcon() {
       aria-hidden="true"
     >
       <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }
@@ -140,6 +157,12 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
   const groupByField = useSettingsStore((state) => state.groupByField);
   const setGroupByField = useSettingsStore((state) => state.setGroupByField);
 
+  // Get available grouping options based on collection data
+  const groupByOptions = useAvailableGroupFields();
+
+  // Group By only shown in List view (not Grid or Compact)
+  const showGroupBy = layout === "list";
+
   // Handle view mode change
   const handleViewModeChange = useCallback(
     (type: LayoutType) => {
@@ -209,7 +232,47 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
             animate="visible"
             exit="exit"
           >
-            {/* View Mode Section */}
+            {/* Header row with close button */}
+            <div className={styles.header}>
+              <button
+                type="button"
+                className={styles.closeButton}
+                onClick={onClose}
+                aria-label="Close view options"
+              >
+                <CloseIcon />
+              </button>
+            </div>
+
+            {/* Grouping Section - only shown in List view */}
+            {showGroupBy && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>Group By</h3>
+                <ul className={styles.optionList} role="listbox" aria-label="Select grouping">
+                  {groupByOptions.map(({ value, label }) => {
+                    const isActive = (groupByField ?? "none") === value;
+                    return (
+                      <li key={value}>
+                        <button
+                          type="button"
+                          className={getOptionClass(isActive)}
+                          onClick={() => { handleGroupChange(value); }}
+                          role="option"
+                          aria-selected={isActive}
+                        >
+                          <span className={styles.optionLabel}>{label}</span>
+                          <span className={styles.checkmark}>
+                            <CheckIcon />
+                          </span>
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
+
+            {/* View Mode Section - at bottom */}
             <div className={styles.section}>
               <h3 className={styles.sectionTitle}>View Mode</h3>
               <ul className={styles.optionList} role="listbox" aria-label="Select view mode">
@@ -230,32 +293,6 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
                     </button>
                   </li>
                 ))}
-              </ul>
-            </div>
-
-            {/* Grouping Section */}
-            <div className={styles.section}>
-              <h3 className={styles.sectionTitle}>Group By</h3>
-              <ul className={styles.optionList} role="listbox" aria-label="Select grouping">
-                {GROUP_BY_FIELD_OPTIONS.map(({ value, label }) => {
-                  const isActive = (groupByField ?? "none") === value;
-                  return (
-                    <li key={value}>
-                      <button
-                        type="button"
-                        className={getOptionClass(isActive)}
-                        onClick={() => { handleGroupChange(value); }}
-                        role="option"
-                        aria-selected={isActive}
-                      >
-                        <span className={styles.optionLabel}>{label}</span>
-                        <span className={styles.checkmark}>
-                          <CheckIcon />
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
               </ul>
             </div>
           </motion.div>

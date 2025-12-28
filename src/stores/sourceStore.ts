@@ -150,6 +150,19 @@ export const useSourceStore = create<SourceState>()(
       },
 
       addMyPlausibleMeSource: (username: string, folder: string, name?: string) => {
+        // Check if this collection already exists (by username + folder combination)
+        const existingSource = get().sources.find(
+          (s) =>
+            s.sourceType === "myplausibleme" &&
+            s.mpmUsername?.toLowerCase() === username.toLowerCase() &&
+            s.mpmFolder?.toLowerCase() === folder.toLowerCase()
+        );
+
+        // If already exists, just return the existing ID (don't add duplicate)
+        if (existingSource) {
+          return existingSource.id;
+        }
+
         const id = generateId();
         const url = `https://cdn.jsdelivr.net/gh/${username}/MyPlausibleMe@main/data/collections/${folder}`;
 
@@ -263,6 +276,19 @@ export const useSourceStore = create<SourceState>()(
 
         // Remove old local source if present (migrated to MyPlausibleMe)
         sources = sources.filter((s) => s.id !== "local");
+
+        // Remove duplicate MyPlausibleMe sources (keep first occurrence)
+        const seenMpm = new Set<string>();
+        sources = sources.filter((s) => {
+          if (s.sourceType === "myplausibleme" && s.mpmUsername && s.mpmFolder) {
+            const key = `${s.mpmUsername.toLowerCase()}:${s.mpmFolder.toLowerCase()}`;
+            if (seenMpm.has(key)) {
+              return false; // Duplicate - remove
+            }
+            seenMpm.add(key);
+          }
+          return true;
+        });
 
         // Ensure date objects are properly hydrated
         sources = sources.map((s) => ({

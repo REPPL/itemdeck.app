@@ -68,6 +68,18 @@ Archive of completed feature implementations.
 | [F-051](./F-051-edit-button-integration.md) | Edit Button Integration | v0.10.0 |
 | [F-052](./F-052-edit-export-import.md) | Edit Export/Import | v0.10.0 |
 
+### v0.11.0 - Mechanics Foundation & Discovery
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-036](./F-036-card-filtering.md) | Card Filtering (with Search) | v0.11.0 |
+| [F-053](./F-053-mechanic-plugin-registry.md) | Mechanic Plugin Registry | v0.11.0 |
+| [F-054](./F-054-mechanic-context-provider.md) | Mechanic Context Provider | v0.11.0 |
+| [F-055](./F-055-mechanic-overlay-system.md) | Mechanic Overlay System | v0.11.0 |
+| [F-056](./F-056-settings-mechanic-selector.md) | Settings Mechanic Selector | v0.11.0 |
+| [F-065](./F-065-card-grouping.md) | Card Grouping | v0.11.0 |
+| [F-066](./F-066-view-mode-toggle.md) | View Mode Toggle | v0.11.0 |
+
 ### v0.11.1 - UX Polish, Video Support & Settings Redesign
 
 | ID | Feature | Milestone |

@@ -49,11 +49,9 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
   const {
     dragModeEnabled,
     showDragIcon,
-    editModeEnabled,
     defaultCardFace,
     setDragModeEnabled,
     setShowDragIcon,
-    setEditModeEnabled,
     setDefaultCardFace,
   } = useSettingsStore();
 
@@ -99,26 +97,6 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
                 />
                 <span className={styles.toggleSlider} />
               </label>
-            </div>
-
-            <div className={styles.divider} />
-
-            <h3 className={styles.sectionHeader}>Edit Mode</h3>
-
-            <div className={styles.row}>
-              <span className={styles.label}>Edit Mode</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={editModeEnabled}
-                  onChange={(e) => { setEditModeEnabled(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-
-            <div className={styles.helpText}>
-              Enable editing of card data directly in the detail view.
             </div>
 
             <div className={styles.divider} />

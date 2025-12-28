@@ -2,22 +2,26 @@
  * Quick Settings component.
  *
  * Provides easy access to the most commonly changed settings:
- * - Visual theme preset
- * - Card size
- * - View mode
- * - Shuffle on load
- * - Random selection
- * - Statistics bar
- * - Mechanics toggle
+ * - Visual theme preset (dropdown with all themes)
+ * - Card size (Small/Medium/Large buttons)
+ * - View mode (Grid/List/Compact buttons)
+ * - Shuffle on load (toggle)
+ * - Random selection (toggle with count input)
+ *
+ * v0.11.5: Removed Statistics Bar toggle, Refresh Data button, and Games Mode.
+ * Statistics Bar moved to System > UI Visibility.
+ * Games Mode accessible via Navigation Hub Games button.
  */
 
-import { RefreshButton } from "@/components/RefreshButton";
+import { useEffect } from "react";
+import { useCollectionData } from "@/context/CollectionDataContext";
 import {
   useSettingsStore,
   type VisualTheme,
   type CardSizePreset,
   type LayoutType,
 } from "@/stores/settingsStore";
+// Games Mode removed - now accessible via Navigation Hub Games button
 import styles from "./SettingsPanel.module.css";
 
 /**
@@ -88,30 +92,39 @@ const layoutOptions: { value: LayoutType; label: string; icon: React.ReactNode }
  * Quick Settings panel for most commonly used settings.
  */
 export function QuickSettings() {
+  const { cards } = useCollectionData();
+  const totalCardCount = cards.length;
+
   const {
     visualTheme,
     cardSizePreset,
     shuffleOnLoad,
     layout,
-    activeMechanicId,
-    showStatisticsBar,
     randomSelectionEnabled,
     randomSelectionCount,
     setVisualTheme,
     setCardSizePreset,
     setShuffleOnLoad,
     setLayout,
-    setActiveMechanicId,
-    setShowStatisticsBar,
     setRandomSelectionEnabled,
     setRandomSelectionCount,
   } = useSettingsStore();
+
+  // Clamp selection count when collection changes (e.g., fewer cards available)
+  useEffect(() => {
+    if (totalCardCount > 0 && randomSelectionCount > totalCardCount) {
+      setRandomSelectionCount(totalCardCount);
+    }
+  }, [totalCardCount, randomSelectionCount, setRandomSelectionCount]);
+
+  // Display effective count (clamped to available cards)
+  const effectiveCount = Math.min(randomSelectionCount, totalCardCount || randomSelectionCount);
 
   return (
     <>
       {/* Visual Theme */}
       <div className={styles.row}>
-        <span className={styles.label}>Theme</span>
+        <span className={styles.label}>Current Theme</span>
         <select
           className={styles.select}
           value={visualTheme}
@@ -173,7 +186,7 @@ export function QuickSettings() {
 
       {/* Shuffle on Load */}
       <div className={styles.row}>
-        <span className={styles.label}>Shuffle on Load</span>
+        <span className={styles.label}>Shuffle Cards on Load</span>
         <label className={styles.toggle}>
           <input
             type="checkbox"
@@ -198,65 +211,28 @@ export function QuickSettings() {
       </div>
 
       {randomSelectionEnabled && (
-        <div className={styles.row}>
-          <span className={styles.label}>Selection Count</span>
-          <input
-            type="number"
-            className={styles.numberInput}
-            value={randomSelectionCount}
-            onChange={(e) => { setRandomSelectionCount(Math.max(1, parseInt(e.target.value, 10) || 1)); }}
-            min={1}
-            max={100}
-            aria-label="Random selection count"
-          />
-        </div>
+        <>
+          <div className={styles.row}>
+            <span className={styles.label}>Selection Count</span>
+            <input
+              type="number"
+              className={styles.numberInput}
+              value={effectiveCount}
+              onChange={(e) => {
+                const value = parseInt(e.target.value, 10) || 1;
+                setRandomSelectionCount(Math.min(Math.max(1, value), totalCardCount));
+              }}
+              min={1}
+              max={totalCardCount}
+              aria-label="Random selection count"
+            />
+          </div>
+          <div className={styles.helpText}>
+            (out of {totalCardCount} cards)
+          </div>
+        </>
       )}
 
-      {/* Statistics Bar */}
-      <div className={styles.row}>
-        <span className={styles.label}>Statistics Bar</span>
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={showStatisticsBar}
-            onChange={(e) => { setShowStatisticsBar(e.target.checked); }}
-          />
-          <span className={styles.toggleSlider} />
-        </label>
-      </div>
-
-      <div className={styles.divider} />
-
-      {/* Mechanics Toggle */}
-      <div className={styles.row}>
-        <span className={styles.label}>Mechanics</span>
-        <label className={styles.toggle}>
-          <input
-            type="checkbox"
-            checked={activeMechanicId !== null}
-            onChange={(e) => {
-              if (e.target.checked) {
-                setActiveMechanicId("memory"); // Default to memory game
-              } else {
-                setActiveMechanicId(null);
-              }
-            }}
-          />
-          <span className={styles.toggleSlider} />
-        </label>
-      </div>
-
-      <div className={styles.helpText}>
-        Enable game mechanics overlay for the card grid.
-      </div>
-
-      <div className={styles.divider} />
-
-      {/* Refresh Data */}
-      <div className={styles.row}>
-        <span className={styles.label}>Refresh Data</span>
-        <RefreshButton size="small" />
-      </div>
     </>
   );
 }

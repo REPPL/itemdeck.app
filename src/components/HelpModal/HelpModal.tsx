@@ -179,10 +179,6 @@ export function HelpModal({ isOpen, onClose }: HelpModalProps) {
                 </tbody>
               </table>
 
-              <p className={styles.settingsHint}>
-                All display options are available in{" "}
-                <strong>Settings</strong> (gear icon).
-              </p>
             </div>
           </motion.div>
         </motion.div>

@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/status-foundation-yellow" alt="Status: Foundation">
+  <img src="https://img.shields.io/badge/status-v0.11.1-brightgreen" alt="Status: v0.11.1">
   <img src="https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen" alt="Node.js >= 20.0.0">
   <img src="https://img.shields.io/badge/TypeScript-strict-blue" alt="TypeScript Strict">
   <br>

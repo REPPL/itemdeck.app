@@ -1,6 +1,7 @@
 import { ImageWithFallback } from "@/components/ImageWithFallback";
 import { RankBadge } from "@/components/RankBadge";
 import { DeviceBadge } from "@/components/DeviceBadge";
+import { useSettingsStore } from "@/stores/settingsStore";
 import styles from "./Card.module.css";
 
 /**
@@ -104,6 +105,11 @@ export function CardFront({
   isFlipping = false,
   hasEdits = false,
 }: CardFrontProps) {
+  const usePlaceholderImages = useSettingsStore((s) => s.usePlaceholderImages);
+
+  // Check if the image URL is a placeholder (picsum.photos)
+  const isPlaceholderUrl = !usePlaceholderImages && imageUrl.includes("picsum.photos");
+
   // Hide unranked badge on small cards to prevent overflow
   const shouldShowRankBadge = showRankBadge && (rank !== null || cardSize !== "small");
 
@@ -118,6 +124,7 @@ export function CardFront({
         title={title}
         className={styles.frontImage}
         loading="lazy"
+        isPlaceholderUrl={isPlaceholderUrl}
       />
 
       {/* Rank badge in top-left - hide unranked text on small cards */}

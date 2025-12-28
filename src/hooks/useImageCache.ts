@@ -219,3 +219,6 @@ export function formatBytes(bytes: number): string {
 
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${unit}`;
 }
+
+// Re-export from imageCache service for convenience
+export { DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";

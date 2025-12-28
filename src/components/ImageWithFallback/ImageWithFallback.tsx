@@ -17,14 +17,17 @@ interface ImageWithFallbackProps {
   className?: string;
   /** Loading attribute for lazy loading */
   loading?: "lazy" | "eager";
+  /** Whether this is a placeholder URL (skip loading if placeholders disabled) */
+  isPlaceholderUrl?: boolean;
 }
 
 /**
- * Image component with title placeholder underneath.
+ * Image component with coloured placeholder.
  *
- * Shows a coloured background with bold title text as the base layer.
+ * Shows a coloured background as the base layer.
  * The image is overlaid on top and fades in when loaded.
- * If the image fails to load, the title placeholder remains visible.
+ * If the image fails to load or is skipped, the coloured background remains visible.
+ * Title text is NOT shown (card overlay already displays the title).
  */
 export function ImageWithFallback({
   src,
@@ -33,9 +36,13 @@ export function ImageWithFallback({
   fallbackSrc,
   className,
   loading = "lazy",
+  isPlaceholderUrl = false,
 }: ImageWithFallbackProps) {
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [currentSrc, setCurrentSrc] = useState(src);
+
+  // If this is a placeholder URL and we want to skip it, show coloured background only
+  const skipImage = isPlaceholderUrl;
 
   // Generate consistent background colour from title
   const bgColour = useMemo(() => generateColour(title), [title]);
@@ -49,23 +56,21 @@ export function ImageWithFallback({
       // Try fallback image
       setCurrentSrc(fallbackSrc);
     } else {
-      // Image failed - placeholder will remain visible
+      // Image failed - coloured background will remain visible
       setLoadState("error");
     }
   }, [loadState, fallbackSrc, currentSrc]);
 
   return (
     <div className={styles.container}>
-      {/* Base layer: coloured background with title */}
+      {/* Base layer: coloured background (title shown in card overlay, not here) */}
       <div
         className={styles.placeholder}
         style={{ backgroundColor: bgColour }}
-      >
-        <span className={styles.placeholderTitle}>{title}</span>
-      </div>
+      />
 
       {/* Overlay: actual image (fades in when loaded) */}
-      {loadState !== "error" && (
+      {!skipImage && loadState !== "error" && (
         <img
           src={currentSrc}
           alt={alt}

@@ -108,13 +108,16 @@ Power users expect keyboard navigation.
 
 ## Recommendations for Itemdeck
 
-### New 3-Tab Structure
+### New 4-Tab Structure (Implemented in v0.11.1)
 
 | Tab | Contents | Rationale |
 |-----|----------|-----------|
-| **Quick** | Dark mode, theme preset, card size, shuffle, mechanics toggle | Most-changed settings |
-| **Appearance** | Theme colours, typography, cards layout, animations | All visual settings merged |
-| **Data** | Sources, cache, import/export | All data operations |
+| **Quick** | Theme preset, card size, view mode, shuffle, random selection, mechanics | Most-changed settings |
+| **System** | Dark mode, accessibility, UI visibility, developer tools | System-level settings |
+| **Appearance** | Theme colours, typography, cards layout, animations, field mapping | All visual settings merged |
+| **Data** | Sources, cache, import/export, themes | All data operations |
+
+> **Note**: The original 3-tab recommendation was revised to 4 tabs during implementation to maintain clear separation between system-level settings (dark mode, accessibility) and appearance customisation.
 
 ### Search Implementation
 

@@ -94,6 +94,7 @@ export function CardBack({
             src={logoSrc}
             alt=""
             aria-hidden="true"
+            draggable="false"
             onError={handleError}
           />
         </div>

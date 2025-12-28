@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useMyPlausibleMeDiscovery, type CollectionEntry } from "@/hooks/useMyPlausibleMeDiscovery";
 import { useSourceStore } from "@/stores/sourceStore";
 import { useSettingsStore } from "@/stores/settingsStore";
+import appLogo from "@/assets/placeholder-logo.svg";
 import styles from "./CollectionPicker.module.css";
 
 /**
@@ -20,8 +21,8 @@ import styles from "./CollectionPicker.module.css";
 interface CollectionPickerProps {
   /** Called when a collection is selected and added */
   onSelect: (sourceId: string) => void;
-  /** Called when user dismisses the picker without selecting */
-  onDismiss?: () => void;
+  /** Initial username to prefill (from URL) */
+  initialUsername?: string;
 }
 
 /**
@@ -32,9 +33,10 @@ const DEFAULT_USERNAME = "REPPL";
 /**
  * Collection picker for startup flow.
  */
-export function CollectionPicker({ onSelect, onDismiss }: CollectionPickerProps) {
-  const [username, setUsername] = useState(DEFAULT_USERNAME);
-  const [inputValue, setInputValue] = useState(DEFAULT_USERNAME);
+export function CollectionPicker({ onSelect, initialUsername }: CollectionPickerProps) {
+  const startUsername = initialUsername ?? DEFAULT_USERNAME;
+  const [username, setUsername] = useState(startUsername);
+  const [inputValue, setInputValue] = useState(startUsername);
 
   const { collections, isLoading, error, refresh } = useMyPlausibleMeDiscovery(username);
   const addMyPlausibleMeSource = useSourceStore((s) => s.addMyPlausibleMeSource);
@@ -72,6 +74,12 @@ export function CollectionPicker({ onSelect, onDismiss }: CollectionPickerProps)
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.2 }}
       >
+        {/* App logo */}
+        <img
+          src={appLogo}
+          alt="itemdeck logo"
+          className={styles.logo}
+        />
         <h1 className={styles.title}>itemdeck</h1>
         <p className={styles.subtitle}>Select a collection to view</p>
 
@@ -134,7 +142,14 @@ export function CollectionPicker({ onSelect, onDismiss }: CollectionPickerProps)
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
-                  <span className={styles.collectionName}>{collection.name}</span>
+                  <span className={styles.collectionHeader}>
+                    <span className={styles.collectionName}>{collection.name}</span>
+                    {collection.isCached && (
+                      <span className={styles.cachedBadge} title="Available offline">
+                        Cached
+                      </span>
+                    )}
+                  </span>
                   {collection.description && (
                     <span className={styles.collectionDescription}>
                       {collection.description}
@@ -151,15 +166,6 @@ export function CollectionPicker({ onSelect, onDismiss }: CollectionPickerProps)
           </div>
         )}
 
-        {/* Skip option */}
-        {onDismiss && (
-          <button
-            className={styles.skipButton}
-            onClick={onDismiss}
-          >
-            Skip for now
-          </button>
-        )}
       </motion.div>
     </div>
   );

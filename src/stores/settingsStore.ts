@@ -7,6 +7,7 @@
 
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
+import type { ForcedSettings, CollectionSettings } from "@/types/collectionSettings";
 
 /**
  * Collection config structure for applying defaults.
@@ -128,6 +129,14 @@ export interface ThemeCustomisation {
   overlayAnimation: boolean;
   /** Verdict overlay animation style - slide up or flip card */
   verdictAnimationStyle: VerdictAnimationStyle;
+  /** Custom font family name (optional) */
+  fontFamily?: string;
+  /** URL to load custom font from (optional) */
+  fontUrl?: string;
+  /** Card back background image URL (optional) */
+  cardBackBackgroundImage?: string;
+  /** Card back background image mode: full (cover), tiled (repeat), or none */
+  cardBackBackgroundMode?: "full" | "tiled" | "none";
 }
 
 /**
@@ -228,6 +237,8 @@ export interface FieldMappingConfig {
   sortField: string;
   /** Sort direction */
   sortDirection: "asc" | "desc";
+  /** Field path for top badge (e.g., "order", "myRank", "myVerdict", "none") */
+  topBadgeField: string;
 }
 
 /**
@@ -302,6 +313,9 @@ interface SettingsState {
 
   /** Card back style */
   cardBackStyle: CardBackStyle;
+
+  /** Selected card back background option value (from BACKGROUND_OPTIONS) */
+  cardBackBackground: string;
 
   /** Whether to show rank badge on cards */
   showRankBadge: boolean;
@@ -407,6 +421,22 @@ interface SettingsState {
   /** Whether the navigation hub is expanded */
   navExpanded: boolean;
 
+  // ============================================================================
+  // v0.11.5: Collection Settings State
+  // ============================================================================
+
+  /** Whether to show the View button in the navigation hub */
+  showViewButton: boolean;
+
+  /** Whether to use placeholder images for cards without images */
+  usePlaceholderImages: boolean;
+
+  /** Collection forced settings (applied on every load, user cannot override) */
+  collectionForcedSettings: ForcedSettings | null;
+
+  /** Source ID of the collection whose defaults were applied (prevents re-applying) */
+  appliedCollectionDefaultsSourceId: string | null;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -420,6 +450,7 @@ interface SettingsState {
   setDragModeEnabled: (enabled: boolean) => void;
   setVisualTheme: (theme: VisualTheme) => void;
   setCardBackStyle: (style: CardBackStyle) => void;
+  setCardBackBackground: (background: string) => void;
   setShowRankBadge: (show: boolean) => void;
   setShowDeviceBadge: (show: boolean) => void;
   setRankPlaceholderText: (text: string) => void;
@@ -468,6 +499,12 @@ interface SettingsState {
   setNavExpanded: (expanded: boolean) => void;
   toggleNavExpanded: () => void;
 
+  // v0.11.5: Collection Settings Actions
+  setShowViewButton: (show: boolean) => void;
+  setUsePlaceholderImages: (use: boolean) => void;
+  applyCollectionSettings: (sourceId: string, settings: CollectionSettings) => void;
+  clearCollectionForcedSettings: () => void;
+
   // ============================================================================
   // v0.11.2: Cache Consent State (F-080)
   // ============================================================================
@@ -505,6 +542,7 @@ const DEFAULT_SETTINGS = {
   dragModeEnabled: true,
   visualTheme: "modern" as VisualTheme,
   cardBackStyle: "bitmap" as CardBackStyle,
+  cardBackBackground: "app-logo",
   showRankBadge: true,
   showDeviceBadge: true,
   rankPlaceholderText: "The one that got away!",
@@ -516,6 +554,7 @@ const DEFAULT_SETTINGS = {
     logoField: "logoUrl",
     sortField: "order",
     sortDirection: "asc" as const,
+    topBadgeField: "order",
   },
   themeCustomisations: { ...DEFAULT_THEME_CUSTOMISATIONS },
   showHelpButton: true,
@@ -549,6 +588,11 @@ const DEFAULT_SETTINGS = {
   cacheConsentPreference: "ask" as const,
   cacheConsentGranted: [] as string[],
   cacheConsentDenied: [] as string[],
+  // v0.11.5: Collection Settings defaults
+  showViewButton: true,
+  usePlaceholderImages: true,
+  collectionForcedSettings: null as ForcedSettings | null,
+  appliedCollectionDefaultsSourceId: null as string | null,
 };
 
 // Check for reset parameter in URL - force clear localStorage
@@ -613,6 +657,10 @@ export const useSettingsStore = create<SettingsState>()(
 
       setCardBackStyle: (cardBackStyle) => {
         set({ cardBackStyle });
+      },
+
+      setCardBackBackground: (cardBackBackground) => {
+        set({ cardBackBackground });
       },
 
       setShowRankBadge: (showRankBadge) => {
@@ -841,6 +889,109 @@ export const useSettingsStore = create<SettingsState>()(
         set((state) => ({ navExpanded: !state.navExpanded }));
       },
 
+      // v0.11.5: Collection Settings Actions
+      setShowViewButton: (showViewButton) => {
+        set({ showViewButton });
+      },
+
+      setUsePlaceholderImages: (usePlaceholderImages) => {
+        set({ usePlaceholderImages });
+      },
+
+      applyCollectionSettings: (sourceId, settings) => {
+        set((state) => {
+          const updates: Partial<SettingsState> = {};
+
+          // Always apply forced settings (user cannot override)
+          if (settings.forced) {
+            updates.collectionForcedSettings = settings.forced;
+
+            // Apply forced field mapping
+            if (settings.forced.fieldMapping) {
+              updates.fieldMapping = {
+                ...state.fieldMapping,
+                ...settings.forced.fieldMapping,
+              } as FieldMappingConfig;
+            }
+
+            // Apply forced card settings
+            if (settings.forced.defaultCardFace !== undefined) {
+              updates.defaultCardFace = settings.forced.defaultCardFace;
+            }
+            if (settings.forced.cardBackDisplay !== undefined) {
+              updates.cardBackDisplay = settings.forced.cardBackDisplay;
+            }
+            if (settings.forced.cardBackStyle !== undefined) {
+              updates.cardBackStyle = settings.forced.cardBackStyle;
+            }
+            if (settings.forced.titleDisplayMode !== undefined) {
+              updates.titleDisplayMode = settings.forced.titleDisplayMode;
+            }
+            if (settings.forced.showRankBadge !== undefined) {
+              updates.showRankBadge = settings.forced.showRankBadge;
+            }
+            if (settings.forced.showDeviceBadge !== undefined) {
+              updates.showDeviceBadge = settings.forced.showDeviceBadge;
+            }
+            if (settings.forced.rankPlaceholderText !== undefined) {
+              updates.rankPlaceholderText = settings.forced.rankPlaceholderText;
+            }
+          }
+
+          // Only apply defaults if not already applied for this source
+          if (settings.defaults && state.appliedCollectionDefaultsSourceId !== sourceId) {
+            updates.appliedCollectionDefaultsSourceId = sourceId;
+
+            // Apply default visual settings
+            if (settings.defaults.visualTheme !== undefined) {
+              updates.visualTheme = settings.defaults.visualTheme;
+            }
+            if (settings.defaults.cardSizePreset !== undefined) {
+              updates.cardSizePreset = settings.defaults.cardSizePreset;
+            }
+            if (settings.defaults.cardAspectRatio !== undefined) {
+              updates.cardAspectRatio = settings.defaults.cardAspectRatio;
+            }
+            if (settings.defaults.maxVisibleCards !== undefined) {
+              updates.maxVisibleCards = settings.defaults.maxVisibleCards;
+            }
+            if (settings.defaults.shuffleOnLoad !== undefined) {
+              updates.shuffleOnLoad = settings.defaults.shuffleOnLoad;
+            }
+
+            // Apply default theme customisations (merge with existing)
+            if (settings.defaults.themeCustomisations) {
+              const mergedCustomisations = { ...state.themeCustomisations };
+              for (const [theme, customisation] of Object.entries(settings.defaults.themeCustomisations)) {
+                // customisation is guaranteed to exist from Object.entries
+                mergedCustomisations[theme as VisualTheme] = {
+                  ...mergedCustomisations[theme as VisualTheme],
+                  ...customisation,
+                };
+              }
+              updates.themeCustomisations = mergedCustomisations;
+            }
+
+            // Apply default search/grouping settings
+            if (settings.defaults.searchFields !== undefined) {
+              updates.searchFields = settings.defaults.searchFields;
+            }
+            if (settings.defaults.groupByField !== undefined) {
+              updates.groupByField = settings.defaults.groupByField;
+            }
+          }
+
+          return Object.keys(updates).length > 0 ? updates : state;
+        });
+      },
+
+      clearCollectionForcedSettings: () => {
+        set({
+          collectionForcedSettings: null,
+          appliedCollectionDefaultsSourceId: null,
+        });
+      },
+
       // v0.11.2: Cache Consent Actions (F-080)
       setCacheConsentPreference: (cacheConsentPreference) => {
         set({ cacheConsentPreference });
@@ -881,7 +1032,7 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 25,
+      version: 26,
       storage: createJSONStorage(() => localStorage),
       // Force-clear activeMechanicId after rehydration - games should never auto-start
       onRehydrateStorage: () => (state) => {
@@ -933,6 +1084,11 @@ export const useSettingsStore = create<SettingsState>()(
         cacheConsentPreference: state.cacheConsentPreference,
         cacheConsentGranted: state.cacheConsentGranted,
         cacheConsentDenied: state.cacheConsentDenied,
+        // v0.11.5: Collection Settings
+        showViewButton: state.showViewButton,
+        // Note: collectionForcedSettings is intentionally NOT persisted
+        // Forced settings are applied fresh from collection on each load
+        appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -1189,6 +1345,17 @@ export const useSettingsStore = create<SettingsState>()(
             cacheConsentPreference: "ask" as const,
             cacheConsentGranted: [] as string[],
             cacheConsentDenied: [] as string[],
+          };
+        }
+
+        // Handle migration from version 25 to 26 (v0.11.5: Collection Settings)
+        if (version < 26) {
+          state = {
+            ...state,
+            showViewButton: true,
+            usePlaceholderImages: true,
+            // collectionForcedSettings is not persisted
+            appliedCollectionDefaultsSourceId: null,
           };
         }
 

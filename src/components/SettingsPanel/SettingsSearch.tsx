@@ -3,6 +3,8 @@
  *
  * Provides a search input that filters settings across all tabs
  * and displays matching results with navigation links.
+ *
+ * v0.11.5: Updated to support 5 tabs and moved to header position.
  */
 
 import { useRef, useEffect } from "react";
@@ -17,7 +19,7 @@ import styles from "./SettingsPanel.module.css";
 
 interface SettingsSearchProps {
   /** Callback when a search result is selected */
-  onNavigate: (tab: "quick" | "system" | "appearance" | "data", subTab?: string) => void;
+  onNavigate: (tab: "quick" | "appearance" | "collections" | "data" | "system", subTab?: string) => void;
 }
 
 /**
@@ -53,6 +55,7 @@ function formatResultLocation(result: SettingSearchResult): string {
 
 /**
  * Settings search component with autocomplete results.
+ * Now positioned in header area (v0.11.5).
  */
 export function SettingsSearch({ onNavigate }: SettingsSearchProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -81,14 +84,13 @@ export function SettingsSearch({ onNavigate }: SettingsSearchProps) {
   };
 
   return (
-    <div className={styles.searchContainer}>
+    <div className={styles.searchContainerHeader}>
       <div className={styles.searchInputWrapper}>
-        <SearchIcon />
         <input
           ref={inputRef}
           type="text"
           className={styles.searchInput}
-          placeholder="Search settings..."
+          placeholder="Search..."
           value={query}
           onChange={(e) => { setQuery(e.target.value); }}
           onKeyDown={handleKeyDown}
@@ -100,7 +102,7 @@ export function SettingsSearch({ onNavigate }: SettingsSearchProps) {
           autoCapitalize="off"
           spellCheck={false}
         />
-        {isSearching && (
+        {isSearching ? (
           <button
             type="button"
             className={styles.searchClearButton}
@@ -109,6 +111,10 @@ export function SettingsSearch({ onNavigate }: SettingsSearchProps) {
           >
             <CloseIcon size={14} />
           </button>
+        ) : (
+          <span className={styles.searchIconRight}>
+            <SearchIcon />
+          </span>
         )}
       </div>
 

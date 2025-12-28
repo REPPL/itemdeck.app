@@ -31,10 +31,16 @@ This directory captures **why** we made technical choices:
 | [ADR-011](./adrs/ADR-011-accessibility-standard.md) | WCAG 2.2 AA | Accepted |
 | [ADR-012](./adrs/ADR-012-ethical-sourcing.md) | Wikimedia Commons | Accepted |
 | [ADR-013](./adrs/ADR-013-external-data-repository.md) | External Data Repository | Accepted |
+| [ADR-014](./adrs/ADR-014-entity-edit-architecture.md) | Overlay Store for Entity Edits | Accepted |
+| [ADR-015](./adrs/ADR-015-edit-mode-ux.md) | Modal Edit Form Pattern | Accepted |
+| [ADR-016](./adrs/ADR-016-gaming-mechanics-plugin-architecture.md) | Registry + Factory for Mechanics | Accepted |
+| [ADR-017](./adrs/ADR-017-mechanic-state-management.md) | Scoped Zustand Stores | Accepted |
+| [ADR-018](./adrs/ADR-018-mechanic-ui-overlay.md) | Slot Props for Overlays | Accepted |
+| [ADR-019](./adrs/ADR-019-configuration-first-mechanics.md) | Configuration-First Mechanics | Accepted |
 
 ---
 
 ## Related Documentation
 
 - [Development Hub](../README.md)
-- [Research](../../research/)
+- [Research](../research/)

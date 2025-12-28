@@ -49,6 +49,56 @@ export const LOGO_FIELD_OPTIONS: FieldOption[] = [
   { value: "none", label: "None (App Logo)" },
 ];
 
+/**
+ * Background options for card back.
+ * Includes built-in images (full/tiled) and collection-specific logos.
+ */
+export interface BackgroundOption {
+  /** Unique value identifier */
+  value: string;
+  /** Display label */
+  label: string;
+  /** Type of background: 'full', 'tiled', 'logo', or 'app' */
+  type: "full" | "tiled" | "logo" | "app";
+  /** URL for built-in images, or field path for collection logos */
+  url?: string;
+  /** Field path for collection-specific logos */
+  fieldPath?: string;
+}
+
+/**
+ * Built-in background options (images from public/backgrounds/).
+ */
+export const BUILT_IN_BACKGROUNDS: BackgroundOption[] = [
+  { value: "full-1", label: "Pattern 1 (Full)", type: "full", url: "/backgrounds/full/1.png" },
+  { value: "full-2", label: "Pattern 2 (Full)", type: "full", url: "/backgrounds/full/2.png" },
+  { value: "tiled-1", label: "Pattern 1 (Tiled)", type: "tiled", url: "/backgrounds/tiled/1.png" },
+];
+
+/**
+ * Collection-specific background options (logos from entity data).
+ */
+export const COLLECTION_BACKGROUNDS: BackgroundOption[] = [
+  { value: "platform-logo", label: "Platform Logo", type: "logo", fieldPath: "logoUrl" },
+  { value: "card-logo", label: "Card Logo", type: "logo", fieldPath: "images[type=logo][0].url" },
+];
+
+/**
+ * App logo background option.
+ */
+export const APP_LOGO_BACKGROUND: BackgroundOption = {
+  value: "app-logo", label: "itemdeck App Logo", type: "app"
+};
+
+/**
+ * All background options for card back settings.
+ */
+export const BACKGROUND_OPTIONS: BackgroundOption[] = [
+  ...BUILT_IN_BACKGROUNDS,
+  ...COLLECTION_BACKGROUNDS,
+  APP_LOGO_BACKGROUND,
+];
+
 export const SORT_FIELD_OPTIONS: FieldOption[] = [
   { value: "order", label: "Order/Rank" },
   { value: "myRank", label: "My Rank" },

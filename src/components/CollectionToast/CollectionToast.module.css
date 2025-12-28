@@ -1,0 +1,126 @@
+/**
+ * CollectionToast styles.
+ *
+ * Prominent notification shown when collection loads successfully.
+ * Centred on screen with backdrop blur.
+ */
+
+/* Backdrop overlay */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Toast container - centred on screen */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md, 16px);
+  padding: var(--spacing-lg, 24px) var(--spacing-xl, 32px);
+
+  background: var(--colour-surface, #fff);
+  border: 1px solid var(--colour-border, #e5e7eb);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow:
+    0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+
+  font-size: 1rem;
+  color: var(--colour-text-primary, #111);
+  cursor: pointer;
+  text-align: center;
+
+  /* Prevent text selection on tap */
+  user-select: none;
+  -webkit-user-select: none;
+
+  /* Minimum size for visibility */
+  min-width: 280px;
+  max-width: 90vw;
+}
+
+.toast:hover {
+  box-shadow:
+    0 30px 60px -15px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(255, 255, 255, 0.15);
+}
+
+.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background: var(--colour-success, #22c55e);
+  color: white;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.message {
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: var(--colour-text-muted, #6b7280);
+  margin-top: var(--spacing-xs, 4px);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .toast {
+    padding: var(--spacing-md, 16px) var(--spacing-lg, 24px);
+    min-width: 240px;
+  }
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    font-size: 1.25rem;
+  }
+
+  .message {
+    font-size: 1rem;
+  }
+}
+
+/* Dark mode */
+[data-theme="dark"] .toast,
+[data-colour-scheme="dark"] .toast {
+  background: var(--colour-surface, #1f2937);
+  border-color: var(--colour-border, #374151);
+  color: var(--colour-text-primary, #f9fafb);
+}
+
+[data-theme="dark"] .backdrop,
+[data-colour-scheme="dark"] .backdrop {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .toast,
+  .backdrop {
+    transition: none;
+  }
+
+  .backdrop {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+}

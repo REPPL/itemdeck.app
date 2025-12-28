@@ -9,6 +9,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
+import { isCollectionCached } from "@/lib/cardCache";
 
 /**
  * Collection entry discovered from repository.
@@ -22,6 +23,8 @@ export interface CollectionEntry {
   description?: string;
   /** Item count (optional, from collection.json) */
   itemCount?: number;
+  /** Whether this collection is already cached locally */
+  isCached?: boolean;
 }
 
 /**
@@ -181,24 +184,36 @@ export function useMyPlausibleMeDiscovery(
       // Step 3: For each directory, check if it has a collection.json
       // and fetch metadata
       const validCollections: CollectionEntry[] = [];
+      const trimmedUsername = username.trim();
 
       await Promise.all(
         directories.map(async (dir) => {
-          const metadata = await fetchCollectionMetadata(username.trim(), dir.name);
+          const metadata = await fetchCollectionMetadata(trimmedUsername, dir.name);
           // Only include if collection.json exists (metadata fetch succeeded)
           if (metadata !== null) {
+            // Build source ID to check cache status (matches sourceStore format)
+            const sourceId = `myplausibleme:${trimmedUsername}:${dir.name}`;
+            const cached = await isCollectionCached(sourceId);
+
             validCollections.push({
               folder: dir.name,
               name: metadata.name ?? dir.name,
               description: metadata.description,
               itemCount: metadata.itemCount,
+              isCached: cached,
             });
           }
         })
       );
 
-      // Sort alphabetically by name
-      validCollections.sort((a, b) => a.name.localeCompare(b.name));
+      // Sort: cached collections first, then alphabetically by name
+      validCollections.sort((a, b) => {
+        // Cached collections come first
+        if (a.isCached && !b.isCached) return -1;
+        if (!a.isCached && b.isCached) return 1;
+        // Then sort alphabetically
+        return a.name.localeCompare(b.name);
+      });
 
       if (validCollections.length === 0) {
         setError("No valid collections found (missing collection.json files)");

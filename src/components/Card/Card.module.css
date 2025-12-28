@@ -127,7 +127,11 @@
 
 /* Back face - visible by default (no rotation) */
 .cardBack {
-  background: var(--card-back-background);
+  background-color: var(--card-back-background);
+  background-image: var(--card-back-background-image, none);
+  background-size: var(--card-back-background-size, auto);
+  background-repeat: var(--card-back-background-repeat, no-repeat);
+  background-position: var(--card-back-background-position, center);
 }
 
 /* Front face - rotated 180deg so it shows when flipped */
@@ -376,12 +380,18 @@
    ============================================ */
 
 /* Corner fold button - triangular corner tab with info icon */
+/* Uses percentages to scale with card size */
 .infoButton {
   position: absolute;
   top: 0;
   right: 0;
-  width: 48px;
-  height: 48px;
+  /* Larger size - 25% of card width/height */
+  width: 25%;
+  height: 25%;
+  min-width: 48px;
+  min-height: 48px;
+  max-width: 80px;
+  max-height: 80px;
   padding: 0;
   background: transparent;
   border: none;
@@ -403,13 +413,13 @@
   transition: background-color var(--transition-fast);
 }
 
-/* Info icon positioned in the corner */
+/* Info icon positioned in the corner - uses percentage-based positioning */
 .infoButton svg {
   position: absolute;
-  top: 8px;
-  right: 6px;
-  width: 18px;
-  height: 18px;
+  top: 12%;
+  right: 18%;
+  width: 38%;
+  height: 38%;
   color: #1a1a1a;
   pointer-events: none;
   z-index: 1;

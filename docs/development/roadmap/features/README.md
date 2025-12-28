@@ -173,6 +173,7 @@ Feature specifications for Itemdeck development.
 | [F-058](./planned/F-058-collection-mechanic.md) | Collection Mechanic | 📋 Planned |
 | [F-061](./planned/F-061-snap-ranking-mechanic.md) | Snap Ranking Mechanic | 📋 Planned |
 | [F-067](./planned/F-067-statistics-dashboard.md) | Statistics Dashboard | 📋 Planned |
+| [F-091](./planned/F-091-entity-auto-discovery.md) | Entity Auto-Discovery | 📋 Planned |
 
 ### v0.13.0 - Advanced Mechanics
 

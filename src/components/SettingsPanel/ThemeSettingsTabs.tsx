@@ -20,7 +20,7 @@
  * - Footer Style: Dark|Light
  * - More Button Label: text input
  * - Auto-expand More: toggle
- * - Zoom Image: toggle
+ * - Zoom First Image: toggle
  */
 
 import { useState, useCallback } from "react";
@@ -376,7 +376,7 @@ export function ThemeSettingsTabs() {
               </label>
             </div>
             <div className={styles.row}>
-              <span className={styles.label}>Zoom Image</span>
+              <span className={styles.label}>Zoom First Image</span>
               <label className={styles.toggle}>
                 <input
                   type="checkbox"

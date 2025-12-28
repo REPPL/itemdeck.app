@@ -111,7 +111,8 @@ function SortableCard({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isSorting ? 0.5 : 1,
+    // Keep original card visible during drag (placeholder shows where card will return)
+    opacity: 1,
     zIndex: isSorting ? 100 : "auto",
     // Cursor shows grab only when drag handles are active
     cursor: "pointer",

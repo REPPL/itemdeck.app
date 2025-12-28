@@ -89,11 +89,21 @@ interface RankBadgeProps {
 
 /**
  * Get ordinal suffix for a number (1st, 2nd, 3rd, etc.).
+ * Only applies to reasonable rank numbers (1-999).
+ * Larger numbers (like years) return empty string.
  */
 function getOrdinalSuffix(n: number): string {
-  const s = ["th", "st", "nd", "rd"];
-  const v = n % 100;
-  return s[(v - 20) % 10] ?? s[v] ?? s[0] ?? "th";
+  // Don't add ordinal suffix to years or other large numbers
+  // Ranks should typically be 1-999 at most
+  if (n >= 1000 || n <= 0) return "";
+
+  const j = n % 10;
+  const k = n % 100;
+
+  if (j === 1 && k !== 11) return "st";
+  if (j === 2 && k !== 12) return "nd";
+  if (j === 3 && k !== 13) return "rd";
+  return "th";
 }
 
 /**

@@ -6,8 +6,10 @@
  *
  * Sub-tabs:
  * - Layout: Size, Aspect Ratio
- * - Front: Title Display, Badges, Footer Badge Field, Unranked Text
- * - Back: Show Logo, Subtitle Field, Logo Field
+ * - Front: Title Display, Badges, Footer Badge Field, Unranked Text, Placeholder Images
+ * - Back: Show Background, Background selection
+ *
+ * v0.11.5: Dynamic field options based on collection data.
  */
 
 import { useState, useCallback } from "react";
@@ -18,11 +20,9 @@ import {
   type CardAspectRatio,
   type FieldMappingConfig,
 } from "@/stores/settingsStore";
-import {
-  SUBTITLE_FIELD_OPTIONS,
-  FOOTER_BADGE_FIELD_OPTIONS,
-  LOGO_FIELD_OPTIONS,
-} from "@/utils/fieldPathResolver";
+import { SUBTITLE_FIELD_OPTIONS } from "@/utils/fieldPathResolver";
+import { useBackgroundOptions } from "@/hooks/useBackgroundOptions";
+import { useAvailableFields } from "@/hooks/useAvailableFields";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -57,24 +57,33 @@ const cardAspectRatioOptions: { value: CardAspectRatio; label: string }[] = [
 export function CardSettingsTabs() {
   const [activeSubTab, setActiveSubTab] = useState<CardSubTab>("layout");
 
+  // Get available background options based on collection data
+  const { builtIn, collection, app } = useBackgroundOptions();
+
+  // Get available field options based on collection data
+  const { footerBadgeFields, topBadgeFields } = useAvailableFields();
+
   const {
     cardSizePreset,
     cardAspectRatio,
-    cardBackDisplay,
+    cardBackBackground,
     titleDisplayMode,
-    showRankBadge,
     showDeviceBadge,
     rankPlaceholderText,
+    usePlaceholderImages,
     fieldMapping,
     setCardSizePreset,
     setCardAspectRatio,
-    setCardBackDisplay,
+    setCardBackBackground,
     setTitleDisplayMode,
-    setShowRankBadge,
     setShowDeviceBadge,
     setRankPlaceholderText,
+    setUsePlaceholderImages,
     setFieldMapping,
   } = useSettingsStore();
+
+  // Derive whether top badge is shown from field mapping
+  const showTopBadge = fieldMapping.topBadgeField !== "none";
 
   const handlePlaceholderChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,30 +184,49 @@ export function CardSettingsTabs() {
               </select>
             </div>
 
-            <div className={styles.divider} />
-
             <div className={styles.row}>
-              <span className={styles.label}>Show Rank Badge</span>
+              <span className={styles.label}>Use Placeholder Images</span>
               <label className={styles.toggle}>
                 <input
                   type="checkbox"
-                  checked={showRankBadge}
-                  onChange={(e) => { setShowRankBadge(e.target.checked); }}
+                  checked={usePlaceholderImages}
+                  onChange={(e) => { setUsePlaceholderImages(e.target.checked); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Unranked Text</span>
-              <input
-                type="text"
-                className={styles.textInput}
-                value={rankPlaceholderText}
-                onChange={handlePlaceholderChange}
-                placeholder="The one that got away!"
-                aria-label="Rank placeholder text"
-              />
+            <div className={styles.helpText}>
+              When off, cards without images show title on coloured background.
             </div>
+
+            <div className={styles.divider} />
+
+            <div className={styles.row}>
+              <span className={styles.label}>Top Badge Field</span>
+              <select
+                className={styles.select}
+                value={fieldMapping.topBadgeField}
+                onChange={(e) => { handleFieldMappingChange("topBadgeField", e.target.value); }}
+                aria-label="Top badge field"
+              >
+                {topBadgeFields.map(({ value, label }) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+            {showTopBadge && (
+              <div className={styles.row}>
+                <span className={styles.label}>Text if Empty</span>
+                <input
+                  type="text"
+                  className={styles.textInput}
+                  value={rankPlaceholderText}
+                  onChange={handlePlaceholderChange}
+                  placeholder="e.g., ?"
+                  aria-label="Text to show when field is empty"
+                />
+              </div>
+            )}
 
             <div className={styles.divider} />
 
@@ -213,19 +241,21 @@ export function CardSettingsTabs() {
                 <span className={styles.toggleSlider} />
               </label>
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Footer Badge Field</span>
-              <select
-                className={styles.select}
-                value={fieldMapping.footerBadgeField}
-                onChange={(e) => { handleFieldMappingChange("footerBadgeField", e.target.value); }}
-                aria-label="Footer badge field"
-              >
-                {FOOTER_BADGE_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
-              </select>
-            </div>
+            {showDeviceBadge && (
+              <div className={styles.row}>
+                <span className={styles.label}>Footer Badge Field</span>
+                <select
+                  className={styles.select}
+                  value={fieldMapping.footerBadgeField}
+                  onChange={(e) => { handleFieldMappingChange("footerBadgeField", e.target.value); }}
+                  aria-label="Footer badge field"
+                >
+                  {footerBadgeFields.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </select>
+              </div>
+            )}
           </>
         );
 
@@ -233,27 +263,28 @@ export function CardSettingsTabs() {
         return (
           <>
             <div className={styles.row}>
-              <span className={styles.label}>Show Logo</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={cardBackDisplay === "logo"}
-                  onChange={(e) => { setCardBackDisplay(e.target.checked ? "logo" : "none"); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Logo Field</span>
+              <span className={styles.label}>Background</span>
               <select
                 className={styles.select}
-                value={fieldMapping.logoField}
-                onChange={(e) => { handleFieldMappingChange("logoField", e.target.value); }}
-                aria-label="Logo field"
+                value={cardBackBackground}
+                onChange={(e) => { setCardBackBackground(e.target.value); }}
+                aria-label="Card back background"
               >
-                {LOGO_FIELD_OPTIONS.map(({ value, label }) => (
-                  <option key={value} value={value}>{label}</option>
-                ))}
+                <optgroup label="Built-in Patterns">
+                  {builtIn.map(({ value, label }) => (
+                    <option key={value} value={value}>{label}</option>
+                  ))}
+                </optgroup>
+                {collection.length > 0 && (
+                  <optgroup label="Collection">
+                    {collection.map(({ value, label }) => (
+                      <option key={value} value={value}>{label}</option>
+                    ))}
+                  </optgroup>
+                )}
+                <optgroup label="App">
+                  <option value={app.value}>{app.label}</option>
+                </optgroup>
               </select>
             </div>
           </>

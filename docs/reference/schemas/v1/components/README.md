@@ -48,6 +48,33 @@ Defines how entities are displayed on cards:
 }
 ```
 
+## User Settings Field Mapping
+
+In addition to collection-defined display configuration, users can customise field mappings in Settings > Appearance > Fields. These settings are stored in `settingsStore` and override collection defaults:
+
+| Field | Purpose | Default | Examples |
+|-------|---------|---------|----------|
+| `titleField` | Card title text | `"title"` | `"title"`, `"name"` |
+| `subtitleField` | Subtitle below title | `"year"` | `"year"`, `"playedSince"`, `"none"` |
+| `footerBadgeField` | Bottom badge text | `"platform.shortTitle"` | `"platform.shortTitle"`, `"device"`, `"none"` |
+| `logoField` | Card back logo | `"logoUrl"` | `"logoUrl"`, `"platform.images[0].url"` |
+| `sortField` | Sort order field | `"order"` | `"order"`, `"title"`, `"year"` |
+| `sortDirection` | Sort direction | `"asc"` | `"asc"`, `"desc"` |
+| `topBadgeField` | Top corner badge | `"order"` | `"order"`, `"myRank"`, `"myVerdict"`, `"none"` |
+
+### Top Badge Field (v0.11.5+)
+
+The `topBadgeField` setting replaced the previous `showRankBadge` toggle:
+
+- **Purpose**: Select which field appears as the top corner badge on card fronts
+- **Options**: Dynamically generated from collection data, includes:
+  - `"order"` - Display order/rank number (default)
+  - `"myRank"` - User-defined ranking
+  - `"myVerdict"` - User verdict/rating
+  - Any field containing "verdict", "rating", or "score"
+  - `"none"` - Hide the badge entirely
+- **Placeholder Text**: When a card has no value for the selected field, the "Text if Empty" setting is displayed instead (default: "?")
+
 ## Fields Schema
 
 Supported field types:

@@ -55,19 +55,19 @@ docs/
 
 ## Implementation Tasks
 
-- [ ] Create docs/tutorials/ directory structure
-- [ ] Create docs/guides/ directory structure
-- [ ] Create docs/explanation/ directory structure
-- [ ] Write getting-started.md tutorial
-- [ ] Write keyboard-shortcuts.md guide
-- [ ] Write search-and-filters.md guide
+- [x] Create docs/tutorials/ directory structure
+- [x] Create docs/guides/ directory structure
+- [x] Create docs/explanation/ directory structure
+- [x] Write getting-started.md tutorial
+- [x] Write keyboard-shortcuts.md guide
+- [x] Write search-and-filters.md guide
 - [ ] Write playing-memory-game.md tutorial
 - [ ] Write view-modes.md guide
 - [ ] Write remaining tutorials
 - [ ] Write remaining guides
 - [ ] Create reference documentation
 - [ ] Create explanation documentation
-- [ ] Update docs/README.md hub
+- [x] Update docs/README.md hub
 - [ ] Add screenshots as needed
 
 ## Screenshots Needed
@@ -85,11 +85,11 @@ docs/
 
 ## Success Criteria
 
-- [ ] tutorials/ directory created with 4 tutorials
-- [ ] guides/ directory created with 8 guides
-- [ ] explanation/ directory created with core docs
-- [ ] Reference docs updated
-- [ ] docs/README.md hub updated
+- [x] tutorials/ directory created with 4 tutorials
+- [x] guides/ directory created with 8 guides
+- [x] explanation/ directory created with core docs
+- [x] Reference docs updated
+- [x] docs/README.md hub updated
 - [ ] Key screenshots captured
 
 ## Dependencies

@@ -61,6 +61,8 @@ These reports provide:
 | R-006 | Plugin State Isolation | [R-006-plugin-state-isolation.md](./R-006-plugin-state-isolation.md) | ✅ Complete |
 | R-007 | Optimistic Updates | [R-007-optimistic-updates.md](./R-007-optimistic-updates.md) | ✅ Complete |
 | R-008 | Fuzzy Matching | [R-008-fuzzy-matching.md](./R-008-fuzzy-matching.md) | ✅ Complete |
+| R-009 | Mechanic App Integration | [R-009-mechanic-app-integration.md](./R-009-mechanic-app-integration.md) | ✅ Complete |
+| R-010 | Settings UX Patterns | [R-010-settings-ux-patterns.md](./R-010-settings-ux-patterns.md) | ✅ Complete |
 
 ## Report Structure
 

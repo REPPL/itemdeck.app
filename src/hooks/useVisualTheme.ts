@@ -16,6 +16,7 @@ import {
 } from "@/stores/settingsStore";
 import { applyVisualTheme } from "@/styles/themes";
 import { isLightColour } from "@/utils/colourContrast";
+import { BUILT_IN_BACKGROUNDS, APP_LOGO_BACKGROUND, COLLECTION_BACKGROUNDS } from "@/hooks/useBackgroundOptions";
 
 /**
  * Border radius CSS values by preset.
@@ -104,7 +105,9 @@ function applyThemeCustomisation(
   flipAnimation: boolean,
   detailAnimation: boolean,
   overlayAnimation: boolean,
-  borderColour: string
+  borderColour: string,
+  cardBackBackgroundImage?: string,
+  cardBackBackgroundMode?: "full" | "tiled" | "none"
 ): void {
   const root = document.documentElement;
 
@@ -193,6 +196,28 @@ function applyThemeCustomisation(
   root.style.setProperty("--text-contrast-primary", bgIsLight ? "#1a1a1a" : "#ffffff");
   root.style.setProperty("--text-contrast-secondary", bgIsLight ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.7)");
   root.style.setProperty("--border-contrast", bgIsLight ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.1)");
+
+  // Apply card back background image (if configured)
+  if (cardBackBackgroundImage && cardBackBackgroundMode && cardBackBackgroundMode !== "none") {
+    root.style.setProperty("--card-back-background-image", `url("${cardBackBackgroundImage}")`);
+    // For tiled mode: use 80px size to ensure visible tiling on cards of any size
+    // For full mode: cover to stretch and fill the entire card
+    root.style.setProperty(
+      "--card-back-background-size",
+      cardBackBackgroundMode === "full" ? "cover" : "80px"
+    );
+    root.style.setProperty(
+      "--card-back-background-repeat",
+      cardBackBackgroundMode === "tiled" ? "repeat" : "no-repeat"
+    );
+    root.style.setProperty("--card-back-background-position", "center");
+  } else {
+    // Clear background image variables when not in use
+    root.style.setProperty("--card-back-background-image", "none");
+    root.style.setProperty("--card-back-background-size", "auto");
+    root.style.setProperty("--card-back-background-repeat", "no-repeat");
+    root.style.setProperty("--card-back-background-position", "center");
+  }
 }
 
 /**
@@ -209,13 +234,45 @@ function applyThemeCustomisation(
  * }
  * ```
  */
+/**
+ * Resolve background option value to image URL and mode.
+ * Searches through all available background options.
+ */
+function resolveBackgroundOption(
+  optionValue: string
+): { imageUrl?: string; mode: "full" | "tiled" | "none" } {
+  // Combine all background option sources
+  const allOptions = [...BUILT_IN_BACKGROUNDS, ...COLLECTION_BACKGROUNDS, APP_LOGO_BACKGROUND];
+  const option = allOptions.find((opt) => opt.value === optionValue);
+
+  if (!option) {
+    return { mode: "none" };
+  }
+
+  // Built-in patterns have a URL
+  if (option.type === "full" || option.type === "tiled") {
+    return {
+      imageUrl: option.url,
+      mode: option.type,
+    };
+  }
+
+  // Collection and app logos are handled differently (no static URL)
+  // For now, return none - these will need entity-specific handling
+  return { mode: "none" };
+}
+
 export function useVisualTheme(): void {
   const visualTheme = useSettingsStore((state) => state.visualTheme);
   const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
+  const cardBackBackground = useSettingsStore((state) => state.cardBackBackground);
 
   useEffect(() => {
     // Apply base theme first
     applyVisualTheme(visualTheme);
+
+    // Resolve the background option
+    const { imageUrl, mode } = resolveBackgroundOption(cardBackBackground);
 
     // Apply customisations on top
     const customisation = themeCustomisations[visualTheme];
@@ -231,9 +288,11 @@ export function useVisualTheme(): void {
       customisation.flipAnimation,
       customisation.detailAnimation,
       customisation.overlayAnimation,
-      customisation.borderColour
+      customisation.borderColour,
+      imageUrl,
+      mode
     );
-  }, [visualTheme, themeCustomisations]);
+  }, [visualTheme, themeCustomisations, cardBackBackground]);
 }
 
 export default useVisualTheme;

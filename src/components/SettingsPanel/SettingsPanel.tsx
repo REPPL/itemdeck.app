@@ -2,9 +2,12 @@
  * Settings panel component with tabbed interface.
  *
  * Provides a centralised interface for configuring user preferences
- * organised into Quick, System, Appearance, and Data tabs.
+ * organised into Quick, Appearance, Collections, Data, and System tabs.
  *
- * v0.11.1 Redesign: Reduced from 5 tabs to 4 for improved UX.
+ * v0.11.5 Phase 3: Restructured from 4 tabs to 5 tabs for better organisation.
+ * - New tab order: Quick | Appearance | Collections | Data | System
+ * - Removed X close button (Cancel button in footer suffices)
+ * - Search moved to header area
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -12,8 +15,10 @@ import { createPortal } from "react-dom";
 import { QuickSettings } from "./QuickSettings";
 import { SystemSettings } from "./SystemSettings";
 import { AppearanceSettingsTabs } from "./AppearanceSettingsTabs";
-import { StorageSettingsTabs } from "./StorageSettingsTabs";
+import { CollectionsTab } from "./CollectionsTab";
+import { DataTab } from "./DataTab";
 import { SettingsSearch } from "./SettingsSearch";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useViewportSize } from "@/hooks/useViewportSize";
 import styles from "./SettingsPanel.module.css";
@@ -34,9 +39,9 @@ interface SettingsPanelProps {
 
 /**
  * Tab configuration.
- * v0.11.1: 4 tabs (Quick | System | Appearance | Data)
+ * v0.11.5: 5 tabs (Quick | Appearance | Collections | Data | System)
  */
-type TabId = "quick" | "system" | "appearance" | "data";
+type TabId = "quick" | "appearance" | "collections" | "data" | "system";
 
 interface Tab {
   id: TabId;
@@ -51,15 +56,6 @@ function QuickIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
       <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-    </svg>
-  );
-}
-
-function SystemIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5.1 15a1.65 1.65 0 0 0-1.51-1.08H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.17.58.26.91.26H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   );
 }
@@ -80,6 +76,14 @@ function AppearanceIcon() {
   );
 }
 
+function CollectionsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
+    </svg>
+  );
+}
+
 function DataIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -90,20 +94,21 @@ function DataIcon() {
   );
 }
 
-function CloseIcon() {
+function SystemIcon() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="18" y1="6" x2="6" y2="18" />
-      <line x1="6" y1="6" x2="18" y2="18" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-2.82 1.17V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1.08-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 5.1 15a1.65 1.65 0 0 0-1.51-1.08H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.26.17.58.26.91.26H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
     </svg>
   );
 }
 
 const tabs: Tab[] = [
   { id: "quick", label: "Quick", icon: <QuickIcon /> },
-  { id: "system", label: "System", icon: <SystemIcon /> },
   { id: "appearance", label: "Appearance", icon: <AppearanceIcon /> },
+  { id: "collections", label: "Collections", icon: <CollectionsIcon /> },
   { id: "data", label: "Data", icon: <DataIcon /> },
+  { id: "system", label: "System", icon: <SystemIcon /> },
 ];
 
 /**
@@ -119,8 +124,23 @@ export function SettingsPanel({
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const [activeTab, setActiveTab] = useState<TabId>("quick");
   const [activeSubTab, setActiveSubTab] = useState<string | undefined>(undefined);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   const { resetToDefaults } = useSettingsStore();
+
+  // Handle reset with confirmation
+  const handleResetClick = useCallback(() => {
+    setShowResetConfirm(true);
+  }, []);
+
+  const handleResetConfirm = useCallback(() => {
+    resetToDefaults();
+    setShowResetConfirm(false);
+  }, [resetToDefaults]);
+
+  const handleResetCancel = useCallback(() => {
+    setShowResetConfirm(false);
+  }, []);
 
   // Viewport size for responsive behaviour
   const { width } = useViewportSize();
@@ -178,6 +198,15 @@ export function SettingsPanel({
       case "quick":
         return <QuickSettings />;
 
+      case "appearance":
+        return <AppearanceSettingsTabs initialSubTab={activeSubTab} />;
+
+      case "collections":
+        return <CollectionsTab initialSubTab={activeSubTab} />;
+
+      case "data":
+        return <DataTab initialSubTab={activeSubTab} />;
+
       case "system":
         return (
           <SystemSettings
@@ -185,12 +214,6 @@ export function SettingsPanel({
             onDevtoolsToggle={onDevtoolsToggle}
           />
         );
-
-      case "appearance":
-        return <AppearanceSettingsTabs initialSubTab={activeSubTab} />;
-
-      case "data":
-        return <StorageSettingsTabs initialSubTab={activeSubTab} />;
     }
   };
 
@@ -213,18 +236,9 @@ export function SettingsPanel({
       >
         <header className={styles.header}>
           <h2 id="settings-title" className={styles.title}>Settings</h2>
-          <button
-            type="button"
-            className={styles.closeButton}
-            onClick={onClose}
-            aria-label="Close settings"
-          >
-            <CloseIcon />
-          </button>
+          {/* Search moved to header - replaces close button */}
+          <SettingsSearch onNavigate={handleSearchNavigate} />
         </header>
-
-        {/* Search */}
-        <SettingsSearch onNavigate={handleSearchNavigate} />
 
         {/* Tab navigation - show dropdown on very narrow screens */}
         {isNarrowScreen ? (
@@ -276,7 +290,7 @@ export function SettingsPanel({
 
         <footer className={styles.footer}>
           <div className={styles.footerButtons}>
-            <button type="button" className={styles.resetButton} onClick={resetToDefaults}>
+            <button type="button" className={styles.resetButton} onClick={handleResetClick}>
               Reset
             </button>
             <div className={styles.footerRight}>
@@ -289,6 +303,18 @@ export function SettingsPanel({
             </div>
           </div>
         </footer>
+
+        {/* Reset confirmation dialog */}
+        <ConfirmDialog
+          isOpen={showResetConfirm}
+          title="Reset Settings"
+          message="This will reset all settings to their default values. This action cannot be undone."
+          confirmLabel="Reset"
+          cancelLabel="Cancel"
+          variant="danger"
+          onConfirm={handleResetConfirm}
+          onCancel={handleResetCancel}
+        />
       </div>
     </div>
   );

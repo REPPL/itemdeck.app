@@ -14,6 +14,7 @@
   right: calc(24px + env(safe-area-inset-right, 0px));
   display: flex;
   flex-direction: column-reverse; /* Bottom button first in DOM, stacks upward */
+  align-items: center; /* Centre all buttons horizontally */
   gap: 12px;
   z-index: 100;
   /* iOS Safari fix */
@@ -85,6 +86,17 @@
 .buttonDisabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+/* Secondary button style - smaller size for expandable buttons */
+.buttonSecondary {
+  width: 48px;
+  height: 48px;
+}
+
+.buttonSecondary svg {
+  width: 24px;
+  height: 24px;
 }
 
 /* Navigation toggle button - special styling when expanded */
@@ -162,6 +174,16 @@
   .button svg {
     width: 24px;
     height: 24px;
+  }
+
+  .buttonSecondary {
+    width: 40px;
+    height: 40px;
+  }
+
+  .buttonSecondary svg {
+    width: 20px;
+    height: 20px;
   }
 }
 

@@ -4,6 +4,8 @@
  * Provides search functionality for the settings panel,
  * allowing users to filter settings by keyword.
  *
+ * v0.11.5: Updated for new 5-tab structure (Quick | Appearance | Collections | Data | System).
+ *
  * @module hooks/useSettingsSearch
  */
 
@@ -11,6 +13,7 @@ import { useState, useMemo, useCallback } from "react";
 
 /**
  * Searchable setting definition.
+ * v0.11.5: Added "collections" tab.
  */
 export interface SearchableSetting {
   /** Unique setting identifier */
@@ -20,7 +23,7 @@ export interface SearchableSetting {
   /** Optional description */
   description?: string;
   /** Tab containing this setting */
-  tab: "quick" | "system" | "appearance" | "data";
+  tab: "quick" | "appearance" | "collections" | "data" | "system";
   /** Sub-tab within the parent tab (optional) */
   subTab?: string;
   /** Additional search keywords */
@@ -37,26 +40,16 @@ export interface SettingSearchResult extends SearchableSetting {
 
 /**
  * All searchable settings in the application.
+ * v0.11.5: Reorganised for new tab structure.
  */
 export const SEARCHABLE_SETTINGS: SearchableSetting[] = [
   // Quick Settings
-  { id: "visual-theme", label: "Theme", description: "Visual theme preset", tab: "quick", keywords: ["retro", "modern", "minimal", "style"] },
+  { id: "visual-theme", label: "Current Theme", description: "Visual theme preset", tab: "quick", keywords: ["retro", "modern", "minimal", "style"] },
   { id: "card-size", label: "Card Size", tab: "quick", keywords: ["small", "medium", "large", "layout"] },
   { id: "view-mode", label: "View Mode", tab: "quick", keywords: ["grid", "list", "compact", "layout"] },
-  { id: "shuffle", label: "Shuffle on Load", tab: "quick", keywords: ["random", "order", "sort"] },
+  { id: "shuffle", label: "Shuffle Cards on Load", tab: "quick", keywords: ["random", "order", "sort"] },
   { id: "random-selection", label: "Random Selection", tab: "quick", keywords: ["subset", "filter", "count"] },
-  { id: "statistics", label: "Statistics Bar", tab: "quick", keywords: ["stats", "count", "info"] },
-  { id: "mechanics", label: "Mechanics", description: "Game mechanics overlay", tab: "quick", keywords: ["game", "memory", "play"] },
-  { id: "refresh", label: "Refresh Data", tab: "quick", keywords: ["reload", "update", "sync"] },
-
-  // System Settings
-  { id: "dark-mode", label: "Dark Mode", tab: "system", keywords: ["theme", "light", "night", "colour"] },
-  { id: "reduce-motion", label: "Reduce Motion", tab: "system", keywords: ["animation", "accessibility", "a11y"] },
-  { id: "high-contrast", label: "High Contrast", tab: "system", keywords: ["accessibility", "a11y", "visibility"] },
-  { id: "show-help", label: "Show Help Button", tab: "system", keywords: ["ui", "visibility"] },
-  { id: "show-settings", label: "Show Settings Button", tab: "system", keywords: ["ui", "visibility"] },
-  { id: "show-search", label: "Show Search Bar", tab: "system", keywords: ["ui", "visibility"] },
-  { id: "devtools", label: "TanStack DevTools", tab: "system", keywords: ["developer", "debug"] },
+  { id: "games-mode", label: "Games Mode", description: "Game mechanics overlay", tab: "quick", keywords: ["game", "memory", "play", "activate"] },
 
   // Appearance > Theme
   { id: "border-radius", label: "Border Radius", tab: "appearance", subTab: "theme", keywords: ["corners", "rounded", "square"] },
@@ -71,7 +64,7 @@ export const SEARCHABLE_SETTINGS: SearchableSetting[] = [
   { id: "footer-style", label: "Footer Style", tab: "appearance", subTab: "theme", keywords: ["dark", "light", "overlay"] },
   { id: "more-button", label: "More Button Label", tab: "appearance", subTab: "theme", keywords: ["verdict", "details"] },
   { id: "auto-expand", label: "Auto-expand More", tab: "appearance", subTab: "theme", keywords: ["overlay", "automatic"] },
-  { id: "zoom-image", label: "Zoom Image", tab: "appearance", subTab: "theme", keywords: ["fill", "scale"] },
+  { id: "zoom-image", label: "Zoom First Image", tab: "appearance", subTab: "theme", keywords: ["fill", "scale"] },
   { id: "animation-style", label: "Animation Style", tab: "appearance", subTab: "theme", keywords: ["motion", "smooth", "bouncy"] },
   { id: "flip-animation", label: "Card Flip", tab: "appearance", subTab: "theme", keywords: ["animation", "turn"] },
   { id: "detail-animation", label: "Detail View Animation", tab: "appearance", subTab: "theme", keywords: ["motion", "open"] },
@@ -97,24 +90,62 @@ export const SEARCHABLE_SETTINGS: SearchableSetting[] = [
   // Appearance > Interactions
   { id: "drag-mode", label: "Drag Mode", tab: "appearance", subTab: "interactions", keywords: ["interaction", "reorder"] },
   { id: "show-drag-icon", label: "Show Drag Icon", tab: "appearance", subTab: "interactions", keywords: ["ui", "grip"] },
-  { id: "edit-mode", label: "Edit Mode", tab: "appearance", subTab: "interactions", keywords: ["modify", "change"] },
   { id: "default-card-face", label: "Default Card Face", tab: "appearance", subTab: "interactions", keywords: ["front", "back", "start"] },
 
-  // Data > Sources
-  { id: "sources", label: "Data Sources", tab: "data", subTab: "sources", keywords: ["remote", "url", "collection"] },
-  { id: "add-source", label: "Add MyPlausibleMe Collection", tab: "data", subTab: "sources", keywords: ["github", "remote"] },
+  // Collections > Sources
+  { id: "sources", label: "Data Sources", tab: "collections", subTab: "sources", keywords: ["remote", "url", "collection"] },
+  { id: "set-active-source", label: "Set Active Source", tab: "collections", subTab: "sources", keywords: ["switch", "change"] },
+  { id: "set-default-source", label: "Set Default Source", tab: "collections", subTab: "sources", keywords: ["startup", "load"] },
+
+  // Collections > Add Source
+  { id: "add-source", label: "Add MyPlausibleMe Collection", tab: "collections", subTab: "add-source", keywords: ["github", "remote", "new"] },
+  { id: "scan-repository", label: "Scan Repository", tab: "collections", subTab: "add-source", keywords: ["github", "find"] },
+
+  // Collections > Edit Source
+  { id: "local-edits", label: "Local Edits", tab: "collections", subTab: "edit-source", keywords: ["changes", "modified"] },
+  { id: "export-edits", label: "Export Edits", tab: "collections", subTab: "edit-source", keywords: ["download", "changes", "backup"] },
+  { id: "import-edits", label: "Import Edits", tab: "collections", subTab: "edit-source", keywords: ["upload", "changes", "restore"] },
+  { id: "revert-edits", label: "Revert All Edits", tab: "collections", subTab: "edit-source", keywords: ["undo", "reset", "discard"] },
+
+  // Collections > Import/Export
+  { id: "export-collection", label: "Export Collection", tab: "collections", subTab: "import-export", keywords: ["download", "json", "csv", "backup"] },
+  { id: "import-collection", label: "Import Collection", tab: "collections", subTab: "import-export", keywords: ["upload", "json", "restore"] },
+
+  // Data > About
+  { id: "data-about", label: "Data Types", tab: "data", subTab: "about", keywords: ["information", "help"] },
+  { id: "cache-info", label: "Image Cache Info", tab: "data", subTab: "about", keywords: ["storage", "indexeddb"] },
 
   // Data > Cache
   { id: "cache-stats", label: "Cache Statistics", tab: "data", subTab: "cache", keywords: ["storage", "size", "images"] },
   { id: "clear-cache", label: "Clear Cache", tab: "data", subTab: "cache", keywords: ["delete", "remove", "storage"] },
-  { id: "recache", label: "Re-cache Images", tab: "data", subTab: "cache", keywords: ["download", "refresh"] },
 
-  // Data > Import/Export
-  { id: "export-collection", label: "Export Collection", tab: "data", subTab: "import-export", keywords: ["download", "json", "csv", "backup"] },
-  { id: "import-collection", label: "Import Collection", tab: "data", subTab: "import-export", keywords: ["upload", "json", "restore"] },
-  { id: "export-edits", label: "Export Edits", tab: "data", subTab: "import-export", keywords: ["download", "changes", "backup"] },
-  { id: "import-edits", label: "Import Edits", tab: "data", subTab: "import-export", keywords: ["upload", "changes", "restore"] },
-  { id: "revert-edits", label: "Revert All Edits", tab: "data", subTab: "import-export", keywords: ["undo", "reset", "discard"] },
+  // Data > Themes
+  { id: "export-theme", label: "Export Theme", tab: "data", subTab: "themes", keywords: ["download", "json", "backup"] },
+  { id: "import-theme", label: "Import Theme", tab: "data", subTab: "themes", keywords: ["upload", "json", "restore"] },
+  { id: "reset-theme", label: "Reset Theme", tab: "data", subTab: "themes", keywords: ["default", "restore"] },
+
+  // Data > Settings
+  { id: "export-settings", label: "Export Settings", tab: "data", subTab: "settings", keywords: ["download", "json", "backup"] },
+  { id: "import-settings", label: "Import Settings", tab: "data", subTab: "settings", keywords: ["upload", "json", "restore"] },
+  { id: "reset-settings", label: "Reset to Defaults", tab: "data", subTab: "settings", keywords: ["restore", "clear"] },
+
+  // System (top level and sub-tabs)
+  { id: "dark-mode", label: "Dark Mode", tab: "system", keywords: ["theme", "light", "night", "colour"] },
+
+  // System > Accessibility
+  { id: "reduce-motion", label: "Reduce Motion", tab: "system", subTab: "accessibility", keywords: ["animation", "accessibility", "a11y"] },
+  { id: "high-contrast", label: "High Contrast", tab: "system", subTab: "accessibility", keywords: ["accessibility", "a11y", "visibility"] },
+
+  // System > UI Visibility
+  { id: "show-help", label: "Show Help Button", tab: "system", subTab: "visibility", keywords: ["ui", "visibility"] },
+  { id: "show-settings", label: "Show Settings Button", tab: "system", subTab: "visibility", keywords: ["ui", "visibility"] },
+  { id: "show-search", label: "Show Search Bar", tab: "system", subTab: "visibility", keywords: ["ui", "visibility"] },
+  { id: "statistics-bar", label: "Show Statistics Bar", tab: "system", subTab: "visibility", keywords: ["stats", "count", "info"] },
+
+  // System > Developer
+  { id: "edit-mode", label: "Edit Mode", tab: "system", subTab: "developer", keywords: ["modify", "change", "developer"] },
+  { id: "devtools", label: "TanStack DevTools", tab: "system", subTab: "developer", keywords: ["developer", "debug"] },
+  { id: "reset-url", label: "Reset URL", tab: "system", subTab: "developer", keywords: ["parameter", "clear"] },
 ];
 
 /**
@@ -257,34 +288,50 @@ export function useSettingsSearch(): UseSettingsSearchResult {
 
 /**
  * Get tab display name.
+ * v0.11.5: Added Collections tab.
  */
 export function getTabDisplayName(tab: SearchableSetting["tab"]): string {
   switch (tab) {
     case "quick":
       return "Quick";
-    case "system":
-      return "System";
     case "appearance":
       return "Appearance";
+    case "collections":
+      return "Collections";
     case "data":
       return "Data";
+    case "system":
+      return "System";
   }
 }
 
 /**
  * Get sub-tab display name.
+ * v0.11.5: Added new sub-tabs for Collections, Data, and System.
  */
 export function getSubTabDisplayName(subTab: string | undefined): string {
   if (!subTab) return "";
 
   const names: Record<string, string> = {
+    // Appearance sub-tabs
     theme: "Theme",
     cards: "Cards",
     fields: "Fields",
     interactions: "Interactions",
+    // Collections sub-tabs
     sources: "Sources",
-    cache: "Cache",
+    "add-source": "Add Source",
+    "edit-source": "Edit Source",
     "import-export": "Import/Export",
+    // Data sub-tabs
+    about: "About",
+    cache: "Image Cache",
+    themes: "Themes",
+    settings: "Settings",
+    // System sub-tabs
+    accessibility: "Accessibility",
+    visibility: "UI Visibility",
+    developer: "Developer",
   };
 
   return names[subTab] ?? subTab;

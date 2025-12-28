@@ -2,13 +2,13 @@
  * NavigationHub component.
  *
  * Collapsible navigation hub with staggered expand/collapse animation.
- * - Always visible: Help (bottom) + Navigation toggle (top)
- * - Expandable: Settings, Games, Search, View (revealed between Help and Navigation)
+ * - Always visible: Help (very bottom) + Navigation toggle (above Help)
+ * - Expandable: Settings, Games, Search, View (revealed above Navigation)
  *
  * Layout from bottom to top (column-reverse):
- * - Help (bottom, always visible)
- * - [Expandable: Settings, Games, Search, View] (appear above Help)
- * - Navigation toggle (top, always visible, icon rotates when expanded)
+ * - Help (very bottom, always visible, closest to thumb)
+ * - Navigation toggle (above Help, always visible)
+ * - [Expandable: Settings, Games, Search, View] (appear above Navigation)
  *
  * @see F-085: Collapsible Navigation Hub
  */
@@ -39,7 +39,7 @@ function QuestionIcon() {
   );
 }
 
-function PlusIcon() {
+function MenuIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -50,8 +50,26 @@ function PlusIcon() {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   );
 }
@@ -184,6 +202,8 @@ interface NavigationHubProps {
   showSettingsButton?: boolean;
   /** Whether the Search button is visible */
   showSearchBar?: boolean;
+  /** Whether to hide the entire hub (e.g., when Search or View overlays are open) */
+  hidden?: boolean;
 }
 
 // ============================================================================
@@ -207,6 +227,7 @@ export function NavigationHub({
   showHelpButton = true,
   showSettingsButton = true,
   showSearchBar = true,
+  hidden = false,
 }: NavigationHubProps) {
   // Store state
   const navExpanded = useSettingsStore((s) => s.navExpanded);
@@ -227,13 +248,18 @@ export function NavigationHub({
     classes.filter(Boolean).join(" ");
 
   // With column-reverse, DOM order determines visual position:
-  // 1. Help (first in DOM → bottom of stack, always visible)
-  // 2. Expandable buttons (middle → appear between Help and Navigation)
-  // 3. Navigation (last in DOM → top of stack, always visible)
+  // 1. Help (first in DOM → very bottom, always visible, closest to thumb)
+  // 2. Navigation (second in DOM → above Help, always visible)
+  // 3. Expandable buttons (last in DOM → top of stack, appear above Navigation)
+
+  // Hide the entire hub when Search or View overlays are open
+  if (hidden) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
-      {/* Help button - always visible at bottom (first in DOM with column-reverse) */}
+      {/* Help button - always visible at very bottom (first in DOM with column-reverse) */}
       {showHelpButton && (
         <motion.button
           type="button"
@@ -251,15 +277,57 @@ export function NavigationHub({
         </motion.button>
       )}
 
-      {/* Expandable buttons - appear above Help, below Navigation when expanded */}
+      {/* Navigation toggle - always visible above Help (second in DOM with column-reverse) */}
+      <motion.button
+        type="button"
+        className={getButtonClass(styles.button, styles.navToggle, navExpanded && styles.navToggleExpanded)}
+        onClick={toggleNavExpanded}
+        aria-label={navExpanded ? "Collapse navigation menu" : "Expand navigation menu"}
+        aria-expanded={navExpanded}
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <span className={styles.navToggleIcon}>
+          <AnimatePresence mode="wait" initial={false}>
+            {navExpanded ? (
+              <motion.span
+                key="close"
+                initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{ display: "flex" }}
+              >
+                <CloseIcon />
+              </motion.span>
+            ) : (
+              <motion.span
+                key="menu"
+                initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                style={{ display: "flex" }}
+              >
+                <MenuIcon />
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </span>
+      </motion.button>
+
+      {/* Expandable buttons - appear above Navigation when expanded (last in DOM) */}
       <AnimatePresence>
         {navExpanded && (
           <>
-            {/* Settings - index 0 (closest to Help, first to appear) */}
+            {/* Settings - index 0 (closest to Navigation, first to appear) */}
             {showSettingsButton && (
               <motion.button
                 type="button"
-                className={getButtonClass(styles.button, (disabled || isMechanicActive) && styles.buttonDisabled)}
+                className={getButtonClass(styles.button, styles.buttonSecondary, (disabled || isMechanicActive) && styles.buttonDisabled)}
                 onClick={onSettingsClick}
                 disabled={disabled || isMechanicActive}
                 aria-label="Open settings"
@@ -278,7 +346,7 @@ export function NavigationHub({
             {/* Games - index 1 */}
             <motion.button
               type="button"
-              className={getButtonClass(styles.button, isMechanicActive && styles.buttonActive, disabled && styles.buttonDisabled)}
+              className={getButtonClass(styles.button, styles.buttonSecondary, isMechanicActive && styles.buttonActive, disabled && styles.buttonDisabled)}
               onClick={onGamesClick}
               disabled={disabled}
               aria-label={isMechanicActive ? "Manage active game mechanic" : "Open game mechanics"}
@@ -299,7 +367,7 @@ export function NavigationHub({
             {showSearchBar && (
               <motion.button
                 type="button"
-                className={getButtonClass(styles.button, (disabled || isMechanicActive) && styles.buttonDisabled)}
+                className={getButtonClass(styles.button, styles.buttonSecondary, (disabled || isMechanicActive) && styles.buttonDisabled)}
                 onClick={onSearchClick}
                 disabled={disabled || isMechanicActive}
                 aria-label="Open search"
@@ -317,10 +385,10 @@ export function NavigationHub({
               </motion.button>
             )}
 
-            {/* View - index 3 (closest to Navigation, last to appear) */}
+            {/* View - index 3 (furthest from Navigation, last to appear) */}
             <motion.button
               type="button"
-              className={getButtonClass(styles.button, (disabled || isMechanicActive) && styles.buttonDisabled)}
+              className={getButtonClass(styles.button, styles.buttonSecondary, (disabled || isMechanicActive) && styles.buttonDisabled)}
               onClick={onViewClick}
               disabled={disabled || isMechanicActive}
               aria-label="Change view mode and grouping"
@@ -338,28 +406,6 @@ export function NavigationHub({
           </>
         )}
       </AnimatePresence>
-
-      {/* Navigation toggle - always visible at top (last in DOM with column-reverse) */}
-      <motion.button
-        type="button"
-        className={getButtonClass(styles.button, styles.navToggle, navExpanded && styles.navToggleExpanded)}
-        onClick={toggleNavExpanded}
-        aria-label={navExpanded ? "Collapse navigation menu" : "Expand navigation menu"}
-        aria-expanded={navExpanded}
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-      >
-        <motion.span
-          className={styles.navToggleIcon}
-          animate={{ rotate: navExpanded ? 45 : 0 }}
-          transition={{ type: "spring", stiffness: 400, damping: 25 }}
-        >
-          <PlusIcon />
-        </motion.span>
-      </motion.button>
     </div>
   );
 }

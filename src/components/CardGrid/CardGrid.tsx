@@ -33,7 +33,9 @@ export function CardGrid() {
   const displayConfig = collectionDisplayConfig?.card;
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
-  const showRankBadge = useSettingsStore((state) => state.showRankBadge);
+  // Derive showRankBadge from topBadgeField (when not "none")
+  const topBadgeField = useSettingsStore((state) => state.fieldMapping.topBadgeField);
+  const showRankBadge = topBadgeField !== "none";
   const showFooterBadge = useSettingsStore((state) => state.showDeviceBadge);
   const rankPlaceholderText = useSettingsStore((state) => state.rankPlaceholderText);
   const dragFace = useSettingsStore((state) => state.dragFace);
@@ -76,7 +78,7 @@ export function CardGrid() {
       front: {
         title: base.front?.title ?? fieldMapping.titleField,
         subtitle: fieldMapping.subtitleField !== "none" ? fieldMapping.subtitleField : undefined,
-        badge: base.front?.badge ?? "rank",
+        badge: base.front?.badge ?? "order",
         footerBadge: fieldMapping.footerBadgeField !== "none" ? fieldMapping.footerBadgeField : undefined,
       },
       back: {

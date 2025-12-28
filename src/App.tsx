@@ -11,7 +11,7 @@ import { NavigationHub } from "@/components/NavigationHub";
 import { ViewPopover } from "@/components/ViewPopover";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { CollectionPicker } from "@/components/CollectionPicker";
-import { StatisticsBar } from "@/components/Statistics";
+import { CollectionToast } from "@/components/CollectionToast";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
@@ -21,7 +21,9 @@ import { MechanicProvider } from "@/mechanics";
 import { useTheme } from "@/hooks/useTheme";
 import { useVisualTheme } from "@/hooks/useVisualTheme";
 import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboard";
+import { useUrlCollection, clearUrlPath } from "@/hooks/useUrlCollection";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useSourceStore } from "@/stores/sourceStore";
 import "@/styles/themes";
 import styles from "./App.module.css";
 
@@ -38,22 +40,44 @@ function AppContent() {
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
 
-  // Collection picker state (F-087)
-  // Always show picker on startup until dismissed or a collection is selected
-  const [pickerDismissed, setPickerDismissed] = useState(false);
+  // URL-based collection loading
+  const urlCollection = useUrlCollection();
+  const addMyPlausibleMeSource = useSourceStore((s) => s.addMyPlausibleMeSource);
+  const setActiveSource = useSourceStore((s) => s.setActiveSource);
 
-  // Show picker on every startup until user selects or dismisses
-  const showCollectionPicker = !pickerDismissed;
+  // Collection picker state (F-087)
+  // Skip picker if URL specifies direct load
+  const [pickerDismissed, setPickerDismissed] = useState(false);
+  const [urlHandled, setUrlHandled] = useState(false);
+
+  // Handle direct URL loading (e.g., /gh/REPPL/collection/retro-games/)
+  useEffect(() => {
+    if (urlHandled) return;
+
+    if (urlCollection.directLoad && urlCollection.username && urlCollection.folder) {
+      // Direct load: add source and skip picker
+      const sourceId = addMyPlausibleMeSource(
+        urlCollection.username,
+        urlCollection.folder
+      );
+      setActiveSource(sourceId);
+      setPickerDismissed(true);
+      clearUrlPath();
+      setUrlHandled(true);
+    } else if (urlCollection.hasGitHubPath) {
+      // Just username in URL: will be passed to picker
+      setUrlHandled(true);
+    }
+  }, [urlCollection, urlHandled, addMyPlausibleMeSource, setActiveSource]);
+
+  // Show picker on every startup until user selects (unless URL direct load)
+  const showCollectionPicker = !pickerDismissed && !urlCollection.directLoad;
 
   const handleCollectionSelect = useCallback((_sourceId: string) => {
     // Source is already added and set as active by the picker
-    // Just dismiss the picker
+    // Just dismiss the picker and clear URL
     setPickerDismissed(true);
-  }, []);
-
-  const handlePickerDismiss = useCallback(() => {
-    // User chose to skip - use default built-in source
-    setPickerDismissed(true);
+    clearUrlPath();
   }, []);
 
   const handleLoadingComplete = useCallback(() => {
@@ -161,9 +185,6 @@ function AppContent() {
     setDevtoolsEnabled((prev) => !prev);
   }, []);
 
-  // Statistics bar settings
-  const showStatisticsBar = useSettingsStore((state) => state.showStatisticsBar);
-  const setShowStatisticsBar = useSettingsStore((state) => state.setShowStatisticsBar);
 
   // Button visibility settings
   const showHelpButton = useSettingsStore((state) => state.showHelpButton);
@@ -204,10 +225,6 @@ function AppContent() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeMechanicId]); // Only react to mechanic changes
 
-  const handleStatisticsBarDismiss = useCallback(() => {
-    setShowStatisticsBar(false);
-  }, [setShowStatisticsBar]);
-
   const handleSearchButtonClick = useCallback(() => {
     setSearchBarMinimised(false);
   }, [setSearchBarMinimised]);
@@ -223,11 +240,11 @@ function AppContent() {
         Skip to content
       </a>
 
-      {/* Collection picker (shows on startup if no custom sources) */}
+      {/* Collection picker (shows on startup) */}
       {showCollectionPicker && (
         <CollectionPicker
           onSelect={handleCollectionSelect}
-          onDismiss={handlePickerDismiss}
+          initialUsername={urlCollection.username ?? undefined}
         />
       )}
 
@@ -239,11 +256,11 @@ function AppContent() {
       {/* Sidebar (Explorer) */}
       <Sidebar isOpen={sidebarOpen} onClose={handleSidebarClose} />
 
+      {/* Collection loaded toast (brief summary) */}
+      <CollectionToast loadingComplete={loadingComplete} />
+
       {/* Main content */}
       <main id="main-content" className={styles.main}>
-        {showStatisticsBar && (
-          <StatisticsBar onDismiss={handleStatisticsBarDismiss} />
-        )}
         <QueryErrorBoundary>
           <CardGrid />
         </QueryErrorBoundary>
@@ -255,6 +272,7 @@ function AppContent() {
       {/* Navigation Hub (bottom-right) */}
       {/* Replaces individual floating buttons with collapsible navigation */}
       {/* Hidden during collection picker and loading to avoid z-index issues */}
+      {/* Also hidden when Search or View overlays are open */}
       {!showCollectionPicker && loadingComplete && (
         <NavigationHub
           onHelpClick={() => { setHelpOpen(true); }}
@@ -266,6 +284,7 @@ function AppContent() {
           showHelpButton={showHelpButton}
           showSettingsButton={showSettingsButton}
           showSearchBar={showSearchBar}
+          hidden={!searchBarMinimised || viewPopoverOpen}
         />
       )}
 

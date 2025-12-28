@@ -28,16 +28,16 @@ Users want to embed YouTube videos alongside images in the card gallery. Current
 
 ## Implementation Tasks
 
-- [ ] Create media type definitions with YouTube helpers
-- [ ] Implement `extractYouTubeId()` function
-- [ ] Implement `isYouTubeUrl()` function
-- [ ] Implement `getYouTubeThumbnail()` function
-- [ ] Create YouTubeEmbed component with thumbnail preview
-- [ ] Add click-to-play functionality
-- [ ] Style video container with 16:9 aspect ratio
-- [ ] Integrate with ImageGallery component
-- [ ] Test with various YouTube URL formats
-- [ ] Ensure keyboard accessibility
+- [x] Create media type definitions with YouTube helpers
+- [x] Implement `extractYouTubeId()` function
+- [x] Implement `isYouTubeUrl()` function
+- [x] Implement `getYouTubeThumbnail()` function
+- [x] Create YouTubeEmbed component with thumbnail preview
+- [x] Add click-to-play functionality
+- [x] Style video container with 16:9 aspect ratio
+- [x] Integrate with ImageGallery component
+- [x] Test with various YouTube URL formats
+- [x] Ensure keyboard accessibility
 
 ## YouTube URL Patterns
 
@@ -63,11 +63,11 @@ No schema changes required:
 
 ## Success Criteria
 
-- [ ] YouTube URLs auto-detected in images array
-- [ ] Thumbnail preview shown by default
-- [ ] Click to play loads iframe
-- [ ] Gallery navigation works with mixed content
-- [ ] Keyboard accessible (Enter/Space to play)
+- [x] YouTube URLs auto-detected in images array
+- [x] Thumbnail preview shown by default
+- [x] Click to play loads iframe
+- [x] Gallery navigation works with mixed content
+- [x] Keyboard accessible (Enter/Space to play)
 
 ## Dependencies
 

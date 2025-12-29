@@ -114,6 +114,32 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-072 | Settings Panel Redesign | v0.11.1 | ✅ Complete |
 | F-073 | User Documentation Suite | v0.14.5 | 📋 Planned |
 | F-074 | Destructive Action Button Styling | v0.11.1 | ✅ Complete |
+| F-075 | Internationalisation Foundation | v2.0.0 | 📋 Planned |
+| F-076 | Icon Configuration Registry | v2.0.0 | 📋 Planned |
+| F-077 | RTL Language Support | v2.0.0 | 📋 Planned |
+| F-095 | Shared ErrorOverlay Component | v0.14.5 | ✅ Complete |
+| F-096 | Shared FloatingTimer Component | v0.14.5 | ✅ Complete |
+| F-097 | Shared GameCompletionModal Component | v0.14.5 | ✅ Complete |
+| F-098 | useMechanicActions Hook | v0.14.5 | ✅ Complete |
+| F-099 | formatTime Utility | v0.14.5 | ✅ Complete |
+| F-100 | Shared Mechanics CSS Module | v0.14.5 | ✅ Complete |
+| F-101 | Refactor Monolithic Mechanics | v0.14.5 | ✅ Complete |
+| F-102 | Visual Presentation Standards | v0.14.5 | ✅ Complete |
+| F-103 | Configuration Standardisation | v0.14.5 | ✅ Complete |
+| F-104 | Progress Display Consistency | v0.14.5 | ✅ Complete |
+| F-106 | JSON-Based Mechanic Configuration | v0.14.5 | ✅ Complete |
+| F-110 | Plugin Manifest Schema | v1.5.0 | 📋 Planned |
+| F-111 | Plugin Loader & Registry | v1.5.0 | 📋 Planned |
+| F-112 | Plugin Security Sandbox | v1.5.0 | 📋 Planned |
+| F-113 | Plugin Permission Model | v1.5.0 | 📋 Planned |
+| F-114 | Settings Schema Plugins | v1.5.0 | 📋 Planned |
+| F-115 | Theme Package Plugins | v1.5.0 | 📋 Planned |
+| F-116 | Mechanic Plugins (External) | v1.5.0 | 📋 Planned |
+| F-117 | Source Adapter Plugins | v1.5.0 | 📋 Planned |
+| F-118 | Built-in Plugin Bundling | v1.5.0 | 📋 Planned |
+| F-119 | Curated Registry API | v1.5.0 | 📋 Planned |
+| F-120 | Community Plugin Loading | v1.5.0 | 📋 Planned |
+| F-121 | Plugin Activation UI | v1.5.0 | 📋 Planned |
 
 ## Contents
 

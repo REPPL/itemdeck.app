@@ -158,15 +158,15 @@ Small
 
 ## Milestone
 
-v0.11.0
+v0.15.0
 
 ---
 
 ## Related Documentation
 
 - [Collection Statistics (F-062)](../completed/F-062-collection-statistics.md)
-- [Card Filtering](./F-036-card-filtering.md)
-- [v0.11.0 Milestone](../../milestones/v0.11.0.md)
+- [Card Filtering](../completed/F-036-card-filtering.md)
+- [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 
 ---
 

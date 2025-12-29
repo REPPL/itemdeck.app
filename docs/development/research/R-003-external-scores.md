@@ -371,9 +371,10 @@ Display recognisable icons for each source:
 
 ## Related Documentation
 
-- [v0.6.1 Milestone](../roadmap/milestones/v0.6.1.md)
-- [v1 Schema Reference](../../reference/schemas/v1/README.md)
-- [F-042 Collection Display Driver](../roadmap/features/planned/F-042-collection-display-driver.md)
+- [ADR-013: External Data Repository](../decisions/adrs/ADR-013-external-data-repository.md) - Architecture decision for external data
+- [v0.6.1 Milestone](../roadmap/milestones/v0.6.1.md) - Related milestone
+- [v1 Schema Reference](../../reference/schemas/v1/README.md) - Schema specifications
+- [F-042 Collection Display Driver](../roadmap/features/planned/F-042-collection-display-driver.md) - Display configuration
 
 ---
 

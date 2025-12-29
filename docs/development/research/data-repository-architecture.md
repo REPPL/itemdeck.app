@@ -722,8 +722,8 @@ GitHub raw URLs (`raw.githubusercontent.com`) are CORS-enabled. For other source
 
 ## Related Documentation
 
-- [Vision Document](../../prompts/vision/README.md) — Product vision and scope
-- [F-007: GitHub Data Source](../roadmap/features/planned/F-007-github-data-source.md)
-- [F-008: Card Data Schema](../roadmap/features/planned/F-008-card-data-schema.md)
-- [External Data Sources](./external-data-sources.md) — Data fetching patterns
+- [F-007: GitHub Data Source](../roadmap/features/completed/F-007-github-data-source.md) - Implementation of GitHub data fetching
+- [Vision Document](../../prompts/vision/README.md) - Product vision and scope
+- [F-008: Card Data Schema](../roadmap/features/planned/F-008-card-data-schema.md) - Card schema design
+- [External Data Sources](./external-data-sources.md) - Data fetching patterns
 

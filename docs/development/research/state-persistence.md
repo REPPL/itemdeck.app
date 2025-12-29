@@ -752,9 +752,13 @@ describe('settingsStore', () => {
 
 ## Related Documentation
 
+### Research
 - [Configuration Hierarchy](./configuration-hierarchy.md) - Config loading and precedence
 - [External Data Sources](./external-data-sources.md) - Data fetching and caching
 - [System Security](./system-security.md) - Secure storage patterns
+
+### Features
+- [F-012: State Persistence](../roadmap/features/completed/F-012-state-persistence.md) - Persistence implementation
 
 ---
 

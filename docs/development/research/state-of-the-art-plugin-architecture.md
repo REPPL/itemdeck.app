@@ -1097,13 +1097,17 @@ Based on this research, the following Architecture Decision Records should be cr
 
 ## Related Documentation
 
-- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md)
-- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md)
-- [ADR-020: Mechanic Settings Isolation](../decisions/adrs/ADR-020-mechanic-settings-isolation.md)
-- [R-006: Plugin State Isolation](./R-006-plugin-state-isolation.md)
-- [Modular Architecture Research](./modular-architecture.md)
-- [System Security Research](./system-security.md)
-- [v1.5.0 Milestone](../roadmap/milestones/v1.5.0.md)
+- [v1.5.0 Milestone](../roadmap/milestones/v1.5.0.md) - Full plugin ecosystem milestone
+- [ADR-023: Plugin Trust Tiers](../decisions/adrs/ADR-023-plugin-trust-tiers.md) - Three-tier trust model decision
+- [ADR-024: Plugin Sandbox Implementation](../decisions/adrs/ADR-024-plugin-sandbox-implementation.md) - Iframe sandboxing decision
+- [ADR-025: Plugin Distribution Strategy](../decisions/adrs/ADR-025-plugin-distribution-strategy.md) - Registry and GitHub distribution
+- [ADR-026: Plugin Manifest Schema](../decisions/adrs/ADR-026-plugin-manifest-schema.md) - JSON manifest validation
+- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md) - Current mechanic system
+- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md) - State isolation patterns
+- [ADR-020: Mechanic Settings Isolation](../decisions/adrs/ADR-020-mechanic-settings-isolation.md) - Settings separation
+- [R-006: Plugin State Isolation](./R-006-plugin-state-isolation.md) - State management research
+- [Modular Architecture Research](./modular-architecture.md) - Plugin system patterns
+- [System Security Research](./system-security.md) - Security foundations
 
 ---
 

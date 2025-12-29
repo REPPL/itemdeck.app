@@ -461,7 +461,7 @@ export function renderWithI18n(component: ReactElement) {
 
 ## Related Documentation
 
-- [ADR-021: Internationalisation Library](../decisions/adrs/ADR-021-internationalisation-library.md)
-- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md)
-- [F-077: RTL Support](../roadmap/features/planned/F-077-rtl-support.md)
-- [v1.5.0 Milestone](../roadmap/milestones/v1.5.0.md)
+- [v2.0.0 Milestone](../roadmap/milestones/v2.0.0.md) - Internationalisation milestone
+- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md) - Core i18n implementation
+- [ADR-021: Internationalisation Library](../decisions/adrs/ADR-021-internationalisation-library.md) - Library selection decision
+- [F-077: RTL Support](../roadmap/features/planned/F-077-rtl-support.md) - Right-to-left language support

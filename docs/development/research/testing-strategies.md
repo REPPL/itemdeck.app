@@ -991,9 +991,13 @@ e2e/
 
 ## Related Documentation
 
+### Research
 - [Accessibility](./accessibility.md) - WCAG testing requirements
 - [Performance & Virtualisation](./performance-virtualisation.md) - Performance testing
 - [Card Layouts & Animations](./card-layouts-animations.md) - Animation testing
+
+### Features
+- [F-017: Testing Infrastructure](../roadmap/features/completed/F-017-testing-infrastructure.md) - Testing setup implementation
 
 ---
 

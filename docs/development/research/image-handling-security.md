@@ -651,9 +651,16 @@ Before deployment:
 
 ## Related Documentation
 
+### Research
 - [System Security](./system-security.md) - Overall application security
 - [Asset Management](./asset-management.md) - Image loading strategies
 - [External Data Sources](./external-data-sources.md) - Fetching remote content
+
+### Features
+- [F-003: Image Fallback System](../roadmap/features/completed/F-003-image-fallback-system.md) - Image fallback implementation
+
+### Decisions
+- [ADR-009: Security](../decisions/adrs/ADR-009-security.md) - Security architecture decisions
 
 ---
 

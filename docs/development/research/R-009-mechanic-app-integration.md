@@ -543,9 +543,10 @@ Or alternatively:
 
 ## Related Documentation
 
-- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md)
-- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md)
-- Feature Specification: F-XXX-mechanic-app-integration (to be created)
+- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md) - Plugin architecture decision
+- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md) - State management decision
+- [R-005: Gaming Mechanics State Patterns](./R-005-gaming-mechanics-state.md) - State patterns for mechanics
+- [R-006: Plugin State Isolation](./R-006-plugin-state-isolation.md) - State isolation patterns
 
 ---
 

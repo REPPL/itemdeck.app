@@ -98,7 +98,7 @@ Medium
 
 ## Milestone
 
-v0.6.0
+v0.15.0
 
 ---
 
@@ -107,7 +107,7 @@ v0.6.0
 - [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
 - [Card Flip Animation](../completed/F-001-card-flip-animation.md)
 - [Reduced Motion Support](../completed/F-005-reduced-motion-support.md)
-- [v0.6.0 Milestone](../../milestones/v0.6.0.md)
+- [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 
 ---
 

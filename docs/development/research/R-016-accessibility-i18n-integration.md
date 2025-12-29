@@ -409,11 +409,11 @@ Create guidelines for marking inline language changes in components.
 
 ## Related Documentation
 
-- [Accessibility Research](./accessibility.md)
-- [F-019: Accessibility Audit](../roadmap/features/planned/F-019-accessibility-audit.md)
-- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md)
-- [R-014: RTL Testing Strategy](./R-014-rtl-testing-strategy.md)
-- [ADR-011: WCAG 2.2 AA Accessibility Standard](../decisions/adrs/ADR-011-accessibility-standard.md)
+- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md) - Core i18n implementation
+- [F-019: Accessibility Audit](../roadmap/features/planned/F-019-accessibility-audit.md) - Accessibility audit feature
+- [Accessibility Research](./accessibility.md) - Accessibility research foundation
+- [R-014: RTL Testing Strategy](./R-014-rtl-testing-strategy.md) - RTL testing methodology
+- [ADR-011: WCAG 2.2 AA Accessibility Standard](../decisions/adrs/ADR-011-accessibility-standard.md) - Accessibility standard
 
 ---
 

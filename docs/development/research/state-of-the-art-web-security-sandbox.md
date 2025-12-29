@@ -1587,6 +1587,8 @@ interface PluginManifest {
 
 ## Related Documentation
 
+- [ADR-024: Plugin Sandbox Implementation](../decisions/adrs/ADR-024-plugin-sandbox-implementation.md) - Sandbox implementation decision
+- [v1.5.0 Milestone](../roadmap/milestones/v1.5.0.md) - Plugin security sandbox (F-124)
 - [System Security](./system-security.md) - General security practices
 - [Modular Architecture](./modular-architecture.md) - Plugin system patterns
 - [State-of-the-Art Plugin Architecture](./state-of-the-art-plugin-architecture.md) - Current mechanic plugin system

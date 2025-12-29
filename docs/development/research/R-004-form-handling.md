@@ -476,10 +476,11 @@ describe('EditForm', () => {
 
 ## Related Documentation
 
-- [ADR-014: Entity Edit Architecture](../decisions/adrs/ADR-014-entity-edit-architecture.md)
-- [ADR-015: Edit Mode UX Pattern](../decisions/adrs/ADR-015-edit-mode-ux.md)
-- [State Persistence Research](./state-persistence.md)
-- [Accessibility Research](./accessibility.md)
+- [F-050: Edit Form Component](../roadmap/features/completed/F-050-edit-form-component.md) - Form implementation
+- [ADR-014: Entity Edit Architecture](../decisions/adrs/ADR-014-entity-edit-architecture.md) - Edit architecture decision
+- [ADR-015: Edit Mode UX Pattern](../decisions/adrs/ADR-015-edit-mode-ux.md) - UX pattern decision
+- [State Persistence Research](./state-persistence.md) - State persistence patterns
+- [Accessibility Research](./accessibility.md) - Accessibility requirements
 
 ---
 

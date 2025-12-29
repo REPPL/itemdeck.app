@@ -839,6 +839,7 @@ None - additive features to existing infrastructure.
 
 ## Related Documentation
 
+- [ADR-018: Mechanic UI Overlay](../decisions/adrs/ADR-018-mechanic-ui-overlay.md) - Related architecture decision
 - [External Data Sources](./external-data-sources.md) - TanStack Query setup, caching
 - [Data Repository Architecture](./data-repository-architecture.md) - Collection structure
 - [Configuration Hierarchy](./configuration-hierarchy.md) - Config loading patterns

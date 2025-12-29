@@ -585,9 +585,16 @@ describe('Security utilities', () => {
 
 ## Related Documentation
 
+### Research
 - [Image Handling & Security](./image-handling-security.md) - Image-specific security
 - [External Data Sources](./external-data-sources.md) - Secure data fetching
 - [Configuration Hierarchy](./configuration-hierarchy.md) - Secure config validation
+
+### Features
+- [F-018: Security Hardening](../roadmap/features/completed/F-018-security-hardening.md) - Security implementation
+
+### Decisions
+- [ADR-009: Security](../decisions/adrs/ADR-009-security.md) - Security architecture decisions
 
 ---
 

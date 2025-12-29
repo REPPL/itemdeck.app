@@ -803,9 +803,17 @@ describe('Card accessibility', () => {
 
 ## Related Documentation
 
+### Research
 - [Card Layouts & Animations](./card-layouts-animations.md) - Animation accessibility
 - [Customisation Options](./customisation-options.md) - Theme contrast requirements
 - [Testing Strategies](./testing-strategies.md) - Accessibility testing
+
+### Features
+- [F-019: Accessibility Audit](../roadmap/features/planned/F-019-accessibility-audit.md) - Comprehensive accessibility review
+- [F-024: ARIA Live Regions](../roadmap/features/completed/F-024-aria-live-regions.md) - Screen reader announcements
+
+### Decisions
+- [ADR-011: Accessibility Standard](../decisions/adrs/ADR-011-accessibility-standard.md) - Accessibility approach decisions
 
 ---
 

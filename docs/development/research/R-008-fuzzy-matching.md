@@ -515,8 +515,9 @@ describe('matchCollections', () => {
 
 ## Related Documentation
 
-- [F-064: Collection Comparison Mode](../../roadmap/features/planned/F-064-collection-comparison.md)
-- [External Data Sources Research](./external-data-sources.md)
+- [F-036: Card Filtering](../roadmap/features/completed/F-036-card-filtering.md) - Filtering implementation using fuzzy matching
+- [F-064: Collection Comparison Mode](../roadmap/features/planned/F-064-collection-comparison.md) - Planned comparison feature
+- [External Data Sources Research](./external-data-sources.md) - External data integration
 
 ---
 

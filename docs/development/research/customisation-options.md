@@ -988,11 +988,9 @@ None - additive features to existing system.
 - [Accessibility](./accessibility.md) - Theme accessibility requirements
 - [State Persistence](./state-persistence.md) - Storing user preferences
 
-### Features (implement this research)
-- [F-010: Theme System](../development/roadmap/features/planned/F-010-theme-system.md)
-- [F-011: Layout Presets](../development/roadmap/features/planned/F-011-layout-presets.md)
-- [F-012: State Persistence](../development/roadmap/features/planned/F-012-state-persistence.md)
-- [F-013: Settings Panel](../development/roadmap/features/planned/F-013-settings-panel.md)
+### Features
+- [F-010: Theme System](../roadmap/features/completed/F-010-theme-system.md) - Theme implementation
+- [F-011: Layout Presets](../roadmap/features/completed/F-011-layout-presets.md) - Layout presets implementation
 
 ### Decisions
-- [ADR-005: CSS Custom Properties for Theming](../development/decisions/adrs/ADR-005-theming-approach.md)
+- [ADR-005: CSS Custom Properties for Theming](../decisions/adrs/ADR-005-theming-approach.md) - Theming approach

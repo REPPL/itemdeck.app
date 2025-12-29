@@ -878,9 +878,13 @@ See [Image Handling & Security](./image-handling-security.md) for security detai
 
 ## Related Documentation
 
+### Research
 - [Image Handling & Security](./image-handling-security.md) - Security aspects of image loading
 - [Performance & Virtualisation](./performance-virtualisation.md) - Lazy loading at scale
 - [Customisation Options](./customisation-options.md) - Theme-based card backs
+
+### Features
+- [F-003: Image Fallback System](../roadmap/features/completed/F-003-image-fallback-system.md) - Image fallback implementation
 
 ---
 

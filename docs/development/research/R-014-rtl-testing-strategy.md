@@ -456,10 +456,10 @@ jobs:
 
 ## Related Documentation
 
-- [F-077: RTL Language Support](../roadmap/features/planned/F-077-rtl-support.md)
-- [State-of-the-Art: Internationalisation](./state-of-the-art-internationalisation.md)
-- [ADR-008: Playwright for E2E Testing](../decisions/adrs/ADR-008-e2e-testing.md)
-- [R-016: Accessibility i18n Integration](./R-016-accessibility-i18n-integration.md)
+- [F-077: RTL Language Support](../roadmap/features/planned/F-077-rtl-support.md) - RTL implementation feature
+- [State-of-the-Art: Internationalisation](./state-of-the-art-internationalisation.md) - i18n research
+- [ADR-008: Playwright for E2E Testing](../decisions/adrs/ADR-008-e2e-testing.md) - Testing infrastructure
+- [R-016: Accessibility i18n Integration](./R-016-accessibility-i18n-integration.md) - Accessibility considerations
 
 ---
 

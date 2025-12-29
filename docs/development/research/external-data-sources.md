@@ -572,6 +572,8 @@ None - additive features to existing mock data system.
 
 ## Related Documentation
 
+- [F-006: TanStack Query Setup](../roadmap/features/completed/F-006-tanstack-query-setup.md) - Query library implementation
+- [F-007: GitHub Data Source](../roadmap/features/completed/F-007-github-data-source.md) - GitHub data fetching implementation
 - [Configuration Hierarchy](./configuration-hierarchy.md) - How to structure external config
 - [System Security](./system-security.md) - Secure data fetching
 - [State Persistence](./state-persistence.md) - Caching and offline storage

@@ -510,9 +510,17 @@ See [Accessibility Research](./accessibility.md) for detailed a11y requirements.
 
 ## Related Documentation
 
+### Research
 - [Accessibility](./accessibility.md) - Keyboard navigation and reduced motion
 - [Performance & Virtualisation](./performance-virtualisation.md) - Animation performance at scale
 - [Customisation Options](./customisation-options.md) - User animation preferences
+
+### Features
+- [F-001: Card Flip Animation](../roadmap/features/completed/F-001-card-flip-animation.md) - Implementation of card flip
+- [F-041: Card Animations Polish](../roadmap/features/planned/F-041-card-animations-polish.md) - Animation refinements
+
+### Decisions
+- [ADR-001: Animation Library](../decisions/adrs/ADR-001-animation-library.md) - Animation library selection
 
 ---
 

@@ -289,8 +289,7 @@ interface SearchableSetting {
 
 ## Related Documentation
 
-- [F-072 Settings Panel Redesign](../roadmap/features/active/F-072-settings-panel-redesign.md)
-- [v0.11.1 Milestone](../roadmap/milestones/v0.11.1.md)
+- [F-072: Settings Panel Redesign](../roadmap/features/completed/F-072-settings-panel-redesign.md) - Implementation of recommendations from this research
 
 ---
 

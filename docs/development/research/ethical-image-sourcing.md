@@ -880,6 +880,7 @@ export async function getPexelsAttribution(photoId: string): Promise<Attribution
 
 ## Related Documentation
 
+- [R-003: External Scores & Ratings Integration](./R-003-external-scores.md) - External data enrichment patterns
 - [Image Handling & Security](./image-handling-security.md) - Secure image loading
 - [External Data Sources](./external-data-sources.md) - API integration patterns
 - [Asset Management](./asset-management.md) - Image caching and fallbacks

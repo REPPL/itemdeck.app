@@ -681,10 +681,12 @@ describe('useMemoryStore', () => {
 
 ## Related Documentation
 
-- [R-006: Plugin State Isolation](./R-006-plugin-state-isolation.md)
-- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md)
-- [Modular Architecture Research](./modular-architecture.md)
-- [State Persistence Research](./state-persistence.md)
+- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md) - Plugin architecture decision
+- [F-053: Mechanic Plugin Registry](../roadmap/features/completed/F-053-mechanic-plugin-registry.md) - Registry implementation
+- [R-006: Plugin State Isolation](./R-006-plugin-state-isolation.md) - State isolation patterns
+- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md) - State management decision
+- [Modular Architecture Research](./modular-architecture.md) - Modular architecture patterns
+- [State Persistence Research](./state-persistence.md) - State persistence patterns
 
 ---
 

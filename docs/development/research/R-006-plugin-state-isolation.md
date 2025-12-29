@@ -524,10 +524,10 @@ if (import.meta.env.DEV) {
 
 ## Related Documentation
 
-- [R-005: Gaming Mechanics State Patterns](./R-005-gaming-mechanics-state.md)
-- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md)
-- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md)
-- [Modular Architecture Research](./modular-architecture.md)
+- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md) - Plugin architecture decision
+- [R-005: Gaming Mechanics State Patterns](./R-005-gaming-mechanics-state.md) - State patterns for mechanics
+- [ADR-017: Mechanic State Management](../decisions/adrs/ADR-017-mechanic-state-management.md) - State management decision
+- [Modular Architecture Research](./modular-architecture.md) - Modular architecture patterns
 
 ---
 

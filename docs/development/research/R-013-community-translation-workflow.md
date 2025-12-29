@@ -403,10 +403,11 @@ src/i18n/locales/
 
 ## Related Documentation
 
-- [State-of-the-Art: Internationalisation](./state-of-the-art-internationalisation.md)
-- [ADR-021: Internationalisation Library](../decisions/adrs/ADR-021-internationalisation-library.md)
-- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md)
-- [R-015: i18n Performance Benchmarks](./R-015-i18n-performance-benchmarks.md)
+- [v2.0.0 Milestone](../roadmap/milestones/v2.0.0.md) - Internationalisation milestone
+- [State-of-the-Art: Internationalisation](./state-of-the-art-internationalisation.md) - i18n library research
+- [ADR-021: Internationalisation Library](../decisions/adrs/ADR-021-internationalisation-library.md) - Library selection
+- [F-075: Internationalisation Foundation](../roadmap/features/planned/F-075-internationalisation-foundation.md) - Core implementation
+- [R-015: i18n Performance Benchmarks](./R-015-i18n-performance-benchmarks.md) - Performance metrics
 
 ---
 

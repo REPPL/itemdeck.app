@@ -470,9 +470,10 @@ Minimal - reuses existing infrastructure.
 
 ## Related Documentation
 
-- [R-004: Form Handling in React](./R-004-form-handling.md)
-- [ADR-014: Entity Edit Architecture](../decisions/adrs/ADR-014-entity-edit-architecture.md)
-- [State Persistence Research](./state-persistence.md)
+- [F-048: Edit Mode Toggle](../roadmap/features/completed/F-048-edit-mode-toggle.md) - Edit mode implementation
+- [R-004: Form Handling in React](./R-004-form-handling.md) - Form handling patterns
+- [ADR-014: Entity Edit Architecture](../decisions/adrs/ADR-014-entity-edit-architecture.md) - Edit architecture decision
+- [State Persistence Research](./state-persistence.md) - State persistence patterns
 
 ---
 

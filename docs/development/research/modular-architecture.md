@@ -668,9 +668,16 @@ Refactoring to compound components:
 
 ## Related Documentation
 
+### Research
 - [Customisation Options](./customisation-options.md) - User-facing configuration
 - [Testing Strategies](./testing-strategies.md) - Testing modular components
 - [Performance & Virtualisation](./performance-virtualisation.md) - Code splitting benefits
+
+### Milestones
+- [v1.5.0](../roadmap/milestones/v1.5.0.md) - Plugin ecosystem milestone
+
+### Decisions
+- [ADR-016: Gaming Mechanics Plugin Architecture](../decisions/adrs/ADR-016-gaming-mechanics-plugin-architecture.md) - Plugin system design
 
 ---
 

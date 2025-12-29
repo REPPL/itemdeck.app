@@ -530,9 +530,14 @@ export default defineConfig({
 
 ## Related Documentation
 
+### Research
 - [Card Layouts & Animations](./card-layouts-animations.md) - Animation performance
 - [Asset Management](./asset-management.md) - Image loading strategies
 - [Testing Strategies](./testing-strategies.md) - Performance testing
+
+### Features
+- [F-014: Virtual Scrolling](../roadmap/features/completed/F-014-virtual-scrolling.md) - Virtualisation implementation
+- [F-015: Image Lazy Loading](../roadmap/features/completed/F-015-image-lazy-loading.md) - Lazy loading implementation
 
 ---
 

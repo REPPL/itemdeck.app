@@ -76,4 +76,4 @@ Use **Framer Motion** as the primary animation library.
 ## Related Documentation
 
 - [Card Layouts & Animations Research](../../../research/card-layouts-animations.md)
-- [F-001: Card Flip Animation](../../roadmap/features/planned/F-001-card-flip-animation.md)
+- [F-001: Card Flip Animation](../../roadmap/features/completed/F-001-card-flip-animation.md)

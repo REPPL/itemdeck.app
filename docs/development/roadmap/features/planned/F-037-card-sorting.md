@@ -97,15 +97,15 @@ Small
 
 ## Milestone
 
-v0.11.0
+v0.15.0
 
 ---
 
 ## Related Documentation
 
 - [Shuffle by Default](../completed/F-027-shuffle-by-default.md)
-- [Card Drag and Drop](./F-028-card-drag-and-drop.md)
-- [v0.11.0 Milestone](../../milestones/v0.11.0.md)
+- [Card Drag and Drop](../completed/F-028-card-drag-and-drop.md)
+- [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 
 ---
 

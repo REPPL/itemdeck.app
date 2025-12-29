@@ -689,9 +689,14 @@ Migrating from current SettingsContext:
 
 ## Related Documentation
 
+### Research
 - [External Data Sources](./external-data-sources.md) - Remote config fetching
 - [State Persistence](./state-persistence.md) - localStorage patterns
 - [Customisation Options](./customisation-options.md) - User-facing settings
+
+### Features
+- [F-002: Configuration System](../roadmap/features/completed/F-002-configuration-system.md) - Configuration implementation
+- [F-012: State Persistence](../roadmap/features/completed/F-012-state-persistence.md) - Persistence implementation
 
 ---
 

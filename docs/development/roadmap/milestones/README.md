@@ -1,6 +1,6 @@
 # Milestones
 
-Release planning for Itemdeck v0.1.0 through v1.0.0.
+Release planning for Itemdeck v0.1.0 through v2.0.0.
 
 ## Timeline Overview
 
@@ -12,7 +12,7 @@ Release planning for Itemdeck v0.1.0 through v1.0.0.
 | [v0.4.0](./v0.4.0.md) | Performance & Interaction | ✅ Complete | 12 |
 | [v0.5.0](./v0.5.0.md) | Schema Design | ✅ Complete | 5 |
 | [v0.6.0](./v0.6.0.md) | Schema Loader | ✅ Complete | 7 |
-| [v0.6.1](./v0.6.1.md) | UI Configuration & Settings | 📋 Deferred | 3 + research |
+| [v0.6.2](./v0.6.2.md) | Settings Restructure | ✅ Complete | 2 |
 | [v0.7.0](./v0.7.0.md) | Schema Flexibility | ✅ Complete | 8 |
 | [v0.7.1](./v0.7.1.md) | Settings Fixes & Visual Polish | ✅ Complete | 10 |
 | [v0.7.2](./v0.7.2.md) | Visual Polish & Animation Refinements | ✅ Complete | 8 |
@@ -28,11 +28,14 @@ Release planning for Itemdeck v0.1.0 through v1.0.0.
 | [v0.11.5](./v0.11.5.md) | UI Refinements & Documentation Sync | ✅ Complete | 6 |
 | [v0.12.0](./v0.12.0.md) | UI Polish & Statistics | ✅ Complete | 14 fixes + 3 components |
 | [v0.12.5](./v0.12.5.md) | Core Mechanics & Documentation | ✅ Complete | 6 features + 12 docs |
-| [v0.13.0](./v0.13.0.md) | Modular Plugin Architecture | 🔄 In Progress | 5 work packages |
-| [v0.14.0](./v0.14.0.md) | Advanced Mechanics | 📋 Planned | 2 |
+| [v0.13.0](./v0.13.0.md) | Modular Plugin Architecture | ✅ Complete | 5 work packages |
+| [v0.14.0](./v0.14.0.md) | Advanced Mechanics | ✅ Complete | 3 |
+| [v0.14.5](./v0.14.5.md) | Shared Mechanics Components | ✅ Complete | 12 |
+| [v0.15.0](./v0.15.0.md) | User Experience & Polish | 🔄 In Progress | 12 |
+| [v0.15.5](./v0.15.5.md) | Infrastructure & Documentation | 📋 Planned | 4 |
 | [v1.0.0](./v1.0.0.md) | Multi-Collection | 📋 Planned | 1 |
-| [v1.5.0](./v1.5.0.md) | Internationalisation Foundation | 📋 Planned | 2 |
-| [v2.0.0](./v2.0.0.md) | Full Language Support | 📋 Planned | 1 |
+| [v1.5.0](./v1.5.0.md) | Full Plugin Ecosystem | 📋 Planned | 12 |
+| [v2.0.0](./v2.0.0.md) | Internationalisation | 📋 Planned | 3 |
 
 ## Dependencies
 
@@ -56,6 +59,9 @@ v0.5.0 Schema Design ✅
     │
     ▼
 v0.6.0 Schema Loader ✅
+    │
+    ▼
+v0.6.2 Settings Restructure ✅
     │
     ▼
 v0.7.0 Schema Flexibility ✅
@@ -103,19 +109,28 @@ v0.12.0 UI Polish & Statistics ✅
 v0.12.5 Core Mechanics ✅
     │
     ▼
-v0.13.0 Plugin Architecture 🔄
+v0.13.0 Plugin Architecture ✅
     │
     ▼
-v0.14.0 Advanced Mechanics 📋
+v0.14.0 Advanced Mechanics ✅
+    │
+    ▼
+v0.14.5 Shared Mechanics ✅
+    │
+    ▼
+v0.15.0 UX & Polish 🔄
+    │
+    ▼
+v0.15.5 Infrastructure 📋
     │
     ▼
 v1.0.0 Multi-Collection 📋
     │
     ▼
-v1.5.0 Internationalisation Foundation 📋
+v1.5.0 Plugin Ecosystem 📋
     │
     ▼
-v2.0.0 Full Language Support 📋
+v2.0.0 Internationalisation 📋
 ```
 
 ## Status Legend

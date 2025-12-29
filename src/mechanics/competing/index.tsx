@@ -51,6 +51,11 @@ export const competingMechanic: Mechanic<CompetingSettings> = {
     icon: CompetingIcon,
     version: "1.0.0",
     minCards: 4,
+    displayPreferences: {
+      cardSizePreset: "small",
+      hideCardGrid: true,
+      uiMode: "fullscreen",
+    },
   },
 
   lifecycle: {

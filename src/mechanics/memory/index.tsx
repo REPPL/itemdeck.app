@@ -45,6 +45,10 @@ export const memoryMechanic: Mechanic<MemorySettings> = {
     icon: MemoryIcon,
     version: "1.0.0",
     minCards: 4,
+    displayPreferences: {
+      cardSizePreset: "medium",
+      hideCardGrid: true,
+    },
   },
 
   lifecycle: {

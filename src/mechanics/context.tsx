@@ -109,12 +109,34 @@ export function MechanicProvider({ children, onOpenMechanicPanel }: MechanicProv
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Only run once on mount
 
+  // Restore settings on page unload to prevent stuck mechanic mode
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      if (mechanic) {
+        useSettingsStore.getState().restoreMechanicOverrides();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [mechanic]);
+
   const activateMechanic = useCallback(
     async (id: string) => {
       try {
         setIsLoading(true);
         setError(null);
         const activated = await mechanicRegistry.activate(id);
+
+        // Apply display preferences if present
+        if (activated.manifest.displayPreferences) {
+          useSettingsStore.getState().applyMechanicOverrides(
+            activated.manifest.displayPreferences
+          );
+        }
+
         setMechanic(activated);
         setActiveMechanicId(id);
       } catch (err) {
@@ -128,6 +150,9 @@ export function MechanicProvider({ children, onOpenMechanicPanel }: MechanicProv
   );
 
   const deactivateMechanic = useCallback(() => {
+    // Restore settings before deactivating
+    useSettingsStore.getState().restoreMechanicOverrides();
+
     mechanicRegistry.deactivate();
     setMechanic(null);
     setActiveMechanicId(null);

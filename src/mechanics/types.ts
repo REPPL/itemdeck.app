@@ -7,6 +7,30 @@
 import type { ComponentType } from "react";
 
 /**
+ * Display preferences that mechanics can declare.
+ * Applied when mechanic activates, restored on deactivation.
+ */
+export interface MechanicDisplayPreferences {
+  /** Preferred card size preset */
+  cardSizePreset?: "small" | "medium" | "large";
+
+  /** Preferred card aspect ratio */
+  cardAspectRatio?: "3:4" | "5:7" | "1:1";
+
+  /** Hide the main card grid when active (for full-screen games) */
+  hideCardGrid?: boolean;
+
+  /** UI mode determining overlay behaviour */
+  uiMode?: "overlay" | "fullscreen" | "inline" | "panel";
+
+  /** Maximum visible cards (for performance) */
+  maxVisibleCards?: number;
+
+  /** Force landscape orientation hint */
+  suggestLandscape?: boolean;
+}
+
+/**
  * Mechanic manifest (metadata).
  */
 export interface MechanicManifest {
@@ -24,6 +48,8 @@ export interface MechanicManifest {
   requiredFields?: string[];
   /** Minimum number of cards required */
   minCards?: number;
+  /** Display preferences applied when mechanic activates */
+  displayPreferences?: MechanicDisplayPreferences;
 }
 
 /**

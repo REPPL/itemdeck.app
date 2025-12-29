@@ -763,17 +763,24 @@ export function CardGrid() {
     ? rows * effectiveDimensions.height + (rows - 1) * GAP
     : 200;
 
-  // Render loading/error/empty states inside the grid container
-  // so the ref is always attached
-  const renderContent = () => {
+  // Render loading/error states outside the grid
+  // Note: Loading skeleton and error messages are rendered outside the grid role to avoid
+  // aria-required-children violation (role="status" and role="alert" cannot be inside role="grid")
+  const renderNonGridState = () => {
     if (isLoading) {
       return <LoadingSkeleton count={8} />;
     }
-
     if (error) {
-      return <div className={styles.error}>Error: {error.message}</div>;
+      return <div className={styles.error} role="alert">Error: {error.message}</div>;
     }
+    return null;
+  };
 
+  // Check if we should show the grid (not loading or error)
+  const shouldShowGrid = !isLoading && !error;
+
+  // Render grid content (only valid grid children)
+  const renderContent = () => {
     if (cards.length === 0 || positions.length === 0) {
       return <div className={styles.empty}>No cards to display</div>;
     }
@@ -976,7 +983,7 @@ export function CardGrid() {
   const GridOverlay = mechanic?.GridOverlay;
 
   // v0.12.5: Fit-to-viewport view - fills available space without scrolling
-  if (isFitMode && !isLoading && !error) {
+  if (isFitMode) {
     return (
       <>
         {/* Mechanic top overlay (stats bar, etc.) */}
@@ -994,16 +1001,20 @@ export function CardGrid() {
           ref={fitContainerRef}
           className={styles.fitContainer}
         >
-          <section
-            ref={containerRef}
-            className={styles.grid}
-            style={{ minHeight: `${String(containerHeight)}px` }}
-            role="grid"
-            aria-label="Card collection"
-            onKeyDown={handleKeyDown}
-          >
-            {renderContent()}
-          </section>
+          {/* Loading/error states rendered outside grid to avoid aria-required-children violation */}
+          {renderNonGridState()}
+          {shouldShowGrid && (
+            <section
+              ref={containerRef}
+              className={styles.grid}
+              style={{ minHeight: `${String(containerHeight)}px` }}
+              role="grid"
+              aria-label="Card collection"
+              onKeyDown={handleKeyDown}
+            >
+              {renderContent()}
+            </section>
+          )}
         </div>
 
         {/* Mechanic bottom overlay (completion modal, etc.) */}
@@ -1026,16 +1037,20 @@ export function CardGrid() {
           filterOptions={filterOptions}
         />
       )}
-      <section
-        ref={containerRef}
-        className={styles.grid}
-        style={{ minHeight: `${String(containerHeight)}px` }}
-        role="grid"
-        aria-label="Card collection"
-        onKeyDown={handleKeyDown}
-      >
-        {renderContent()}
-      </section>
+      {/* Loading/error states rendered outside grid to avoid aria-required-children violation */}
+      {renderNonGridState()}
+      {shouldShowGrid && (
+        <section
+          ref={containerRef}
+          className={styles.grid}
+          style={{ minHeight: `${String(containerHeight)}px` }}
+          role="grid"
+          aria-label="Card collection"
+          onKeyDown={handleKeyDown}
+        >
+          {renderContent()}
+        </section>
+      )}
 
       {/* Mechanic bottom overlay (completion modal, etc.) */}
       {GridOverlay && <GridOverlay position="bottom" />}

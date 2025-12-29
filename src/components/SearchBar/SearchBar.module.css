@@ -202,8 +202,8 @@
   text-transform: uppercase;
   text-align: center;
   letter-spacing: 0.05em;
-  /* Hardcoded light color - search bar always has dark background */
-  color: rgba(255, 255, 255, 0.6);
+  /* WCAG AA contrast: light text on dark background (4.5:1 minimum) */
+  color: rgba(255, 255, 255, 0.85);
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 0.375rem;

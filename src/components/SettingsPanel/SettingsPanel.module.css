@@ -480,12 +480,13 @@
 }
 
 .tabActive {
-  background: var(--colour-primary);
+  /* WCAG AA contrast: darker blue (#2563eb) with white has 4.5+:1 ratio */
+  background: var(--colour-primary-dark, #2563eb);
   color: white;
 }
 
 .tabActive:hover {
-  background: var(--colour-primary-dark, var(--colour-primary));
+  background: var(--colour-primary-darker, #1d4ed8);
   color: white;
 }
 

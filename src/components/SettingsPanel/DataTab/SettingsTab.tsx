@@ -2,10 +2,17 @@
  * Settings sub-tab for Data settings.
  *
  * Manages settings import/export and reset functionality.
+ * Uses Zod validation for import and supports Replace/Merge modes.
  */
 
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useSettingsStore } from "@/stores/settingsStore";
+import {
+  exportSettingsToFile,
+  importSettingsFromFile,
+  type ImportMode,
+} from "@/utils/settingsExport";
+import { Toast } from "@/components/Toast";
 import styles from "../SettingsPanel.module.css";
 
 /**
@@ -14,159 +21,79 @@ import styles from "../SettingsPanel.module.css";
 export function SettingsTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [importMode, setImportMode] = useState<ImportMode>("merge");
+  const [isImporting, setIsImporting] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "warning" | "info";
+    visible: boolean;
+  }>({ message: "", type: "info", visible: false });
 
   const resetToDefaults = useSettingsStore((s) => s.resetToDefaults);
 
-  const handleExportSettings = () => {
-    // Get all settings from the store
-    const state = useSettingsStore.getState();
+  const showToast = useCallback(
+    (message: string, type?: "success" | "warning" | "info") => {
+      setToast({ message, type: type ?? "info", visible: true });
+    },
+    []
+  );
 
-    // Create export object with relevant settings
-    const exportData = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      settings: {
-        layout: state.layout,
-        cardSizePreset: state.cardSizePreset,
-        cardAspectRatio: state.cardAspectRatio,
-        maxVisibleCards: state.maxVisibleCards,
-        cardBackDisplay: state.cardBackDisplay,
-        shuffleOnLoad: state.shuffleOnLoad,
-        reduceMotion: state.reduceMotion,
-        highContrast: state.highContrast,
-        titleDisplayMode: state.titleDisplayMode,
-        dragModeEnabled: state.dragModeEnabled,
-        visualTheme: state.visualTheme,
-        cardBackStyle: state.cardBackStyle,
-        showRankBadge: state.showRankBadge,
-        showDeviceBadge: state.showDeviceBadge,
-        rankPlaceholderText: state.rankPlaceholderText,
-        dragFace: state.dragFace,
-        fieldMapping: state.fieldMapping,
-        themeCustomisations: state.themeCustomisations,
-        showHelpButton: state.showHelpButton,
-        showSettingsButton: state.showSettingsButton,
-        showDragIcon: state.showDragIcon,
-        randomSelectionEnabled: state.randomSelectionEnabled,
-        randomSelectionCount: state.randomSelectionCount,
-        defaultCardFace: state.defaultCardFace,
-        showStatisticsBar: state.showStatisticsBar,
-        editModeEnabled: state.editModeEnabled,
-        showSearchBar: state.showSearchBar,
-        searchBarMinimised: state.searchBarMinimised,
-        searchFields: state.searchFields,
-        searchScope: state.searchScope,
-        groupByField: state.groupByField,
-      },
-    };
+  const hideToast = useCallback(() => {
+    setToast((prev) => ({ ...prev, visible: false }));
+  }, []);
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `itemdeck-settings-${new Date().toISOString().split("T")[0] ?? "export"}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const handleExportSettings = useCallback(() => {
+    try {
+      exportSettingsToFile();
+      showToast("Settings exported successfully", "success");
+    } catch {
+      showToast("Failed to export settings", "warning");
+    }
+  }, [showToast]);
 
-  const handleImportClick = () => {
+  const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
+      setIsImporting(true);
       try {
-        const content = event.target?.result as string;
-        const imported = JSON.parse(content) as {
-          version?: number;
-          settings?: Record<string, unknown>;
-        };
-
-        // Validate import format
-        if (!imported.settings) {
-          throw new Error("Invalid settings file: missing settings data");
-        }
-
-        // Get setters from the store
-        const store = useSettingsStore.getState();
-        const settings = imported.settings;
-
-        // Apply each setting if it exists in the import
-        if (settings.layout !== undefined) store.setLayout(settings.layout as typeof store.layout);
-        if (settings.cardSizePreset !== undefined) store.setCardSizePreset(settings.cardSizePreset as typeof store.cardSizePreset);
-        if (settings.cardAspectRatio !== undefined) store.setCardAspectRatio(settings.cardAspectRatio as typeof store.cardAspectRatio);
-        if (settings.maxVisibleCards !== undefined) store.setMaxVisibleCards(settings.maxVisibleCards as number);
-        if (settings.cardBackDisplay !== undefined) store.setCardBackDisplay(settings.cardBackDisplay as typeof store.cardBackDisplay);
-        if (settings.shuffleOnLoad !== undefined) store.setShuffleOnLoad(settings.shuffleOnLoad as boolean);
-        if (settings.reduceMotion !== undefined) store.setReduceMotion(settings.reduceMotion as typeof store.reduceMotion);
-        if (settings.highContrast !== undefined) store.setHighContrast(settings.highContrast as boolean);
-        if (settings.titleDisplayMode !== undefined) store.setTitleDisplayMode(settings.titleDisplayMode as typeof store.titleDisplayMode);
-        if (settings.dragModeEnabled !== undefined) store.setDragModeEnabled(settings.dragModeEnabled as boolean);
-        if (settings.visualTheme !== undefined) store.setVisualTheme(settings.visualTheme as typeof store.visualTheme);
-        if (settings.cardBackStyle !== undefined) store.setCardBackStyle(settings.cardBackStyle as typeof store.cardBackStyle);
-        if (settings.showRankBadge !== undefined) store.setShowRankBadge(settings.showRankBadge as boolean);
-        if (settings.showDeviceBadge !== undefined) store.setShowDeviceBadge(settings.showDeviceBadge as boolean);
-        if (settings.rankPlaceholderText !== undefined) store.setRankPlaceholderText(settings.rankPlaceholderText as string);
-        if (settings.dragFace !== undefined) store.setDragFace(settings.dragFace as typeof store.dragFace);
-        if (settings.showHelpButton !== undefined) store.setShowHelpButton(settings.showHelpButton as boolean);
-        if (settings.showSettingsButton !== undefined) store.setShowSettingsButton(settings.showSettingsButton as boolean);
-        if (settings.showDragIcon !== undefined) store.setShowDragIcon(settings.showDragIcon as boolean);
-        if (settings.randomSelectionEnabled !== undefined) store.setRandomSelectionEnabled(settings.randomSelectionEnabled as boolean);
-        if (settings.randomSelectionCount !== undefined) store.setRandomSelectionCount(settings.randomSelectionCount as number);
-        if (settings.defaultCardFace !== undefined) store.setDefaultCardFace(settings.defaultCardFace as typeof store.defaultCardFace);
-        if (settings.showStatisticsBar !== undefined) store.setShowStatisticsBar(settings.showStatisticsBar as boolean);
-        if (settings.editModeEnabled !== undefined) store.setEditModeEnabled(settings.editModeEnabled as boolean);
-        if (settings.showSearchBar !== undefined) store.setShowSearchBar(settings.showSearchBar as boolean);
-        if (settings.searchBarMinimised !== undefined) store.setSearchBarMinimised(settings.searchBarMinimised as boolean);
-        if (settings.searchFields !== undefined) store.setSearchFields(settings.searchFields as string[]);
-        if (settings.searchScope !== undefined) store.setSearchScope(settings.searchScope as typeof store.searchScope);
-        if (settings.groupByField !== undefined) store.setGroupByField(settings.groupByField as string | null);
-
-        // Handle nested objects
-        if (settings.fieldMapping !== undefined) {
-          store.setFieldMapping(settings.fieldMapping as typeof store.fieldMapping);
-        }
-
-        // Handle theme customisations per theme
-        if (settings.themeCustomisations !== undefined) {
-          const customisations = settings.themeCustomisations as typeof store.themeCustomisations;
-          for (const theme of Object.keys(customisations) as (keyof typeof customisations)[]) {
-            store.setThemeCustomisation(theme, customisations[theme]);
-          }
-        }
-
-        alert("Settings imported successfully!");
+        const result = await importSettingsFromFile(file, importMode);
+        const modeLabel = importMode === "replace" ? "replaced" : "merged";
+        showToast(
+          `Imported ${String(result.settingsCount)} settings (${modeLabel}) from v${String(result.version)}`,
+          "success"
+        );
       } catch (error) {
-        alert(error instanceof Error ? error.message : "Failed to import settings");
+        const message =
+          error instanceof Error ? error.message : "Failed to import settings";
+        showToast(message, "warning");
+      } finally {
+        setIsImporting(false);
+        // Reset input to allow re-importing the same file
+        e.target.value = "";
       }
+    },
+    [importMode, showToast]
+  );
 
-      // Reset input
-      e.target.value = "";
-    };
-    reader.readAsText(file);
-  };
-
-  const handleResetToDefaults = () => {
+  const handleResetToDefaults = useCallback(() => {
     if (showResetConfirm) {
       resetToDefaults();
       setShowResetConfirm(false);
-      alert("Settings reset to defaults.");
+      showToast("Settings reset to defaults", "success");
     } else {
       setShowResetConfirm(true);
     }
-  };
+  }, [showResetConfirm, resetToDefaults, showToast]);
 
-  const handleCancelReset = () => {
+  const handleCancelReset = useCallback(() => {
     setShowResetConfirm(false);
-  };
+  }, []);
 
   return (
     <>
@@ -192,19 +119,48 @@ export function SettingsTab() {
       <h3 className={styles.sectionHeader}>Import Settings</h3>
 
       <div className={styles.row}>
+        <span className={styles.label}>Import mode</span>
+        <div className={styles.segmentedControl}>
+          <button
+            type="button"
+            className={`${styles.segmentButton ?? ""} ${importMode === "merge" ? (styles.segmentButtonActive ?? "") : ""}`}
+            onClick={() => { setImportMode("merge"); }}
+            aria-pressed={importMode === "merge"}
+          >
+            Merge
+          </button>
+          <button
+            type="button"
+            className={`${styles.segmentButton ?? ""} ${importMode === "replace" ? (styles.segmentButtonActive ?? "") : ""}`}
+            onClick={() => { setImportMode("replace"); }}
+            aria-pressed={importMode === "replace"}
+          >
+            Replace
+          </button>
+        </div>
+      </div>
+
+      <div className={styles.helpText}>
+        {importMode === "merge"
+          ? "Merge keeps your current settings and only updates values from the file."
+          : "Replace resets to defaults first, then applies the imported settings."}
+      </div>
+
+      <div className={styles.row}>
         <span className={styles.label}>Load from file</span>
         <button
           type="button"
           className={styles.secondaryButton}
           onClick={handleImportClick}
+          disabled={isImporting}
         >
-          Import Settings
+          {isImporting ? "Importing..." : "Import Settings"}
         </button>
         <input
           ref={fileInputRef}
           type="file"
           accept=".json"
-          onChange={handleFileChange}
+          onChange={(e) => { void handleFileChange(e); }}
           style={{ display: "none" }}
         />
       </div>
@@ -254,6 +210,15 @@ export function SettingsTab() {
       <div className={styles.helpText}>
         Resets all settings to their default values. This cannot be undone.
       </div>
+
+      {/* Toast notification */}
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+        duration={3000}
+      />
     </>
   );
 }

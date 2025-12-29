@@ -45,6 +45,10 @@ export const snapRankingMechanic: Mechanic<SnapRankingSettings> = {
     icon: SnapRankingIcon,
     version: "2.0.0",
     minCards: 2,
+    displayPreferences: {
+      cardSizePreset: "small",
+      uiMode: "inline",
+    },
   },
 
   lifecycle: {

@@ -346,7 +346,8 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--colour-warning, #f59e0b);
+  /* WCAG AA contrast: dark amber text on light amber background */
+  color: #92400e;
   background: rgba(245, 158, 11, 0.15);
   padding: 2px 6px;
   border-radius: var(--radius-sm);

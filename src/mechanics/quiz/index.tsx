@@ -57,6 +57,10 @@ export const quizMechanic: Mechanic<QuizSettings> = {
     icon: QuizIcon,
     version: "1.0.0",
     minCards: 4,
+    displayPreferences: {
+      cardSizePreset: "medium",
+      uiMode: "overlay",
+    },
   },
 
   lifecycle: {

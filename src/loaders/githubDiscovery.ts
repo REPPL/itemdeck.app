@@ -18,6 +18,64 @@ interface GitHubContentItem {
 }
 
 /**
+ * GitHub API rate limit info.
+ */
+export interface RateLimitInfo {
+  remaining: number;
+  reset: number; // Unix timestamp
+}
+
+/**
+ * Track rate limit state.
+ */
+let lastRateLimitReset: number | null = null;
+
+/**
+ * Parse GitHub API rate limit headers.
+ *
+ * @param response - Fetch Response object
+ * @returns Rate limit info or null if headers are missing
+ */
+export function parseRateLimitHeaders(response: Response): RateLimitInfo | null {
+  const remaining = response.headers.get("X-RateLimit-Remaining");
+  const reset = response.headers.get("X-RateLimit-Reset");
+
+  if (remaining && reset) {
+    return {
+      remaining: parseInt(remaining, 10),
+      reset: parseInt(reset, 10),
+    };
+  }
+  return null;
+}
+
+/**
+ * Check if we should skip GitHub API due to rate limiting.
+ *
+ * @returns True if currently rate limited
+ */
+export function isRateLimited(): boolean {
+  if (!lastRateLimitReset) return false;
+  return Date.now() / 1000 < lastRateLimitReset;
+}
+
+/**
+ * Clear rate limit state (e.g., after reset time passes).
+ */
+export function clearRateLimitState(): void {
+  lastRateLimitReset = null;
+}
+
+/**
+ * Set rate limit reset timestamp (exposed for testing).
+ *
+ * @param resetTimestamp - Unix timestamp when rate limit resets
+ */
+export function setRateLimitReset(resetTimestamp: number | null): void {
+  lastRateLimitReset = resetTimestamp;
+}
+
+/**
  * Parsed GitHub repository info from a CDN URL.
  */
 export interface GitHubRepoInfo {
@@ -61,6 +119,10 @@ export function parseJsDelivrUrl(cdnUrl: string): GitHubRepoInfo | null {
  * Uses the GitHub Contents API to list files in the entity directory,
  * then filters for JSON files that aren't prefixed with underscore.
  *
+ * Rate limiting is tracked to prevent repeated failed API calls.
+ * When rate limited, the function returns null immediately without
+ * making an API call.
+ *
  * @param cdnUrl - jsDelivr CDN URL pointing to entity directory
  * @returns Array of entity IDs or null if discovery failed
  *
@@ -71,6 +133,12 @@ export function parseJsDelivrUrl(cdnUrl: string): GitHubRepoInfo | null {
 export async function discoverEntitiesViaGitHub(
   cdnUrl: string
 ): Promise<string[] | null> {
+  // Skip if currently rate limited
+  if (isRateLimited()) {
+    console.warn("[GitHub Discovery] Skipping due to rate limit");
+    return null;
+  }
+
   const repoInfo = parseJsDelivrUrl(cdnUrl);
 
   if (!repoInfo) {
@@ -87,15 +155,25 @@ export async function discoverEntitiesViaGitHub(
   try {
     const response = await fetch(apiUrl, {
       headers: {
-        "Accept": "application/vnd.github.v3+json",
-        // Note: For higher rate limits, add Authorization header with token
+        Accept: "application/vnd.github.v3+json",
+        // User-Agent is required by GitHub API
+        "User-Agent": "itemdeck-app",
       },
     });
 
     if (!response.ok) {
-      // GitHub API error (404 = directory doesn't exist, 403 = rate limited)
+      // Handle rate limiting from 403 response
       if (response.status === 403) {
-        console.warn("GitHub API rate limit exceeded");
+        const rateLimit = parseRateLimitHeaders(response);
+        if (rateLimit?.remaining === 0) {
+          lastRateLimitReset = rateLimit.reset;
+          const resetDate = new Date(rateLimit.reset * 1000);
+          console.warn(
+            `[GitHub Discovery] Rate limited until ${resetDate.toISOString()}`
+          );
+        } else {
+          console.warn("[GitHub Discovery] Access forbidden (403)");
+        }
       }
       return null;
     }
@@ -124,7 +202,7 @@ export async function discoverEntitiesViaGitHub(
 
     return entityIds.length > 0 ? entityIds : null;
   } catch (error) {
-    console.warn("GitHub API discovery failed:", error);
+    console.warn("[GitHub Discovery] API discovery failed:", error);
     return null;
   }
 }

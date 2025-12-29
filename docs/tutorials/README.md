@@ -1,16 +1,24 @@
 # Tutorials
 
-Learning-oriented guides for beginners. Start here if you're new to Itemdeck.
+Learning-oriented guides for beginners. Start here if you're new to itemdeck.
 
 ## Available Tutorials
 
-1. **[Getting Started](getting-started.md)** - Your first steps with Itemdeck
+| Tutorial | Description |
+|----------|-------------|
+| [Getting Started](getting-started.md) | Your first steps with itemdeck |
+| [Your First Collection](first-collection.md) | Load and create collections |
+| [Playing Memory Game](playing-memory-game.md) | Learn the Memory mechanic |
+| [Customising Themes](customising-themes.md) | Personalise your experience |
 
-### Coming Soon
+## Tutorial Order
 
-- Your First Collection - Create and explore a collection
-- Playing Memory Game - Learn the mechanics system
-- Customising Themes - Personalise the visual style
+For the best learning experience, follow this sequence:
+
+1. **[Getting Started](getting-started.md)** - Understand the interface
+2. **[Your First Collection](first-collection.md)** - Load your own data
+3. **[Playing Memory Game](playing-memory-game.md)** - Try interactive mechanics
+4. **[Customising Themes](customising-themes.md)** - Make it your own
 
 ## What's the Difference?
 
@@ -25,3 +33,4 @@ Learning-oriented guides for beginners. Start here if you're new to Itemdeck.
 
 - [Documentation Hub](../README.md)
 - [Guides](../guides/)
+- [Explanation](../explanation/)

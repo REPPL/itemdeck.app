@@ -8,6 +8,7 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import type { ForcedSettings, CollectionSettings } from "@/types/collectionSettings";
+import type { MechanicDisplayPreferences } from "@/mechanics/types";
 
 /**
  * Collection config structure for applying defaults.
@@ -524,6 +525,21 @@ interface SettingsState {
   /** Whether draft differs from committed state */
   isDirty: boolean;
 
+  // ============================================================================
+  // v0.15.5: Mechanic Display Preferences (F-102)
+  // ============================================================================
+
+  /** Backup of settings before mechanic override (transient, not persisted) */
+  _mechanicOverridesBackup: Partial<{
+    cardSizePreset: CardSizePreset;
+    cardAspectRatio: CardAspectRatio;
+    layout: LayoutType;
+    maxVisibleCards: number;
+  }> | null;
+
+  /** Whether mechanic overrides are currently active */
+  mechanicOverridesActive: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -603,6 +619,12 @@ interface SettingsState {
   discardDraft: () => void;
   /** Get effective value (draft if editing, committed otherwise) */
   getEffective: <K extends DraftableSettingsKeys>(key: K) => SettingsState[K];
+
+  // v0.15.5: Mechanic Display Preferences Actions (F-102)
+  /** Apply display preferences from active mechanic. Stores current values for restoration. */
+  applyMechanicOverrides: (prefs: MechanicDisplayPreferences) => void;
+  /** Restore original settings after mechanic deactivation. */
+  restoreMechanicOverrides: () => void;
 
   // ============================================================================
   // v0.11.2: Cache Consent State (F-080)
@@ -695,6 +717,14 @@ const DEFAULT_SETTINGS = {
   // v0.14.0: Draft State defaults (F-090)
   _draft: null as DraftSettings | null,
   isDirty: false,
+  // v0.15.5: Mechanic Display Preferences defaults (F-102)
+  _mechanicOverridesBackup: null as Partial<{
+    cardSizePreset: CardSizePreset;
+    cardAspectRatio: CardAspectRatio;
+    layout: LayoutType;
+    maxVisibleCards: number;
+  }> | null,
+  mechanicOverridesActive: false,
 };
 
 // Check for reset parameter in URL - force clear localStorage
@@ -1235,6 +1265,53 @@ export const useSettingsStore = create<SettingsState>()(
         }
         return state[key];
       },
+
+      // v0.15.5: Mechanic Display Preferences Actions (F-102)
+      applyMechanicOverrides: (prefs) => {
+        const current = get();
+
+        // Store current values for restoration
+        set({
+          _mechanicOverridesBackup: {
+            cardSizePreset: current.cardSizePreset,
+            cardAspectRatio: current.cardAspectRatio,
+            layout: current.layout,
+            maxVisibleCards: current.maxVisibleCards,
+          },
+          mechanicOverridesActive: true,
+        });
+
+        // Apply preferences
+        const updates: Partial<SettingsState> = {};
+        if (prefs.cardSizePreset) {
+          updates.cardSizePreset = prefs.cardSizePreset;
+        }
+        if (prefs.cardAspectRatio) {
+          updates.cardAspectRatio = prefs.cardAspectRatio;
+        }
+        if (prefs.maxVisibleCards) {
+          updates.maxVisibleCards = prefs.maxVisibleCards;
+        }
+
+        if (Object.keys(updates).length > 0) {
+          set(updates);
+        }
+      },
+
+      restoreMechanicOverrides: () => {
+        const state = get();
+        const backup = state._mechanicOverridesBackup;
+        if (!backup) return;
+
+        set({
+          cardSizePreset: backup.cardSizePreset ?? state.cardSizePreset,
+          cardAspectRatio: backup.cardAspectRatio ?? state.cardAspectRatio,
+          layout: backup.layout ?? state.layout,
+          maxVisibleCards: backup.maxVisibleCards ?? state.maxVisibleCards,
+          _mechanicOverridesBackup: null,
+          mechanicOverridesActive: false,
+        });
+      },
     }),
     {
       name: "itemdeck-settings",
@@ -1297,6 +1374,8 @@ export const useSettingsStore = create<SettingsState>()(
         appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
         // v0.14.0: Draft state is intentionally NOT persisted
         // _draft and isDirty are excluded - editing session is transient
+        // v0.15.5: Mechanic override backup is intentionally NOT persisted
+        // _mechanicOverridesBackup and mechanicOverridesActive are excluded - transient state
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;

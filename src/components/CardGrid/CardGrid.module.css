@@ -34,7 +34,8 @@
   align-items: center;
   min-height: 200px;
   width: 100%;
-  color: #dc2626;
+  /* WCAG AA contrast: red-700 has better contrast than red-600 */
+  color: #b91c1c;
   font-size: 1rem;
   padding: var(--grid-gap);
   text-align: center;

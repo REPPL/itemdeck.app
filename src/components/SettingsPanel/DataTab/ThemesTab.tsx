@@ -2,6 +2,7 @@
  * Themes sub-tab for Data settings.
  *
  * Manages theme import/export and custom theme management.
+ * Exports only customisation overrides, not full theme data.
  */
 
 import { useRef, useState, useCallback } from "react";
@@ -10,7 +11,14 @@ import {
   DEFAULT_THEME_CUSTOMISATIONS,
   type VisualTheme,
 } from "@/stores/settingsStore";
+import {
+  exportThemeToFile,
+  importThemeFromFile,
+  hasThemeCustomisations,
+  countThemeOverrides,
+} from "@/utils/themeExport";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Toast } from "@/components/Toast";
 import styles from "../SettingsPanel.module.css";
 
 /**
@@ -28,68 +36,73 @@ const themeLabels: Record<VisualTheme, string> = {
 export function ThemesTab() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [switchToBaseTheme, setSwitchToBaseTheme] = useState(true);
+  const [isImporting, setIsImporting] = useState(false);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: "success" | "warning" | "info";
+    visible: boolean;
+  }>({ message: "", type: "info", visible: false });
 
   const visualTheme = useSettingsStore((s) => s.visualTheme);
-  const themeCustomisations = useSettingsStore((s) => s.themeCustomisations);
   const setThemeCustomisation = useSettingsStore((s) => s.setThemeCustomisation);
 
-  const handleExportTheme = () => {
-    const currentCustomisation = themeCustomisations[visualTheme];
-    const exportData = {
-      version: 1,
-      exportedAt: new Date().toISOString(),
-      theme: visualTheme,
-      customisation: currentCustomisation,
-    };
+  const showToast = useCallback(
+    (message: string, type?: "success" | "warning" | "info") => {
+      setToast({ message, type: type ?? "info", visible: true });
+    },
+    []
+  );
 
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `itemdeck-theme-${visualTheme}-${new Date().toISOString().split("T")[0] ?? "export"}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const hideToast = useCallback(() => {
+    setToast((prev) => ({ ...prev, visible: false }));
+  }, []);
 
-  const handleImportClick = () => {
+  const handleExportTheme = useCallback(() => {
+    try {
+      exportThemeToFile(visualTheme);
+      const overrideCount = countThemeOverrides(visualTheme);
+      showToast(
+        `Exported ${String(overrideCount)} customisation${overrideCount !== 1 ? "s" : ""} for ${themeLabels[visualTheme]}`,
+        "success"
+      );
+    } catch {
+      showToast("Failed to export theme", "warning");
+    }
+  }, [visualTheme, showToast]);
+
+  const handleImportClick = useCallback(() => {
     fileInputRef.current?.click();
-  };
+  }, []);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
+      setIsImporting(true);
       try {
-        const content = event.target?.result as string;
-        const imported = JSON.parse(content) as {
-          version?: number;
-          theme?: VisualTheme;
-          customisation?: Record<string, unknown>;
-        };
-
-        // Validate import format
-        if (!imported.customisation) {
-          throw new Error("Invalid theme file: missing customisation data");
-        }
-
-        // Apply to current theme
-        setThemeCustomisation(visualTheme, imported.customisation);
-        alert("Theme imported successfully!");
+        const result = await importThemeFromFile(file, switchToBaseTheme);
+        const themeName = result.name ?? themeLabels[result.baseTheme];
+        const switchedMessage = switchToBaseTheme
+          ? ` (switched to ${themeLabels[result.baseTheme]})`
+          : "";
+        showToast(
+          `Imported "${themeName}" with ${String(result.overrideCount)} customisation${result.overrideCount !== 1 ? "s" : ""}${switchedMessage}`,
+          "success"
+        );
       } catch (error) {
-        alert(error instanceof Error ? error.message : "Failed to import theme");
+        const message =
+          error instanceof Error ? error.message : "Failed to import theme";
+        showToast(message, "warning");
+      } finally {
+        setIsImporting(false);
+        // Reset input to allow re-importing the same file
+        e.target.value = "";
       }
-
-      // Reset input
-      e.target.value = "";
-    };
-    reader.readAsText(file);
-  };
+    },
+    [switchToBaseTheme, showToast]
+  );
 
   const handleResetClick = useCallback(() => {
     setShowResetConfirm(true);
@@ -98,15 +111,16 @@ export function ThemesTab() {
   const handleResetConfirm = useCallback(() => {
     setThemeCustomisation(visualTheme, DEFAULT_THEME_CUSTOMISATIONS[visualTheme]);
     setShowResetConfirm(false);
-  }, [visualTheme, setThemeCustomisation]);
+    showToast(`${themeLabels[visualTheme]} theme reset to defaults`, "success");
+  }, [visualTheme, setThemeCustomisation, showToast]);
 
   const handleResetCancel = useCallback(() => {
     setShowResetConfirm(false);
   }, []);
 
   // Check if current theme has been modified from defaults
-  const isModified = JSON.stringify(themeCustomisations[visualTheme]) !==
-    JSON.stringify(DEFAULT_THEME_CUSTOMISATIONS[visualTheme]);
+  const isModified = hasThemeCustomisations(visualTheme);
+  const overrideCount = countThemeOverrides(visualTheme);
 
   return (
     <>
@@ -118,8 +132,10 @@ export function ThemesTab() {
       </div>
 
       <div className={styles.row}>
-        <span className={styles.label}>Customised</span>
-        <span className={styles.value}>{isModified ? "Yes" : "No"}</span>
+        <span className={styles.label}>Customisations</span>
+        <span className={styles.value}>
+          {isModified ? `${String(overrideCount)} override${overrideCount !== 1 ? "s" : ""}` : "None"}
+        </span>
       </div>
 
       <div className={styles.helpText}>
@@ -142,7 +158,9 @@ export function ThemesTab() {
       </div>
 
       <div className={styles.helpText}>
-        Exports your current theme customisations as a JSON file.
+        {isModified
+          ? `Exports ${String(overrideCount)} customisation override${overrideCount !== 1 ? "s" : ""} as a JSON file.`
+          : "Exports your current theme customisations (currently using defaults)."}
       </div>
 
       <div className={styles.divider} />
@@ -150,25 +168,44 @@ export function ThemesTab() {
       <h3 className={styles.sectionHeader}>Import Theme</h3>
 
       <div className={styles.row}>
+        <span className={styles.label}>Switch to base theme</span>
+        <label className={styles.toggle}>
+          <input
+            type="checkbox"
+            checked={switchToBaseTheme}
+            onChange={(e) => { setSwitchToBaseTheme(e.target.checked); }}
+          />
+          <span className={styles.toggleSlider} />
+        </label>
+      </div>
+
+      <div className={styles.helpText}>
+        {switchToBaseTheme
+          ? "Automatically switch to the theme specified in the import file."
+          : "Apply customisations to the current theme, ignoring the import file's base theme."}
+      </div>
+
+      <div className={styles.row}>
         <span className={styles.label}>Load from file</span>
         <button
           type="button"
           className={styles.secondaryButton}
           onClick={handleImportClick}
+          disabled={isImporting}
         >
-          Import Theme
+          {isImporting ? "Importing..." : "Import Theme"}
         </button>
         <input
           ref={fileInputRef}
           type="file"
           accept=".json"
-          onChange={handleFileChange}
+          onChange={(e) => { void handleFileChange(e); }}
           style={{ display: "none" }}
         />
       </div>
 
       <div className={styles.helpText}>
-        Imports theme customisations from a JSON file and applies them to the current theme.
+        Imports theme customisations from a JSON file.
       </div>
 
       <div className={styles.divider} />
@@ -195,12 +232,21 @@ export function ThemesTab() {
       <ConfirmDialog
         isOpen={showResetConfirm}
         title="Reset Theme"
-        message={`This will reset the "${themeLabels[visualTheme]}" theme to its default settings. Your customisations will be lost.`}
+        message={`This will reset the "${themeLabels[visualTheme]}" theme to its default settings. Your ${String(overrideCount)} customisation${overrideCount !== 1 ? "s" : ""} will be lost.`}
         confirmLabel="Reset"
         cancelLabel="Cancel"
         variant="danger"
         onConfirm={handleResetConfirm}
         onCancel={handleResetCancel}
+      />
+
+      {/* Toast notification */}
+      <Toast
+        message={toast.message}
+        visible={toast.visible}
+        onHide={hideToast}
+        type={toast.type}
+        duration={3000}
       />
     </>
   );

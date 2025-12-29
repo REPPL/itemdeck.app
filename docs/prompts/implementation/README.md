@@ -30,7 +30,9 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | [v0.12.5](v0.12.5/README.md) | Snap Ranking & Fit Layout | Complete |
 | [v0.13.0](v0.13.0-wp-a-plugin-core.md) | Modular Plugin Architecture | Complete |
 | [v0.14.0](v0.14.0/README.md) | Advanced Mechanics (Plugin-Based) | Complete |
-| **[v0.14.5](v0.14.5/v0.14.5-shared-components.md)** | **Shared Mechanics Components** | **Planned** |
+| [v0.14.5](v0.14.5/v0.14.5-shared-components.md) | Shared Mechanics Components | Complete |
+| [v0.15.0](v0.15.0/README.md) | User Experience & Polish | Complete |
+| **[v0.15.5](v0.15.5/README.md)** | **Infrastructure & Documentation** | **Planned** |
 
 ### v0.13.0 Work Packages
 
@@ -56,6 +58,18 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | Package | Description | Dependencies |
 |---------|-------------|--------------|
 | [WP-A](v0.14.5/v0.14.5-shared-components.md) | Shared Mechanics Components + Refactor | v0.14.0 |
+
+### v0.15.5 Implementation Tracks
+
+| Track | Focus | Features |
+|-------|-------|----------|
+| [Track A: Accessibility](v0.15.5/track-a-accessibility.md) | WCAG 2.2 AA Audit | F-019 |
+| [Track A: Storybook](v0.15.5/track-a-storybook.md) | Component Storybook | F-026 |
+| [Track B: Settings Export](v0.15.5/track-b-settings-export.md) | Settings JSON Export/Import | F-081 |
+| [Track B: Theme Export](v0.15.5/track-b-theme-export.md) | Theme JSON Export/Import | F-082 |
+| [Track B: Auto-Discovery](v0.15.5/track-b-auto-discovery.md) | Entity Auto-Discovery | F-091 |
+| [Track C: Display Prefs](v0.15.5/track-c-display-prefs.md) | Mechanic Display Preferences | F-102 |
+| [Track D: Documentation](v0.15.5/track-d-documentation.md) | User Documentation Suite | F-073 |
 
 ## Purpose
 

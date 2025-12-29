@@ -33,7 +33,7 @@ Implement a source management system with persistent storage, validation, and a 
 User wants to add source
         ↓
 ┌─────────────────────────────┐
-│ Add Source Dialog           │
+│ Add Source Dialogue         │
 │ → Enter owner/repo or URL   │
 │ → Select collection         │
 └─────────────────────────────┘
@@ -185,7 +185,7 @@ SourceManager/
 └─────────────────────────────────────────────────────────┘
 ```
 
-### Add Source Dialog
+### Add Source Dialogue
 
 ```
 ┌─────────────────────────────────────────────────────────┐

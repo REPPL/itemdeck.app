@@ -26,7 +26,7 @@ window.addEventListener("keydown", (event) => {
 }, true); // Capture phase - runs before React
 ```
 
-This allows a confirmation dialog instead of immediate reload.
+This allows a confirmation dialogue instead of immediate reload.
 
 ### Phase 2: Dark Mode CSS Fixes
 

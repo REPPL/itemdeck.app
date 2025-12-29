@@ -431,7 +431,7 @@ function SettingsIcon() {
 
 ## Success Criteria
 
-- [ ] Settings panel opens as modal dialog
+- [ ] Settings panel opens as modal dialogue
 - [ ] All settings grouped by category
 - [ ] Theme, layout, and card size controls work
 - [ ] Accessibility options functional
@@ -441,7 +441,7 @@ function SettingsIcon() {
 - [ ] Reset to defaults works
 - [ ] Keyboard fully navigable (Tab, Escape)
 - [ ] Focus trapped in modal when open
-- [ ] Screen readers announce dialog
+- [ ] Screen readers announce dialogue
 - [ ] Tests pass
 
 ## Dependencies

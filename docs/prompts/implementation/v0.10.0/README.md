@@ -396,7 +396,7 @@ Add "Local Edits" section:
 - Show count: "12 cards modified"
 - Export button: triggers download
 - Import button: opens file picker
-- "Revert All Edits" button with confirmation dialog
+- "Revert All Edits" button with confirmation dialogue
 
 ### 5.4 Import Options Modal
 

@@ -45,7 +45,7 @@ Implemented a draft/commit pattern for settings:
 
 Key design decision: Dark Mode and High Contrast apply immediately (accessibility requirement).
 
-**F-092: Cache Consent Dialog UX**
+**F-092: Cache Consent Dialogue UX**
 
 Improved clarity for non-expert users:
 - Updated text: "Cached data is stored only in this browser on this device"

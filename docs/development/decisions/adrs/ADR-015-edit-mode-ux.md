@@ -22,7 +22,7 @@ We evaluated several UX approaches:
 
 Use a **Modal Edit Form** pattern.
 
-When editing is triggered (via Edit button), open a modal dialog containing a form for the entity's editable fields. This mirrors the existing CardExpanded pattern for viewing details.
+When editing is triggered (via Edit button), open a modal dialogue containing a form for the entity's editable fields. This mirrors the existing CardExpanded pattern for viewing details.
 
 ```
 ┌────────────────────────────────────────────────┐

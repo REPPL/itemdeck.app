@@ -36,8 +36,8 @@
 - F-041 Card animations polish
 - These would strengthen the release but were deprioritised
 
-### Export Dialog
-- Full export dialog with field selection was simplified to dropdown
+### Export Dialogue
+- Full export dialogue with field selection was simplified to dropdown
 - Would provide better UX for complex export scenarios
 
 ## Lessons Learned
@@ -56,7 +56,7 @@ Adding ~300 lines of CSS to SettingsPanel.module.css works but could be cleaner.
 | Decision | Rationale |
 |----------|-----------|
 | Integrate source management into Settings rather than Sidebar | Sidebar redesign scope too large for this milestone |
-| Use dropdown for export format rather than full dialog | Simpler implementation, adequate for v0.9.0 |
+| Use dropdown for export format rather than full dialogue | Simpler implementation, adequate for v0.9.0 |
 | Skip optional additions | Core features more important for milestone value |
 | Lower coverage thresholds temporarily | Allow release without blocking on test debt |
 
@@ -76,7 +76,7 @@ Adding ~300 lines of CSS to SettingsPanel.module.css works but could be cleaner.
 
 1. **Add tests for v0.9.0 features** - Health check, source store, statistics
 2. **Implement optional additions** - Recipe demo, index automation
-3. **Export dialog enhancement** - Field selection, filter options
+3. **Export dialogue enhancement** - Field selection, filter options
 4. **Restore coverage thresholds** - Back to 48%+ after adding tests
 
 ---

@@ -13,7 +13,7 @@ Users cannot backup, share, or analyse their collection data externally:
 
 Add client-side export functionality with multiple format options.
 
-### Export Dialog
+### Export Dialogue
 
 ```
 ┌─────────────────────────────────────────────────────────────┐

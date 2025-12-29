@@ -226,15 +226,15 @@ v0.11.2 focuses on **responsive UI polish**, **navigation reorganisation**, **ex
 **Problem**: Users should consent before caching collections locally.
 
 **Solution**:
-- First external load triggers permission dialog
+- First external load triggers permission dialogue
 - Options: "Allow", "Allow for this collection", "Don't cache"
 - Store per-source consent in settingsStore
 
 **Acceptance Criteria**:
-- [ ] Dialog appears on first external collection load
+- [ ] Dialogue appears on first external collection load
 - [ ] Three options: Allow, Allow for this collection, Don't cache
 - [ ] Consent stored per-source
-- [ ] Dialog doesn't appear for consented sources
+- [ ] Dialogue doesn't appear for consented sources
 - [ ] User can revoke consent in settings
 
 **Files**:
@@ -341,6 +341,6 @@ v0.11.2 focuses on **responsive UI polish**, **navigation reorganisation**, **ex
 - [ ] Single "Sources" button opens overlay with all links
 - [ ] Loading screen shows GitHub context when loading external
 - [ ] Invalid images filtered from gallery with IndexedDB cache
-- [ ] Per-collection cache consent dialog
+- [ ] Per-collection cache consent dialogue
 - [ ] User can export/import settings as JSON
 - [ ] User can export/import theme customisations as JSON

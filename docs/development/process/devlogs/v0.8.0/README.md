@@ -96,7 +96,7 @@ Created a themed loading screen component:
 Added storage tab to settings panel:
 
 - Cache statistics display (image count, storage used, percentage)
-- Clear cache button with confirmation dialog
+- Clear cache button with confirmation dialogue
 - Information about automatic LRU eviction
 
 ## Challenges Encountered

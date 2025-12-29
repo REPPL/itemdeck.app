@@ -67,7 +67,7 @@ Settings Panel → System Tab → Edit Mode Section
 - [x] Implement `importEditsFromFile(file: File)` function
 - [x] Parse and validate JSON with Zod schema
 - [x] Handle version compatibility (reject if version unsupported)
-- [x] Merge or replace existing edits (user choice via confirm dialog)
+- [x] Merge or replace existing edits (user choice via confirm dialogue)
 
 ### Phase 3: Settings UI
 
@@ -79,8 +79,8 @@ Settings Panel → System Tab → Edit Mode Section
 
 ### Phase 4: Import Options
 
-- [x] Use confirm dialog for merge/replace choice
-- [x] Show preview of edit count in dialog
+- [x] Use confirm dialogue for merge/replace choice
+- [x] Show preview of edit count in dialogue
 - [x] Option: Merge with existing / Replace all
 - [x] Alert on success with count
 

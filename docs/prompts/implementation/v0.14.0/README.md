@@ -13,7 +13,7 @@ Implement advanced gaming mechanics using the plugin architecture from v0.13.0. 
 | ID | Feature | Complexity | Work Package |
 |----|---------|------------|--------------|
 | F-090 | Settings Draft State Pattern | Large | WP-A |
-| F-092 | Cache Consent Dialog UX | Small | WP-A |
+| F-092 | Cache Consent Dialogue UX | Small | WP-A |
 | F-093 | Mechanic Panel: Hide Active from List | Small | WP-A |
 | F-094 | Button Style Consistency Audit | Medium | WP-A |
 | F-059 | Competing Mechanic (Top Trumps) | Large | WP-B |
@@ -66,7 +66,7 @@ All work packages can be implemented **in parallel** by different agents.
 Implements the draft/commit pattern for settings and fixes UI inconsistencies:
 
 1. **Settings Draft State (F-090)** - Changes only apply on "Accept", not immediately
-2. **Cache Consent Dialog UX (F-092)** - Clearer messaging about browser-local storage
+2. **Cache Consent Dialogue UX (F-092)** - Clearer messaging about browser-local storage
 3. **Mechanic Panel Fix (F-093)** - Don't show active mechanic in alternatives list
 4. **Button Style Audit (F-094)** - Ensure consistent button hierarchy across all modals
 

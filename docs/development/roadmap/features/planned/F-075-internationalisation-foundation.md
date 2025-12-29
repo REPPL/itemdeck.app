@@ -161,6 +161,196 @@ function QuickSettings() {
 }
 ```
 
+---
+
+## Error Handling and Fallback Strategy
+
+### Fallback Chain
+
+When a translation is missing, i18next uses a fallback chain:
+
+```
+1. Requested language (e.g., 'de')
+   ↓ (if missing)
+2. Fallback language ('en-GB')
+   ↓ (if missing)
+3. Translation key as last resort
+```
+
+### Configuration
+
+```typescript
+// src/i18n/index.ts
+i18n.init({
+  fallbackLng: 'en-GB',
+  returnEmptyString: false,  // Don't return empty strings
+  returnNull: false,         // Don't return null
+
+  // Handle missing keys
+  saveMissing: process.env.NODE_ENV === 'development',
+  missingKeyHandler: (lng, ns, key, fallbackValue) => {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Missing translation: ${lng}/${ns}/${key}`);
+    }
+    // In production, report to monitoring
+  },
+
+  // Interpolation safety
+  interpolation: {
+    escapeValue: false,  // React already escapes
+    skipOnVariables: false,
+  },
+});
+```
+
+### Network Failure Handling
+
+When lazy-loaded namespaces fail to fetch:
+
+```typescript
+// src/i18n/index.ts
+import Backend from 'i18next-http-backend';
+
+i18n.use(Backend).init({
+  backend: {
+    loadPath: '/locales/{{lng}}/{{ns}}.json',
+    // Retry failed requests
+    requestOptions: {
+      mode: 'cors',
+      cache: 'default',
+    },
+  },
+
+  // Retry configuration
+  load: 'currentOnly',
+  preload: ['en-GB'],  // Always preload fallback
+
+  // Handle load errors gracefully
+  react: {
+    useSuspense: true,
+    bindI18n: 'languageChanged loaded',
+  },
+});
+
+// Error boundary for translation loading
+i18n.on('failedLoading', (lng, ns, msg) => {
+  console.error(`Failed to load ${lng}/${ns}: ${msg}`);
+  // Show user-friendly message if critical namespace fails
+});
+```
+
+### Offline Translation Caching
+
+Leverage service worker for offline support:
+
+```typescript
+// Service worker caches translation files
+// vite-plugin-pwa configuration
+workbox: {
+  runtimeCaching: [
+    {
+      urlPattern: /\/locales\/.*\.json$/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'translations',
+        expiration: {
+          maxEntries: 50,
+          maxAgeSeconds: 60 * 60 * 24 * 7, // 1 week
+        },
+      },
+    },
+  ],
+}
+```
+
+### User Experience During Loading
+
+```typescript
+// Suspense boundary for translation loading
+function App() {
+  return (
+    <Suspense fallback={<LoadingScreen />}>
+      <I18nextProvider i18n={i18n}>
+        <AppContent />
+      </I18nextProvider>
+    </Suspense>
+  );
+}
+
+// Namespace-level loading indicator
+function SettingsPanel() {
+  const { t, ready } = useTranslation('settings', { useSuspense: false });
+
+  if (!ready) {
+    return <SettingsSkeleton />;
+  }
+
+  return <SettingsContent t={t} />;
+}
+```
+
+### Error Boundaries
+
+```typescript
+// Wrap translation-heavy components
+function TranslationErrorBoundary({ children }) {
+  return (
+    <ErrorBoundary
+      fallback={
+        <div role="alert">
+          Unable to load translations. Please refresh the page.
+        </div>
+      }
+      onError={(error) => {
+        console.error('Translation error:', error);
+      }}
+    >
+      {children}
+    </ErrorBoundary>
+  );
+}
+```
+
+---
+
+## Community Contribution Integration
+
+Translation contributions are managed via Weblate (see ADR-027).
+
+### String Extraction Automation
+
+```bash
+# Extract new strings from source code
+npm run i18n:extract
+
+# Verify translation coverage
+npm run i18n:check
+
+# CI integration
+npm run i18n:check || exit 1
+```
+
+### Contribution Workflow
+
+1. Developers add strings with `t()` function
+2. `i18next-scanner` extracts to en-GB JSON
+3. Weblate syncs new keys from GitHub
+4. Contributors translate in Weblate interface
+5. Approved translations sync back to GitHub
+6. Translations included in next release
+
+### Quality Gates
+
+| Check | Automation | Requirement |
+|-------|------------|-------------|
+| JSON syntax | CI | All files valid |
+| Key coverage | CI | All en-GB keys in other locales |
+| Interpolation | CI | Placeholders match source |
+| Peer review | Weblate | Required for new languages |
+| Native review | Manual | Required for RTL languages |
+
+---
+
 ## Success Criteria
 
 - [ ] All 360+ user-facing strings extracted to translation files
@@ -186,8 +376,12 @@ function QuickSettings() {
 ## Related Documentation
 
 - [State-of-the-Art: Internationalisation](../../../research/state-of-the-art-internationalisation.md)
+- [R-013: Community Translation Workflow](../../../research/R-013-community-translation-workflow.md)
+- [R-015: i18n Performance Benchmarks](../../../research/R-015-i18n-performance-benchmarks.md)
+- [R-016: Accessibility i18n Integration](../../../research/R-016-accessibility-i18n-integration.md)
 - [ADR-021: Internationalisation Library](../../../decisions/adrs/ADR-021-internationalisation-library.md)
-- [v1.5.0 Milestone](../../milestones/v1.5.0.md)
+- [ADR-027: Translation Management Workflow](../../../decisions/adrs/ADR-027-translation-management-workflow.md)
+- [v2.0.0 Milestone](../../milestones/v2.0.0.md)
 
 ---
 

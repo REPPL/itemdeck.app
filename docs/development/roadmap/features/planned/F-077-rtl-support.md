@@ -192,6 +192,128 @@ function App() {
 
 All target browsers support CSS logical properties.
 
+---
+
+## Concrete CSS File Inventory
+
+**Total CSS files:** 78
+**Estimated directional properties:** ~209
+
+### By Component Category
+
+| Category | Files | Estimated Properties | Priority |
+|----------|-------|---------------------|----------|
+| **Components** | 45+ | ~140 | High |
+| **Mechanics** | 8 | ~25 | High |
+| **Styles (global)** | 5 | ~20 | Critical |
+| **Other** | 20 | ~24 | Medium |
+
+### High-Priority CSS Modules
+
+| File | Complexity | Notes |
+|------|------------|-------|
+| `src/components/SettingsPanel/SettingsPanel.module.css` | High | Tabs, forms, complex layout |
+| `src/components/Sidebar/Sidebar.module.css` | High | Primary navigation |
+| `src/components/SearchBar/SearchBar.module.css` | Medium | Input alignment, icons |
+| `src/components/Card/Card.module.css` | Medium | Card layout, actions |
+| `src/components/Modal/Modal.module.css` | High | Positioned, close button |
+| `src/components/NavigationHub/NavigationHub.module.css` | Medium | Navigation layout |
+| `src/mechanics/shared/shared.module.css` | Medium | Game overlays |
+| `src/styles/globals.css` | Critical | Base styles |
+
+---
+
+## Animation Directional Audit
+
+### Animations Requiring Review
+
+| Animation | Location | Directional | Action Required |
+|-----------|----------|-------------|-----------------|
+| Slide-in sidebar | `Sidebar.module.css` | Yes | Reverse direction |
+| Card flip | `Card.module.css` | No | Symmetric |
+| Modal enter | `Modal.module.css` | Possibly | Review |
+| Tooltip appear | Various | Possibly | Review position |
+| Toast notification | `Toast.module.css` | Yes | Slide from opposite |
+| Carousel swipe | `CardCarousel.module.css` | Yes | Reverse gesture |
+
+### Framer Motion Considerations
+
+Framer Motion animations defined in TypeScript may need RTL variants:
+
+```typescript
+// Current
+const slideIn = { x: -100, opacity: 0 };
+
+// RTL-aware
+const slideIn = { x: isRTL ? 100 : -100, opacity: 0 };
+```
+
+---
+
+## Positioned Element Inventory
+
+### Tooltips and Popovers
+
+| Component | Position | RTL Consideration |
+|-----------|----------|-------------------|
+| `ViewPopover` | Below button | Position to start |
+| `GroupByDropdown` | Below input | Position to start |
+| `CardQuickActions` | Card corner | Invert corner |
+| `MechanicPanel` | Side overlay | Opposite side |
+
+### Modals and Overlays
+
+| Component | Current Position | RTL Position |
+|-----------|-----------------|--------------|
+| `Modal` | Centred | Centred (no change) |
+| `SettingsPanel` | Right side | Left side |
+| `Sidebar` | Left side | Right side |
+| `Toast` | Bottom-right | Bottom-left |
+
+### Close Button Positioning
+
+All close buttons currently use `right: Xpx`. Must change to `inset-inline-end`:
+
+- `Modal.module.css`
+- `SettingsPanel.module.css`
+- `CardDetailModal.module.css`
+- `MechanicPanel.module.css`
+
+---
+
+## Testing Acceptance Matrix
+
+### Automated Verification
+
+| Check | Tool | Pass Criteria |
+|-------|------|---------------|
+| No directional CSS | Stylelint | 0 violations |
+| LTR screenshots match | Playwright | <1% pixel diff from baseline |
+| RTL screenshots consistent | Playwright | No obvious layout breaks |
+| JSON translation files valid | JSON linter | Valid syntax |
+| Translation key coverage | Custom script | 100% keys in ar, he |
+
+### Manual Verification
+
+| Check | Reviewer | Pass Criteria |
+|-------|----------|---------------|
+| Arabic layout natural | Native speaker | Sign-off checklist |
+| Hebrew layout natural | Native speaker | Sign-off checklist |
+| Reading flow correct | Native speaker | No jarring transitions |
+| Icons make sense | Native speaker | Directional icons point correctly |
+| Forms usable | Native speaker | Can complete all forms |
+
+### Cross-Browser Matrix
+
+| Browser | LTR | RTL (Arabic) | RTL (Hebrew) |
+|---------|-----|--------------|--------------|
+| Chrome (latest) | Required | Required | Required |
+| Firefox (latest) | Required | Required | Recommended |
+| Safari (latest) | Required | Recommended | Recommended |
+| Edge (latest) | Recommended | Recommended | Optional |
+
+---
+
 ## Success Criteria
 
 - [ ] All CSS uses logical properties (no `left`/`right`/`margin-left` etc.)
@@ -219,6 +341,8 @@ All target browsers support CSS logical properties.
 
 ## Related Documentation
 
+- [R-014: RTL Testing Strategy](../../../research/R-014-rtl-testing-strategy.md)
+- [R-016: Accessibility i18n Integration](../../../research/R-016-accessibility-i18n-integration.md)
 - [State-of-the-Art: Internationalisation](../../../research/state-of-the-art-internationalisation.md)
 - [MDN: CSS Logical Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties_and_values)
 - [RTL Styling 101](https://rtlstyling.com/)

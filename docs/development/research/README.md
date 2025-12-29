@@ -67,6 +67,12 @@ These reports provide:
 | R-008 | Fuzzy Matching | [R-008-fuzzy-matching.md](./R-008-fuzzy-matching.md) | ✅ Complete |
 | R-009 | Mechanic App Integration | [R-009-mechanic-app-integration.md](./R-009-mechanic-app-integration.md) | ✅ Complete |
 | R-010 | Settings UX Patterns | [R-010-settings-ux-patterns.md](./R-010-settings-ux-patterns.md) | ✅ Complete |
+| R-011 | Button Component Strategy | [R-011-button-component-strategy.md](./R-011-button-component-strategy.md) | ✅ Complete |
+| R-012 | Caching UX Patterns | [R-012-caching-ux-patterns.md](./R-012-caching-ux-patterns.md) | ✅ Complete |
+| R-013 | Community Translation Workflow | [R-013-community-translation-workflow.md](./R-013-community-translation-workflow.md) | ✅ Complete |
+| R-014 | RTL Testing Strategy | [R-014-rtl-testing-strategy.md](./R-014-rtl-testing-strategy.md) | ✅ Complete |
+| R-015 | i18n Performance Benchmarks | [R-015-i18n-performance-benchmarks.md](./R-015-i18n-performance-benchmarks.md) | ✅ Complete |
+| R-016 | Accessibility i18n Integration | [R-016-accessibility-i18n-integration.md](./R-016-accessibility-i18n-integration.md) | ✅ Complete |
 
 ## Report Structure
 

@@ -1,0 +1,99 @@
+/**
+ * Retro theme - Pixelated, CRT-inspired aesthetics.
+ *
+ * Features sharp corners, pixel fonts, and subtle CRT effects.
+ *
+ * @plugin org.itemdeck.theme-retro
+ */
+
+[data-visual-theme="retro"] {
+  /* Font families - pixel/retro style */
+  --font-family-heading: "Press Start 2P", "VT323", "Courier New", monospace;
+  --font-family-body: "VT323", "Courier New", monospace;
+  --font-family-mono: "Courier New", monospace;
+
+  /* Border radii - sharp corners */
+  --radius-sm: 0;
+  --radius-md: 2px;
+  --radius-lg: 4px;
+  --radius-xl: 4px;
+  --radius-full: 4px;
+  --card-border-radius: 2px;
+
+  /* Shadows - harsh, pixelated */
+  --shadow-sm: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --shadow-lg: 6px 6px 0 rgba(0, 0, 0, 0.5);
+  --shadow-xl: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  --shadow-card: 3px 3px 0 rgba(0, 0, 0, 0.5);
+  --shadow-card-hover: 5px 5px 0 rgba(0, 255, 0, 0.3);
+
+  /* Elevations - pixelated offset shadows */
+  --elevation-1: 2px 2px 0 rgba(0, 0, 0, 0.5);
+  --elevation-2: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --elevation-3: 6px 6px 0 rgba(0, 0, 0, 0.5);
+  --elevation-4: 8px 8px 0 rgba(0, 0, 0, 0.5);
+  --elevation-5: 10px 10px 0 rgba(0, 0, 0, 0.5);
+
+  /* Animation curves - stepped/abrupt */
+  --transition-fast: 50ms;
+  --transition-normal: 100ms;
+  --transition-medium: 100ms;
+  --transition-slow: 200ms;
+  --easing-default: steps(4, end);
+  --easing-bounce: steps(6, end);
+
+  /* Colour accents */
+  --colour-primary: #00ff00;
+  --colour-primary-hover: #33ff33;
+  --colour-secondary: #ff00ff;
+  --colour-accent: #ffff00;
+
+  /* Card styling - base border width (small size) */
+  --card-border-width: 3px;
+  --card-border-style: solid;
+  --card-border-colour: #00ff00;
+
+  /* Badge styling */
+  --badge-font-weight: 400;
+  --badge-text-transform: uppercase;
+  --badge-letter-spacing: 0.1em;
+
+  /* CRT scanline effect (optional - applied via pseudo-elements) */
+  --crt-scanline-colour: rgba(0, 0, 0, 0.1);
+  --crt-scanline-size: 2px;
+}
+
+/* Size-specific border widths for retro theme */
+[data-visual-theme="retro"] [data-card-size="medium"] .cardFace {
+  border-width: 4px;
+}
+
+[data-visual-theme="retro"] [data-card-size="large"] .cardFace {
+  border-width: 5px;
+}
+
+/* CRT scanline overlay effect */
+[data-visual-theme="retro"] .crt-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent var(--crt-scanline-size),
+    var(--crt-scanline-colour) var(--crt-scanline-size),
+    var(--crt-scanline-colour) calc(var(--crt-scanline-size) * 2)
+  );
+  z-index: 100;
+}
+
+/* Retro glow effect for interactive elements */
+[data-visual-theme="retro"] button:hover,
+[data-visual-theme="retro"] a:hover {
+  text-shadow: 0 0 10px var(--colour-primary);
+}

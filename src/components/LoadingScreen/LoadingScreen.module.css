@@ -250,6 +250,114 @@
   opacity: 0.6;
 }
 
+/* Offline state */
+.offlineIcon {
+  width: 64px;
+  height: 64px;
+  opacity: 0.6;
+  margin-bottom: 0.5rem;
+}
+
+.offlineIcon svg {
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+.offlineTitle {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.offlineMessage {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  margin: 0;
+  max-width: 280px;
+}
+
+.cachedCollections {
+  margin-top: 1rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  text-align: left;
+  max-width: 280px;
+}
+
+.cachedLabel {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  margin: 0 0 0.5rem 0;
+}
+
+.cachedList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cachedItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.875rem;
+  padding: 0.25rem 0;
+}
+
+.cachedName {
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 180px;
+}
+
+.cachedAge {
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+.retryButton {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 0.1s ease, opacity 0.1s ease;
+}
+
+.retryButton:hover {
+  transform: scale(1.02);
+  opacity: 0.9;
+}
+
+.retryButton:active {
+  transform: scale(0.98);
+}
+
+/* Theme-specific retry button */
+.retro .retryButton {
+  background: #ff6b6b;
+  color: #ffffff;
+}
+
+.modern .retryButton {
+  background: #4f9eff;
+  color: #ffffff;
+}
+
+.minimal .retryButton {
+  background: #6b7280;
+  color: #ffffff;
+}
+
 /* Animations */
 @keyframes pulse {
   0%, 100% {

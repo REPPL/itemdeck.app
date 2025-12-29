@@ -1,0 +1,41 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.mechanic-memory",
+  "name": "Memory Game",
+  "version": "1.0.0",
+  "description": "Match pairs of cards by flipping them to reveal their faces. Test your memory by finding all matching pairs with the fewest attempts.",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "mechanic",
+    "tier": "builtin"
+  },
+  "capabilities": ["storage:local", "ui:overlay"],
+  "entry": {
+    "main": "./index.ts"
+  },
+  "contributes": {
+    "mechanics": [
+      {
+        "id": "memory",
+        "name": "Memory Match",
+        "description": "Find matching pairs of cards",
+        "category": "puzzle",
+        "minCards": 4,
+        "maxCards": 52,
+        "difficulty": "easy",
+        "playerCount": {
+          "min": 1,
+          "max": 1
+        },
+        "estimatedDuration": "5-15 minutes",
+        "tags": ["memory", "matching", "pairs", "puzzle"],
+        "entry": "@/mechanics/memory"
+      }
+    ]
+  },
+  "keywords": ["memory", "matching", "pairs", "game", "puzzle"]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.theme-minimal",
+  "name": "Minimal",
+  "version": "1.0.0",
+  "description": "Stripped-down, content-focused design with clean typography",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "theme",
+    "tier": "builtin"
+  },
+  "capabilities": [],
+  "entry": {
+    "styles": "./theme.css"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "id": "minimal",
+        "name": "Minimal",
+        "description": "Stripped-down, content-focused design with subtle styling",
+        "type": "light",
+        "tokens": {
+          "colours": {
+            "primary": "#475569",
+            "primaryHover": "#334155",
+            "secondary": "#64748b",
+            "accent": "#cbd5e1",
+            "border": "#cbd5e1"
+          },
+          "typography": {
+            "fontFamily": "\"Helvetica Neue\", \"Arial\", sans-serif",
+            "fontFamilyHeading": "\"Helvetica Neue\", \"Arial\", sans-serif",
+            "fontFamilyMono": "\"Menlo\", \"Monaco\", monospace"
+          },
+          "borders": {
+            "radius": "8px",
+            "radiusSm": "4px",
+            "radiusLg": "8px",
+            "radiusFull": "9999px",
+            "width": "1px",
+            "cardRadius": "4px"
+          },
+          "shadows": {
+            "small": "0 1px 2px rgba(0, 0, 0, 0.03)",
+            "medium": "0 2px 4px rgba(0, 0, 0, 0.04)",
+            "large": "0 4px 8px rgba(0, 0, 0, 0.05)",
+            "card": "0 1px 3px rgba(0, 0, 0, 0.05)",
+            "cardHover": "0 2px 6px rgba(0, 0, 0, 0.08)"
+          },
+          "animation": {
+            "durationFast": "100ms",
+            "durationNormal": "200ms",
+            "durationSlow": "300ms",
+            "easing": "ease-out",
+            "easingBounce": "ease-out"
+          }
+        }
+      }
+    ]
+  },
+  "keywords": ["minimal", "clean", "simple", "light", "content-focused"]
+}

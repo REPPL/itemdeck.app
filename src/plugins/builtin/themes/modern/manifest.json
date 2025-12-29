@@ -1,0 +1,66 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.theme-modern",
+  "name": "Modern",
+  "version": "1.0.0",
+  "description": "Clean, contemporary design with smooth shadows and subtle gradients",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "theme",
+    "tier": "builtin"
+  },
+  "capabilities": [],
+  "entry": {
+    "styles": "./theme.css"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "id": "modern",
+        "name": "Modern",
+        "description": "Clean, contemporary design with rounded corners and smooth animations",
+        "type": "dark",
+        "tokens": {
+          "colours": {
+            "primary": "#6366f1",
+            "primaryHover": "#4f46e5",
+            "secondary": "#8b5cf6",
+            "accent": "#f59e0b"
+          },
+          "typography": {
+            "fontFamily": "\"Inter\", \"SF Pro Text\", -apple-system, BlinkMacSystemFont, sans-serif",
+            "fontFamilyHeading": "\"Inter\", \"SF Pro Display\", -apple-system, BlinkMacSystemFont, sans-serif",
+            "fontFamilyMono": "\"SF Mono\", \"Fira Code\", \"Consolas\", monospace"
+          },
+          "borders": {
+            "radius": "12px",
+            "radiusSm": "6px",
+            "radiusLg": "16px",
+            "radiusFull": "9999px",
+            "width": "1px",
+            "cardRadius": "16px"
+          },
+          "shadows": {
+            "small": "0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.1)",
+            "medium": "0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)",
+            "large": "0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)",
+            "card": "0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06)",
+            "cardHover": "0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05)"
+          },
+          "animation": {
+            "durationFast": "150ms",
+            "durationNormal": "250ms",
+            "durationSlow": "400ms",
+            "easing": "cubic-bezier(0.4, 0, 0.2, 1)",
+            "easingBounce": "cubic-bezier(0.34, 1.56, 0.64, 1)"
+          }
+        }
+      }
+    ]
+  },
+  "keywords": ["modern", "clean", "minimal", "glassmorphism", "smooth"]
+}

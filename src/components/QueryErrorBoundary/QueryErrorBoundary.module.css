@@ -19,6 +19,12 @@
   color: var(--color-error, #dc2626);
 }
 
+.noCollectionTitle {
+  margin: 0;
+  font-size: 1.5rem;
+  color: var(--colour-text, #ffffff);
+}
+
 .errorMessage {
   margin: 0;
   color: var(--color-text-secondary, #6b7280);
@@ -72,5 +78,38 @@
 }
 
 .retryButton:active {
+  transform: scale(0.98);
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.secondaryButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--colour-text, #ffffff);
+  background: transparent;
+  border: 1px solid var(--colour-border, rgba(255, 255, 255, 0.2));
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.secondaryButton:hover {
+  background: var(--colour-surface, rgba(255, 255, 255, 0.1));
+  border-color: var(--colour-border-hover, rgba(255, 255, 255, 0.3));
+}
+
+.secondaryButton:focus {
+  outline: 2px solid var(--color-primary, #3b82f6);
+  outline-offset: 2px;
+}
+
+.secondaryButton:active {
   transform: scale(0.98);
 }

@@ -18,6 +18,27 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | [v0.7.3](v0.7.3/README.md) | Settings Audit | Ready |
 | [v0.8.0](v0.8.0/README.md) | Configuration Externalisation | Ready |
 | [v0.9.0](v0.9.0/README.md) | Multi-Collection Support | Ready |
+| [v0.10.0](v0.10.0/README.md) | Settings & Data Sources | Complete |
+| [v0.10.1](v0.10.1/README.md) | Bug Fixes | Complete |
+| [v0.10.5](v0.10.5/README.md) | Settings Refinement | Complete |
+| [v0.10.6](v0.10.6/README.md) | Visual Refinements | Complete |
+| [v0.11.0](v0.11.0/README.md) | Mechanics Foundation | Complete |
+| [v0.11.1](v0.11.1/README.md) | Documentation Sync | Complete |
+| [v0.11.2](v0.11.2/README.md) | Bug Fixes | Complete |
+| [v0.11.5](v0.11.5-implementation.md) | UI Refinements | Complete |
+| [v0.12.0](v0.12.0/README.md) | UI Polish & Statistics | Complete |
+| [v0.12.5](v0.12.5/README.md) | Snap Ranking & Fit Layout | In Progress |
+| **v0.13.0** | **Modular Plugin Architecture** | **Planned** |
+
+### v0.13.0 Work Packages
+
+| Package | Description | Dependencies |
+|---------|-------------|--------------|
+| [WP-A](v0.13.0-wp-a-plugin-core.md) | Plugin Core Infrastructure | None |
+| [WP-B](v0.13.0-wp-b-migration.md) | Migration to Plugin Architecture | WP-A |
+| [WP-C](v0.13.0-wp-c-user-docs.md) | User Documentation | None |
+| [WP-D](v0.13.0-wp-d-discovery-ui.md) | Plugin Discovery UI | WP-A |
+| [WP-E](v0.13.0-wp-e-developer-docs.md) | Developer Documentation & ADRs | WP-A, WP-B |
 
 ## Purpose
 

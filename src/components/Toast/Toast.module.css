@@ -1,0 +1,66 @@
+/**
+ * Toast notification styles.
+ *
+ * Simple toast that slides in from bottom.
+ */
+
+.toast {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  cursor: pointer;
+  user-select: none;
+
+  /* Glass effect */
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.message {
+  white-space: nowrap;
+}
+
+/* Type variants */
+.info {
+  background: rgba(79, 158, 255, 0.9);
+  color: #ffffff;
+}
+
+.success {
+  background: rgba(34, 197, 94, 0.9);
+  color: #ffffff;
+}
+
+.warning {
+  background: rgba(251, 191, 36, 0.9);
+  color: #1f2937;
+}
+
+/* Hover effect */
+.toast:hover {
+  opacity: 0.9;
+}
+
+/* Reduce motion */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    transition: opacity 0.1s ease;
+  }
+}

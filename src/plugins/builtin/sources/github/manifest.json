@@ -1,0 +1,72 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.source-github",
+  "name": "GitHub Collections",
+  "version": "1.0.0",
+  "description": "Load collections from GitHub repositories using the jsDelivr CDN for fast, reliable access",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "source",
+    "tier": "builtin"
+  },
+  "capabilities": ["fetch:external", "cache:collections"],
+  "entry": {
+    "main": "./index.ts"
+  },
+  "contributes": {
+    "sources": [
+      {
+        "id": "github",
+        "name": "GitHub",
+        "description": "Load collections from GitHub repositories",
+        "type": "github",
+        "icon": "github",
+        "config": {
+          "configSchema": {
+            "type": "object",
+            "required": ["owner"],
+            "properties": {
+              "owner": {
+                "type": "string",
+                "description": "GitHub username or organisation"
+              },
+              "repo": {
+                "type": "string",
+                "description": "Repository name",
+                "default": "collections"
+              },
+              "branch": {
+                "type": "string",
+                "description": "Branch name",
+                "default": "main"
+              },
+              "path": {
+                "type": "string",
+                "description": "Path to collection folder within repository"
+              }
+            }
+          },
+          "defaults": {
+            "repo": "collections",
+            "branch": "main"
+          }
+        },
+        "caching": {
+          "enabled": true,
+          "ttl": 3600,
+          "strategy": "stale-while-revalidate"
+        },
+        "rateLimit": {
+          "requests": 60,
+          "window": 3600
+        },
+        "entry": "@/loaders/githubDiscovery"
+      }
+    ]
+  },
+  "keywords": ["github", "repository", "git", "jsdelivr", "cdn"]
+}

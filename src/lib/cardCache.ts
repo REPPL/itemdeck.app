@@ -170,3 +170,59 @@ export async function isCollectionCached(
   const age = await getCacheAge(sourceId);
   return age !== null && age < maxAge;
 }
+
+/**
+ * Cache entry info for listing.
+ */
+export interface CacheInfo {
+  /** Source ID (cache key without prefix) */
+  sourceId: string;
+
+  /** Timestamp when cached */
+  cachedAt: Date;
+
+  /** Cache age in milliseconds */
+  ageMs: number;
+}
+
+/**
+ * List all cached collections.
+ *
+ * @param maxAge - Maximum age in milliseconds (default: 24 hours)
+ * @returns Array of cache info for valid collections
+ */
+export async function listCachedCollections(
+  maxAge = DEFAULT_MAX_AGE
+): Promise<CacheInfo[]> {
+  try {
+    const allKeys = await keys();
+    const collectionKeys = allKeys.filter(
+      (key) => typeof key === "string" && key.startsWith(CACHE_KEY_PREFIX)
+    ) as string[];
+
+    const results: CacheInfo[] = [];
+
+    for (const key of collectionKeys) {
+      const cached = await get<CachedData<Collection>>(key);
+      if (!cached) continue;
+
+      // Check version compatibility
+      if (cached.version !== CACHE_VERSION) continue;
+
+      // Check if cache is expired
+      const ageMs = Date.now() - cached.timestamp;
+      if (ageMs > maxAge) continue;
+
+      results.push({
+        sourceId: key.slice(CACHE_KEY_PREFIX.length),
+        cachedAt: new Date(cached.timestamp),
+        ageMs,
+      });
+    }
+
+    return results;
+  } catch (error) {
+    console.warn("Failed to list cached collections:", error);
+    return [];
+  }
+}

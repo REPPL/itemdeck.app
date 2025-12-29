@@ -1,0 +1,66 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.theme-retro",
+  "name": "Retro",
+  "version": "1.0.0",
+  "description": "Classic retro gaming aesthetic with pixel-perfect details and CRT effects",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "theme",
+    "tier": "builtin"
+  },
+  "capabilities": [],
+  "entry": {
+    "styles": "./theme.css"
+  },
+  "contributes": {
+    "themes": [
+      {
+        "id": "retro",
+        "name": "Retro",
+        "description": "Classic retro gaming aesthetic with pixel-perfect details",
+        "type": "dark",
+        "tokens": {
+          "colours": {
+            "primary": "#00ff00",
+            "primaryHover": "#33ff33",
+            "secondary": "#ff00ff",
+            "accent": "#ffff00"
+          },
+          "typography": {
+            "fontFamily": "\"VT323\", \"Courier New\", monospace",
+            "fontFamilyHeading": "\"Press Start 2P\", \"VT323\", \"Courier New\", monospace",
+            "fontFamilyMono": "\"Courier New\", monospace"
+          },
+          "borders": {
+            "radius": "2px",
+            "radiusSm": "0",
+            "radiusLg": "4px",
+            "radiusFull": "4px",
+            "width": "3px",
+            "cardRadius": "2px"
+          },
+          "shadows": {
+            "small": "2px 2px 0 rgba(0, 0, 0, 0.5)",
+            "medium": "4px 4px 0 rgba(0, 0, 0, 0.5)",
+            "large": "6px 6px 0 rgba(0, 0, 0, 0.5)",
+            "card": "3px 3px 0 rgba(0, 0, 0, 0.5)",
+            "cardHover": "5px 5px 0 rgba(0, 255, 0, 0.3)"
+          },
+          "animation": {
+            "durationFast": "50ms",
+            "durationNormal": "100ms",
+            "durationSlow": "200ms",
+            "easing": "steps(4, end)",
+            "easingBounce": "steps(6, end)"
+          }
+        }
+      }
+    ]
+  },
+  "keywords": ["retro", "pixel", "gaming", "crt", "8-bit"]
+}

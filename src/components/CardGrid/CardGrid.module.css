@@ -10,6 +10,8 @@
 
 .card {
   position: absolute;
+  /* Isolate stacking context for CardOverlay to render above 3D card */
+  isolation: isolate;
   transition: left 400ms cubic-bezier(0.22, 1, 0.36, 1),
               top 400ms cubic-bezier(0.22, 1, 0.36, 1);
 }

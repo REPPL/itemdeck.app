@@ -15,6 +15,7 @@ import { CollectionToast } from "@/components/CollectionToast";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
 import { StatisticsBar } from "@/components/Statistics";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Toast } from "@/components/Toast";
 import { ConfigProvider } from "@/context/ConfigContext";
 import { SettingsProvider } from "@/context/SettingsContext";
 import { MotionProvider } from "@/context/MotionContext";
@@ -29,19 +30,24 @@ import { useSourceStore } from "@/stores/sourceStore";
 import "@/styles/themes";
 import styles from "./App.module.css";
 
+interface AppContentProps {
+  mechanicPanelOpen: boolean;
+  setMechanicPanelOpen: (open: boolean) => void;
+}
+
 /**
  * Inner app component that uses theme hook.
  */
-function AppContent() {
+function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }: AppContentProps) {
   // UI state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
-  const [mechanicPanelOpen, setMechanicPanelOpen] = useState(false);
   const [viewPopoverOpen, setViewPopoverOpen] = useState(false);
   const [devtoolsEnabled, setDevtoolsEnabled] = useState(false);
   const [loadingComplete, setLoadingComplete] = useState(false);
   const [showReloadDialog, setShowReloadDialog] = useState(false);
+  const [resetToastVisible, setResetToastVisible] = useState(false);
 
   // URL-based collection loading
   const urlCollection = useUrlCollection();
@@ -189,7 +195,10 @@ function AppContent() {
         setShuffleOnLoad(true);
       }, 10);
     }
-  }, [clearAllFilters, shuffleOnLoad, setShuffleOnLoad]);
+
+    // 4. Show confirmation toast
+    setResetToastVisible(true);
+  }, [clearAllFilters, shuffleOnLoad, setShuffleOnLoad, setMechanicPanelOpen]);
 
   const handleReloadCancel = useCallback(() => {
     setShowReloadDialog(false);
@@ -412,7 +421,36 @@ function AppContent() {
         onConfirm={handleReloadConfirm}
         onCancel={handleReloadCancel}
       />
+
+      {/* Reset confirmation toast */}
+      <Toast
+        message="View reset"
+        visible={resetToastVisible}
+        onHide={() => { setResetToastVisible(false); }}
+        type="success"
+      />
     </div>
+  );
+}
+
+/**
+ * Wrapper that provides MechanicProvider with panel open callback.
+ * Manages mechanic panel state at this level so children can open it.
+ */
+function MechanicProviderWithPanel() {
+  const [mechanicPanelOpen, setMechanicPanelOpen] = useState(false);
+
+  const handleOpenMechanicPanel = useCallback(() => {
+    setMechanicPanelOpen(true);
+  }, []);
+
+  return (
+    <MechanicProvider onOpenMechanicPanel={handleOpenMechanicPanel}>
+      <AppContentWithMechanicPanel
+        mechanicPanelOpen={mechanicPanelOpen}
+        setMechanicPanelOpen={setMechanicPanelOpen}
+      />
+    </MechanicProvider>
   );
 }
 
@@ -425,9 +463,7 @@ function App() {
       <SettingsProvider>
         <MotionProvider>
           <CollectionDataProvider>
-            <MechanicProvider>
-              <AppContent />
-            </MechanicProvider>
+            <MechanicProviderWithPanel />
           </CollectionDataProvider>
         </MotionProvider>
       </SettingsProvider>

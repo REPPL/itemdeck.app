@@ -1,0 +1,35 @@
+{
+  "$schema": "https://itemdeck.app/schemas/source-config/v1.json",
+  "id": "github",
+  "name": "GitHub",
+  "description": "Load collections from GitHub repositories via jsDelivr CDN",
+  "urlPatterns": [
+    "/gh?u={owner}&c={path}",
+    "/gh/{owner}/c/{path}",
+    "/gh/{owner}/{repo}/c/{path}",
+    "/?gh={owner}&c={path}"
+  ],
+  "discovery": {
+    "method": "api",
+    "endpoint": "https://api.github.com/repos/{owner}/{repo}/contents/{path}?ref={branch}",
+    "headers": {
+      "Accept": "application/vnd.github.v3+json"
+    },
+    "rateLimit": {
+      "anonymous": 60,
+      "authenticated": 5000
+    }
+  },
+  "cdnBaseUrl": "https://cdn.jsdelivr.net/gh/{owner}/{repo}@{branch}/{path}",
+  "transforms": {
+    "supported": ["json"],
+    "indexFile": "index.json",
+    "entityPattern": "*.json",
+    "excludePatterns": ["_*.json", "*.schema.json"]
+  },
+  "validation": {
+    "requireIndex": false,
+    "autoDiscover": true,
+    "schema": "collection.schema.json"
+  }
+}

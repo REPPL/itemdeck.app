@@ -37,8 +37,8 @@ export function CardGrid() {
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
   // Derive showRankBadge from topBadgeField (when not "none")
+  // Note: effectiveTopBadgeField (defined later) hides badge during snap-ranking game
   const topBadgeField = useSettingsStore((state) => state.fieldMapping.topBadgeField);
-  const showRankBadge = topBadgeField !== "none";
   const showFooterBadge = useSettingsStore((state) => state.showDeviceBadge);
   const rankPlaceholderText = useSettingsStore((state) => state.rankPlaceholderText);
   const dragFace = useSettingsStore((state) => state.dragFace);
@@ -297,18 +297,27 @@ export function CardGrid() {
   const mechanicResetCount = (mechanicState as { resetCount?: number } | null)?.resetCount;
 
   // ADR-020: Get memory game settings through mechanic interface (not direct store import)
-  // mechanicState dependency ensures re-render when settings change via mechanic store
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   const memoryPairCount = useMemo(() => {
-    if (mechanic?.manifest.id === "memory" && mechanic.getSettings) {
-      const settings = mechanic.getSettings() as { pairCount?: number };
-      return settings.pairCount ?? 6;
+    if (mechanic?.manifest.id === "memory" && mechanicState) {
+      // Get pairCount from reactive state (not getSettings which doesn't trigger re-render)
+      const state = mechanicState as { pairCount?: number };
+      return state.pairCount ?? 6;
     }
     return 6; // Default
   }, [mechanic, mechanicState]);
 
+  // Get snap-ranking cardIds for filtering displayed cards
+  const snapRankingCardIds = useMemo(() => {
+    if (mechanic?.manifest.id === "snap-ranking" && mechanicState) {
+      const state = mechanicState as { cardIds?: string[] };
+      return state.cardIds ?? null;
+    }
+    return null;
+  }, [mechanic, mechanicState]);
+
   // v0.11.0: Transform cards for active mechanic
   // For memory game: duplicate cards and shuffle to create pairs
+  // For snap-ranking: filter to only cards in the game
   const cards = useMemo(() => {
     if (!mechanic) return baseCards;
 
@@ -334,20 +343,167 @@ export function CardGrid() {
       return shuffle(pairedCards);
     }
 
+    // Snap-ranking: show only cards that are in the game
+    if (mechanic.manifest.id === "snap-ranking" && snapRankingCardIds && snapRankingCardIds.length > 0) {
+      // Create lookup map for efficient card finding
+      const cardMap = new Map(baseCards.map(c => [c.id, c]));
+      // Preserve the game's shuffled order
+      return snapRankingCardIds
+        .map(id => cardMap.get(id))
+        .filter((c): c is DisplayCard => c !== undefined);
+    }
+
     return baseCards;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baseCards, mechanic, mechanicResetCount, memoryPairCount]); // mechanicResetCount triggers re-shuffle on reset
+  }, [baseCards, mechanic, mechanicResetCount, memoryPairCount, snapRankingCardIds]); // mechanicResetCount triggers re-shuffle on reset
 
-  // v0.11.0: Initialize mechanic game state when cards change
+  // Track initialization to avoid re-initializing on every render
+  const lastInitRef = useRef<{
+    mechanicId: string | null;
+    cardCount: number;
+    resetCount: number | undefined;
+    badgeField: string;
+    settingsCardCount: number | undefined;
+  }>({
+    mechanicId: null,
+    cardCount: 0,
+    resetCount: undefined,
+    badgeField: "",
+    settingsCardCount: undefined,
+  });
+
+  // Get snap ranking cardCount setting (if applicable)
+  const snapRankingCardCount = mechanic?.manifest.id === "snap-ranking" && mechanicState
+    ? (mechanicState as unknown as { cardCount?: number }).cardCount
+    : undefined;
+
+  // v0.11.0: Initialize mechanic game state when mechanic, cards, or reset changes
   useEffect(() => {
-    if (mechanic?.manifest.id === "memory" && cards.length > 0) {
-      // Initialize memory game with card IDs
-      const memoryState = mechanic.getState() as unknown as { initGame?: (ids: string[]) => void };
-      if (typeof memoryState.initGame === "function") {
-        memoryState.initGame(cards.map((c) => c.id));
-      }
+    if (!mechanic || cards.length === 0) return;
+
+    const mechanicId = mechanic.manifest.id;
+    const cardCount = cards.length;
+
+    // Only initialize if mechanic, card count, reset count, badge field, or settings changed
+    const lastInit = lastInitRef.current;
+    if (
+      lastInit.mechanicId === mechanicId &&
+      lastInit.cardCount === cardCount &&
+      lastInit.resetCount === mechanicResetCount &&
+      lastInit.badgeField === topBadgeField &&
+      lastInit.settingsCardCount === snapRankingCardCount
+    ) {
+      return; // Already initialized for this configuration
     }
-  }, [mechanic, cards]);
+
+    // Update tracking ref BEFORE calling initGame to prevent re-entry
+    lastInitRef.current = { mechanicId, cardCount, resetCount: mechanicResetCount, badgeField: topBadgeField, settingsCardCount: snapRankingCardCount };
+
+    // Snap Ranking: Initialize with field configuration
+    if (mechanicId === "snap-ranking") {
+      interface GameConfig {
+        guessField: string;
+        cards: { id: string; value: string | number }[];
+        valueType: "numeric" | "categorical";
+        uniqueValues: (string | number)[];
+        errorMessage?: string;
+      }
+      const snapState = mechanic.getState() as unknown as { initGame?: (config: GameConfig) => void };
+
+      if (typeof snapState.initGame !== "function") return;
+
+      // Check playability
+      if (!topBadgeField || topBadgeField === "none") {
+        snapState.initGame({
+          guessField: topBadgeField || "none",
+          cards: [],
+          valueType: "categorical",
+          uniqueValues: [],
+          errorMessage: "No badge field configured. Set a Top Badge field in Settings to play.",
+        });
+        return;
+      }
+
+      // "order" field is valid - players can guess the card's position number
+      // (handled below with other numeric fields)
+
+      // Extract values from cards in the game (filtered subset)
+      const cardsWithValues: { id: string; value: string | number }[] = [];
+      for (const card of cards) {
+        const value = resolveFieldPath(card as unknown as Record<string, unknown>, topBadgeField);
+        if (value !== undefined && value !== null && value !== "") {
+          cardsWithValues.push({
+            id: card.id,
+            value: value as string | number,
+          });
+        }
+      }
+
+      if (cardsWithValues.length === 0) {
+        snapState.initGame({
+          guessField: topBadgeField,
+          cards: [],
+          valueType: "categorical",
+          uniqueValues: [],
+          errorMessage: `No cards have values for "${topBadgeField}".`,
+        });
+        return;
+      }
+
+      // Get unique values from ALL cards in collection (not just selected subset)
+      // This ensures the same guess options appear regardless of card count setting
+      const allCollectionValues: (string | number)[] = [];
+      for (const card of baseCards) {
+        const value = resolveFieldPath(card as unknown as Record<string, unknown>, topBadgeField);
+        if (value !== undefined && value !== null && value !== "") {
+          allCollectionValues.push(value as string | number);
+        }
+      }
+      const uniqueValues = [...new Set(allCollectionValues)].sort((a, b) => {
+        if (typeof a === "number" && typeof b === "number") return a - b;
+        return String(a).localeCompare(String(b));
+      });
+
+      if (uniqueValues.length < 2) {
+        snapState.initGame({
+          guessField: topBadgeField,
+          cards: [],
+          valueType: "categorical",
+          uniqueValues: [],
+          errorMessage: "All cards have the same value. Need variety to play.",
+        });
+        return;
+      }
+
+      // Determine value type
+      const valueType = uniqueValues.every((v) => typeof v === "number") ? "numeric" : "categorical";
+
+      snapState.initGame({
+        guessField: topBadgeField,
+        cards: cardsWithValues,
+        valueType,
+        uniqueValues,
+      });
+      return;
+    }
+
+    // Other mechanics: Initialize with card IDs
+    const state = mechanic.getState() as unknown as { initGame?: (ids: string[]) => void };
+    if (typeof state.initGame === "function") {
+      state.initGame(cards.map((c) => c.id));
+    }
+  }, [mechanic, cards, mechanicResetCount, topBadgeField, snapRankingCardCount]);
+
+  // Hide rank badges during snap-ranking game
+  const effectiveTopBadgeField = useMemo(() => {
+    if (mechanic?.manifest.id === "snap-ranking" && mechanicState?.isActive) {
+      return "none"; // Hide badge during game to prevent cheating
+    }
+    return topBadgeField;
+  }, [mechanic, mechanicState?.isActive, topBadgeField]);
+
+  // Derive showRankBadge from effective badge field
+  const showRankBadge = effectiveTopBadgeField !== "none";
 
   // Handle reorder from drag and drop
   const handleReorder = useCallback((newOrder: string[]) => {

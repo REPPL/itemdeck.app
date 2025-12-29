@@ -15,6 +15,7 @@
 }
 
 .panel {
+  position: relative;
   width: 100%;
   max-width: 400px;
   max-height: 80vh;
@@ -116,6 +117,80 @@
   border-radius: var(--radius-md, 0.375rem);
 }
 
+/* Configuration overlay - appears on top of game selection */
+.configOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
+  border-radius: var(--radius-xl, 1rem);
+  z-index: 10;
+}
+
+.configPanel {
+  width: calc(100% - 2rem);
+  max-width: 320px;
+  padding: 1.25rem;
+  background: var(--colour-surface, #1a1a1a);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: var(--radius-lg, 0.75rem);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+.configHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.configIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  border-radius: var(--radius-md, 0.375rem);
+  color: white;
+}
+
+.configIcon svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.configTitleArea {
+  flex: 1;
+}
+
+.configTitle {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--colour-text, #fff);
+}
+
+.configSubtitle {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+.configSettings {
+  margin-bottom: 1rem;
+}
+
+.configActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .activeBadge {
   display: inline-block;
   padding: 0.125rem 0.5rem;
@@ -185,6 +260,48 @@
 .stopButton:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.5);
+}
+
+.cancelButton {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text-secondary, rgba(255, 255, 255, 0.6));
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-md, 0.375rem);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.startButton {
+  flex: 2;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  border: none;
+  border-radius: var(--radius-md, 0.375rem);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.3);
+}
+
+.startButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.4);
+}
+
+.startButton:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.3);
 }
 
 /* Mechanic options */

@@ -1,0 +1,108 @@
+/**
+ * Modern theme - Clean, contemporary design.
+ *
+ * Features rounded corners, smooth shadows, and subtle gradients.
+ *
+ * @plugin org.itemdeck.theme-modern
+ */
+
+[data-visual-theme="modern"] {
+  /* Font families - clean, modern */
+  --font-family-heading: "Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-body: "Inter", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-family-mono: "SF Mono", "Fira Code", "Consolas", monospace;
+
+  /* Border radii - smooth, rounded */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+  --card-border-radius: 16px;
+
+  /* Shadows - soft, layered */
+  --shadow-sm:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg:
+    0 10px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl:
+    0 20px 25px rgba(0, 0, 0, 0.1),
+    0 10px 10px rgba(0, 0, 0, 0.04);
+  --shadow-card:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover:
+    0 10px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+
+  /* Elevations - soft layered shadows */
+  --elevation-1:
+    0 1px 2px rgba(0, 0, 0, 0.05),
+    0 1px 3px rgba(0, 0, 0, 0.1);
+  --elevation-2:
+    0 4px 6px rgba(0, 0, 0, 0.07),
+    0 2px 4px rgba(0, 0, 0, 0.06);
+  --elevation-3:
+    0 10px 15px rgba(0, 0, 0, 0.1),
+    0 4px 6px rgba(0, 0, 0, 0.05);
+  --elevation-4:
+    0 15px 20px rgba(0, 0, 0, 0.1),
+    0 6px 8px rgba(0, 0, 0, 0.05);
+  --elevation-5:
+    0 20px 25px rgba(0, 0, 0, 0.1),
+    0 10px 10px rgba(0, 0, 0, 0.04);
+
+  /* Animation curves - smooth, natural */
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-medium: 250ms;
+  --transition-slow: 400ms;
+  --easing-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Colour accents */
+  --colour-primary: #6366f1;
+  --colour-primary-hover: #4f46e5;
+  --colour-secondary: #8b5cf6;
+  --colour-accent: #f59e0b;
+
+  /* Card styling */
+  --card-border-width: 1px;
+  --card-border-style: solid;
+  --card-border-colour: rgba(255, 255, 255, 0.1);
+
+  /* Badge styling */
+  --badge-font-weight: 600;
+  --badge-text-transform: none;
+  --badge-letter-spacing: -0.01em;
+}
+
+/* Modern gradient overlays */
+[data-visual-theme="modern"] .gradient-overlay {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+}
+
+/* Glassmorphism effect for panels */
+[data-visual-theme="modern"] .glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Smooth hover transitions */
+[data-visual-theme="modern"] button,
+[data-visual-theme="modern"] a {
+  transition: background-color var(--transition-fast) var(--easing-default),
+              border-color var(--transition-fast) var(--easing-default),
+              color var(--transition-fast) var(--easing-default);
+}

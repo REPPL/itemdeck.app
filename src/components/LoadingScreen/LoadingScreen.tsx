@@ -14,8 +14,23 @@ import { useCollectionData } from "@/context/CollectionDataContext";
 import { useImagePreloader } from "@/hooks/useImageCache";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useSourceStore } from "@/stores/sourceStore";
+import { useOnlineStatus } from "@/hooks/useOnlineStatus";
+import { isCollectionCached, listCachedCollections, type CacheInfo } from "@/lib/cardCache";
 import { CacheConsentDialog } from "@/components/CacheConsentDialog";
 import styles from "./LoadingScreen.module.css";
+
+/**
+ * Format cache age as human-readable string.
+ */
+function formatCacheAge(ageMs: number): string {
+  const hours = Math.floor(ageMs / (1000 * 60 * 60));
+  if (hours < 1) return "< 1 hour ago";
+  if (hours === 1) return "1 hour ago";
+  if (hours < 24) return `${String(hours)} hours ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "1 day ago";
+  return `${String(days)} days ago`;
+}
 
 /**
  * Loading phases.
@@ -99,6 +114,21 @@ export function LoadingScreen({
   const [startTime] = useState(() => Date.now());
   const [isVisible, setIsVisible] = useState(true);
   const [consentDialogOpen, setConsentDialogOpen] = useState(false);
+
+  // Offline detection
+  const isOnline = useOnlineStatus();
+  const [hasCachedData, setHasCachedData] = useState<boolean | null>(null);
+  const [cachedCollections, setCachedCollections] = useState<CacheInfo[]>([]);
+
+  // Check for cached data when offline
+  useEffect(() => {
+    if (!isOnline && activeSourceId) {
+      // Check if current source has cache
+      void isCollectionCached(activeSourceId).then(setHasCachedData);
+      // List all available cached collections
+      void listCachedCollections().then(setCachedCollections);
+    }
+  }, [isOnline, activeSourceId]);
 
   // Get all image URLs from cards
   const imageUrls = useMemo(() => {
@@ -211,7 +241,64 @@ export function LoadingScreen({
 
   const mainContainerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
 
-  // Handle error
+  // Handle offline state with error
+  if (!isOnline && (error || isLoadingCollection)) {
+    const containerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
+
+    // Show cached option if available
+    if (hasCachedData === true) {
+      // We have cache for current source - proceed normally (cache will be used)
+      // Don't show error, let the loading continue
+    } else {
+      // No cache available - show offline message
+      return (
+        <div className={containerClass}>
+          <div className={styles.content}>
+            <div className={styles.offlineIcon}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="1" y1="1" x2="23" y2="23" />
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
+                <path d="M10.71 5.05A16 16 0 0 1 22.58 9" />
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88" />
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
+                <line x1="12" y1="20" x2="12.01" y2="20" />
+              </svg>
+            </div>
+            <h2 className={styles.offlineTitle}>You appear to be offline</h2>
+            <p className={styles.offlineMessage}>
+              Cannot reach the collection source. Check your internet connection and try again.
+            </p>
+
+            {cachedCollections.length > 0 && (
+              <div className={styles.cachedCollections}>
+                <p className={styles.cachedLabel}>Previously viewed collections:</p>
+                <ul className={styles.cachedList}>
+                  {cachedCollections.slice(0, 5).map((cache) => (
+                    <li key={cache.sourceId} className={styles.cachedItem}>
+                      <span className={styles.cachedName}>{cache.sourceId}</span>
+                      <span className={styles.cachedAge}>
+                        {formatCacheAge(cache.ageMs)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <button
+              className={styles.retryButton}
+              onClick={() => { window.location.reload(); }}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      );
+    }
+  }
+
+  // Handle error (when online)
   if (error) {
     const containerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
     return (

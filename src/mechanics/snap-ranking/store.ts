@@ -1,11 +1,25 @@
 /**
  * Zustand store for Snap Ranking mechanic.
+ *
+ * A field value guessing game where players guess the value of a hidden
+ * field for each card. Supports numeric (distance scoring) and categorical
+ * (exact match) fields.
  */
 
 import { create } from "zustand";
 import { shuffle } from "@/utils/shuffle";
-import type { TierRating, CardRating, SnapRankingState, SnapRankingSettings } from "./types";
-import { DEFAULT_SETTINGS } from "./types";
+import type {
+  GuessValue,
+  CardGuess,
+  GameConfig,
+  SnapRankingState,
+  SnapRankingSettings,
+} from "./types";
+import {
+  DEFAULT_SETTINGS,
+  NUMERIC_SCORING,
+  calculateScore,
+} from "./types";
 
 /**
  * Extended store state with actions.
@@ -15,23 +29,25 @@ interface SnapRankingStore extends SnapRankingState, SnapRankingSettings {
   activate: () => void;
   deactivate: () => void;
   resetGame: () => void;
-  initGame: (cardIds: string[]) => void;
+  initGame: (config: GameConfig) => void;
 
   // Game actions
-  rateCard: (tier: TierRating) => void;
+  flipCurrentCard: () => void;
+  submitGuess: (guess: GuessValue) => void;
   getCurrentCardId: () => string | null;
   isGameComplete: () => boolean;
   getProgress: () => { current: number; total: number };
 
   // Results
-  getRatingsByTier: () => Record<TierRating, string[]>;
-  getAverageRatingTime: () => number;
+  getTotalScore: () => number;
+  getMaxPossibleScore: () => number;
+  getScoreBreakdown: () => { exact: number; close: number; wrong: number };
+  getAverageGuessTime: () => number;
   getTotalTime: () => number;
 
   // Settings
-  setConfirmRating: (value: boolean) => void;
-  setAutoAdvance: (value: boolean) => void;
   setShowTimer: (value: boolean) => void;
+  setCardCount: (value: number) => void;
 }
 
 /**
@@ -39,13 +55,19 @@ interface SnapRankingStore extends SnapRankingState, SnapRankingSettings {
  */
 const INITIAL_STATE: SnapRankingState = {
   isActive: false,
+  guessField: "",
+  uniqueValues: [],
+  valueType: "categorical",
   cardIds: [],
+  cardValues: {},
   currentIndex: 0,
-  ratings: [],
+  guesses: [],
   cardShownAt: 0,
   gameStartedAt: 0,
   gameEndedAt: null,
   resetCount: 0,
+  isCurrentCardFlipped: false,
+  errorMessage: null,
 };
 
 /**
@@ -61,12 +83,14 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
     set({
       isActive: true,
       gameStartedAt: Date.now(),
-      cardShownAt: Date.now(),
     });
   },
 
   deactivate: () => {
-    set({ isActive: false });
+    set({
+      isActive: false,
+      isCurrentCardFlipped: false,
+    });
   },
 
   resetGame: () => {
@@ -75,50 +99,115 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
     set({
       cardIds: shuffled,
       currentIndex: 0,
-      ratings: [],
-      cardShownAt: Date.now(),
+      guesses: [],
+      cardShownAt: 0,
       gameStartedAt: Date.now(),
       gameEndedAt: null,
       resetCount: resetCount + 1,
+      isCurrentCardFlipped: false,
+      errorMessage: null,
     });
   },
 
-  initGame: (cardIds: string[]) => {
-    const shuffled = shuffle([...cardIds]);
+  initGame: (config: GameConfig) => {
+    const state = get();
+
+    // Handle error state
+    if (config.errorMessage || config.cards.length === 0) {
+      set({
+        ...INITIAL_STATE,
+        isActive: state.isActive, // Preserve current active state
+        guessField: config.guessField,
+        errorMessage: config.errorMessage ?? "No cards available to play.",
+      });
+      return;
+    }
+
+    // Build card values map
+    const cardValues: Record<string, GuessValue> = {};
+    for (const card of config.cards) {
+      cardValues[card.id] = card.value;
+    }
+
+    // Shuffle card IDs
+    let shuffledIds = shuffle(config.cards.map((c) => c.id));
+
+    // Apply card count limit if set (0 = all cards)
+    if (state.cardCount > 0 && shuffledIds.length > state.cardCount) {
+      shuffledIds = shuffledIds.slice(0, state.cardCount);
+    }
+
     set({
-      cardIds: shuffled,
+      isActive: state.isActive, // Preserve current active state (avoid race with onActivate)
+      guessField: config.guessField,
+      uniqueValues: config.uniqueValues,
+      valueType: config.valueType,
+      cardIds: shuffledIds,
+      cardValues,
       currentIndex: 0,
-      ratings: [],
-      cardShownAt: Date.now(),
-      gameStartedAt: Date.now(),
+      guesses: [],
+      cardShownAt: 0,
+      gameStartedAt: 0,
       gameEndedAt: null,
+      isCurrentCardFlipped: false,
+      errorMessage: null,
     });
   },
 
   // Game actions
-  rateCard: (tier: TierRating) => {
+  flipCurrentCard: () => {
     const state = get();
-    if (!state.isActive || state.currentIndex >= state.cardIds.length) return;
+    if (!state.isActive || state.isCurrentCardFlipped) return;
+    if (state.currentIndex >= state.cardIds.length) return;
+
+    const now = Date.now();
+
+    // Start timer on first card flip
+    const gameStartedAt = state.gameStartedAt === 0 ? now : state.gameStartedAt;
+
+    set({
+      isCurrentCardFlipped: true,
+      cardShownAt: now,
+      gameStartedAt,
+    });
+  },
+
+  submitGuess: (guess: GuessValue) => {
+    const state = get();
+    if (!state.isActive || !state.isCurrentCardFlipped) return;
+    if (state.currentIndex >= state.cardIds.length) return;
 
     const cardId = state.cardIds[state.currentIndex];
     if (!cardId) return;
 
+    const actualValue = state.cardValues[cardId];
+    if (actualValue === undefined) return;
+
     const now = Date.now();
-    const rating: CardRating = {
+    const score = calculateScore(
+      guess,
+      actualValue,
+      state.valueType,
+      state.uniqueValues
+    );
+
+    const cardGuess: CardGuess = {
       cardId,
-      tier,
-      ratedAt: now,
-      timeToRate: now - state.cardShownAt,
+      guess,
+      actualValue,
+      score,
+      guessedAt: now,
+      timeToGuess: now - state.cardShownAt,
     };
 
-    const newRatings = [...state.ratings, rating];
+    const newGuesses = [...state.guesses, cardGuess];
     const newIndex = state.currentIndex + 1;
     const isComplete = newIndex >= state.cardIds.length;
 
     set({
-      ratings: newRatings,
+      guesses: newGuesses,
       currentIndex: newIndex,
-      cardShownAt: isComplete ? state.cardShownAt : now,
+      isCurrentCardFlipped: false, // Reset for next card
       gameEndedAt: isComplete ? now : null,
     });
   },
@@ -143,29 +232,49 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
   },
 
   // Results
-  getRatingsByTier: () => {
-    const { ratings } = get();
-    const result: Record<TierRating, string[]> = {
-      S: [],
-      A: [],
-      B: [],
-      C: [],
-      D: [],
-      F: [],
-    };
-
-    for (const rating of ratings) {
-      result[rating.tier].push(rating.cardId);
-    }
-
-    return result;
+  getTotalScore: () => {
+    const { guesses } = get();
+    return guesses.reduce((sum, g) => sum + g.score, 0);
   },
 
-  getAverageRatingTime: () => {
-    const { ratings } = get();
-    if (ratings.length === 0) return 0;
-    const total = ratings.reduce((sum, r) => sum + r.timeToRate, 0);
-    return total / ratings.length;
+  getMaxPossibleScore: () => {
+    const { cardIds } = get();
+    const maxPerCard = NUMERIC_SCORING.exactMatch; // Same for both types
+    return cardIds.length * maxPerCard;
+  },
+
+  getScoreBreakdown: () => {
+    const { guesses, valueType, uniqueValues } = get();
+    let exact = 0;
+    let close = 0;
+    let wrong = 0;
+
+    for (const guess of guesses) {
+      if (guess.guess === guess.actualValue) {
+        exact++;
+      } else if (valueType === "numeric") {
+        // Check if close (within 2 positions)
+        const guessIndex = uniqueValues.indexOf(guess.guess);
+        const actualIndex = uniqueValues.indexOf(guess.actualValue);
+        const distance = Math.abs(guessIndex - actualIndex);
+        if (distance <= 2) {
+          close++;
+        } else {
+          wrong++;
+        }
+      } else {
+        wrong++;
+      }
+    }
+
+    return { exact, close, wrong };
+  },
+
+  getAverageGuessTime: () => {
+    const { guesses } = get();
+    if (guesses.length === 0) return 0;
+    const total = guesses.reduce((sum, g) => sum + g.timeToGuess, 0);
+    return total / guesses.length;
   },
 
   getTotalTime: () => {
@@ -176,15 +285,11 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
   },
 
   // Settings
-  setConfirmRating: (value: boolean) => {
-    set({ confirmRating: value });
-  },
-
-  setAutoAdvance: (value: boolean) => {
-    set({ autoAdvance: value });
-  },
-
   setShowTimer: (value: boolean) => {
     set({ showTimer: value });
+  },
+
+  setCardCount: (value: number) => {
+    set({ cardCount: value as SnapRankingSettings["cardCount"] });
   },
 }));

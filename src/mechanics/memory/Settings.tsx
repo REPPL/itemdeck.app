@@ -46,7 +46,7 @@ export function MemorySettingsPanel({
           {(
             Object.entries(DIFFICULTY_SETTINGS) as [
               MemoryDifficulty,
-              { label: string; flipDelay: number },
+              (typeof DIFFICULTY_SETTINGS)[MemoryDifficulty],
             ][]
           ).map(([key, { label }]) => (
             <button

@@ -134,6 +134,30 @@ class MechanicRegistry {
   }
 
   /**
+   * Load a mechanic by ID without activating it.
+   * Useful for getting settings/configuration before activation.
+   *
+   * @param id - Mechanic ID
+   * @returns The loaded mechanic
+   * @throws Error if mechanic not found
+   */
+  async load(id: string): Promise<Mechanic> {
+    // Return already loaded instance
+    const existing = this.instances.get(id);
+    if (existing) return existing;
+
+    // Load via factory
+    const factory = this.factories.get(id);
+    if (!factory) {
+      throw new Error(`Mechanic "${id}" not found in registry`);
+    }
+
+    const mechanic = await factory();
+    this.instances.set(id, mechanic);
+    return mechanic;
+  }
+
+  /**
    * Get a mechanic by ID (must be loaded first).
    *
    * @param id - Mechanic ID

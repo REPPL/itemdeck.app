@@ -38,6 +38,14 @@ interface MechanicContextValue {
   error: string | null;
   /** List of available mechanic IDs */
   availableIds: string[];
+  /** Open the mechanic selection panel */
+  openMechanicPanel: () => void;
+}
+
+interface MechanicProviderProps {
+  children: ReactNode;
+  /** Callback to open the mechanic selection panel */
+  onOpenMechanicPanel?: () => void;
 }
 
 const MechanicContext = createContext<MechanicContextValue | null>(null);
@@ -45,7 +53,7 @@ const MechanicContext = createContext<MechanicContextValue | null>(null);
 /**
  * Mechanic context provider component.
  */
-export function MechanicProvider({ children }: { children: ReactNode }) {
+export function MechanicProvider({ children, onOpenMechanicPanel }: MechanicProviderProps) {
   const [mechanic, setMechanic] = useState<Mechanic | null>(null);
   const [state, setState] = useState<MechanicState | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -130,6 +138,10 @@ export function MechanicProvider({ children }: { children: ReactNode }) {
     mechanicRegistry.reset();
   }, []);
 
+  const openMechanicPanel = useCallback(() => {
+    onOpenMechanicPanel?.();
+  }, [onOpenMechanicPanel]);
+
   const value = useMemo<MechanicContextValue>(
     () => ({
       mechanic,
@@ -140,6 +152,7 @@ export function MechanicProvider({ children }: { children: ReactNode }) {
       isLoading,
       error,
       availableIds,
+      openMechanicPanel,
     }),
     [
       mechanic,
@@ -150,6 +163,7 @@ export function MechanicProvider({ children }: { children: ReactNode }) {
       isLoading,
       error,
       availableIds,
+      openMechanicPanel,
     ]
   );
 

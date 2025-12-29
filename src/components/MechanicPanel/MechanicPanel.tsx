@@ -2,11 +2,13 @@
  * MechanicPanel - Dedicated panel for game mechanics selection and control.
  * Separate from Settings to emphasise that mechanics change the app's behaviour.
  * ADR-020: Uses mechanic.Settings component instead of direct store imports.
+ *
+ * v0.13.0: Two-step activation - select mechanic, configure settings, then start.
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
-import { mechanicRegistry, useMechanicContext } from "@/mechanics";
+import { mechanicRegistry, useMechanicContext, type Mechanic } from "@/mechanics";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { MechanicManifest } from "@/mechanics";
 import styles from "./MechanicPanel.module.css";
@@ -51,6 +53,13 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
   const [mechanics, setMechanics] = useState<MechanicManifest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // Two-step activation: selected mechanic ID (for configuration), separate from active
+  const [selectedMechanicId, setSelectedMechanicId] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [selectedMechanic, setSelectedMechanic] = useState<Mechanic<any> | null>(null);
+  // Pending settings before game starts
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [pendingSettings, setPendingSettings] = useState<Record<string, any> | null>(null);
 
   const activeMechanicId = useSettingsStore((s) => s.activeMechanicId);
   const { mechanic: activeMechanicInstance, state: mechanicState, activateMechanic, deactivateMechanic } = useMechanicContext();
@@ -108,22 +117,72 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
     };
   }, [isOpen, onClose]);
 
-  const handleSelect = useCallback(
+  // Handle mechanic selection (first step - show configuration)
+  const handlePreSelect = useCallback(
     async (mechanicId: string | null) => {
       if (mechanicId === null) {
-        deactivateMechanic();
-      } else {
-        try {
-          await activateMechanic(mechanicId);
-          // Close panel immediately when a mechanic is selected
-          onClose();
-        } catch (err) {
-          setError(err instanceof Error ? err.message : "Failed to activate mechanic");
-        }
+        // Deselect / cancel selection
+        setSelectedMechanicId(null);
+        setSelectedMechanic(null);
+        setPendingSettings(null);
+        return;
+      }
+
+      // If already active, just deselect (no-op)
+      if (mechanicId === activeMechanicId) {
+        setSelectedMechanicId(null);
+        setSelectedMechanic(null);
+        setPendingSettings(null);
+        return;
+      }
+
+      // Load the mechanic to get its settings
+      try {
+        const mechanic = await mechanicRegistry.load(mechanicId);
+        setSelectedMechanicId(mechanicId);
+        setSelectedMechanic(mechanic);
+        // Initialise pending settings with defaults
+        setPendingSettings(mechanic.defaultSettings ?? {});
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load mechanic");
       }
     },
-    [activateMechanic, deactivateMechanic, onClose]
+    [activeMechanicId]
   );
+
+  // Handle starting the game (second step - activate with settings)
+  const handleStartGame = useCallback(async () => {
+    if (!selectedMechanicId || !selectedMechanic) return;
+
+    try {
+      // Apply pending settings before activation
+      if (selectedMechanic.setSettings && pendingSettings) {
+        selectedMechanic.setSettings(pendingSettings);
+      }
+      await activateMechanic(selectedMechanicId);
+      // Reset selection state
+      setSelectedMechanicId(null);
+      setSelectedMechanic(null);
+      setPendingSettings(null);
+      // Close panel after starting
+      onClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to activate mechanic");
+    }
+  }, [selectedMechanicId, selectedMechanic, pendingSettings, activateMechanic, onClose]);
+
+  // Handle stopping an active game
+  const handleStop = useCallback(() => {
+    deactivateMechanic();
+    setSelectedMechanicId(null);
+    setSelectedMechanic(null);
+    setPendingSettings(null);
+  }, [deactivateMechanic]);
+
+  // Handle pending settings change
+  const handlePendingSettingsChange = useCallback((newSettings: Partial<unknown>) => {
+    setPendingSettings((prev) => ({ ...prev, ...newSettings }));
+  }, []);
 
   // ADR-020: Get settings from active mechanic via interface
   // Depend on mechanicState to re-render when settings change
@@ -143,7 +202,9 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
   if (!isOpen) return null;
 
   const activeMechanic = mechanics.find((m) => m.id === activeMechanicId);
+  const selectedManifest = mechanics.find((m) => m.id === selectedMechanicId);
   const MechanicSettings = activeMechanicInstance?.Settings;
+  const SelectedMechanicSettings = selectedMechanic?.Settings;
 
   return createPortal(
     <div className={styles.overlay}>
@@ -174,6 +235,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
 
           {!isLoading && !error && (
             <>
+              {/* Active mechanic display */}
               {activeMechanic && (
                 <div className={styles.activeSection}>
                   <div className={styles.activeBadge}>ACTIVE</div>
@@ -188,7 +250,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                     <button
                       type="button"
                       className={styles.stopButton}
-                      onClick={() => { void handleSelect(null); }}
+                      onClick={handleStop}
                     >
                       Stop
                     </button>
@@ -207,10 +269,13 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                 </div>
               )}
 
+              {/* Help text based on state */}
               <div className={styles.helpText}>
-                {activeMechanic
-                  ? "Select a different mechanic or stop the current one."
-                  : "Select a game mechanic to add interactive gameplay to your collection."}
+                {selectedManifest && !activeMechanic
+                  ? "Configure your game settings, then click Start Game."
+                  : activeMechanic
+                    ? "Select a different mechanic or stop the current one."
+                    : "Select a game mechanic to add interactive gameplay to your collection."}
               </div>
 
               {/* None option - only show when a mechanic is active */}
@@ -218,7 +283,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                 <button
                   type="button"
                   className={[styles.mechanicOption, !activeMechanicId ? styles.mechanicOptionActive : ""].filter(Boolean).join(" ")}
-                  onClick={() => { void handleSelect(null); }}
+                  onClick={handleStop}
                 >
                   <div className={styles.mechanicIcon}>
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -235,7 +300,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                 </button>
               )}
 
-              {/* Mechanic options */}
+              {/* Mechanic options - always visible */}
               {mechanics.map((manifest) => {
                 const Icon = manifest.icon;
                 const isActive = activeMechanicId === manifest.id;
@@ -245,7 +310,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                     key={manifest.id}
                     type="button"
                     className={[styles.mechanicOption, isActive ? styles.mechanicOptionActive : ""].filter(Boolean).join(" ")}
-                    onClick={() => { void handleSelect(manifest.id); }}
+                    onClick={() => { void handlePreSelect(manifest.id); }}
                     disabled={isActive}
                   >
                     <div className={styles.mechanicIcon}>
@@ -278,6 +343,55 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
             </>
           )}
         </div>
+
+        {/* Configuration overlay - appears on top of the selection panel */}
+        {selectedManifest && selectedMechanic && !activeMechanic && (
+          <div
+            className={styles.configOverlay}
+            onClick={(e) => { e.stopPropagation(); }}
+          >
+            <div className={styles.configPanel}>
+              <div className={styles.configHeader}>
+                <span className={styles.configIcon}>
+                  <selectedManifest.icon />
+                </span>
+                <div className={styles.configTitleArea}>
+                  <h3 className={styles.configTitle}>{selectedManifest.name}</h3>
+                  <p className={styles.configSubtitle}>Configure game settings</p>
+                </div>
+              </div>
+
+              {/* Settings */}
+              {SelectedMechanicSettings && pendingSettings && (
+                <div className={styles.configSettings}>
+                  <SelectedMechanicSettings
+                    settings={pendingSettings as Record<string, unknown>}
+                    onChange={handlePendingSettingsChange}
+                    disabled={false}
+                  />
+                </div>
+              )}
+
+              {/* Action buttons */}
+              <div className={styles.configActions}>
+                <button
+                  type="button"
+                  className={styles.cancelButton}
+                  onClick={(e) => { e.stopPropagation(); void handlePreSelect(null); }}
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  className={styles.startButton}
+                  onClick={() => { void handleStartGame(); }}
+                >
+                  Start Game
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>,
     document.body

@@ -1,8 +1,8 @@
 /**
  * Snap Ranking mechanic.
  *
- * Rate cards instantly with quick tier decisions (S/A/B/C/D/F).
- * No going back - your first instinct is final!
+ * A field value guessing game where players guess the value of a hidden
+ * field for each card.
  */
 
 import { useSnapRankingStore } from "./store";
@@ -26,12 +26,10 @@ function SnapRankingIcon({ className }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      {/* Tier list bars */}
-      <rect x="3" y="3" width="18" height="4" rx="1" />
-      <rect x="3" y="9" width="14" height="4" rx="1" />
-      <rect x="3" y="15" width="10" height="4" rx="1" />
-      {/* Star for S-tier */}
-      <path d="M19 12l1.5 3 3-1-1 3 2.5 2-3 0.5-0.5 3-2-2.5-2.5 1.5 0.5-3-2.5-2 3-0.5z" />
+      {/* Question mark in circle for guessing game */}
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9 9a3 3 0 1 1 3 3v2" />
+      <circle cx="12" cy="18" r="0.5" fill="currentColor" />
     </svg>
   );
 }
@@ -42,11 +40,11 @@ function SnapRankingIcon({ className }: { className?: string }) {
 export const snapRankingMechanic: Mechanic<SnapRankingSettings> = {
   manifest: {
     id: "snap-ranking",
-    name: "Snap Ranking",
-    description: "Rate cards instantly with quick tier decisions. Build a tier list by rating each card S/A/B/C/D/F as it appears.",
+    name: "Guess the Value",
+    description: "Test your knowledge! Cards appear face-down - flip and guess the value of the badge field.",
     icon: SnapRankingIcon,
-    version: "1.0.0",
-    minCards: 5,
+    version: "2.0.0",
+    minCards: 2,
   },
 
   lifecycle: {
@@ -70,16 +68,25 @@ export const snapRankingMechanic: Mechanic<SnapRankingSettings> = {
   },
 
   getCardActions: (): CardActions => ({
-    // Snap Ranking doesn't use card clicks - uses rating buttons instead
-    onClick: undefined,
+    // Guessing game uses overlay for card interaction
+    onClick: (cardId) => {
+      const state = useSnapRankingStore.getState();
+      // Only flip current card if it's not already flipped
+      if (state.isActive && state.getCurrentCardId() === cardId && !state.isCurrentCardFlipped) {
+        state.flipCurrentCard();
+      }
+    },
     canInteract: (cardId) => {
       const state = useSnapRankingStore.getState();
       return state.isActive && state.getCurrentCardId() === cardId;
     },
     isHighlighted: (cardId) => {
       const state = useSnapRankingStore.getState();
-      // Show all cards face-up, highlight current
-      return state.isActive || state.ratings.some((r) => r.cardId === cardId);
+      // Highlight guessed cards and current card
+      return state.isActive && (
+        state.guesses.some((g) => g.cardId === cardId) ||
+        state.getCurrentCardId() === cardId
+      );
     },
   }),
 
@@ -92,22 +99,18 @@ export const snapRankingMechanic: Mechanic<SnapRankingSettings> = {
   getSettings: () => {
     const state = useSnapRankingStore.getState();
     return {
-      confirmRating: state.confirmRating,
-      autoAdvance: state.autoAdvance,
       showTimer: state.showTimer,
+      cardCount: state.cardCount,
     };
   },
 
   setSettings: (settings) => {
     const store = useSnapRankingStore.getState();
-    if (settings.confirmRating !== undefined) {
-      store.setConfirmRating(settings.confirmRating);
-    }
-    if (settings.autoAdvance !== undefined) {
-      store.setAutoAdvance(settings.autoAdvance);
-    }
     if (settings.showTimer !== undefined) {
       store.setShowTimer(settings.showTimer);
+    }
+    if (settings.cardCount !== undefined) {
+      store.setCardCount(settings.cardCount);
     }
   },
 };

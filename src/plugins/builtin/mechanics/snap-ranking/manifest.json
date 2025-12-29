@@ -1,0 +1,40 @@
+{
+  "$schema": "https://itemdeck.app/schemas/plugin/v1.json",
+  "id": "org.itemdeck.mechanic-snap-ranking",
+  "name": "Snap Ranking",
+  "version": "1.0.0",
+  "description": "Rate cards instantly with quick tier decisions. Build a tier list by rating each card S/A/B/C/D/F as it appears. No second chances - your first instinct is final!",
+  "author": {
+    "name": "itemdeck"
+  },
+  "licence": "GPL-3.0-or-later",
+  "itemdeck": {
+    "minVersion": "0.13.0",
+    "type": "mechanic",
+    "tier": "builtin"
+  },
+  "capabilities": ["storage:local", "ui:overlay"],
+  "entry": {
+    "main": "./index.ts"
+  },
+  "contributes": {
+    "mechanics": [
+      {
+        "id": "snap-ranking",
+        "name": "Snap Ranking",
+        "description": "Rate cards instantly with quick tier decisions",
+        "category": "rating",
+        "minCards": 5,
+        "difficulty": "medium",
+        "playerCount": {
+          "min": 1,
+          "max": 1
+        },
+        "estimatedDuration": "5-10 minutes",
+        "tags": ["ranking", "tier-list", "rating", "snap-decision"],
+        "entry": "@/mechanics/snap-ranking"
+      }
+    ]
+  },
+  "keywords": ["ranking", "tier-list", "rating", "snap-decision", "game"]
+}

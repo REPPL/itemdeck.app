@@ -52,6 +52,8 @@ These reports provide:
 | Remote Data Assessment | [state-of-the-art-remote-data-assessment.md](./state-of-the-art-remote-data-assessment.md) | ✅ Complete |
 | Plugin Architecture | [state-of-the-art-plugin-architecture.md](./state-of-the-art-plugin-architecture.md) | ✅ Complete |
 | Internationalisation | [state-of-the-art-internationalisation.md](./state-of-the-art-internationalisation.md) | ✅ Complete |
+| Web Security Sandboxing | [state-of-the-art-web-security-sandbox.md](./state-of-the-art-web-security-sandbox.md) | ✅ Complete |
+| Visual Consistency | [state-of-the-art-visual-consistency.md](./state-of-the-art-visual-consistency.md) | ✅ Complete |
 
 ### Numbered Research
 

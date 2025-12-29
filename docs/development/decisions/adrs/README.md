@@ -28,6 +28,10 @@ Documented architectural decisions for Itemdeck.
 | [020](./ADR-020-mechanic-settings-isolation.md) | Use Settings Accessor for mechanic isolation | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
 | [021](./ADR-021-internationalisation-library.md) | Use react-i18next for internationalisation | Accepted | [state-of-the-art-internationalisation](../../research/state-of-the-art-internationalisation.md) |
 | [022](./ADR-022-icon-configuration-registry.md) | Use JSON registry for icon configuration | Accepted | [state-of-the-art-internationalisation](../../research/state-of-the-art-internationalisation.md) |
+| [023](./ADR-023-plugin-trust-tiers.md) | Three-tier trust model for plugins | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
+| [024](./ADR-024-plugin-sandbox-implementation.md) | Use sandboxed iframes for external plugins | Accepted | [state-of-the-art-web-security-sandbox](../../research/state-of-the-art-web-security-sandbox.md) |
+| [025](./ADR-025-plugin-distribution-strategy.md) | Static registry + GitHub for distribution | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
+| [026](./ADR-026-plugin-manifest-schema.md) | JSON manifest with Zod validation | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
 
 ## ADR Template
 

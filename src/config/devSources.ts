@@ -35,6 +35,22 @@ export interface ExampleCollection {
  */
 export const EXAMPLE_COLLECTIONS: ExampleCollection[] = [
   {
+    id: "example-books",
+    name: "100 Greatest Books",
+    folder: "books",
+    description: "Classic and contemporary literature spanning centuries of storytelling",
+    itemCount: 100,
+    hasCollection: true,
+  },
+  {
+    id: "example-games",
+    name: "Video Games Collection",
+    folder: "games/vc",
+    description: "Modern video games across PC, PlayStation, Xbox, and Nintendo platforms",
+    itemCount: 50,
+    hasCollection: true,
+  },
+  {
     id: "example-movies",
     name: "100 Highest-Grossing Films",
     folder: "movies",
@@ -50,31 +66,14 @@ export const EXAMPLE_COLLECTIONS: ExampleCollection[] = [
     itemCount: 100,
     hasCollection: true,
   },
-  // Future collections (collection.json not yet available)
-  // {
-  //   id: "example-tv",
-  //   name: "TV Shows",
-  //   folder: "tv",
-  //   description: "Television series and shows",
-  //   itemCount: 126,
-  //   hasCollection: false,
-  // },
-  // {
-  //   id: "example-books",
-  //   name: "Books",
-  //   folder: "books",
-  //   description: "Fiction and non-fiction books",
-  //   itemCount: 200,
-  //   hasCollection: false,
-  // },
-  // {
-  //   id: "example-games",
-  //   name: "Games",
-  //   folder: "games/vc",
-  //   description: "Video games collection",
-  //   itemCount: 50,
-  //   hasCollection: false,
-  // },
+  {
+    id: "example-tv",
+    name: "TV Shows Collection",
+    folder: "tv",
+    description: "Television series from classic dramas to modern hits (1972-2024)",
+    itemCount: 126,
+    hasCollection: true,
+  },
 ];
 
 /**

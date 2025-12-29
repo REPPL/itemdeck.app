@@ -27,6 +27,7 @@ import { useAdminModeShortcut, useGlobalKeyboard } from "@/hooks/useGlobalKeyboa
 import { useUrlCollection, clearUrlPath } from "@/hooks/useUrlCollection";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useSourceStore } from "@/stores/sourceStore";
+import { ACTION_SHORTCUTS } from "@/config/keyboardShortcuts";
 import "@/styles/themes";
 import styles from "./App.module.css";
 
@@ -206,28 +207,32 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
 
   useAdminModeShortcut(handleSettingsToggle);
 
-  // Additional keyboard shortcuts: ?, S, R, E
+  // Additional keyboard shortcuts using centralised config
+  // All action shortcuts now require Ctrl modifier for consistency
   // Note: Cmd-R/Ctrl-R is handled in main.tsx for early interception
   useGlobalKeyboard({
     shortcuts: [
       {
-        key: "Slash", // ? key (Shift + /)
-        shift: true,
+        key: ACTION_SHORTCUTS.help.key,
+        shift: ACTION_SHORTCUTS.help.shift,
         handler: handleHelpToggle,
         preventDefault: true,
       },
       {
-        key: "KeyS",
+        key: ACTION_SHORTCUTS.settings.key,
+        ctrl: ACTION_SHORTCUTS.settings.ctrl,
         handler: handleSettingsToggle,
         preventDefault: true,
       },
       {
-        key: "KeyR",
+        key: ACTION_SHORTCUTS.shuffle.key,
+        ctrl: ACTION_SHORTCUTS.shuffle.ctrl,
         handler: handleShuffle,
         preventDefault: true,
       },
       {
-        key: "KeyE",
+        key: ACTION_SHORTCUTS.editMode.key,
+        ctrl: ACTION_SHORTCUTS.editMode.ctrl,
         handler: handleEditModeToggle,
         preventDefault: true,
       },

@@ -4,6 +4,7 @@ import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useConfig } from "@/hooks/useConfig";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { getLogoFieldPath } from "@/hooks/useBackgroundOptions";
+import { springPresets } from "@/config/animationPresets";
 import { CardBack } from "./CardBack";
 import { CardFront } from "./CardFront";
 import { CardInner } from "./CardInner";
@@ -245,9 +246,14 @@ export function Card({
         tabIndex={tabIndex}
         aria-pressed={isFlipped}
         aria-label={`${card.title}${isFlipped ? " (showing front)" : " (showing back)"}`}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+        whileHover={{
+          scale: 1.02,
+          transition: { type: "spring", ...springPresets.cardHover },
+        }}
+        whileTap={{
+          scale: 0.98,
+          transition: { type: "spring", ...springPresets.snappy },
+        }}
       >
         <CardInner
           isFlipped={isFlipped}

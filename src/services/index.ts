@@ -16,3 +16,10 @@ export {
   getSortFieldOptions,
   type FieldContext,
 } from "./fieldDiscovery";
+
+// Update checker
+export {
+  checkForUpdates,
+  checkMultipleForUpdates,
+  type UpdateCheckResult,
+} from "./updateChecker";

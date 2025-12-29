@@ -9,9 +9,12 @@
  * - Add Source: Add new MyPlausibleMe collections
  * - Edit Source: Manage local edits to card data
  * - Import/Export: Collection-level import and export
+ *
+ * @see F-107: Auto-switches to Add Source when no collections exist
  */
 
 import { useState, useEffect } from "react";
+import { useSources } from "@/stores/sourceStore";
 import { SourcesTab } from "./SourcesTab";
 import { AddSourceTab } from "./AddSourceTab";
 import { EditSourceTab } from "./EditSourceTab";
@@ -36,7 +39,12 @@ interface CollectionsTabProps {
  * Collections settings tab component with sub-navigation.
  */
 export function CollectionsTab({ initialSubTab }: CollectionsTabProps) {
-  const [activeSubTab, setActiveSubTab] = useState<CollectionsSubTab>("sources");
+  const sources = useSources();
+  const hasNoSources = sources.length === 0;
+
+  // Auto-switch to Add Source when no sources exist (F-107)
+  const defaultTab: CollectionsSubTab = hasNoSources ? "add-source" : "sources";
+  const [activeSubTab, setActiveSubTab] = useState<CollectionsSubTab>(defaultTab);
 
   // Handle navigation from search
   useEffect(() => {
@@ -44,6 +52,13 @@ export function CollectionsTab({ initialSubTab }: CollectionsTabProps) {
       setActiveSubTab(initialSubTab as CollectionsSubTab);
     }
   }, [initialSubTab]);
+
+  // Auto-switch to Add Source when sources become empty (F-107)
+  useEffect(() => {
+    if (hasNoSources && activeSubTab === "sources") {
+      setActiveSubTab("add-source");
+    }
+  }, [hasNoSources, activeSubTab]);
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -62,22 +77,31 @@ export function CollectionsTab({ initialSubTab }: CollectionsTabProps) {
     <div className={tabStyles.container}>
       {/* Sub-tab navigation */}
       <div className={tabStyles.subTabs} role="tablist" aria-label="Collections settings sections">
-        {subTabs.map(({ id, label }) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={activeSubTab === id}
-            aria-controls={`collections-subtab-${id}`}
-            className={[
-              tabStyles.subTab,
-              activeSubTab === id ? tabStyles.subTabActive : "",
-            ].filter(Boolean).join(" ")}
-            onClick={() => { setActiveSubTab(id); }}
-          >
-            {label}
-          </button>
-        ))}
+        {subTabs.map(({ id, label }) => {
+          // Disable Sources tab when no sources exist (F-107)
+          const isDisabled = id === "sources" && hasNoSources;
+
+          return (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={activeSubTab === id}
+              aria-controls={`collections-subtab-${id}`}
+              aria-disabled={isDisabled}
+              className={[
+                tabStyles.subTab,
+                activeSubTab === id ? tabStyles.subTabActive : "",
+                isDisabled ? tabStyles.subTabDisabled : "",
+              ].filter(Boolean).join(" ")}
+              onClick={() => { if (!isDisabled) setActiveSubTab(id); }}
+              disabled={isDisabled}
+              title={isDisabled ? "Add a source first" : undefined}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Sub-tab content */}

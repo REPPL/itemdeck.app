@@ -28,6 +28,8 @@ interface LazyImageProps
   blur?: boolean;
   /** Additional class for container */
   containerClassName?: string;
+  /** Show loading spinner overlay (default: false) */
+  showSpinner?: boolean;
 }
 
 /**
@@ -35,10 +37,12 @@ interface LazyImageProps
  *
  * Features:
  * - Intersection Observer for viewport-based loading
- * - Shimmer animation placeholder
+ * - Enhanced shimmer animation placeholder (slower, more visible)
+ * - Optional loading spinner overlay
  * - Smooth fade-in on load
  * - Error state with fallback
  * - Respects prefers-reduced-motion
+ * - aria-busy attribute during loading for accessibility
  *
  * @example
  * ```tsx
@@ -46,6 +50,7 @@ interface LazyImageProps
  *   src="/images/card.jpg"
  *   alt="Card image"
  *   fallbackSrc="/images/placeholder.jpg"
+ *   showSpinner
  * />
  * ```
  */
@@ -57,6 +62,7 @@ export function LazyImage({
   blur = true,
   className,
   containerClassName,
+  showSpinner = false,
   ...props
 }: LazyImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -104,6 +110,9 @@ export function LazyImage({
     }
   }, [isVisible, loadState, src]);
 
+  const isLoading = loadState === "loading" || loadState === "idle";
+  const showPlaceholder = loadState !== "loaded" && loadState !== "error";
+
   const containerClasses = [styles.container, containerClassName]
     .filter(Boolean)
     .join(" ");
@@ -122,14 +131,22 @@ export function LazyImage({
       ref={containerRef}
       className={containerClasses}
       style={{ backgroundColor: placeholderColour }}
+      aria-busy={isLoading}
     >
       {/* Placeholder shimmer */}
-      {loadState !== "loaded" && loadState !== "error" && (
+      {showPlaceholder && (
         <div
           className={styles.placeholder}
           role="presentation"
           aria-hidden="true"
         />
+      )}
+
+      {/* Loading spinner overlay */}
+      {showSpinner && loadState === "loading" && (
+        <div className={styles.spinnerOverlay} aria-hidden="true">
+          <div className={styles.spinner} />
+        </div>
       )}
 
       {/* Actual image */}

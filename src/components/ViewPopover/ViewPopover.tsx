@@ -5,12 +5,14 @@
  * Opened from the View button in NavigationHub.
  *
  * @see F-086: View Button with Popover
+ * @see F-111: Overlay Consistency Review
  */
 
 import { useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettingsStore, type LayoutType } from "@/stores/settingsStore";
 import { useAvailableGroupFields } from "@/hooks/useAvailableGroupFields";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import styles from "./ViewPopover.module.css";
 
 // ============================================================================
@@ -163,6 +165,13 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
   // Group By only shown in List view (not Grid or Compact)
   const showGroupBy = layout === "list";
 
+  // Use shared focus trap hook for consistent behaviour
+  useFocusTrap({
+    enabled: isOpen,
+    onEscape: onClose,
+    restoreFocus: true,
+  });
+
   // Handle view mode change
   const handleViewModeChange = useCallback(
     (type: LayoutType) => {
@@ -178,23 +187,6 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
     },
     [setGroupByField]
   );
-
-  // Close on Escape key
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        onClose();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
 
   // Focus first option when opened
   useEffect(() => {

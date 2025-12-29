@@ -4,6 +4,8 @@
  * ADR-020: Uses mechanic.Settings component instead of direct store imports.
  *
  * v0.13.0: Two-step activation - select mechanic, configure settings, then start.
+ *
+ * @see F-111: Overlay Consistency Review
  */
 
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -11,6 +13,7 @@ import { createPortal } from "react-dom";
 import { mechanicRegistry, useMechanicContext, type Mechanic } from "@/mechanics";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useCollectionData } from "@/context/CollectionDataContext";
+import { useOverlay } from "@/hooks/useOverlay";
 import type { MechanicManifest } from "@/mechanics";
 import styles from "./MechanicPanel.module.css";
 
@@ -67,6 +70,16 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
   const { cards } = useCollectionData();
   const cardCount = cards.length;
 
+  // Use shared overlay hook for consistent behaviour
+  const { overlayProps, contentProps } = useOverlay({
+    isOpen,
+    onClose,
+    closeOnEscape: true,
+    closeOnClickOutside: true,
+    trapFocus: true,
+    preventScroll: true,
+  });
+
   // Load all mechanics on mount
   useEffect(() => {
     const loadMechanics = async () => {
@@ -84,41 +97,6 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
 
     void loadMechanics();
   }, []);
-
-  // Close on escape key
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => { window.removeEventListener("keydown", handleKeyDown); };
-  }, [isOpen, onClose]);
-
-  // Close on click outside
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
-        onClose();
-      }
-    };
-
-    // Delay to avoid immediate close on button click
-    const timeoutId = setTimeout(() => {
-      window.addEventListener("click", handleClickOutside);
-    }, 0) as unknown as number;
-
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener("click", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
 
   // Handle mechanic selection (first step - show configuration)
   const handlePreSelect = useCallback(
@@ -210,13 +188,26 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
   const SelectedMechanicSettings = selectedMechanic?.Settings;
 
   return createPortal(
-    <div className={styles.overlay}>
-      <div ref={panelRef} className={styles.panel}>
+    <div
+      className={styles.overlay}
+      onClick={overlayProps.onClick}
+      role={overlayProps.role}
+      aria-hidden={overlayProps["aria-hidden"]}
+    >
+      <div
+        ref={panelRef}
+        className={styles.panel}
+        role={contentProps.role}
+        aria-modal={contentProps["aria-modal"]}
+        aria-labelledby="mechanic-panel-title"
+        tabIndex={contentProps.tabIndex}
+        onClick={contentProps.onClick}
+      >
         <header className={styles.header}>
           <div className={styles.headerIcon}>
             <GameControllerIcon />
           </div>
-          <h2 className={styles.title}>Games</h2>
+          <h2 id="mechanic-panel-title" className={styles.title}>Games</h2>
           <button
             type="button"
             className={styles.closeButton}

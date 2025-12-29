@@ -71,7 +71,7 @@ export const fontDefinitionSchema = z.object({
   /** Fallback fonts (system fonts) */
   fallbacks: z.array(z.string()).optional(),
   /** URL to load font from (Google Fonts, custom URL) */
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   /** Font weight (for variable fonts) */
   weight: z.union([z.string(), z.number()]).optional(),
   /** Font style */
@@ -169,11 +169,11 @@ export type ThemeAnimations = z.infer<typeof themeAnimationsSchema>;
  */
 export const themeCardBackSchema = z.object({
   /** Background image URL */
-  backgroundImage: z.string().url().optional(),
+  backgroundImage: z.url().optional(),
   /** Background mode: full (cover), tiled (repeat), none */
   backgroundMode: z.enum(["full", "tiled", "none"]).optional(),
   /** Logo/watermark image URL */
-  logoImage: z.string().url().optional(),
+  logoImage: z.url().optional(),
   /** Logo opacity (0-1) */
   logoOpacity: z.number().min(0).max(1).optional(),
   /** Pattern overlay (SVG pattern or gradient) */
@@ -223,7 +223,7 @@ export const themeContributionSchema = z.object({
   /** Theme description */
   description: z.string().max(500).optional(),
   /** Theme preview image URL */
-  preview: z.string().url().optional(),
+  preview: z.url().optional(),
   /** Theme category (e.g., "dark", "light", "retro", "minimal") */
   category: z.enum(["dark", "light", "retro", "minimal", "custom"]).default("custom"),
 
@@ -245,7 +245,7 @@ export const themeContributionSchema = z.object({
   /** Raw CSS to inject (for advanced customisation) */
   customCSS: z.string().max(50000).optional(),
   /** External CSS file URL to load */
-  cssUrl: z.string().url().optional(),
+  cssUrl: z.url().optional(),
 });
 
 export type ThemeContribution = z.infer<typeof themeContributionSchema>;

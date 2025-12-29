@@ -25,6 +25,12 @@ const CACHE_VERSION = "1.0.0";
 const DEFAULT_MAX_AGE = 24 * 60 * 60 * 1000;
 
 /**
+ * Stale threshold (1 hour in milliseconds).
+ * Cache is considered stale but usable after this time.
+ */
+const STALE_THRESHOLD = 60 * 60 * 1000;
+
+/**
  * Cached data wrapper with metadata.
  */
 interface CachedData<T> {
@@ -224,5 +230,84 @@ export async function listCachedCollections(
   } catch (error) {
     console.warn("Failed to list cached collections:", error);
     return [];
+  }
+}
+
+/**
+ * Cache metadata for a source.
+ */
+export interface CacheMetadata {
+  /** Whether cache exists */
+  exists: boolean;
+
+  /** Timestamp when cached */
+  cachedAt?: Date;
+
+  /** Cache age in milliseconds */
+  ageMs?: number;
+
+  /** Whether cache is fresh (< 1 hour old) */
+  isFresh?: boolean;
+
+  /** Whether cache is stale but usable (1-24 hours old) */
+  isStale?: boolean;
+
+  /** Cache status: fresh, stale, or none */
+  status: "fresh" | "stale" | "none";
+}
+
+/**
+ * Get cache metadata for a source.
+ *
+ * @param sourceId - Unique identifier for the data source
+ * @returns Cache metadata including timestamp, age, and freshness status
+ */
+export async function getCacheMetadata(sourceId: string): Promise<CacheMetadata> {
+  const cacheKey = getCacheKey(sourceId);
+
+  try {
+    const cached = await get<CachedData<Collection>>(cacheKey);
+
+    if (!cached) {
+      return {
+        exists: false,
+        status: "none",
+      };
+    }
+
+    // Check version compatibility
+    if (cached.version !== CACHE_VERSION) {
+      return {
+        exists: false,
+        status: "none",
+      };
+    }
+
+    const ageMs = Date.now() - cached.timestamp;
+
+    // Check if cache is expired (> 24 hours)
+    if (ageMs > DEFAULT_MAX_AGE) {
+      return {
+        exists: false,
+        status: "none",
+      };
+    }
+
+    const isFresh = ageMs < STALE_THRESHOLD;
+    const isStale = !isFresh;
+
+    return {
+      exists: true,
+      cachedAt: new Date(cached.timestamp),
+      ageMs,
+      isFresh,
+      isStale,
+      status: isFresh ? "fresh" : "stale",
+    };
+  } catch {
+    return {
+      exists: false,
+      status: "none",
+    };
   }
 }

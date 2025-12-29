@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card } from "@/components/Card/Card";
 import { DraggableCardGrid } from "@/components/DraggableCardGrid";
 import { SearchBar } from "@/components/SearchBar";
@@ -10,11 +11,13 @@ import { useSettingsContext } from "@/hooks/useSettingsContext";
 import { useGridNavigation } from "@/hooks/useGridNavigation";
 import { useShuffledCards } from "@/hooks/useShuffledCards";
 import { useFitToViewport } from "@/hooks/useFitToViewport";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { useSettingsStore, CARD_ASPECT_RATIOS } from "@/stores/settingsStore";
 import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
 import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { springPresets, getItemDelay } from "@/config/animationPresets";
 import type { CardDisplayConfig } from "@/types/display";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./CardGrid.module.css";
@@ -65,6 +68,9 @@ export function CardGrid() {
   // v0.11.0: Mechanics integration
   const { mechanic, state: mechanicState } = useMechanicContext();
   const mechanicCardActions = useMechanicCardActions();
+
+  // F-041: Reduced motion preference for staggered animations
+  const prefersReducedMotion = useReducedMotion();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const fitContainerRef = useRef<HTMLDivElement>(null);
@@ -772,49 +778,70 @@ export function CardGrid() {
       return <div className={styles.empty}>No cards to display</div>;
     }
 
-    return cards.map((card, index) => {
-      const pos = positions[index];
-      if (!pos) return null;
+    // F-041: Staggered entrance animation for grid items
+    // Uses spring physics and respects reduced motion preference
+    return (
+      <AnimatePresence mode="popLayout">
+        {cards.map((card, index) => {
+          const pos = positions[index];
+          if (!pos) return null;
 
-      // When mechanic is active, use its highlight state for flip display
-      // For memory game: cards are "flipped" when they're highlighted by the mechanic
-      const isFlipped = mechanicCardActions?.isHighlighted
-        ? mechanicCardActions.isHighlighted(card.id)
-        : flippedCardIds.includes(card.id);
-      const tabIndex = getTabIndex(index);
+          // When mechanic is active, use its highlight state for flip display
+          // For memory game: cards are "flipped" when they're highlighted by the mechanic
+          const isFlipped = mechanicCardActions?.isHighlighted
+            ? mechanicCardActions.isHighlighted(card.id)
+            : flippedCardIds.includes(card.id);
+          const tabIndex = getTabIndex(index);
 
-      // Get CardOverlay component from active mechanic
-      const CardOverlay = mechanic?.CardOverlay;
+          // Get CardOverlay component from active mechanic
+          const CardOverlay = mechanic?.CardOverlay;
 
-      return (
-        <div
-          key={card.id}
-          className={styles.card}
-          style={{
-            left: `${String(pos.left)}px`,
-            top: `${String(pos.top)}px`,
-            width: `${String(effectiveDimensions.width)}px`,
-            height: `${String(effectiveDimensions.height)}px`,
-          }}
-          role="gridcell"
-        >
-          <Card
-            card={card}
-            cardNumber={index + 1}
-            isFlipped={isFlipped}
-            onFlip={() => { handleFlip(card.id); }}
-            tabIndex={tabIndex}
-            cardBackDisplay={cardBackDisplay}
-            showRankBadge={showRankBadge}
-            showFooterBadge={showFooterBadge}
-            rankPlaceholderText={rankPlaceholderText}
-            displayConfig={mergedDisplayConfig}
-            cardSize={cardSizePreset}
-            overlay={CardOverlay && <CardOverlay cardId={card.id} />}
-          />
-        </div>
-      );
-    });
+          // Calculate staggered delay (skip for reduced motion)
+          const entranceDelay = prefersReducedMotion ? 0 : getItemDelay(index);
+
+          return (
+            <motion.div
+              key={card.id}
+              className={styles.card}
+              style={{
+                left: `${String(pos.left)}px`,
+                top: `${String(pos.top)}px`,
+                width: `${String(effectiveDimensions.width)}px`,
+                height: `${String(effectiveDimensions.height)}px`,
+              }}
+              role="gridcell"
+              initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={prefersReducedMotion ? undefined : { opacity: 0, scale: 0.9 }}
+              transition={
+                prefersReducedMotion
+                  ? { duration: 0 }
+                  : {
+                      type: "spring",
+                      ...springPresets.gridEntrance,
+                      delay: entranceDelay,
+                    }
+              }
+            >
+              <Card
+                card={card}
+                cardNumber={index + 1}
+                isFlipped={isFlipped}
+                onFlip={() => { handleFlip(card.id); }}
+                tabIndex={tabIndex}
+                cardBackDisplay={cardBackDisplay}
+                showRankBadge={showRankBadge}
+                showFooterBadge={showFooterBadge}
+                rankPlaceholderText={rankPlaceholderText}
+                displayConfig={mergedDisplayConfig}
+                cardSize={cardSizePreset}
+                overlay={CardOverlay && <CardOverlay cardId={card.id} />}
+              />
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    );
   };
 
   // Render draggable grid when drag mode is enabled AND layout is grid

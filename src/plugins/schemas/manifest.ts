@@ -34,9 +34,9 @@ export const pluginAuthorSchema = z.object({
   /** Author display name */
   name: z.string().min(1).max(100),
   /** Author URL (GitHub profile, website, etc.) */
-  url: z.string().url().optional(),
+  url: z.url().optional(),
   /** Author email */
-  email: z.string().email().optional(),
+  email: z.email().optional(),
 });
 
 export type PluginAuthor = z.infer<typeof pluginAuthorSchema>;
@@ -203,7 +203,7 @@ export type PluginContributes = z.infer<typeof pluginContributesSchema>;
  */
 export const pluginManifestSchema = z.object({
   /** JSON Schema URL (optional, for IDE support) */
-  $schema: z.string().url().optional(),
+  $schema: z.url().optional(),
 
   /** Unique plugin identifier (reverse domain notation) */
   id: z
@@ -228,10 +228,10 @@ export const pluginManifestSchema = z.object({
   licence: z.string().optional(),
 
   /** Plugin homepage URL */
-  homepage: z.string().url().optional(),
+  homepage: z.url().optional(),
 
   /** Source repository URL */
-  repository: z.string().url().optional(),
+  repository: z.url().optional(),
 
   /** Keywords for discoverability */
   keywords: z.array(z.string().max(30)).max(10).optional(),

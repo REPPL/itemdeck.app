@@ -5,11 +5,13 @@
  * Uses the same patterns as CacheConsentDialog for consistency.
  *
  * @see v0.11.5 Phase 1: Foundation
+ * @see F-111: Overlay Consistency Review
  */
 
 import { useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useFocusTrap } from "@/hooks/useFocusTrap";
 import styles from "./ConfirmDialog.module.css";
 
 /**
@@ -58,6 +60,14 @@ export function ConfirmDialog({
   const cancelButtonRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
 
+  // Use shared focus trap hook for consistent behaviour
+  useFocusTrap({
+    enabled: isOpen,
+    onEscape: onCancel,
+    restoreFocus: true,
+    initialFocus: confirmButtonRef,
+  });
+
   // Focus confirm button when dialog opens
   useEffect(() => {
     if (isOpen && confirmButtonRef.current) {
@@ -65,45 +75,23 @@ export function ConfirmDialog({
     }
   }, [isOpen]);
 
-  // Handle keyboard events
+  // Handle Enter key for confirmation
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (!isOpen) return;
 
-      switch (event.key) {
-        case "Escape":
+      if (event.key === "Enter") {
+        // Only confirm if not focused on cancel button
+        if (document.activeElement !== cancelButtonRef.current) {
           event.preventDefault();
-          onCancel();
-          break;
-        case "Enter":
-          // Only confirm if not focused on cancel button
-          if (document.activeElement !== cancelButtonRef.current) {
-            event.preventDefault();
-            onConfirm();
-          }
-          break;
-        case "Tab": {
-          // Simple focus trap between the two buttons
-          if (!dialogRef.current) return;
-          const focusableElements = dialogRef.current.querySelectorAll("button");
-          const firstElement = focusableElements[0];
-          const lastElement = focusableElements[focusableElements.length - 1];
-
-          if (event.shiftKey && document.activeElement === firstElement) {
-            event.preventDefault();
-            (lastElement as HTMLElement).focus();
-          } else if (!event.shiftKey && document.activeElement === lastElement) {
-            event.preventDefault();
-            (firstElement as HTMLElement).focus();
-          }
-          break;
+          onConfirm();
         }
       }
     },
-    [isOpen, onConfirm, onCancel]
+    [isOpen, onConfirm]
   );
 
-  // Add keyboard event listener
+  // Add keyboard event listener for Enter
   useEffect(() => {
     if (!isOpen) return;
 

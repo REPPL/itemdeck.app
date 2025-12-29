@@ -2,10 +2,14 @@
  * Modal component for displaying overlays.
  *
  * Handles focus trapping, keyboard navigation, and accessibility.
+ * Uses shared useOverlay hook for consistent behaviour.
+ *
+ * @see F-111: Overlay Consistency Review
  */
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
+import { useOverlay } from "@/hooks/useOverlay";
 import styles from "./Modal.module.css";
 
 interface ModalProps {
@@ -30,79 +34,34 @@ interface ModalProps {
  */
 export function Modal({ isOpen, onClose, title, children, className }: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const previousActiveElement = useRef<HTMLElement | null>(null);
 
-  // Store the previously focused element and focus the modal
-  useEffect(() => {
-    if (isOpen) {
-      previousActiveElement.current = document.activeElement as HTMLElement;
-      modalRef.current?.focus();
-    } else if (previousActiveElement.current) {
-      previousActiveElement.current.focus();
-    }
-  }, [isOpen]);
-
-  // Handle keyboard navigation
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        onClose();
-        return;
-      }
-
-      // Focus trap
-      if (event.key === "Tab" && modalRef.current) {
-        const focusableElements = modalRef.current.querySelectorAll<HTMLElement>(
-          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-        );
-
-        const firstElement = focusableElements[0];
-        const lastElement = focusableElements[focusableElements.length - 1];
-
-        if (event.shiftKey && document.activeElement === firstElement) {
-          event.preventDefault();
-          lastElement?.focus();
-        } else if (!event.shiftKey && document.activeElement === lastElement) {
-          event.preventDefault();
-          firstElement?.focus();
-        }
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  // Prevent body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  // Use shared overlay hook for consistent behaviour
+  const { overlayProps, contentProps } = useOverlay({
+    isOpen,
+    onClose,
+    closeOnEscape: true,
+    closeOnClickOutside: true,
+    trapFocus: true,
+    preventScroll: true,
+  });
 
   if (!isOpen) return null;
 
   const modalContent = (
-    <div className={styles.overlay} onClick={onClose}>
+    <div
+      className={styles.overlay}
+      onClick={overlayProps.onClick}
+      role={overlayProps.role}
+      aria-hidden={overlayProps["aria-hidden"]}
+    >
       <div
         ref={modalRef}
         className={[styles.modal, className].filter(Boolean).join(" ")}
-        role="dialog"
-        aria-modal="true"
+        role={contentProps.role}
+        aria-modal={contentProps["aria-modal"]}
         aria-labelledby="modal-title"
-        tabIndex={-1}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
+        tabIndex={contentProps.tabIndex}
+        onClick={contentProps.onClick}
       >
         <header className={styles.header}>
           <h2 id="modal-title" className={styles.title}>

@@ -448,9 +448,9 @@ export function formatValidationResult(result: ValidationResult): string {
   const lines: string[] = [];
 
   if (!result.valid) {
-    lines.push(`Validation FAILED with ${result.errors.length} error(s).`);
+    lines.push(`Validation FAILED with ${String(result.errors.length)} error(s).`);
   } else {
-    lines.push(`Validation passed with ${result.warnings.length} warning(s).`);
+    lines.push(`Validation passed with ${String(result.warnings.length)} warning(s).`);
   }
 
   lines.push("");

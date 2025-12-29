@@ -20,9 +20,10 @@ const EXCLUDED_FIELD_PATTERNS = [
   /timestamp/i,
   /^_/i, // private/internal fields
   /^index$/i,
-  // Note: 'order' and 'rank' are intentionally NOT excluded - they are valid stats
   /^sort/i,
   /^position$/i,
+  /^order$/i, // generic order field (often just display order, not meaningful stat)
+  /^rank$/i, // generic rank field (prefer specific variants like myRank)
 ];
 
 /**

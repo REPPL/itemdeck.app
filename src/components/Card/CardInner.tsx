@@ -1,12 +1,13 @@
 import { type ReactNode } from "react";
 import { motion } from "framer-motion";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { springPresets } from "@/config/animationPresets";
 import styles from "./Card.module.css";
 
 interface CardInnerProps {
   /** Whether the card is flipped to show front */
   isFlipped: boolean;
-  /** Flip animation duration in seconds */
+  /** Flip animation duration in seconds (used as fallback when spring disabled) */
   flipDuration: number;
   /** Card back face */
   back: ReactNode;
@@ -21,10 +22,16 @@ interface CardInnerProps {
 /**
  * Inner container that handles 3D flip transform.
  * Contains both card faces and rotates on Y-axis when flipped.
+ *
+ * Uses spring physics for natural, bouncy flip animation.
+ * Respects user's reduced motion preference via MotionConfig.
+ *
+ * @see F-041: Card Animation Polish
  */
 export function CardInner({
   isFlipped,
-  flipDuration,
+  // flipDuration kept for API compatibility but spring physics are used instead
+  flipDuration: _flipDuration,
   back,
   front,
   onFlipStart,
@@ -34,22 +41,26 @@ export function CardInner({
   const themeCustomisations = useSettingsStore((state) => state.themeCustomisations);
   const flipAnimationEnabled = themeCustomisations[visualTheme].flipAnimation;
 
-  // Use instant transition (0) when flip animation is disabled
-  const actualDuration = flipAnimationEnabled ? flipDuration : 0;
+  // Use spring physics when animation is enabled, instant otherwise
+  const flipTransition = flipAnimationEnabled
+    ? {
+        type: "spring" as const,
+        ...springPresets.cardFlip,
+      }
+    : {
+        duration: 0,
+      };
 
   return (
     <motion.div
       className={styles.cardInner}
       initial={false}
       animate={{ rotateY: isFlipped ? 180 : 0 }}
-      transition={{
-        duration: actualDuration,
-        ease: "easeInOut",
-      }}
+      transition={flipTransition}
       style={{ transformStyle: "preserve-3d" }}
       onAnimationStart={() => {
-        // Only trigger if animation has meaningful duration
-        if (actualDuration > 0) {
+        // Only trigger if animation is enabled
+        if (flipAnimationEnabled) {
           onFlipStart?.();
         }
       }}

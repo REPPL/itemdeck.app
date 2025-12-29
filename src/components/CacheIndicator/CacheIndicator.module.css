@@ -1,0 +1,114 @@
+/**
+ * CacheIndicator component styles.
+ *
+ * Visual indicator showing cache freshness status.
+ */
+
+.container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+}
+
+.container:focus {
+  outline: none;
+}
+
+.container:focus-visible .indicator {
+  box-shadow: 0 0 0 2px var(--focus-colour);
+}
+
+/* Indicator dot */
+.indicator {
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Size variants */
+.small {
+  width: 8px;
+  height: 8px;
+}
+
+.medium {
+  width: 10px;
+  height: 10px;
+}
+
+/* Status colours */
+.fresh {
+  background: var(--colour-success, #22c55e);
+  box-shadow: 0 0 4px var(--colour-success, #22c55e);
+}
+
+.stale {
+  background: var(--colour-warning, #f59e0b);
+  box-shadow: 0 0 4px var(--colour-warning, #f59e0b);
+}
+
+.none {
+  background: var(--colour-text-muted, #6b7280);
+  opacity: 0.6;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  background: var(--colour-surface-elevated, #1f2937);
+  border: 1px solid var(--colour-border, #374151);
+  border-radius: var(--radius-md);
+  box-shadow: var(--elevation-3);
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  animation: tooltipFadeIn var(--transition-fast) ease-out;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--colour-border, #374151);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.tooltipTitle {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--colour-text);
+}
+
+.tooltipDescription {
+  font-size: var(--text-xs);
+  color: var(--colour-text-muted);
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    animation: none;
+  }
+}

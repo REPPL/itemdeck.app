@@ -160,7 +160,7 @@ export const mechanicContributionSchema = z.object({
   /** Mechanic icon (URL or emoji) */
   icon: z.string().optional(),
   /** Preview image URL */
-  preview: z.string().url().optional(),
+  preview: z.url().optional(),
 
   /** Minimum number of cards required */
   minCards: z.number().int().positive().default(2),
@@ -180,10 +180,10 @@ export const mechanicContributionSchema = z.object({
   ui: mechanicUIConfigSchema.optional(),
 
   /** Sample collection URL for demo/testing */
-  sampleCollection: z.string().url().optional(),
+  sampleCollection: z.url().optional(),
 
   /** Documentation URL */
-  docs: z.string().url().optional(),
+  docs: z.url().optional(),
 
   /** Whether the mechanic is experimental/beta */
   experimental: z.boolean().default(false),

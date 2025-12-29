@@ -8,6 +8,8 @@
  * - New tab order: Quick | Appearance | Collections | Data | System
  * - Removed X close button (Cancel button in footer suffices)
  * - Search moved to header area
+ *
+ * @see F-111: Overlay Consistency Review
  */
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -20,6 +22,7 @@ import { DataTab } from "./DataTab";
 import { SettingsSearch } from "./SettingsSearch";
 import { useViewportSize } from "@/hooks/useViewportSize";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useOverlay } from "@/hooks/useOverlay";
 import styles from "./SettingsPanel.module.css";
 
 interface SettingsPanelProps {
@@ -141,13 +144,6 @@ export function SettingsPanel({
     setActiveSubTab(subTab);
   }, []);
 
-  // Start editing when panel opens (F-090)
-  useEffect(() => {
-    if (isOpen) {
-      startEditing();
-    }
-  }, [isOpen, startEditing]);
-
   // Handle Cancel button - discard draft and close
   const handleCancel = useCallback(() => {
     discardDraft();
@@ -160,43 +156,26 @@ export function SettingsPanel({
     onClose();
   }, [commitDraft, onClose]);
 
-  // Focus management
+  // Use shared overlay hook for consistent behaviour
+  const { overlayProps, contentProps } = useOverlay({
+    isOpen,
+    onClose: handleCancel, // Cancel on escape/click outside
+    closeOnEscape: true,
+    closeOnClickOutside: true,
+    trapFocus: true,
+    preventScroll: true,
+  });
+
+  // Start editing when panel opens (F-090)
   useEffect(() => {
     if (isOpen) {
+      startEditing();
       previousActiveElement.current = document.activeElement as HTMLElement;
       panelRef.current?.focus();
     } else if (previousActiveElement.current) {
       previousActiveElement.current.focus();
     }
-  }, [isOpen]);
-
-  // Keyboard handling
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        handleCancel();
-      }
-    };
-
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isOpen, handleCancel]);
-
-  // Prevent body scroll when panel is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isOpen]);
+  }, [isOpen, startEditing]);
 
   if (!isOpen) return null;
 
@@ -231,15 +210,20 @@ export function SettingsPanel({
   ].filter(Boolean).join(" ");
 
   const panelContent = (
-    <div className={styles.overlay} onClick={handleCancel}>
+    <div
+      className={styles.overlay}
+      onClick={overlayProps.onClick}
+      role={overlayProps.role}
+      aria-hidden={overlayProps["aria-hidden"]}
+    >
       <div
         ref={panelRef}
         className={panelClassName}
-        role="dialog"
-        aria-modal="true"
+        role={contentProps.role}
+        aria-modal={contentProps["aria-modal"]}
         aria-labelledby="settings-title"
-        tabIndex={-1}
-        onClick={(e) => { e.stopPropagation(); }}
+        tabIndex={contentProps.tabIndex}
+        onClick={contentProps.onClick}
       >
         <header className={styles.header}>
           <h2 id="settings-title" className={styles.title}>Settings</h2>

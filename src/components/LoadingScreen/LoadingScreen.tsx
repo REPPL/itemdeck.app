@@ -17,6 +17,7 @@ import { useSourceStore } from "@/stores/sourceStore";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isCollectionCached, listCachedCollections, type CacheInfo } from "@/lib/cardCache";
 import { CacheConsentDialog } from "@/components/CacheConsentDialog";
+import logo from "@/assets/img/logo.png";
 import styles from "./LoadingScreen.module.css";
 
 /**
@@ -338,12 +339,12 @@ export function LoadingScreen({
           </div>
         ) : (
           <div className={styles.logo}>
-            <svg viewBox="0 0 48 48" className={styles.logoIcon}>
-              {/* Simple deck of cards icon */}
-              <rect x="8" y="12" width="24" height="32" rx="2" className={styles.card1} />
-              <rect x="12" y="8" width="24" height="32" rx="2" className={styles.card2} />
-              <rect x="16" y="4" width="24" height="32" rx="2" className={styles.card3} />
-            </svg>
+            <img
+              src={logo}
+              alt="itemdeck"
+              className={styles.logoImage}
+              draggable="false"
+            />
           </div>
         )}
 

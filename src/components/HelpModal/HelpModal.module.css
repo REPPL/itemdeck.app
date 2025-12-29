@@ -89,12 +89,36 @@
 
 .content {
   padding: var(--spacing-lg, 24px);
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* ============================================
+   Category Sections
+   ============================================ */
+
+.section {
+  margin-bottom: var(--spacing-lg, 24px);
+}
+
+.section:last-child {
+  margin-bottom: 0;
+}
+
+.sectionTitle {
+  margin: 0 0 var(--spacing-sm, 12px) 0;
+  font-family: var(--font-family-heading);
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  colour: var(--colour-primary, #4f9eff);
+  color: var(--colour-primary, #4f9eff);
 }
 
 .shortcutsTable {
   width: 100%;
   border-collapse: collapse;
-  margin-bottom: var(--spacing-md, 16px);
 }
 
 .shortcutsTable tr {

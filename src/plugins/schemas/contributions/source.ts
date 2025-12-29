@@ -60,9 +60,9 @@ export const authConfigSchema = z.object({
     /** OAuth scopes required */
     scopes: z.array(z.string()).optional(),
     /** OAuth authorize URL */
-    authorizeUrl: z.string().url().optional(),
+    authorizeUrl: z.url().optional(),
     /** OAuth token URL */
-    tokenUrl: z.string().url().optional(),
+    tokenUrl: z.url().optional(),
   }).optional(),
 });
 
@@ -207,7 +207,7 @@ export const sourceContributionSchema = z.object({
   urlTemplate: urlTemplateSchema.optional(),
 
   /** Base URL for API sources */
-  baseUrl: z.string().url().optional(),
+  baseUrl: z.url().optional(),
 
   /** Authentication configuration */
   auth: authConfigSchema.optional(),
@@ -236,7 +236,7 @@ export const sourceContributionSchema = z.object({
   }).optional(),
 
   /** Documentation URL */
-  docs: z.string().url().optional(),
+  docs: z.url().optional(),
 
   /** Whether the source is experimental/beta */
   experimental: z.boolean().default(false),

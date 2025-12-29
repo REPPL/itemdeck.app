@@ -784,15 +784,45 @@
   color: var(--colour-text);
 }
 
-/* Tablet adjustments */
-@media (max-width: 768px) {
+/* iPad and tablet adjustments (768px-1024px) */
+@media (max-width: 1024px) {
+  .cardsContainer {
+    max-width: 600px;
+    gap: 1.5rem;
+  }
+
   .battleCard {
     max-width: 240px;
+  }
+
+  .vsIndicator {
+    font-size: 1.25rem;
+  }
+
+  .statButton,
+  .statHidden {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.8rem;
+    min-height: 2.25rem;
+  }
+}
+
+/* Smaller tablets and large phones */
+@media (max-width: 768px) {
+  .battleCard {
+    max-width: 200px;
   }
 
   .cardImage,
   .cardBack {
     aspect-ratio: 4 / 3;
+  }
+
+  .statButton,
+  .statHidden {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+    min-height: 2rem;
   }
 }
 

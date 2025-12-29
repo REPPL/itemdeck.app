@@ -21,7 +21,7 @@ export const mechanicAuthorSchema = z.object({
   /** Author display name */
   name: z.string().min(1),
   /** Author URL (GitHub profile, website, etc.) */
-  url: z.string().url().optional(),
+  url: z.url().optional(),
 });
 
 export type MechanicAuthor = z.infer<typeof mechanicAuthorSchema>;
@@ -62,7 +62,7 @@ export const mechanicManifestSchema = z.object({
   theme: z.string().optional(),
 
   /** Sample collection URL for demo/testing */
-  sampleCollection: z.string().url().optional(),
+  sampleCollection: z.url().optional(),
 
   /** Minimum number of cards required to play */
   minCards: z.number().int().positive().optional(),
@@ -86,13 +86,13 @@ export const mechanicManifestSchema = z.object({
   keywords: z.array(z.string()).optional(),
 
   /** URL to the mechanic's icon */
-  icon: z.string().url().optional(),
+  icon: z.url().optional(),
 
   /** URL to the mechanic's documentation */
-  docs: z.string().url().optional(),
+  docs: z.url().optional(),
 
   /** URL to the mechanic's source repository */
-  repository: z.string().url().optional(),
+  repository: z.url().optional(),
 
   /** Licence identifier (SPDX) */
   licence: z.string().optional(),
@@ -116,11 +116,11 @@ export const mechanicRegistryEntrySchema = z.object({
   /** Display name */
   name: z.string().min(1),
   /** Manifest URL */
-  manifestUrl: z.string().url(),
+  manifestUrl: z.url(),
   /** Short description */
   description: z.string().optional(),
   /** Preview image URL */
-  preview: z.string().url().optional(),
+  preview: z.url().optional(),
   /** Whether this is an official mechanic */
   official: z.boolean().default(false),
 });
@@ -134,7 +134,7 @@ export const mechanicRegistrySchema = z.object({
   /** Registry version */
   version: z.string(),
   /** Last updated timestamp (ISO 8601) */
-  lastUpdated: z.string().datetime().optional(),
+  lastUpdated: z.iso.datetime().optional(),
   /** List of available mechanics */
   mechanics: z.array(mechanicRegistryEntrySchema),
 });

@@ -169,7 +169,7 @@ function parsePathSegment(segment: string): ParsedSegment {
   }
 
   // Extract numeric index: [0] (must be numeric, not a filter)
-  const indexMatch = /\[(\d+)\](?![^\[])/.exec(segment);
+  const indexMatch = /\[(\d+)\](?![^[])/.exec(segment);
   if (indexMatch) {
     index = parseInt(indexMatch[1] ?? "", 10);
   }

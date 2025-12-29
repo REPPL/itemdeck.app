@@ -17,7 +17,7 @@ const STORAGE_KEY = "itemdeck-sources";
 /**
  * Current store version for migrations.
  */
-const STORE_VERSION = 2;
+const STORE_VERSION = 3;
 
 /**
  * Source type indicating how the source was added.
@@ -46,6 +46,12 @@ export interface Source {
   mpmUsername?: string;
   /** MyPlausibleMe folder (if sourceType is myplausibleme) */
   mpmFolder?: string;
+  /** Last remote update check timestamp */
+  lastRemoteCheck?: Date;
+  /** Remote last modified timestamp from update check */
+  remoteLastModified?: number;
+  /** Whether an update is available */
+  hasUpdate?: boolean;
 }
 
 /**
@@ -78,6 +84,10 @@ interface SourceState {
   getActiveSourceUrl: () => string | null;
   /** Get source by ID */
   getSource: (id: string) => Source | undefined;
+  /** Update source update check result */
+  setSourceUpdateCheck: (id: string, hasUpdate: boolean, remoteLastModified?: number) => void;
+  /** Clear update flag for a source (after user refreshes) */
+  clearSourceUpdate: (id: string) => void;
 }
 
 /**
@@ -280,6 +290,34 @@ export const useSourceStore = create<SourceState>()(
       getSource: (id: string) => {
         return get().sources.find((s) => s.id === id);
       },
+
+      setSourceUpdateCheck: (id: string, hasUpdate: boolean, remoteLastModified?: number) => {
+        set((state) => ({
+          sources: state.sources.map((s) =>
+            s.id === id
+              ? {
+                  ...s,
+                  hasUpdate,
+                  remoteLastModified,
+                  lastRemoteCheck: new Date(),
+                }
+              : s
+          ),
+        }));
+      },
+
+      clearSourceUpdate: (id: string) => {
+        set((state) => ({
+          sources: state.sources.map((s) =>
+            s.id === id
+              ? {
+                  ...s,
+                  hasUpdate: false,
+                }
+              : s
+          ),
+        }));
+      },
     }),
     {
       name: STORAGE_KEY,
@@ -325,6 +363,9 @@ export const useSourceStore = create<SourceState>()(
           addedAt: new Date(s.addedAt),
           lastHealthCheck: s.lastHealthCheck
             ? new Date(s.lastHealthCheck)
+            : undefined,
+          lastRemoteCheck: s.lastRemoteCheck
+            ? new Date(s.lastRemoteCheck)
             : undefined,
         }));
 

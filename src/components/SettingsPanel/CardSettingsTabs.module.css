@@ -46,6 +46,17 @@
   box-shadow: var(--elevation-1);
 }
 
+/* Disabled state (F-107) */
+.subTabDisabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.subTabDisabled:hover {
+  background: transparent;
+  color: var(--colour-text-muted);
+}
+
 .subTab:focus-visible {
   outline: 2px solid var(--focus-colour);
   outline-offset: -2px;

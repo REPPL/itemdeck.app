@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
+import { isNavigationKey } from "@/config/keyboardShortcuts";
 
 interface UseGridNavigationOptions {
   /** Total number of items in the grid */
@@ -29,6 +30,7 @@ interface UseGridNavigationResult {
  *
  * Supports:
  * - Arrow keys for navigation
+ * - Vim-style keys (h/j/k/l) for navigation
  * - Home/End for first/last item
  * - Enter/Space to select
  */
@@ -59,58 +61,54 @@ export function useGridNavigation({
     (event: React.KeyboardEvent) => {
       if (!enabled || totalItems === 0) return;
 
-      const { key } = event;
+      const { code, key } = event;
       let newIndex = focusedIndex;
       let handled = false;
 
-      switch (key) {
-        case "ArrowRight":
-          if (focusedIndex < totalItems - 1) {
-            newIndex = focusedIndex + 1;
-            handled = true;
-          }
-          break;
-
-        case "ArrowLeft":
-          if (focusedIndex > 0) {
-            newIndex = focusedIndex - 1;
-            handled = true;
-          }
-          break;
-
-        case "ArrowDown":
-          if (focusedIndex + columns < totalItems) {
-            newIndex = focusedIndex + columns;
-            handled = true;
-          }
-          break;
-
-        case "ArrowUp":
-          if (focusedIndex - columns >= 0) {
-            newIndex = focusedIndex - columns;
-            handled = true;
-          }
-          break;
-
-        case "Home":
-          newIndex = 0;
+      // Navigation: Arrow keys and vim-style (h/j/k/l)
+      if (isNavigationKey(code, "right") || key === "ArrowRight") {
+        if (focusedIndex < totalItems - 1) {
+          newIndex = focusedIndex + 1;
           handled = true;
-          break;
-
-        case "End":
-          newIndex = totalItems - 1;
+        }
+      } else if (isNavigationKey(code, "left") || key === "ArrowLeft") {
+        if (focusedIndex > 0) {
+          newIndex = focusedIndex - 1;
           handled = true;
-          break;
-
-        case "Enter":
-        case " ":
-          event.preventDefault();
-          onSelect(focusedIndex);
+        }
+      } else if (isNavigationKey(code, "down") || key === "ArrowDown") {
+        if (focusedIndex + columns < totalItems) {
+          newIndex = focusedIndex + columns;
           handled = true;
-          break;
+        }
+      } else if (isNavigationKey(code, "up") || key === "ArrowUp") {
+        if (focusedIndex - columns >= 0) {
+          newIndex = focusedIndex - columns;
+          handled = true;
+        }
+      } else {
+        // Non-vim navigation keys
+        switch (key) {
+          case "Home":
+            newIndex = 0;
+            handled = true;
+            break;
 
-        default:
-          break;
+          case "End":
+            newIndex = totalItems - 1;
+            handled = true;
+            break;
+
+          case "Enter":
+          case " ":
+            event.preventDefault();
+            onSelect(focusedIndex);
+            handled = true;
+            break;
+
+          default:
+            break;
+        }
       }
 
       if (handled) {

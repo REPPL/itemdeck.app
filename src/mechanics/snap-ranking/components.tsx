@@ -58,7 +58,7 @@ export function SnapRankingCardOverlay({ cardId }: CardOverlayProps) {
     return (
       <div className={styles.cardOverlay}>
         <span
-          className={`${styles.guessBadge} ${styles[feedback.type]}`}
+          className={[styles.guessBadge, styles[feedback.type]].filter(Boolean).join(" ")}
         >
           {String(guess.actualValue)}
         </span>
@@ -70,7 +70,7 @@ export function SnapRankingCardOverlay({ cardId }: CardOverlayProps) {
   if (isCurrent && !isCurrentCardFlipped) {
     return (
       <div
-        className={`${styles.cardOverlay} ${styles.clickable}`}
+        className={[styles.cardOverlay, styles.clickable].filter(Boolean).join(" ")}
         onClick={handleClick}
         role="button"
         tabIndex={0}
@@ -168,7 +168,7 @@ function GuessButtons() {
       <div className={styles.guessHeader}>
         <span className={styles.guessPrompt}>Guess the {guessField}:</span>
       </div>
-      <div className={`${styles.guessButtons} ${layoutClass}`}>
+      <div className={[styles.guessButtons, layoutClass].filter(Boolean).join(" ")}>
         {uniqueValues.map((value, i) => {
           const shortcut = i < 9 ? String(i + 1) : i === 9 ? "0" : null;
           return (
@@ -217,7 +217,7 @@ function SnapRankingFloatingTimer() {
   return (
     <FloatingTimer
       timeMs={elapsedMs}
-      progressLabel={`${currentIndex}/${cardIds.length}`}
+      progressLabel={`${String(currentIndex)}/${String(cardIds.length)}`}
       visible={true}
     />
   );
@@ -265,7 +265,7 @@ function ResultsModal() {
     <GameCompletionModal
       isOpen={isComplete}
       title="Game Complete!"
-      subtitle={`${totalScore}/${maxScore} (${percentage}%)`}
+      subtitle={`${String(totalScore)}/${String(maxScore)} (${String(percentage)}%)`}
       stats={[
         { label: "Cards", value: guesses.length },
         { label: "Total Time", value: formatTime(totalTime) },
@@ -278,17 +278,17 @@ function ResultsModal() {
       <div className={styles.breakdownSection}>
         <h3 className={styles.breakdownTitle}>Breakdown</h3>
         <div className={styles.breakdownGrid}>
-          <div className={`${styles.breakdownItem} ${styles.correct}`}>
+          <div className={[styles.breakdownItem, styles.correct].filter(Boolean).join(" ")}>
             <span className={styles.breakdownCount}>{breakdown.exact}</span>
             <span className={styles.breakdownLabel}>Exact</span>
           </div>
           {valueType === "numeric" && (
-            <div className={`${styles.breakdownItem} ${styles.close}`}>
+            <div className={[styles.breakdownItem, styles.close].filter(Boolean).join(" ")}>
               <span className={styles.breakdownCount}>{breakdown.close}</span>
               <span className={styles.breakdownLabel}>Close</span>
             </div>
           )}
-          <div className={`${styles.breakdownItem} ${styles.wrong}`}>
+          <div className={[styles.breakdownItem, styles.wrong].filter(Boolean).join(" ")}>
             <span className={styles.breakdownCount}>{breakdown.wrong}</span>
             <span className={styles.breakdownLabel}>Wrong</span>
           </div>
@@ -308,7 +308,7 @@ function ResultsModal() {
           return (
             <div
               key={guess.cardId}
-              className={`${styles.guessItem} ${styles[feedback.type]}`}
+              className={[styles.guessItem, styles[feedback.type]].filter(Boolean).join(" ")}
             >
               <span className={styles.guessItemTitle}>{title}</span>
               <span className={styles.guessItemResult}>

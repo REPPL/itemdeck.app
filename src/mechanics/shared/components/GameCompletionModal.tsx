@@ -60,10 +60,10 @@ export interface GameCompletionModalProps {
  * and action buttons. Supports custom children for mechanic-specific
  * content like guess breakdowns.
  *
- * Button hierarchy:
- * 1. Exit (tertiary/destructive) - leftmost
- * 2. Secondary (outline) - middle (optional)
- * 3. Primary (filled) - rightmost
+ * Button layout:
+ * - Row 1: End Game (outline) | Play Again (filled)
+ * - Row 2: "Choose a different game" (small text link, centred)
+ * - Close X button in top right corner
  *
  * @example
  * <GameCompletionModal
@@ -87,7 +87,7 @@ export function GameCompletionModal({
   primaryAction,
   secondaryAction,
   onExit,
-  exitLabel = "Exit",
+  exitLabel = "End Game",
   children,
 }: GameCompletionModalProps) {
   return (
@@ -105,6 +105,16 @@ export function GameCompletionModal({
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
           >
+            {/* Close button in top right */}
+            <button
+              type="button"
+              className={styles.closeButton}
+              onClick={onExit}
+              aria-label="Close"
+            >
+              ×
+            </button>
+
             <h2 className={styles.modalTitle}>{title}</h2>
 
             {subtitle && (
@@ -122,6 +132,7 @@ export function GameCompletionModal({
 
             {children}
 
+            {/* Main action buttons: End Game | Play Again */}
             <div className={styles.actionButtons}>
               <button
                 type="button"
@@ -130,15 +141,6 @@ export function GameCompletionModal({
               >
                 {exitLabel}
               </button>
-              {secondaryAction && (
-                <button
-                  type="button"
-                  className={`${styles.secondaryButton ?? ""} ${styles.hideOnMobile ?? ""}`}
-                  onClick={secondaryAction.onClick}
-                >
-                  {secondaryAction.label}
-                </button>
-              )}
               <button
                 type="button"
                 className={styles.primaryButton}
@@ -147,6 +149,17 @@ export function GameCompletionModal({
                 {primaryAction.label}
               </button>
             </div>
+
+            {/* Secondary action as small text link below */}
+            {secondaryAction && (
+              <button
+                type="button"
+                className={styles.textLink}
+                onClick={secondaryAction.onClick}
+              >
+                {secondaryAction.label}
+              </button>
+            )}
           </motion.div>
         </motion.div>
       )}

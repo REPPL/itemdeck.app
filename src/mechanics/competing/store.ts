@@ -142,8 +142,8 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
   initGame: (config: CompetingGameConfig) => {
     const state = get();
 
-    // Handle missing or insufficient cards
-    if (!config.cards || config.cards.length < 4) {
+    // Handle insufficient cards
+    if (config.cards.length < 4) {
       set({
         ...INITIAL_STATE,
         isActive: state.isActive,
@@ -152,7 +152,7 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
         showCpuThinking: state.showCpuThinking,
         autoAdvance: state.autoAdvance,
         errorMessage: config.errorMessage ?? "Need at least 4 cards to play.",
-        numericFields: config.numericFields ?? [],
+        numericFields: config.numericFields,
       });
       return;
     }

@@ -237,7 +237,7 @@ export function CardGrid() {
           pendingOp = "or";
         } else if (token.type === "not") {
           negateNext = true;
-        } else if (token.type === "term") {
+        } else if (token.type as string === "term") {
           let matches = cardMatchesTerm(card, token.value);
           if (negateNext) {
             matches = !matches;

@@ -321,9 +321,7 @@ export function buildSourceUrl(
   // Replace placeholders
   let url = template.template;
   for (const [key, value] of Object.entries(merged)) {
-    if (value !== undefined) {
-      url = url.replace(new RegExp(`\\{${key}\\}`, "g"), encodeURIComponent(value));
-    }
+    url = url.replace(new RegExp(`\\{${key}\\}`, "g"), encodeURIComponent(value));
   }
 
   return url;
@@ -351,15 +349,16 @@ export function applyDataTransform(
       // Handle array access like "items[0]"
       const arrayMatch = /^(\w+)\[(\d+)\]$/.exec(part);
       if (arrayMatch) {
-        const [, arrayKey, arrayIndex] = arrayMatch;
+        const arrayKey = arrayMatch[1];
+        const arrayIndex = arrayMatch[2];
         if (arrayKey) {
-          result = (result as Record<string, unknown>)?.[arrayKey];
+          result = (result as Record<string, unknown>)[arrayKey];
         }
-        if (arrayIndex !== undefined) {
-          result = (result as unknown[])?.[parseInt(arrayIndex, 10)];
+        if (arrayIndex !== undefined && result !== undefined) {
+          result = (result as unknown[])[parseInt(arrayIndex, 10)];
         }
       } else {
-        result = (result as Record<string, unknown>)?.[part];
+        result = (result as Record<string, unknown>)[part];
       }
       if (result === undefined) break;
     }
@@ -367,18 +366,18 @@ export function applyDataTransform(
 
   // Apply field mappings if result is an array
   if (Array.isArray(result) && transform.fieldMappings) {
+    const fieldMappings = transform.fieldMappings;
     result = result.map((item) => {
       const mapped: Record<string, unknown> = {};
-      for (const [sourceField, targetField] of Object.entries(transform.fieldMappings!)) {
-        const value = (item as Record<string, unknown>)?.[sourceField];
+      for (const [sourceField, targetField] of Object.entries(fieldMappings)) {
+        const value = (item as Record<string, unknown>)[sourceField];
         if (value !== undefined) {
           mapped[targetField] = value;
         }
       }
       // Include unmapped fields
       for (const [fieldKey, fieldValue] of Object.entries(item as Record<string, unknown>)) {
-        const mappings = transform.fieldMappings!;
-        if (!(fieldKey in mappings) && !transform.excludeFields?.includes(fieldKey)) {
+        if (!(fieldKey in fieldMappings) && !transform.excludeFields?.includes(fieldKey)) {
           if (!transform.includeFields || transform.includeFields.includes(fieldKey)) {
             mapped[fieldKey] = fieldValue;
           }

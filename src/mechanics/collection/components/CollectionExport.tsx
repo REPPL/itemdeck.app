@@ -86,11 +86,11 @@ export function CollectionExportModal({ onClose }: CollectionExportModalProps) {
 
         {/* Stats grid */}
         <div className={styles.resultsStats}>
-          <div className={`${styles.resultsStat} ${styles.owned ?? ""}`}>
+          <div className={[styles.resultsStat, styles.owned].filter(Boolean).join(" ")}>
             <span className={styles.resultsStatValue}>{stats.owned}</span>
             <span className={styles.resultsStatLabel}>Owned</span>
           </div>
-          <div className={`${styles.resultsStat} ${styles.wishlist ?? ""}`}>
+          <div className={[styles.resultsStat, styles.wishlist].filter(Boolean).join(" ")}>
             <span className={styles.resultsStatValue}>{stats.wishlist}</span>
             <span className={styles.resultsStatLabel}>Wishlist</span>
           </div>

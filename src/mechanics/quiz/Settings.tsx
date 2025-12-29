@@ -112,7 +112,7 @@ export function QuizSettingsPanel({
                   type="checkbox"
                   checked={isEnabled}
                   onChange={() => { handleTypeToggle(type); }}
-                  disabled={disabled || isLastEnabled}
+                  disabled={Boolean(disabled) || isLastEnabled}
                 />
                 <span>{getQuestionTypeLabel(type)}</span>
               </label>

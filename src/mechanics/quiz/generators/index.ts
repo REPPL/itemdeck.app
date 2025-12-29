@@ -122,7 +122,7 @@ export function canGenerateQuiz(
   if (cards.length < MIN_CARDS_FOR_QUIZ) {
     return {
       canGenerate: false,
-      reason: `Need at least ${MIN_CARDS_FOR_QUIZ} cards to play the quiz.`,
+      reason: `Need at least ${String(MIN_CARDS_FOR_QUIZ)} cards to play the quiz.`,
     };
   }
 

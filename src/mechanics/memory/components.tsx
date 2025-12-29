@@ -91,7 +91,7 @@ export function MemoryGridOverlay({ position }: GridOverlayProps) {
     return (
       <FloatingTimer
         timeMs={elapsedMs}
-        progressLabel={`${foundPairs}/${totalPairs}`}
+        progressLabel={`${String(foundPairs)}/${String(totalPairs)}`}
         visible={isActivePlay}
       />
     );
@@ -102,9 +102,9 @@ export function MemoryGridOverlay({ position }: GridOverlayProps) {
     <GameCompletionModal
       isOpen={isComplete}
       title="Complete!"
-      subtitle={`You found all ${totalPairs} pairs in ${attempts} attempts!`}
+      subtitle={`You found all ${String(totalPairs)} pairs in ${String(attempts)} attempts!`}
       stats={[
-        { label: "Pairs", value: `${foundPairs}/${totalPairs}` },
+        { label: "Pairs", value: `${String(foundPairs)}/${String(totalPairs)}` },
         { label: "Attempts", value: attempts },
         { label: "Score", value: score },
         { label: "Time", value: formattedTime },

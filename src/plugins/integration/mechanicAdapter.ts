@@ -50,10 +50,10 @@ class MechanicPluginAdapter {
    * @param pluginId - Plugin ID providing the mechanic
    * @param contribution - Mechanic contribution to register
    */
-  async registerFromPlugin(
+  registerFromPlugin(
     pluginId: string,
     contribution: MechanicContribution
-  ): Promise<void> {
+  ): void {
     const fullId = `${pluginId}:${contribution.id}`;
 
     // Check if already registered
@@ -157,10 +157,10 @@ class MechanicPluginAdapter {
     if (contribution.entrypoint) {
       try {
         // Dynamic import of the mechanic entry point
-        const module = await import(/* @vite-ignore */ contribution.entrypoint);
+        const module = await import(/* @vite-ignore */ contribution.entrypoint) as Record<string, unknown>;
 
         // Expect the module to export a mechanic object
-        const mechanic = module.default ?? module[`${contribution.id}Mechanic`];
+        const mechanic = (module.default ?? module[`${contribution.id}Mechanic`]) as Mechanic | undefined;
 
         if (mechanic) {
           return mechanic;
@@ -197,7 +197,7 @@ class MechanicPluginAdapter {
     return {
       manifest,
       lifecycle: {
-        onActivate: async () => {
+        onActivate: () => {
           state = { isActive: true };
           listeners.forEach((l) => { l(state); });
           console.log(`Mechanic ${contribution.id} activated`);
@@ -242,11 +242,11 @@ export const mechanicAdapter = new MechanicPluginAdapter();
  * @param pluginId - Plugin ID
  * @param contribution - Mechanic contribution
  */
-export async function registerMechanicFromPlugin(
+export function registerMechanicFromPlugin(
   pluginId: string,
   contribution: MechanicContribution
-): Promise<void> {
-  return mechanicAdapter.registerFromPlugin(pluginId, contribution);
+): void {
+  mechanicAdapter.registerFromPlugin(pluginId, contribution);
 }
 
 /**
@@ -273,9 +273,9 @@ export function getAllPluginMechanics(): RegisteredMechanic[] {
  * This is called during app initialisation to register the built-in
  * mechanics (memory, snap-ranking) through the plugin system.
  */
-export async function registerBuiltinMechanics(): Promise<void> {
+export function registerBuiltinMechanics(): void {
   // Memory mechanic
-  await mechanicAdapter.registerFromPlugin("org.itemdeck.mechanic-memory", {
+  mechanicAdapter.registerFromPlugin("org.itemdeck.mechanic-memory", {
     id: "memory",
     name: "Memory Match",
     description: "Find matching pairs of cards",
@@ -286,7 +286,7 @@ export async function registerBuiltinMechanics(): Promise<void> {
   });
 
   // Snap Ranking mechanic
-  await mechanicAdapter.registerFromPlugin("org.itemdeck.mechanic-snap-ranking", {
+  mechanicAdapter.registerFromPlugin("org.itemdeck.mechanic-snap-ranking", {
     id: "snap-ranking",
     name: "Snap Ranking",
     description: "Rate cards instantly with quick tier decisions",

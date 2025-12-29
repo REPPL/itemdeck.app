@@ -47,6 +47,7 @@ export const memoryMechanic: Mechanic<MemorySettings> = {
     minCards: 4,
     displayPreferences: {
       cardSizePreset: "medium",
+      layout: "grid",
       hideCardGrid: true,
     },
   },

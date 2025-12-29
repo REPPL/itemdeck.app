@@ -198,7 +198,7 @@ class SourcePluginAdapter {
     const data = await loader(config);
 
     return {
-      id: `${sourceId}:${Date.now()}`,
+      id: `${sourceId}:${String(Date.now())}`,
       name: "Collection",
       data,
       sourceId,
@@ -224,8 +224,8 @@ class SourcePluginAdapter {
     // For sources with custom entrypoints, load the module
     if (contribution.entrypoint) {
       try {
-        const module = await import(/* @vite-ignore */ contribution.entrypoint);
-        const loader = module.default ?? module.loadCollection ?? module.load;
+        const module = await import(/* @vite-ignore */ contribution.entrypoint) as Record<string, unknown>;
+        const loader = (module.default ?? module.loadCollection ?? module.load) as ((config: unknown) => Promise<unknown>) | undefined;
 
         if (typeof loader === "function") {
           return loader;
@@ -257,14 +257,14 @@ class SourcePluginAdapter {
           };
           const url = `https://cdn.jsdelivr.net/gh/${owner}/${repo ?? "collections"}@main/${path ?? ""}`;
           const response = await fetch(url);
-          return response.json();
+          return response.json() as Promise<unknown>;
         };
 
       case "url":
         return async (config: unknown) => {
           const { url } = config as { url: string };
           const response = await fetch(url);
-          return response.json();
+          return response.json() as Promise<unknown>;
         };
 
       case "api":
@@ -274,23 +274,23 @@ class SourcePluginAdapter {
             headers?: Record<string, string>;
           };
           const response = await fetch(endpoint, { headers });
-          return response.json();
+          return response.json() as Promise<unknown>;
         };
 
       case "local":
-        return async () => {
+        return () => {
           // Local sources require file system access - not supported in browser
           throw new Error("Local sources not supported in browser");
         };
 
       case "custom":
-        return async () => {
+        return () => {
           throw new Error("Custom sources require an entrypoint");
         };
 
       default:
-        return async () => {
-          throw new Error(`Unknown source type: ${sourceType}`);
+        return () => {
+          throw new Error(`Unknown source type: ${sourceType as string}`);
         };
     }
   }

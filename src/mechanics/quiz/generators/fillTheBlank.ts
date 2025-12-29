@@ -63,7 +63,12 @@ function generateQuestion(
     return null;
   }
 
-  const correctLabel = String(correctValue);
+  // Skip object values (only stringify primitives)
+  if (typeof correctValue === "object") {
+    return null;
+  }
+
+  const correctLabel = typeof correctValue === "string" ? correctValue : String(correctValue as number | boolean);
 
   // Create correct answer
   const correctAnswer: Answer = {

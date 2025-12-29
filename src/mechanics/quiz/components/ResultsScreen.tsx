@@ -30,7 +30,7 @@ export function ResultsScreen() {
     <GameCompletionModal
       isOpen={true}
       title="Quiz Complete!"
-      subtitle={`${results.totalScore}/${results.maxScore} (${results.percentage}%)`}
+      subtitle={`${String(results.totalScore)}/${String(results.maxScore)} (${String(results.percentage)}%)`}
       stats={[
         { label: "Correct", value: results.correctCount },
         { label: "Incorrect", value: results.incorrectCount },

@@ -451,13 +451,17 @@
   margin-top: 0.5rem;
 }
 
-/* Action prompt */
+/* Action prompt - fixed height to prevent layout shift */
 .actionPrompt {
   padding: 0.75rem 1rem;
   text-align: center;
   color: var(--colour-text-muted);
   font-size: 0.875rem;
   border-top: 1px solid var(--colour-border);
+  min-height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .cpuSelectedPrompt {

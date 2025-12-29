@@ -293,9 +293,9 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
 
     // Handle interruption during locked phase (third card click)
     // Parallel animation: new card flips while previous cards flip back
-    if (state.phase === "locked") {
-      const first = state.firstCard!;
-      const second = state.secondCard!;
+    if (state.phase === "locked" && state.firstCard && state.secondCard) {
+      const first = state.firstCard;
+      const second = state.secondCard;
 
       // Process the pending match immediately
       const isMatch = cardsMatch(first, second);
@@ -413,9 +413,9 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
           flippedCards: [cardId], // Legacy
         });
       }
-    } else if (state.phase === "first_selected") {
+    } else if (state.phase === "first_selected" && state.firstCard) {
       // Second card selection - lock but allow interruption
-      const first = state.firstCard!;
+      const first = state.firstCard;
 
       set({
         phase: "locked",

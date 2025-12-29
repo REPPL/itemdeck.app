@@ -59,6 +59,7 @@ export const quizMechanic: Mechanic<QuizSettings> = {
     minCards: 4,
     displayPreferences: {
       cardSizePreset: "medium",
+      layout: "grid",
       uiMode: "overlay",
     },
   },

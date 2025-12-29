@@ -154,7 +154,7 @@ class LazyPluginLoader {
     switch (strategy) {
       case "immediate":
         // Load immediately
-        this.load(source, { ...options, skipEnable: true });
+        void this.load(source, { ...options, skipEnable: true });
         break;
 
       case "idle":
@@ -292,7 +292,7 @@ class LazyPluginLoader {
       if (request) {
         // Start loading (fire and forget)
         this.load(request.source, { ...request.options, skipEnable: true }).catch(
-          (error) => {
+          (error: unknown) => {
             console.warn(
               "[LazyLoader] Preload failed:",
               this.getSourceKey(request.source),

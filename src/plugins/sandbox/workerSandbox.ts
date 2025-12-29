@@ -301,7 +301,10 @@ export class WorkerSandbox {
     if (!this.apiHandlers.has(api)) {
       this.apiHandlers.set(api, new Map());
     }
-    this.apiHandlers.get(api)!.set(method, handler);
+    const handlers = this.apiHandlers.get(api);
+    if (handlers) {
+      handlers.set(method, handler);
+    }
   }
 
   /**
@@ -447,7 +450,7 @@ export class WorkerSandbox {
           await this.handleAPICall(message.id, message.api, message.method, message.args);
           break;
 
-        case "response":
+        case "response": {
           // Plugin is responding to our call
           const pending = this.pendingCalls.get(message.id);
           if (pending) {
@@ -461,6 +464,7 @@ export class WorkerSandbox {
             }
           }
           break;
+        }
 
         case "error":
           console.error(`[Sandbox ${this.options.manifest.id}] Error:`, message.error);
@@ -537,7 +541,7 @@ export class WorkerSandbox {
   }
 
   private generateCallId(): string {
-    return `call_${++this.callId}_${Date.now().toString(36)}`;
+    return `call_${String(++this.callId)}_${Date.now().toString(36)}`;
   }
 }
 

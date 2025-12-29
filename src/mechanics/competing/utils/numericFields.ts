@@ -43,6 +43,12 @@ const LOWER_IS_BETTER_PATTERNS = [
 const MIN_VALID_PERCENTAGE = 0.8;
 
 /**
+ * Maximum number of fields to display.
+ * Limited to prevent UI overflow on smaller screens (iPad, etc.).
+ */
+const MAX_FIELDS_TO_DISPLAY = 5;
+
+/**
  * Convert a camelCase or snake_case field key to a human-readable label.
  */
 export function humaniseFieldName(key: string): string {
@@ -184,7 +190,8 @@ export function detectNumericFields(cards: CardData[]): NumericFieldInfo[] {
     return rangeB - rangeA;
   });
 
-  return numericFields;
+  // Limit to max fields to prevent UI overflow on smaller screens
+  return numericFields.slice(0, MAX_FIELDS_TO_DISPLAY);
 }
 
 /**

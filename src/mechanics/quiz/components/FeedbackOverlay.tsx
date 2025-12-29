@@ -61,7 +61,7 @@ export function FeedbackOverlay() {
   return (
     <div className={styles.feedbackOverlay} onClick={handleDismiss}>
       <div
-        className={`${styles.feedbackContent} ${lastAnswerCorrect ? styles.correct : styles.incorrect}`}
+        className={[styles.feedbackContent, lastAnswerCorrect ? styles.correct : styles.incorrect].filter(Boolean).join(" ")}
       >
         <div className={styles.feedbackIcon}>
           {lastAnswerCorrect ? "✓" : wasSkipped ? "⏭" : "✗"}

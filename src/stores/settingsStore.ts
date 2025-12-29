@@ -1289,6 +1289,9 @@ export const useSettingsStore = create<SettingsState>()(
         if (prefs.cardAspectRatio) {
           updates.cardAspectRatio = prefs.cardAspectRatio;
         }
+        if (prefs.layout) {
+          updates.layout = prefs.layout;
+        }
         if (prefs.maxVisibleCards) {
           updates.maxVisibleCards = prefs.maxVisibleCards;
         }

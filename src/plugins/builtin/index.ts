@@ -61,7 +61,7 @@ export const BUILTIN_PLUGIN_IDS = [
  * This should be called during app initialisation to make
  * all built-in plugins available.
  */
-export async function registerAllBuiltinPlugins(): Promise<void> {
+export function registerAllBuiltinPlugins(): void {
   // Register themes
   registerBuiltinPlugin("org.itemdeck.theme-retro", async () => {
     const module = await import("./themes/retro/manifest.json");

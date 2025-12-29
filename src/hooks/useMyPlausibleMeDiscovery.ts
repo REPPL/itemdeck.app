@@ -209,7 +209,7 @@ export function useMyPlausibleMeDiscovery(
       await Promise.all(
         collectionJsonFiles.map(async (file) => {
           // Extract the collection path (everything between data/collections/ and /collection.json)
-          const match = file.path.match(/^data\/collections\/(.+)\/collection\.json$/);
+          const match = /^data\/collections\/(.+)\/collection\.json$/.exec(file.path);
           if (!match?.[1]) return;
 
           const collectionPath = match[1];

@@ -344,10 +344,10 @@ class PluginLoader {
     const response = await fetch(url);
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch manifest: ${response.status} ${response.statusText}`);
+      throw new Error(`Failed to fetch manifest: ${String(response.status)} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
 
     // TODO: Validate with Zod schema
     return data as PluginManifest;
@@ -408,7 +408,7 @@ class PluginLoader {
       store.enablePlugin(pluginId);
 
       // Register with type-specific systems
-      await this.registerPluginContributions(loaded);
+      this.registerPluginContributions(loaded);
     } catch (error) {
       loaded.state = "error";
       loaded.error = error instanceof Error ? error.message : "Unknown error";
@@ -437,7 +437,7 @@ class PluginLoader {
       }
 
       // Unregister contributions
-      await this.unregisterPluginContributions(loaded);
+      this.unregisterPluginContributions(loaded);
 
       // Update state
       loaded.state = "disabled";
@@ -481,32 +481,36 @@ class PluginLoader {
 
     // Create capability-gated APIs
     const storage: PluginStorage = {
-      get: async (key) => {
+      get: (key) => {
         if (!store.hasCapability(pluginId, "storage:local")) {
-          throw new Error("storage:local capability not granted");
+          return Promise.reject(new Error("storage:local capability not granted"));
         }
         const config = store.pluginConfigs[pluginId] ?? {};
-        return config[key];
+        return Promise.resolve(config[key]);
       },
-      set: async (key, value) => {
+      set: (key, value) => {
         if (!store.hasCapability(pluginId, "storage:local")) {
-          throw new Error("storage:local capability not granted");
+          return Promise.reject(new Error("storage:local capability not granted"));
         }
         store.updatePluginConfig(pluginId, { [key]: value });
+        return Promise.resolve();
       },
-      delete: async (key) => {
+      delete: (key) => {
         if (!store.hasCapability(pluginId, "storage:local")) {
-          throw new Error("storage:local capability not granted");
+          return Promise.reject(new Error("storage:local capability not granted"));
         }
         const config = { ...store.pluginConfigs[pluginId] };
+        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
         delete config[key];
         store.setPluginConfig(pluginId, config);
+        return Promise.resolve();
       },
-      clear: async () => {
+      clear: () => {
         if (!store.hasCapability(pluginId, "storage:local")) {
-          throw new Error("storage:local capability not granted");
+          return Promise.reject(new Error("storage:local capability not granted"));
         }
         store.resetPluginConfig(pluginId);
+        return Promise.resolve();
       },
     };
 
@@ -518,36 +522,36 @@ class PluginLoader {
         // TODO: Integrate with notification system
         console.log(`[Plugin ${pluginId}] ${type}: ${message}`);
       },
-      showModal: async () => {
+      showModal: () => {
         if (!store.hasCapability(pluginId, "ui:modal")) {
-          throw new Error("ui:modal capability not granted");
+          return Promise.reject(new Error("ui:modal capability not granted"));
         }
         // TODO: Integrate with modal system
-        throw new Error("Modal system not yet implemented");
+        return Promise.reject(new Error("Modal system not yet implemented"));
       },
     };
 
     const collection: PluginCollection = {
-      getCards: async () => {
+      getCards: () => {
         if (!store.hasCapability(pluginId, "collection:read")) {
-          throw new Error("collection:read capability not granted");
+          return Promise.reject(new Error("collection:read capability not granted"));
         }
         // TODO: Integrate with collection store
-        return [];
+        return Promise.resolve([]);
       },
-      getSelectedCards: async () => {
+      getSelectedCards: () => {
         if (!store.hasCapability(pluginId, "collection:read")) {
-          throw new Error("collection:read capability not granted");
+          return Promise.reject(new Error("collection:read capability not granted"));
         }
         // TODO: Integrate with selection state
-        return [];
+        return Promise.resolve([]);
       },
-      getCollectionInfo: async () => {
+      getCollectionInfo: () => {
         if (!store.hasCapability(pluginId, "collection:read")) {
-          throw new Error("collection:read capability not granted");
+          return Promise.reject(new Error("collection:read capability not granted"));
         }
         // TODO: Integrate with collection metadata
-        return {};
+        return Promise.resolve({});
       },
     };
 
@@ -567,7 +571,7 @@ class PluginLoader {
   /**
    * Register a plugin's contributions with the appropriate systems.
    */
-  private async registerPluginContributions(loaded: LoadedPlugin): Promise<void> {
+  private registerPluginContributions(loaded: LoadedPlugin): void {
     const { manifest } = loaded;
     const store = usePluginStore.getState();
 
@@ -598,7 +602,7 @@ class PluginLoader {
   /**
    * Unregister a plugin's contributions.
    */
-  private async unregisterPluginContributions(loaded: LoadedPlugin): Promise<void> {
+  private unregisterPluginContributions(loaded: LoadedPlugin): void {
     const { manifest } = loaded;
     const store = usePluginStore.getState();
 

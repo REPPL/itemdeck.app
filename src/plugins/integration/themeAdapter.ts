@@ -144,7 +144,7 @@ class ThemePluginAdapter {
    * @param pluginId - Plugin ID providing the theme
    * @param contribution - Theme contribution to apply
    */
-  async applyTheme(pluginId: string, contribution: ThemeContribution): Promise<void> {
+  applyTheme(pluginId: string, contribution: ThemeContribution): void {
     // Remove current theme first
     this.removeCurrentTheme();
 
@@ -279,11 +279,11 @@ export const themeAdapter = new ThemePluginAdapter();
  * @param pluginId - Plugin ID
  * @param contribution - Theme contribution
  */
-export async function applyTheme(
+export function applyTheme(
   pluginId: string,
   contribution: ThemeContribution
-): Promise<void> {
-  return themeAdapter.applyTheme(pluginId, contribution);
+): void {
+  themeAdapter.applyTheme(pluginId, contribution);
 }
 
 /**

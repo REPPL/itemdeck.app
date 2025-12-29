@@ -84,8 +84,8 @@ export function calculateScore(
 
   const distance = Math.abs(guessIndex - actualIndex);
 
-  if (distance === 1) return NUMERIC_SCORING.offByOne!;
-  if (distance === 2) return NUMERIC_SCORING.offByTwo!;
+  if (distance === 1) return NUMERIC_SCORING.offByOne ?? 0;
+  if (distance === 2) return NUMERIC_SCORING.offByTwo ?? 0;
   return NUMERIC_SCORING.wrong;
 }
 

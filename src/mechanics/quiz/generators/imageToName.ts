@@ -21,7 +21,7 @@ import {
 function generateQuestion(
   card: GeneratorCardData,
   allCards: GeneratorCardData[],
-  useSimilarDistractors: boolean = false
+  useSimilarDistractors = false
 ): Question {
   // Create correct answer
   const correctAnswer: Answer = {
@@ -65,7 +65,7 @@ export const imageToNameGenerator: QuestionGenerator = {
     if (cardsWithImages.length < MIN_CARDS_FOR_QUIZ) {
       return {
         canGenerate: false,
-        reason: `Need at least ${MIN_CARDS_FOR_QUIZ} cards with images for Image to Name questions.`,
+        reason: `Need at least ${String(MIN_CARDS_FOR_QUIZ)} cards with images for Image to Name questions.`,
       };
     }
 

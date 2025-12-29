@@ -8,6 +8,7 @@ import { create } from "zustand";
 import { generateQuestions, canGenerateQuiz } from "./generators";
 import type { GeneratorCardData } from "./generators";
 import type {
+  Answer,
   Question,
   AnswerRecord,
   QuizResults,
@@ -47,7 +48,7 @@ interface QuizStore extends QuizState, QuizSettings {
   getProgress: () => { current: number; total: number };
   isQuizComplete: () => boolean;
   getResults: () => QuizResults;
-  getShuffledAnswers: () => import("./types").Answer[];
+  getShuffledAnswers: () => Answer[];
 }
 
 /**

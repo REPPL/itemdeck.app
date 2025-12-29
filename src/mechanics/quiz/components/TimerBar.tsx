@@ -54,18 +54,18 @@ export function TimerBar() {
   if (!timerMode || !question) return null;
 
   // Determine colour based on remaining time
-  let progressClass = styles.timerProgress;
+  let progressClass = styles.timerProgress ?? "";
   if (progress < 20) {
-    progressClass = `${styles.timerProgress} ${styles.danger}`;
+    progressClass = [styles.timerProgress, styles.danger].filter(Boolean).join(" ");
   } else if (progress < 40) {
-    progressClass = `${styles.timerProgress} ${styles.warning}`;
+    progressClass = [styles.timerProgress, styles.warning].filter(Boolean).join(" ");
   }
 
   return (
     <div className={styles.timerBar}>
       <div
         className={progressClass}
-        style={{ width: `${progress}%` }}
+        style={{ width: `${String(progress)}%` }}
       />
     </div>
   );

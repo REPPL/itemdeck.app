@@ -121,33 +121,37 @@ export function createPluginAPIHandlers(
 
   // Storage API
   const storage: PluginAPIHandlers["storage"] = {
-    get: async (key: string) => {
+    get: (key: string) => {
       requireCapability("storage:local");
       const config = store.pluginConfigs[pluginId] ?? {};
-      return config[key];
+      return Promise.resolve(config[key]);
     },
 
-    set: async (key: string, value: unknown) => {
+    set: (key: string, value: unknown) => {
       requireCapability("storage:local");
       store.updatePluginConfig(pluginId, { [key]: value });
+      return Promise.resolve();
     },
 
-    delete: async (key: string) => {
+    delete: (key: string) => {
       requireCapability("storage:local");
       const config = { ...store.pluginConfigs[pluginId] };
+      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
       delete config[key];
       store.setPluginConfig(pluginId, config);
+      return Promise.resolve();
     },
 
-    clear: async () => {
+    clear: () => {
       requireCapability("storage:local");
       store.resetPluginConfig(pluginId);
+      return Promise.resolve();
     },
   };
 
   // UI API
   const ui: PluginAPIHandlers["ui"] = {
-    notify: async (message: string, type = "info") => {
+    notify: (message: string, type = "info") => {
       requireCapability("ui:notifications");
 
       if (globalNotificationHandler) {
@@ -156,9 +160,10 @@ export function createPluginAPIHandlers(
         // Fallback to console
         console.log(`[Plugin ${pluginId}] ${type}: ${message}`);
       }
+      return Promise.resolve();
     },
 
-    showModal: async (content: unknown) => {
+    showModal: (content: unknown) => {
       requireCapability("ui:modal");
 
       if (globalModalHandler) {
@@ -171,31 +176,31 @@ export function createPluginAPIHandlers(
 
   // Collection API
   const collection: PluginAPIHandlers["collection"] = {
-    getCards: async () => {
+    getCards: () => {
       requireCapability("collection:read");
 
       if (globalCollectionProvider) {
-        return globalCollectionProvider().cards;
+        return Promise.resolve(globalCollectionProvider().cards);
       }
-      return [];
+      return Promise.resolve([]);
     },
 
-    getSelectedCards: async () => {
+    getSelectedCards: () => {
       requireCapability("collection:read");
 
       if (globalCollectionProvider) {
-        return globalCollectionProvider().selectedCards;
+        return Promise.resolve(globalCollectionProvider().selectedCards);
       }
-      return [];
+      return Promise.resolve([]);
     },
 
-    getInfo: async () => {
+    getInfo: () => {
       requireCapability("collection:read");
 
       if (globalCollectionProvider) {
-        return globalCollectionProvider().info;
+        return Promise.resolve(globalCollectionProvider().info);
       }
-      return {};
+      return Promise.resolve({});
     },
   };
 

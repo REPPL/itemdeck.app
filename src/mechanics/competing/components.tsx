@@ -388,27 +388,27 @@ function TiePileIndicator() {
 
 /**
  * Action prompt component.
+ * Always renders with fixed height to prevent layout shift.
  */
 function ActionPrompt() {
   const phase = useCompetingStore((s) => s.phase);
   const currentTurn = useCompetingStore((s) => s.currentTurn);
 
+  let content: React.ReactNode = "\u00A0"; // Non-breaking space for empty state
+
   if (phase === "player_select" && currentTurn === "player") {
-    return <div className={styles.actionPrompt}>Select a stat to compare!</div>;
-  }
-  if (phase === "cpu_select" && currentTurn === "cpu") {
-    return <div className={styles.actionPrompt}>CPU is choosing a stat...</div>;
-  }
-  if (phase === "cpu_reveal") {
-    return (
-      <div className={styles.actionPrompt}>
-        <span className={styles.cpuSelectedPrompt}>
-          CPU chose a stat! Tap the highlighted stat to compare.
-        </span>
-      </div>
+    content = "Select a stat to compare!";
+  } else if (phase === "cpu_select" && currentTurn === "cpu") {
+    content = "CPU is choosing a stat...";
+  } else if (phase === "cpu_reveal") {
+    content = (
+      <span className={styles.cpuSelectedPrompt}>
+        CPU chose a stat! Tap the highlighted stat to compare.
+      </span>
     );
   }
-  return null;
+
+  return <div className={styles.actionPrompt}>{content}</div>;
 }
 
 /**
@@ -562,7 +562,7 @@ export function CompetingGridOverlay({ position }: GridOverlayProps) {
 
   useEffect(() => {
     if (!isActive || phase !== "setup") return;
-    if (!cards || cards.length === 0) return;
+    if (cards.length === 0) return;
 
     const numericFields = detectNumericFields(
       cards as unknown as Record<string, unknown>[]

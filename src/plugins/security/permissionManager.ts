@@ -105,7 +105,7 @@ class PermissionManager {
 
     // Process any pending requests
     for (const [pluginId, request] of this.pendingRequests) {
-      this.processConsentRequest(pluginId, request);
+      void this.processConsentRequest(pluginId, request);
     }
   }
 

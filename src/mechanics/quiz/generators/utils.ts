@@ -20,7 +20,7 @@ export const WRONG_ANSWER_COUNT = 3;
  * Generate a unique question ID.
  */
 export function generateQuestionId(): string {
-  return `q-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return `q-${String(Date.now())}-${Math.random().toString(36).slice(2, 9)}`;
 }
 
 /**
@@ -53,8 +53,10 @@ export function calculateSimilarity(
 
   // Similar year (within 5 years)
   if (card1.year && card2.year) {
-    const year1 = parseInt(String(card1.year), 10);
-    const year2 = parseInt(String(card2.year), 10);
+    const year1Val = card1.year;
+    const year2Val = card2.year;
+    const year1 = parseInt(typeof year1Val === "string" ? year1Val : String(year1Val), 10);
+    const year2 = parseInt(typeof year2Val === "string" ? year2Val : String(year2Val), 10);
     if (!isNaN(year1) && !isNaN(year2)) {
       const yearDiff = Math.abs(year1 - year2);
       if (yearDiff === 0) {
@@ -98,8 +100,8 @@ export function calculateSimilarity(
 export function selectWrongAnswerCards(
   cards: GeneratorCardData[],
   correctCard: GeneratorCardData,
-  count: number = WRONG_ANSWER_COUNT,
-  useSimilar: boolean = false
+  count = WRONG_ANSWER_COUNT,
+  useSimilar = false
 ): GeneratorCardData[] {
   const available = cards.filter((c) => c.id !== correctCard.id);
 
@@ -184,7 +186,10 @@ export function getUniqueFieldValues(
   for (const card of cards) {
     const value = card[field];
     if (value !== undefined && value !== null && value !== "") {
-      values.add(String(value));
+      // Ensure we only stringify primitive values
+      if (typeof value === "object") continue;
+      const stringValue = typeof value === "string" ? value : String(value as number | boolean);
+      values.add(stringValue);
     }
   }
   return Array.from(values);

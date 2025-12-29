@@ -27,8 +27,10 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | [v0.11.2](v0.11.2/README.md) | Bug Fixes | Complete |
 | [v0.11.5](v0.11.5-implementation.md) | UI Refinements | Complete |
 | [v0.12.0](v0.12.0/README.md) | UI Polish & Statistics | Complete |
-| [v0.12.5](v0.12.5/README.md) | Snap Ranking & Fit Layout | In Progress |
-| **v0.13.0** | **Modular Plugin Architecture** | **Planned** |
+| [v0.12.5](v0.12.5/README.md) | Snap Ranking & Fit Layout | Complete |
+| [v0.13.0](v0.13.0-wp-a-plugin-core.md) | Modular Plugin Architecture | Complete |
+| **[v0.14.0](v0.14.0/README.md)** | **Advanced Mechanics (Plugin-Based)** | **Planned** |
+| [v0.14.5](v0.14.5/v0.14.5-shared-components.md) | Shared Mechanics Components | Planned |
 
 ### v0.13.0 Work Packages
 
@@ -39,6 +41,21 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | [WP-C](v0.13.0-wp-c-user-docs.md) | User Documentation | None |
 | [WP-D](v0.13.0-wp-d-discovery-ui.md) | Plugin Discovery UI | WP-A |
 | [WP-E](v0.13.0-wp-e-developer-docs.md) | Developer Documentation & ADRs | WP-A, WP-B |
+
+### v0.14.0 Work Packages
+
+| Package | Description | Dependencies |
+|---------|-------------|--------------|
+| [WP-A](v0.14.0/v0.14.0-wp-a-settings-ui.md) | Settings Draft State + UI Polish | None |
+| [WP-B](v0.14.0/v0.14.0-wp-b-competing.md) | Competing Mechanic (Top Trumps) | v0.13.0 |
+| [WP-C](v0.14.0/v0.14.0-wp-c-quiz.md) | Quiz Mechanic | v0.13.0 |
+| [WP-D](v0.14.0/v0.14.0-wp-d-collection.md) | Collection Mechanic | v0.13.0 |
+
+### v0.14.5 Work Packages
+
+| Package | Description | Dependencies |
+|---------|-------------|--------------|
+| [WP-A](v0.14.5/v0.14.5-shared-components.md) | Shared Mechanics Components + Refactor | v0.14.0 |
 
 ## Purpose
 

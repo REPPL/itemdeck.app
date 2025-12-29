@@ -29,6 +29,8 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.12.0](./milestones/v0.12.0.md) | UI Polish & Statistics | ✅ Complete |
 | [v0.12.5](./milestones/v0.12.5.md) | URL Simplification & Snap Ranking | ✅ Complete |
 | [v0.13.0](./milestones/v0.13.0.md) | Modular Plugin Architecture | 🔄 In Progress |
+| [v0.14.0](./milestones/v0.14.0.md) | Advanced Mechanics | 📋 Planned |
+| [v0.14.5](./milestones/v0.14.5.md) | Shared Mechanics Components | 📋 Planned |
 | [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
 
 ## Feature Summary

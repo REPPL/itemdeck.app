@@ -26,7 +26,7 @@ export function MemoryCardOverlay({ cardId }: CardOverlayProps) {
   const isFlipped = visibleCards.includes(cardId);
   const isMatched = matchedPairs.some((pair) => pair.includes(cardId));
 
-  // In Ultra mode, first card flips back but we still need to show it's selected
+  // In Extreme mode, first card flips back but we still need to show it's selected
   // Show indicator when: this is the first card, it's not visible, and we're waiting for second
   const isHiddenFirstCard = firstCard === cardId &&
     !visibleCards.includes(cardId) &&
@@ -79,7 +79,6 @@ export function MemoryGridOverlay({ position }: GridOverlayProps) {
   const cardIds = useMemoryStore((s) => s.cardIds);
   const startTime = useMemoryStore((s) => s.startTime);
   const endTime = useMemoryStore((s) => s.endTime);
-  const resetGame = useMemoryStore((s) => s.resetGame);
   const { deactivateMechanic, openMechanicPanel } = useMechanicContext();
 
   const totalPairs = Math.floor(cardIds.length / 2);

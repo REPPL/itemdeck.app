@@ -71,7 +71,7 @@
   pointer-events: none;
 }
 
-/* First card indicator - shown when first card has flipped back in Ultra mode */
+/* First card indicator - shown when first card has flipped back in Extreme mode */
 .firstCardIndicator {
   position: absolute;
   inset: -4px;

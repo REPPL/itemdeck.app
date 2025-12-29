@@ -93,11 +93,11 @@
   background: var(--colour-primary-hover);
 }
 
-.secondaryButton {
+.outlineButton {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: 0.9375rem;
   font-weight: 500;
-  background: var(--colour-background);
+  background: transparent;
   color: var(--colour-text);
   border: 1px solid var(--colour-border);
   border-radius: var(--radius-md);
@@ -105,7 +105,7 @@
   transition: all 0.15s ease;
 }
 
-.secondaryButton:hover {
+.outlineButton:hover {
   background: var(--colour-surface-hover);
   border-color: var(--colour-border-hover);
 }
@@ -113,22 +113,40 @@
 .divider {
   height: 1px;
   background: var(--colour-border);
-  margin: var(--spacing-xs) 0;
+  margin: var(--spacing-sm) 0;
 }
 
-.textButton {
-  padding: var(--spacing-xs) var(--spacing-sm);
+.globalOptions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
-  color: var(--colour-text-muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  text-align: center;
-  transition: color 0.15s ease;
+  flex-wrap: wrap;
 }
 
-.textButton:hover {
+.textLink {
+  background: none;
+  border: none;
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: inherit;
+  padding: var(--spacing-xs);
+}
+
+.textLink:hover {
   color: var(--colour-text);
+}
+
+.hint {
+  color: var(--colour-text-muted);
+  font-size: 0.75rem;
+}
+
+.optionSeparator {
+  color: var(--colour-border);
 }
 
 /* Theme variants */

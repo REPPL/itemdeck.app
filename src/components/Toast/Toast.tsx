@@ -53,7 +53,7 @@ export function Toast({
     <AnimatePresence>
       {visible && (
         <motion.div
-          className={`${styles.toast} ${styles[type]}`}
+          className={`${styles.toast} ${styles[type] ?? ""}`}
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 50 }}

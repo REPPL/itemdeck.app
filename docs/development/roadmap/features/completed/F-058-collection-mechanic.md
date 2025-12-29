@@ -51,55 +51,55 @@ Or use overlay buttons:
 
 ### Phase 1: Mechanic Core
 
-- [ ] Create `src/mechanics/collection/index.ts`
-- [ ] Define `CollectionMechanicManifest`
-- [ ] Create `CollectionMechanic` class
-- [ ] Register factory with mechanic registry
+- [x] Create `src/mechanics/collection/index.ts`
+- [x] Define `CollectionMechanicManifest`
+- [x] Create `CollectionMechanic` class
+- [x] Register factory with mechanic registry
 
 ### Phase 2: State Management
 
-- [ ] Create `src/mechanics/collection/store.ts`
-- [ ] Track: `ownedIds: Set<string>`, `wishlistIds: Set<string>`
-- [ ] Implement `toggleOwned(id)` action
-- [ ] Implement `toggleWishlist(id)` action
-- [ ] Persist state to localStorage
+- [x] Create `src/mechanics/collection/store.ts`
+- [x] Track: `ownedIds: Set<string>`, `wishlistIds: Set<string>`
+- [x] Implement `toggleOwned(id)` action
+- [x] Implement `toggleWishlist(id)` action
+- [x] Persist state to localStorage
 
 ### Phase 3: Card Overlay
 
-- [ ] Create `CollectionCardOverlay.tsx`
-- [ ] Show ownership badge (checkmark for owned)
-- [ ] Show wishlist badge (heart for wishlisted)
-- [ ] Position badge in top-right corner
-- [ ] Add click handler for quick toggle
+- [x] Create `CollectionCardOverlay.tsx`
+- [x] Show ownership badge (checkmark for owned)
+- [x] Show wishlist badge (heart for wishlisted)
+- [x] Position badge in top-right corner
+- [x] Add click handler for quick toggle
 
 ### Phase 4: Grid Overlay
 
-- [ ] Create `CollectionGridOverlay.tsx`
-- [ ] Calculate and display progress bar
-- [ ] Show counts: owned, wishlist, remaining
-- [ ] Show percentage completion
-- [ ] Position at top of grid
+- [x] Create `CollectionGridOverlay.tsx`
+- [x] Calculate and display progress bar
+- [x] Show counts: owned, wishlist, remaining
+- [x] Show percentage completion
+- [x] Position at top of grid
 
 ### Phase 5: Quick Actions
 
-- [ ] Add toggle buttons to card overlay
-- [ ] Support keyboard shortcuts (O for owned, W for wishlist)
-- [ ] Batch actions (select multiple, mark all owned)
+- [x] Add toggle buttons to card overlay
+- [x] Support keyboard shortcuts (O for owned, W for wishlist)
+- [x] Batch actions (select multiple, mark all owned)
 
 ### Phase 6: Export/Import
 
-- [ ] Export collection state as JSON
-- [ ] Import collection state from JSON
-- [ ] Merge or replace options
+- [x] Export collection state as JSON
+- [x] Import collection state from JSON
+- [x] Merge or replace options
 
 ## Success Criteria
 
-- [ ] Can mark cards as owned
-- [ ] Can add cards to wishlist
-- [ ] Owned/wishlist state persists
-- [ ] Progress bar shows completion
-- [ ] Quick toggle works from card
-- [ ] Collection exportable
+- [x] Can mark cards as owned
+- [x] Can add cards to wishlist
+- [x] Owned/wishlist state persists
+- [x] Progress bar shows completion
+- [x] Quick toggle works from card
+- [x] Collection exportable
 
 ## Dependencies
 
@@ -128,4 +128,4 @@ Or use overlay buttons:
 
 ---
 
-**Status**: Planned
+**Status**: Complete

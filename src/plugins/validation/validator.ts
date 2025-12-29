@@ -392,7 +392,7 @@ function checkContentPolicy(manifest: PluginManifest): ValidationIssue[] {
   }
 
   // Check for URL-like names (could be misleading)
-  if (manifest.name.match(/^https?:\/\//i)) {
+  if (/^https?:\/\//i.exec(manifest.name)) {
     issues.push({
       severity: "error",
       code: "MISLEADING_NAME",

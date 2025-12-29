@@ -158,7 +158,7 @@ async function validateImageUrl(url: string): Promise<ValidationResult> {
       valid,
       error: errorMsg,
     };
-  } catch (error) {
+  } catch {
     // If HEAD fails, try a GET request with range header (some servers don't support HEAD)
     try {
       const controller = new AbortController();

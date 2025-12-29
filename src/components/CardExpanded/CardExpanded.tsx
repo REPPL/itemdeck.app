@@ -451,7 +451,7 @@ export function CardExpanded({
                   )}
 
                   {/* Consolidated Sources button (F-084) */}
-                  {((card.detailUrls && card.detailUrls.length > 0) || card.detailUrl) && (
+                  {((card.detailUrls && card.detailUrls.length > 0) ?? card.detailUrl) && (
                     <button
                       type="button"
                       className={styles.outlineButton}

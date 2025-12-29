@@ -49,24 +49,37 @@ export function SystemSettings({
 }: SystemSettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<SystemSubTab>("accessibility");
 
-  const {
-    reduceMotion,
-    highContrast,
-    showHelpButton,
-    showSettingsButton,
-    showSearchBar,
-    showViewButton,
-    showStatisticsBar,
-    editModeEnabled,
-    setReduceMotion,
-    setHighContrast,
-    setShowHelpButton,
-    setShowSettingsButton,
-    setShowSearchBar,
-    setShowViewButton,
-    setShowStatisticsBar,
-    setEditModeEnabled,
-  } = useSettingsStore();
+  // Draft state for preview (F-090)
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
+
+  // Accessibility settings apply immediately (bypass draft pattern)
+  const setReduceMotion = useSettingsStore((s) => s.setReduceMotion);
+  const setHighContrast = useSettingsStore((s) => s.setHighContrast);
+
+  // Get effective values from draft
+  const reduceMotion = getEffective("reduceMotion");
+  const highContrast = getEffective("highContrast");
+  const showHelpButton = getEffective("showHelpButton");
+  const showSettingsButton = getEffective("showSettingsButton");
+  const showSearchBar = getEffective("showSearchBar");
+  const showViewButton = getEffective("showViewButton");
+  const showStatisticsBar = getEffective("showStatisticsBar");
+
+  // Edit mode uses direct setter (developer feature, immediate feedback)
+  const editModeEnabled = useSettingsStore((s) => s.editModeEnabled);
+  const setEditModeEnabled = useSettingsStore((s) => s.setEditModeEnabled);
+
+  // Handle accessibility setting changes - apply immediately AND update draft
+  const handleReduceMotionChange = (value: ReduceMotionPreference) => {
+    setReduceMotion(value);
+    updateDraft({ reduceMotion: value });
+  };
+
+  const handleHighContrastChange = (enabled: boolean) => {
+    setHighContrast(enabled);
+    updateDraft({ highContrast: enabled });
+  };
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -84,7 +97,7 @@ export function SystemSettings({
                       styles.segmentButton,
                       reduceMotion === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setReduceMotion(value); }}
+                    onClick={() => { handleReduceMotionChange(value); }}
                     role="radio"
                     aria-checked={reduceMotion === value}
                   >
@@ -96,6 +109,7 @@ export function SystemSettings({
 
             <div className={styles.helpText}>
               Controls animation and motion effects. &quot;System&quot; respects your OS preference.
+              Changes apply immediately for accessibility.
             </div>
 
             <div className={styles.divider} />
@@ -106,7 +120,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={highContrast}
-                  onChange={(e) => { setHighContrast(e.target.checked); }}
+                  onChange={(e) => { handleHighContrastChange(e.target.checked); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -114,6 +128,7 @@ export function SystemSettings({
 
             <div className={styles.helpText}>
               Increases contrast for better visibility.
+              Changes apply immediately for accessibility.
             </div>
           </>
         );
@@ -127,7 +142,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showHelpButton}
-                  onChange={(e) => { setShowHelpButton(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showHelpButton: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -139,7 +154,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showSettingsButton}
-                  onChange={(e) => { setShowSettingsButton(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showSettingsButton: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -151,7 +166,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showSearchBar}
-                  onChange={(e) => { setShowSearchBar(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showSearchBar: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -163,7 +178,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showViewButton}
-                  onChange={(e) => { setShowViewButton(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showViewButton: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -175,7 +190,7 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showStatisticsBar}
-                  onChange={(e) => { setShowStatisticsBar(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showStatisticsBar: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>

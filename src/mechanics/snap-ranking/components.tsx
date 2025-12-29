@@ -251,7 +251,6 @@ function ResultsModal() {
   const getAverageGuessTime = useSnapRankingStore((s) => s.getAverageGuessTime);
   const getTotalTime = useSnapRankingStore((s) => s.getTotalTime);
   const guesses = useSnapRankingStore((s) => s.guesses);
-  const guessField = useSnapRankingStore((s) => s.guessField);
   const valueType = useSnapRankingStore((s) => s.valueType);
   const uniqueValues = useSnapRankingStore((s) => s.uniqueValues);
 
@@ -264,11 +263,6 @@ function ResultsModal() {
 
   const handlePlayAgain = useCallback(() => {
     // Go to config screen to let user adjust settings before playing again
-    deactivateMechanic();
-    openMechanicPanel();
-  }, [deactivateMechanic, openMechanicPanel]);
-
-  const handleChooseDifferent = useCallback(() => {
     deactivateMechanic();
     openMechanicPanel();
   }, [deactivateMechanic, openMechanicPanel]);

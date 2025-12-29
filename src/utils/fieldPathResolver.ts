@@ -153,7 +153,7 @@ function parsePathSegment(segment: string): ParsedSegment {
 
   // Extract property name (everything before first bracket)
   const propMatch = /^([^[]*)?/.exec(segment);
-  if (propMatch && propMatch[1]) {
+  if (propMatch?.[1]) {
     prop = propMatch[1];
   } else if (segment.startsWith("[")) {
     prop = null;

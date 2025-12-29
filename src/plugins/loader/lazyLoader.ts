@@ -266,12 +266,12 @@ class LazyPluginLoader {
 
     if ("requestIdleCallback" in window) {
       requestIdleCallback(
-        (deadline) => this.processPreloadQueue(deadline),
+        (deadline) => { this.processPreloadQueue(deadline); },
         { timeout: 5000 }
       );
     } else {
       // Fallback for browsers without requestIdleCallback
-      setTimeout(() => this.processPreloadQueue(), 100);
+      setTimeout(() => { this.processPreloadQueue(); }, 100);
     }
   }
 

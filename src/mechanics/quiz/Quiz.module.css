@@ -1,0 +1,787 @@
+/**
+ * Styles for Quiz mechanic.
+ * A knowledge-testing game with multiple choice questions.
+ */
+
+/* Quiz overlay - full screen during quiz */
+.quizOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--colour-background);
+  z-index: 150;
+  overflow: hidden;
+}
+
+/* Progress header */
+.progressHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+  background: var(--colour-surface);
+  border-bottom: 1px solid var(--colour-border);
+}
+
+.progressInfo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.progressText {
+  font-size: 0.875rem;
+  color: var(--colour-text-muted);
+}
+
+.progressCurrent {
+  font-weight: bold;
+  color: var(--colour-text);
+}
+
+.scoreDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.scoreValue {
+  font-size: 1.25rem;
+  font-weight: bold;
+  color: var(--colour-primary);
+}
+
+.scoreLabel {
+  font-size: 0.75rem;
+  color: var(--colour-text-muted);
+  text-transform: uppercase;
+}
+
+.streakDisplay {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(255, 165, 0, 0.15);
+  border-radius: 4px;
+}
+
+.streakIcon {
+  font-size: 1rem;
+}
+
+.streakValue {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: #ffa500;
+}
+
+.exitButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--colour-border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.exitButton:hover {
+  background: var(--colour-surface-elevated);
+  color: var(--colour-text);
+  border-color: var(--colour-text-muted);
+}
+
+/* Question content area */
+.questionContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Question display */
+.questionDisplay {
+  width: 100%;
+  max-width: 600px;
+  text-align: center;
+}
+
+.questionPrompt {
+  font-size: 1.25rem;
+  color: var(--colour-text);
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+/* Container for zoomed images - clips overflow */
+.questionImageContainer {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  border-radius: 12px;
+  margin: 0 auto 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.questionImageContainer .questionImage {
+  margin: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.questionImage {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 4/3;
+  object-fit: cover;
+  border-radius: 12px;
+  margin: 0 auto 2rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Answer options */
+.answerOptions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.answerButton {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border: 2px solid var(--colour-border);
+  border-radius: 10px;
+  background: var(--colour-surface);
+  color: var(--colour-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  font-size: 1rem;
+  text-align: left;
+}
+
+.answerButton:hover:not(.disabled) {
+  border-color: var(--colour-primary);
+  background: var(--colour-surface-elevated);
+  transform: translateY(-2px);
+}
+
+.answerButton:active:not(.disabled) {
+  transform: translateY(0);
+}
+
+.answerButton.disabled {
+  cursor: default;
+  opacity: 0.9;
+}
+
+.answerButton.correct {
+  border-color: #2ECC71;
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.answerButton.incorrect {
+  border-color: #E74C3C;
+  background: rgba(231, 76, 60, 0.15);
+}
+
+.answerButton.showCorrect {
+  border-color: #2ECC71;
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.answerLabel {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--colour-border-light);
+  color: var(--colour-text);
+  font-weight: bold;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+
+.answerButton.correct .answerLabel,
+.answerButton.showCorrect .answerLabel {
+  background: #2ECC71;
+  color: #fff;
+}
+
+.answerButton.incorrect .answerLabel {
+  background: #E74C3C;
+  color: #fff;
+}
+
+.answerText {
+  flex: 1;
+  line-height: 1.3;
+}
+
+/* Image answer options (for name-to-image) */
+.imageAnswerOptions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.imageAnswerButton {
+  position: relative;
+  aspect-ratio: 4/3;
+  border: 3px solid var(--colour-border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  background: var(--colour-surface);
+}
+
+.imageAnswerButton:hover:not(.disabled) {
+  border-color: var(--colour-primary);
+  transform: scale(1.02);
+}
+
+.imageAnswerButton.disabled {
+  cursor: default;
+}
+
+.imageAnswerButton.correct {
+  border-color: #2ECC71;
+}
+
+.imageAnswerButton.incorrect {
+  border-color: #E74C3C;
+}
+
+.imageAnswerButton.showCorrect {
+  border-color: #2ECC71;
+}
+
+.answerImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.imageLabel {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  font-weight: bold;
+  font-size: 0.875rem;
+  color: #fff;
+}
+
+.imageAnswerButton.correct .imageLabel,
+.imageAnswerButton.showCorrect .imageLabel {
+  background: #2ECC71;
+}
+
+.imageAnswerButton.incorrect .imageLabel {
+  background: #E74C3C;
+}
+
+/* Feedback overlay */
+.feedbackOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 10;
+  cursor: pointer;
+}
+
+.feedbackContent {
+  text-align: center;
+  padding: 2rem;
+  background: var(--colour-surface);
+  border-radius: 16px;
+  max-width: 400px;
+  animation: feedbackPop 0.3s ease;
+}
+
+@keyframes feedbackPop {
+  0% { transform: scale(0.8); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.feedbackIcon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.feedbackText {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.feedbackContent.correct .feedbackText {
+  color: #2ECC71;
+}
+
+.feedbackContent.incorrect .feedbackText {
+  color: #E74C3C;
+}
+
+.feedbackPoints {
+  font-size: 1.25rem;
+  color: var(--colour-primary);
+  margin-bottom: 0.5rem;
+}
+
+.feedbackCorrectAnswer {
+  font-size: 0.875rem;
+  color: var(--colour-text-muted);
+}
+
+.feedbackHint {
+  font-size: 0.75rem;
+  color: var(--colour-text-muted);
+  margin-top: 1rem;
+}
+
+/* Skip button */
+.skipButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid var(--colour-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--colour-text-muted);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s ease;
+}
+
+.skipButton:hover {
+  background: var(--colour-surface-elevated);
+  color: var(--colour-text);
+}
+
+/* Timer bar */
+.timerBar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--colour-border-light);
+}
+
+.timerProgress {
+  height: 100%;
+  background: var(--colour-primary);
+  transition: width 0.1s linear;
+}
+
+.timerProgress.warning {
+  background: #F1C40F;
+}
+
+.timerProgress.danger {
+  background: #E74C3C;
+}
+
+/* Results screen */
+.resultsOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 200;
+  padding: 1rem;
+}
+
+.resultsModal {
+  background: var(--colour-surface);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 500px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.resultsHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.resultsTitle {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  color: var(--colour-text);
+}
+
+.resultsScore {
+  display: flex;
+  justify-content: center;
+  align-items: baseline;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.resultsScoreValue {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--colour-primary);
+}
+
+.resultsScoreMax {
+  font-size: 1.5rem;
+  color: var(--colour-text-secondary);
+}
+
+.resultsPercentage {
+  font-size: 1.25rem;
+  color: var(--colour-text-secondary);
+}
+
+/* Stats grid */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: var(--colour-surface-elevated);
+  border: 1px solid var(--colour-border);
+  border-radius: 10px;
+}
+
+.statValue {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--colour-text);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--colour-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.25rem;
+}
+
+.statItem.correct .statValue {
+  color: #2ECC71;
+}
+
+.statItem.incorrect .statValue {
+  color: #E74C3C;
+}
+
+.statItem.streak .statValue {
+  color: #ffa500;
+}
+
+/* Results actions */
+.resultsActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.actionButton {
+  padding: 0.875rem 2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.actionButton:hover {
+  transform: scale(1.02);
+}
+
+.actionButton:active {
+  transform: scale(0.98);
+}
+
+.primaryButton {
+  background: var(--colour-primary);
+  border: none;
+  color: var(--colour-primary-text);
+}
+
+.secondaryButton {
+  background: transparent;
+  border: 2px solid var(--colour-border);
+  color: var(--colour-text);
+}
+
+.secondaryButton:hover {
+  background: var(--colour-surface-elevated);
+  border-color: var(--colour-text-muted);
+}
+
+/* Error overlay */
+.errorOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 200;
+  padding: 1rem;
+}
+
+.errorModal {
+  background: var(--colour-surface);
+  border-radius: 12px;
+  padding: 2rem;
+  max-width: 400px;
+  width: 100%;
+  text-align: center;
+}
+
+.errorTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0 0 1rem 0;
+  color: #E74C3C;
+}
+
+.errorMessage {
+  color: var(--colour-text);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.errorHint {
+  color: var(--colour-text-muted);
+  font-size: 0.875rem;
+  margin: 0 0 1.5rem 0;
+}
+
+.errorExitButton {
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  background: var(--colour-primary);
+  color: var(--colour-primary-text);
+  transition: all 0.15s ease;
+}
+
+.errorExitButton:hover {
+  opacity: 0.9;
+  transform: scale(1.02);
+}
+
+/* Settings panel */
+.settingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.settingRow {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 8px);
+}
+
+.settingLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text, #333);
+}
+
+.checkboxGroup {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.checkboxLabel input {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+}
+
+.checkboxLabel span {
+  font-size: 0.875rem;
+  color: var(--colour-text-muted, #666);
+}
+
+.checkboxLabel:hover span {
+  color: var(--colour-text, #333);
+}
+
+.settingHint {
+  font-size: 0.75rem;
+  color: var(--colour-text-muted, #666);
+  margin-top: 0.5rem;
+  line-height: 1.4;
+}
+
+/* Segmented control - matches Memory game style */
+.segmentedControl {
+  display: flex;
+  gap: 2px;
+  background: var(--colour-border-light, #f0f0f0);
+  border-radius: 8px;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.segmentButton {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--colour-text-muted, #666);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.segmentButton:hover:not(:disabled) {
+  background: var(--colour-surface, #fff);
+  color: var(--colour-text, #333);
+}
+
+.segmentButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.segmentButtonActive {
+  background: var(--colour-surface, #fff);
+  color: var(--colour-text, #333);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.segmentButtonActive:hover:not(:disabled) {
+  background: var(--colour-surface, #fff);
+}
+
+/* Mobile adjustments */
+@media (max-width: 600px) {
+  .progressHeader {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .progressInfo {
+    gap: 0.5rem;
+  }
+
+  .questionContent {
+    padding: 1rem;
+  }
+
+  .questionPrompt {
+    font-size: 1.1rem;
+  }
+
+  .questionImage {
+    max-width: 100%;
+  }
+
+  .answerButton {
+    padding: 0.875rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .answerLabel {
+    width: 1.75rem;
+    height: 1.75rem;
+    font-size: 0.75rem;
+  }
+
+  .imageAnswerOptions {
+    gap: 0.5rem;
+  }
+
+  .imageLabel {
+    width: 1.5rem;
+    height: 1.5rem;
+    font-size: 0.75rem;
+  }
+
+  .resultsModal {
+    padding: 1.5rem;
+  }
+
+  .resultsTitle {
+    font-size: 1.5rem;
+  }
+
+  .resultsScoreValue {
+    font-size: 2.5rem;
+  }
+
+  .statsGrid {
+    gap: 0.75rem;
+  }
+
+  .statItem {
+    padding: 0.75rem;
+  }
+
+  .statValue {
+    font-size: 1.25rem;
+  }
+
+  .resultsActions {
+    flex-direction: column;
+  }
+
+  .actionButton {
+    width: 100%;
+  }
+}

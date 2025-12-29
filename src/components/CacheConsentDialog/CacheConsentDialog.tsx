@@ -96,10 +96,14 @@ export function CacheConsentDialog({
 
             <div className={styles.info}>
               <span className={styles.infoIcon}>i</span>
-              <span>Cached data is stored locally in your browser.</span>
+              <span>
+                Cached data is stored only in this browser on this device.
+                It will not sync to other browsers or devices.
+              </span>
             </div>
 
             <div className={styles.actions}>
+              {/* Primary action */}
               <button
                 className={styles.primaryButton}
                 onClick={handleAllowOnce}
@@ -107,28 +111,33 @@ export function CacheConsentDialog({
                 Allow for this collection
               </button>
 
+              {/* Secondary action - outline style */}
               <button
-                className={styles.secondaryButton}
-                onClick={handleAlwaysAllow}
-              >
-                Always allow caching
-              </button>
-
-              <div className={styles.divider} />
-
-              <button
-                className={styles.textButton}
+                className={styles.outlineButton}
                 onClick={handleDeny}
               >
                 Not now
               </button>
 
-              <button
-                className={styles.textButton}
-                onClick={handleNeverCache}
-              >
-                Never cache
-              </button>
+              {/* Global options below divider */}
+              <div className={styles.divider} />
+
+              <div className={styles.globalOptions}>
+                <button
+                  className={styles.textLink}
+                  onClick={handleAlwaysAllow}
+                >
+                  Always allow caching
+                </button>
+                <span className={styles.optionSeparator}>|</span>
+                <button
+                  className={styles.textLink}
+                  onClick={handleNeverCache}
+                >
+                  Never cache
+                  <span className={styles.hint}> (can change in Settings)</span>
+                </button>
+              </div>
             </div>
           </motion.div>
         </motion.div>

@@ -62,26 +62,26 @@ Apply to all settings except:
 
 ## Implementation Tasks
 
-- [ ] Add draft state to settingsStore
-- [ ] Add startEditing, updateDraft, commitDraft, discardDraft actions
-- [ ] Add getEffective selector
-- [ ] Update SettingsPanel to initialise draft on open
-- [ ] Update all settings controls to use updateDraft
-- [ ] Update Accept button to commit draft
-- [ ] Update Cancel button to discard draft
-- [ ] Add dirty state indicator
-- [ ] Update theme hooks to use effective settings
-- [ ] Exclude accessibility settings from draft pattern
-- [ ] Add tests for draft state lifecycle
+- [x] Add draft state to settingsStore
+- [x] Add startEditing, updateDraft, commitDraft, discardDraft actions
+- [x] Add getEffective selector
+- [x] Update SettingsPanel to initialise draft on open
+- [x] Update all settings controls to use updateDraft
+- [x] Update Accept button to commit draft
+- [x] Update Cancel button to discard draft
+- [x] Add dirty state indicator
+- [x] Update theme hooks to use effective settings
+- [x] Exclude accessibility settings from draft pattern
+- [x] Add tests for draft state lifecycle
 
 ## Success Criteria
 
-- [ ] Settings changes only apply on Accept
-- [ ] Cancel reverts to previous state
-- [ ] Preview shows draft values while editing
-- [ ] Dark Mode and High Contrast still apply immediately
-- [ ] Draft state not persisted (only committed state)
-- [ ] Clear visual indication when changes are pending
+- [x] Settings changes only apply on Accept
+- [x] Cancel reverts to previous state
+- [x] Preview shows draft values while editing
+- [x] Dark Mode and High Contrast still apply immediately
+- [x] Draft state not persisted (only committed state)
+- [x] Clear visual indication when changes are pending
 
 ## Complexity
 
@@ -104,4 +104,4 @@ Apply to all settings except:
 
 ---
 
-**Status**: Planned
+**Status**: Complete

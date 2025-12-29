@@ -110,27 +110,24 @@ export function QuickSettings() {
   const { cards } = useCollectionData();
   const totalCardCount = cards.length;
 
-  const {
-    visualTheme,
-    cardSizePreset,
-    shuffleOnLoad,
-    layout,
-    randomSelectionEnabled,
-    randomSelectionCount,
-    setVisualTheme,
-    setCardSizePreset,
-    setShuffleOnLoad,
-    setLayout,
-    setRandomSelectionEnabled,
-    setRandomSelectionCount,
-  } = useSettingsStore();
+  // Use getEffective for reading values (shows draft if editing)
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
+
+  // Get effective values
+  const visualTheme = getEffective("visualTheme");
+  const cardSizePreset = getEffective("cardSizePreset");
+  const shuffleOnLoad = getEffective("shuffleOnLoad");
+  const layout = getEffective("layout");
+  const randomSelectionEnabled = getEffective("randomSelectionEnabled");
+  const randomSelectionCount = getEffective("randomSelectionCount");
 
   // Clamp selection count when collection changes (e.g., fewer cards available)
   useEffect(() => {
     if (totalCardCount > 0 && randomSelectionCount > totalCardCount) {
-      setRandomSelectionCount(totalCardCount);
+      updateDraft({ randomSelectionCount: totalCardCount });
     }
-  }, [totalCardCount, randomSelectionCount, setRandomSelectionCount]);
+  }, [totalCardCount, randomSelectionCount, updateDraft]);
 
   // Display effective count (clamped to available cards)
   const effectiveCount = Math.min(randomSelectionCount, totalCardCount || randomSelectionCount);
@@ -143,7 +140,7 @@ export function QuickSettings() {
         <select
           className={styles.select}
           value={visualTheme}
-          onChange={(e) => { setVisualTheme(e.target.value as VisualTheme); }}
+          onChange={(e) => { updateDraft({ visualTheme: e.target.value as VisualTheme }); }}
           aria-label="Visual theme"
         >
           {themeOptions.map(({ value, label }) => (
@@ -164,7 +161,7 @@ export function QuickSettings() {
                 styles.segmentButton,
                 cardSizePreset === value ? styles.segmentButtonActive : "",
               ].filter(Boolean).join(" ")}
-              onClick={() => { setCardSizePreset(value); }}
+              onClick={() => { updateDraft({ cardSizePreset: value }); }}
               role="radio"
               aria-checked={cardSizePreset === value}
             >
@@ -186,7 +183,7 @@ export function QuickSettings() {
                 styles.segmentButton,
                 layout === value ? styles.segmentButtonActive : "",
               ].filter(Boolean).join(" ")}
-              onClick={() => { setLayout(value); }}
+              onClick={() => { updateDraft({ layout: value }); }}
               role="radio"
               aria-checked={layout === value}
               title={label}
@@ -206,7 +203,7 @@ export function QuickSettings() {
           <input
             type="checkbox"
             checked={shuffleOnLoad}
-            onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
+            onChange={(e) => { updateDraft({ shuffleOnLoad: e.target.checked }); }}
           />
           <span className={styles.toggleSlider} />
         </label>
@@ -219,7 +216,7 @@ export function QuickSettings() {
           <input
             type="checkbox"
             checked={randomSelectionEnabled}
-            onChange={(e) => { setRandomSelectionEnabled(e.target.checked); }}
+            onChange={(e) => { updateDraft({ randomSelectionEnabled: e.target.checked }); }}
           />
           <span className={styles.toggleSlider} />
         </label>
@@ -235,7 +232,7 @@ export function QuickSettings() {
               value={effectiveCount}
               onChange={(e) => {
                 const value = parseInt(e.target.value, 10) || 1;
-                setRandomSelectionCount(Math.min(Math.max(1, value), totalCardCount));
+                updateDraft({ randomSelectionCount: Math.min(Math.max(1, value), totalCardCount) });
               }}
               min={1}
               max={totalCardCount}

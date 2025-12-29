@@ -269,7 +269,7 @@ export function getImageUrls(images: Image[] | undefined): string[] {
         return isValidUrl(img) ? img : null;
       }
       // Handle Image objects with url property
-      if (img && typeof img === "object" && typeof img.url === "string") {
+      if (typeof img === "object" && img !== null && typeof img.url === "string") {
         return isValidUrl(img.url) ? img.url : null;
       }
       // Skip invalid entries

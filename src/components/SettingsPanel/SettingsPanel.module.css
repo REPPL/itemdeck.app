@@ -326,8 +326,28 @@
 
 /* Footer */
 .footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
   border-top: 1px solid var(--colour-border);
+  gap: var(--spacing-md);
+}
+
+.dirtyIndicator {
+  font-size: 0.875rem;
+  color: var(--colour-warning, #f59e0b);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.dirtyIndicator::before {
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
+  background: currentColor;
+  border-radius: 50%;
 }
 
 .footerButtons {
@@ -335,6 +355,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--spacing-md);
+  margin-left: auto;
 }
 
 .footerRight {

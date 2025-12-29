@@ -56,7 +56,7 @@ function validateCollectionSettings(data: unknown): CollectionSettings | null {
   // Check version
   const version = typeof raw.version === "number" ? raw.version : 1;
   if (version > COLLECTION_SETTINGS_VERSION) {
-    console.warn(`Unsupported settings version: ${version} (expected <= ${COLLECTION_SETTINGS_VERSION})`);
+    console.warn(`Unsupported settings version: ${String(version)} (expected <= ${String(COLLECTION_SETTINGS_VERSION)})`);
     return null;
   }
 
@@ -84,22 +84,22 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
   const forced: ForcedSettings = {};
 
   // defaultCardFace
-  if (raw.defaultCardFace && ["front", "back"].includes(String(raw.defaultCardFace))) {
+  if (typeof raw.defaultCardFace === "string" && ["front", "back"].includes(raw.defaultCardFace)) {
     forced.defaultCardFace = raw.defaultCardFace as "front" | "back";
   }
 
   // cardBackDisplay
-  if (raw.cardBackDisplay && ["year", "logo", "both", "none"].includes(String(raw.cardBackDisplay))) {
+  if (typeof raw.cardBackDisplay === "string" && ["year", "logo", "both", "none"].includes(raw.cardBackDisplay)) {
     forced.cardBackDisplay = raw.cardBackDisplay as ForcedSettings["cardBackDisplay"];
   }
 
   // cardBackStyle
-  if (raw.cardBackStyle && ["plain", "pattern", "gradient"].includes(String(raw.cardBackStyle))) {
+  if (typeof raw.cardBackStyle === "string" && ["plain", "pattern", "gradient"].includes(raw.cardBackStyle)) {
     forced.cardBackStyle = raw.cardBackStyle as ForcedSettings["cardBackStyle"];
   }
 
   // titleDisplayMode
-  if (raw.titleDisplayMode && ["always", "hover", "never"].includes(String(raw.titleDisplayMode))) {
+  if (typeof raw.titleDisplayMode === "string" && ["always", "hover", "never"].includes(raw.titleDisplayMode)) {
     forced.titleDisplayMode = raw.titleDisplayMode as ForcedSettings["titleDisplayMode"];
   }
 
@@ -131,17 +131,17 @@ function validateDefaultSettings(raw: Record<string, unknown>): DefaultSettings 
   const defaults: DefaultSettings = {};
 
   // visualTheme
-  if (raw.visualTheme && ["retro", "modern", "minimal"].includes(String(raw.visualTheme))) {
+  if (typeof raw.visualTheme === "string" && ["retro", "modern", "minimal"].includes(raw.visualTheme)) {
     defaults.visualTheme = raw.visualTheme as DefaultSettings["visualTheme"];
   }
 
   // cardSizePreset
-  if (raw.cardSizePreset && ["small", "medium", "large"].includes(String(raw.cardSizePreset))) {
+  if (typeof raw.cardSizePreset === "string" && ["small", "medium", "large"].includes(raw.cardSizePreset)) {
     defaults.cardSizePreset = raw.cardSizePreset as DefaultSettings["cardSizePreset"];
   }
 
   // cardAspectRatio
-  if (raw.cardAspectRatio && ["3:4", "5:7", "1:1"].includes(String(raw.cardAspectRatio))) {
+  if (typeof raw.cardAspectRatio === "string" && ["3:4", "5:7", "1:1"].includes(raw.cardAspectRatio)) {
     defaults.cardAspectRatio = raw.cardAspectRatio as DefaultSettings["cardAspectRatio"];
   }
 

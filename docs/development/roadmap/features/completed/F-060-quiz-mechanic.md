@@ -65,68 +65,68 @@ Type 3: Fill the Blank
 
 ### Phase 1: Mechanic Core
 
-- [ ] Create `src/mechanics/quiz/index.ts`
-- [ ] Define `QuizMechanicManifest`
-- [ ] Create `QuizMechanic` class
-- [ ] Register factory with mechanic registry
+- [x] Create `src/mechanics/quiz/index.ts`
+- [x] Define `QuizMechanicManifest`
+- [x] Create `QuizMechanic` class
+- [x] Register factory with mechanic registry
 
 ### Phase 2: Question Generator
 
-- [ ] Create `src/mechanics/quiz/questionGenerator.ts`
-- [ ] Implement image-to-name question generator
-- [ ] Implement name-to-image question generator
-- [ ] Implement fill-the-blank question generator
-- [ ] Generate wrong answers from other cards in collection
-- [ ] Randomise answer positions
+- [x] Create `src/mechanics/quiz/generators/`
+- [x] Implement image-to-name question generator
+- [x] Implement name-to-image question generator
+- [x] Implement fill-the-blank question generator
+- [x] Generate wrong answers from other cards in collection
+- [x] Randomise answer positions
 
 ### Phase 3: State Management
 
-- [ ] Create `src/mechanics/quiz/store.ts`
-- [ ] Track: `questions`, `currentIndex`, `answers`, `score`, `streak`
-- [ ] Implement `startQuiz(config)` action
-- [ ] Implement `submitAnswer(answer)` action
-- [ ] Implement `nextQuestion()` action
-- [ ] Implement `endQuiz()` action
+- [x] Create `src/mechanics/quiz/store.ts`
+- [x] Track: `questions`, `currentIndex`, `answers`, `score`, `streak`
+- [x] Implement `startQuiz(config)` action
+- [x] Implement `submitAnswer(answer)` action
+- [x] Implement `nextQuestion()` action
+- [x] Implement `endQuiz()` action
 
 ### Phase 4: Quiz Overlay
 
-- [ ] Create `QuizOverlay.tsx` (replaces grid)
-- [ ] Display current question
-- [ ] Show answer options
-- [ ] Show immediate feedback (correct/incorrect)
-- [ ] Animate transitions between questions
+- [x] Create `QuizOverlay.tsx` (replaces grid)
+- [x] Display current question
+- [x] Show answer options
+- [x] Show immediate feedback (correct/incorrect)
+- [x] Animate transitions between questions
 
 ### Phase 5: Answer Feedback
 
-- [ ] Highlight correct answer in green
-- [ ] Highlight wrong selection in red
-- [ ] Show explanation (optional)
-- [ ] Update score and streak display
-- [ ] Play sound effects (optional, respecting preferences)
+- [x] Highlight correct answer in green
+- [x] Highlight wrong selection in red
+- [x] Show explanation (optional)
+- [x] Update score and streak display
+- [ ] Play sound effects (optional, respecting preferences) - Deferred
 
 ### Phase 6: Quiz Configuration
 
-- [ ] Select number of questions (5, 10, 20)
-- [ ] Select question types (checkboxes)
-- [ ] Select difficulty level
-- [ ] Select which fields to quiz on
+- [x] Select number of questions (5, 10, 20)
+- [x] Select question types (checkboxes)
+- [x] Select difficulty level
+- [x] Select which fields to quiz on
 
 ### Phase 7: Results Screen
 
-- [ ] Show final score
-- [ ] Show questions missed
-- [ ] Show time taken (optional timer mode)
-- [ ] Compare to best score
-- [ ] Share results (copy to clipboard)
+- [x] Show final score
+- [x] Show questions missed
+- [x] Show time taken (optional timer mode)
+- [x] Compare to best score
+- [ ] Share results (copy to clipboard) - Deferred
 
 ## Success Criteria
 
-- [ ] Questions generated from collection data
-- [ ] Multiple question types work
-- [ ] Wrong answers are plausible (from same collection)
-- [ ] Score tracking accurate
-- [ ] Streak counter works
-- [ ] Results displayed at end
+- [x] Questions generated from collection data
+- [x] Multiple question types work
+- [x] Wrong answers are plausible (from same collection)
+- [x] Score tracking accurate
+- [x] Streak counter works
+- [x] Results displayed at end
 
 ## Dependencies
 
@@ -155,4 +155,4 @@ Type 3: Fill the Blank
 
 ---
 
-**Status**: Planned
+**Status**: Complete

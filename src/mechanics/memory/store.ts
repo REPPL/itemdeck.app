@@ -29,12 +29,12 @@ import type { MechanicState } from "../types";
  * Difficulty levels for Memory Game.
  * Controls how long cards stay visible before flipping back.
  */
-export type MemoryDifficulty = "easy" | "medium" | "hard" | "expert" | "ultra";
+export type MemoryDifficulty = "easy" | "medium" | "hard" | "expert" | "extreme";
 
 /**
  * Difficulty settings.
  * - flipDelay: How long to show cards before checking match (ms)
- * - instant: If true, first card flips back immediately (ultra mode)
+ * - instant: If true, first card flips back immediately (Extreme mode)
  */
 /**
  * Flip animation duration in ms (matches config.animation.flipDuration * 1000).
@@ -58,17 +58,17 @@ export const DIFFICULTY_SETTINGS: Record<MemoryDifficulty, {
   label: string;
   flipDelay: number;
   instant?: boolean;
-  /** For Ultra mode: how long first card stays visible before flipping back */
+  /** For Extreme mode: how long first card stays visible before flipping back */
   firstCardViewTime?: number;
 }> = {
   easy: { label: "Easy", flipDelay: 1500 },
   medium: { label: "Medium", flipDelay: 1000 },
   hard: { label: "Hard", flipDelay: 700 },
   expert: { label: "Expert", flipDelay: 500 },
-  // Ultra: First card flips, shows briefly, then flips back
+  // Extreme: First card flips, shows briefly, then flips back
   // firstCardViewTime = animation (600ms) + view time (400ms) = 1000ms
   // flipDelay must also account for animation so second card fully shows
-  ultra: { label: "Ultra", flipDelay: FLIP_ANIMATION_DURATION + 400, instant: true, firstCardViewTime: 1000 },
+  extreme: { label: "Extreme", flipDelay: FLIP_ANIMATION_DURATION + 400, instant: true, firstCardViewTime: 1000 },
 };
 
 /**
@@ -272,7 +272,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
   selectCard: (cardId) => {
     const state = get();
     const settings = DIFFICULTY_SETTINGS[state.difficulty];
-    const isUltraMode = settings.instant === true;
+    const isExtremeMode = settings.instant === true;
 
     // Guard: Must be active
     if (!state.isActive) return;
@@ -363,8 +363,8 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
         });
       }
 
-      // Handle Ultra mode hide timer for the new first card
-      if (isUltraMode) {
+      // Handle Extreme mode hide timer for the new first card
+      if (isExtremeMode) {
         const hideDelay = settings.firstCardViewTime ?? (FLIP_ANIMATION_DURATION + 400);
         setTimeout(() => {
           const current = get();
@@ -382,8 +382,8 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
     // Handle based on current phase
     if (state.phase === "idle") {
       // First card selection
-      if (isUltraMode) {
-        // Ultra mode: Show card briefly, then hide but remember it
+      if (isExtremeMode) {
+        // Extreme mode: Show card briefly, then hide but remember it
         set({
           phase: "first_selected",
           firstCard: cardId,
@@ -420,9 +420,9 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
       set({
         phase: "locked",
         secondCard: cardId,
-        visibleCards: isUltraMode ? [cardId] : [first, cardId],
+        visibleCards: isExtremeMode ? [cardId] : [first, cardId],
         attempts: state.attempts + 1,
-        flippedCards: isUltraMode ? [cardId] : [first, cardId], // Legacy
+        flippedCards: isExtremeMode ? [cardId] : [first, cardId], // Legacy
       });
 
       // Check match after delay (can be interrupted by third card click)

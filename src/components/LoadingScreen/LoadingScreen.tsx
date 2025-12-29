@@ -326,12 +326,12 @@ export function LoadingScreen({
           <div className={styles.githubContext}>
             <img
               src={githubAvatarUrl}
-              alt={`${githubUsername}'s GitHub avatar`}
+              alt={`${githubUsername ?? "User"}'s GitHub avatar`}
               className={styles.githubAvatar}
               loading="eager"
               draggable="false"
             />
-            <span className={styles.githubUsername}>{githubUsername}</span>
+            <span className={styles.githubUsername}>{githubUsername ?? ""}</span>
             {collectionName && (
               <span className={styles.collectionName}>{collectionName}</span>
             )}

@@ -137,7 +137,7 @@ export interface GameConfig {
   /** The field being guessed (from topBadgeField) */
   guessField: string;
   /** Cards with their values */
-  cards: Array<{ id: string; value: GuessValue }>;
+  cards: { id: string; value: GuessValue }[];
   /** Whether values are numeric or categorical */
   valueType: ValueType;
   /** All unique values for the guess field */

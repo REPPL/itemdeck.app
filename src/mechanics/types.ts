@@ -95,6 +95,8 @@ export interface MechanicSettingsProps<TSettings = unknown> {
   onChange: (settings: Partial<TSettings>) => void;
   /** Whether settings are disabled (e.g., during active game) */
   disabled?: boolean;
+  /** Number of cards in the current collection (for validation) */
+  cardCount?: number;
 }
 
 /**

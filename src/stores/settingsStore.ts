@@ -308,6 +308,50 @@ export const CARD_ASPECT_RATIOS: Record<CardAspectRatio, number> = {
 export type CardBackDisplay = "year" | "logo" | "both" | "none";
 
 /**
+ * Keys that can be stored in draft state.
+ * Excludes functions and internal state.
+ */
+type DraftableSettingsKeys =
+  | "layout"
+  | "cardSizePreset"
+  | "cardAspectRatio"
+  | "maxVisibleCards"
+  | "cardBackDisplay"
+  | "shuffleOnLoad"
+  | "reduceMotion"
+  | "highContrast"
+  | "titleDisplayMode"
+  | "dragModeEnabled"
+  | "visualTheme"
+  | "cardBackStyle"
+  | "cardBackBackground"
+  | "showRankBadge"
+  | "showDeviceBadge"
+  | "rankPlaceholderText"
+  | "dragFace"
+  | "fieldMapping"
+  | "themeCustomisations"
+  | "showHelpButton"
+  | "showSettingsButton"
+  | "showDragIcon"
+  | "customThemeUrl"
+  | "randomSelectionEnabled"
+  | "randomSelectionCount"
+  | "defaultCardFace"
+  | "showStatisticsBar"
+  | "showSearchBar"
+  | "searchBarMinimised"
+  | "showViewButton"
+  | "usePlaceholderImages";
+
+/**
+ * Type for draft settings (subset of SettingsState).
+ */
+type DraftSettings = {
+  [K in DraftableSettingsKeys]?: SettingsState[K];
+};
+
+/**
  * Settings store state.
  */
 interface SettingsState {
@@ -470,6 +514,16 @@ interface SettingsState {
   /** Source ID of the collection whose defaults were applied (prevents re-applying) */
   appliedCollectionDefaultsSourceId: string | null;
 
+  // ============================================================================
+  // v0.14.0: Draft State Management (F-090)
+  // ============================================================================
+
+  /** Draft copy of settings (null when not editing) */
+  _draft: DraftSettings | null;
+
+  /** Whether draft differs from committed state */
+  isDirty: boolean;
+
   /** Actions */
   setLayout: (layout: LayoutType) => void;
   setCardSizePreset: (preset: CardSizePreset) => void;
@@ -537,6 +591,18 @@ interface SettingsState {
   setUsePlaceholderImages: (use: boolean) => void;
   applyCollectionSettings: (sourceId: string, settings: CollectionSettings) => void;
   clearCollectionForcedSettings: () => void;
+
+  // v0.14.0: Draft State Actions (F-090)
+  /** Start editing - creates draft from current committed state */
+  startEditing: () => void;
+  /** Update draft with partial settings (does not persist) */
+  updateDraft: (partial: DraftSettings) => void;
+  /** Commit draft to committed state and persist */
+  commitDraft: () => void;
+  /** Discard draft and reset to committed state */
+  discardDraft: () => void;
+  /** Get effective value (draft if editing, committed otherwise) */
+  getEffective: <K extends DraftableSettingsKeys>(key: K) => SettingsState[K];
 
   // ============================================================================
   // v0.11.2: Cache Consent State (F-080)
@@ -626,6 +692,9 @@ const DEFAULT_SETTINGS = {
   usePlaceholderImages: true,
   collectionForcedSettings: null as ForcedSettings | null,
   appliedCollectionDefaultsSourceId: null as string | null,
+  // v0.14.0: Draft State defaults (F-090)
+  _draft: null as DraftSettings | null,
+  isDirty: false,
 };
 
 // Check for reset parameter in URL - force clear localStorage
@@ -1062,6 +1131,110 @@ export const useSettingsStore = create<SettingsState>()(
         // "ask" mode: check per-source consent
         return state.cacheConsentGranted.includes(sourceId);
       },
+
+      // v0.14.0: Draft State Actions (F-090)
+      startEditing: () => {
+        const state = get();
+        // Create a shallow copy of draftable settings
+        const draft: DraftSettings = {
+          layout: state.layout,
+          cardSizePreset: state.cardSizePreset,
+          cardAspectRatio: state.cardAspectRatio,
+          maxVisibleCards: state.maxVisibleCards,
+          cardBackDisplay: state.cardBackDisplay,
+          shuffleOnLoad: state.shuffleOnLoad,
+          reduceMotion: state.reduceMotion,
+          highContrast: state.highContrast,
+          titleDisplayMode: state.titleDisplayMode,
+          dragModeEnabled: state.dragModeEnabled,
+          visualTheme: state.visualTheme,
+          cardBackStyle: state.cardBackStyle,
+          cardBackBackground: state.cardBackBackground,
+          showRankBadge: state.showRankBadge,
+          showDeviceBadge: state.showDeviceBadge,
+          rankPlaceholderText: state.rankPlaceholderText,
+          dragFace: state.dragFace,
+          fieldMapping: { ...state.fieldMapping },
+          themeCustomisations: structuredClone(state.themeCustomisations),
+          showHelpButton: state.showHelpButton,
+          showSettingsButton: state.showSettingsButton,
+          showDragIcon: state.showDragIcon,
+          customThemeUrl: state.customThemeUrl,
+          randomSelectionEnabled: state.randomSelectionEnabled,
+          randomSelectionCount: state.randomSelectionCount,
+          defaultCardFace: state.defaultCardFace,
+          showStatisticsBar: state.showStatisticsBar,
+          showSearchBar: state.showSearchBar,
+          searchBarMinimised: state.searchBarMinimised,
+          showViewButton: state.showViewButton,
+          usePlaceholderImages: state.usePlaceholderImages,
+        };
+        set({ _draft: draft, isDirty: false });
+      },
+
+      updateDraft: (partial) => {
+        set((state) => {
+          if (!state._draft) {
+            // Not editing, ignore
+            return state;
+          }
+
+          // Merge partial into draft
+          const newDraft = { ...state._draft, ...partial };
+
+          // Handle nested objects (fieldMapping, themeCustomisations)
+          if (partial.fieldMapping) {
+            newDraft.fieldMapping = { ...state._draft.fieldMapping, ...partial.fieldMapping };
+          }
+          if (partial.themeCustomisations) {
+            newDraft.themeCustomisations = {
+              ...state._draft.themeCustomisations,
+              ...partial.themeCustomisations,
+            };
+          }
+
+          // Check if draft differs from committed state
+          const isDirty = (Object.keys(newDraft) as DraftableSettingsKeys[]).some((key) => {
+            const draftValue = newDraft[key];
+            const committedValue = state[key];
+            // Deep comparison for objects
+            if (typeof draftValue === "object" && draftValue !== null) {
+              return JSON.stringify(draftValue) !== JSON.stringify(committedValue);
+            }
+            return draftValue !== committedValue;
+          });
+
+          return { _draft: newDraft, isDirty };
+        });
+      },
+
+      commitDraft: () => {
+        const state = get();
+        if (!state._draft) {
+          return;
+        }
+
+        // Merge draft into main state
+        const updates: Partial<SettingsState> = {
+          ...state._draft,
+          _draft: null,
+          isDirty: false,
+        };
+
+        set(updates);
+      },
+
+      discardDraft: () => {
+        set({ _draft: null, isDirty: false });
+      },
+
+      getEffective: <K extends DraftableSettingsKeys>(key: K): SettingsState[K] => {
+        const state = get();
+        if (state._draft && key in state._draft) {
+          return state._draft[key] as SettingsState[K];
+        }
+        return state[key];
+      },
     }),
     {
       name: "itemdeck-settings",
@@ -1122,6 +1295,8 @@ export const useSettingsStore = create<SettingsState>()(
         // Note: collectionForcedSettings is intentionally NOT persisted
         // Forced settings are applied fresh from collection on each load
         appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
+        // v0.14.0: Draft state is intentionally NOT persisted
+        // _draft and isDirty are excluded - editing session is transient
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -1404,3 +1579,8 @@ export const useSettingsStore = create<SettingsState>()(
 export function getDefaultSettings() {
   return DEFAULT_SETTINGS;
 }
+
+/**
+ * Export draft settings type for use in components.
+ */
+export type { DraftableSettingsKeys, DraftSettings };

@@ -1,0 +1,14 @@
+{
+  "id": "quiz",
+  "name": "Knowledge Quiz",
+  "version": "1.0.0",
+  "description": "Test your knowledge! Answer questions about cards in the collection with multiple choice answers.",
+  "entrypoint": "./index.tsx",
+  "minCards": 4,
+  "author": {
+    "name": "itemdeck",
+    "url": "https://github.com/itemdeck"
+  },
+  "keywords": ["quiz", "trivia", "knowledge", "learning", "game"],
+  "licence": "GPL-3.0"
+}

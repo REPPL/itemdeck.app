@@ -231,7 +231,7 @@ export function CardGrid() {
           pendingOp = "or";
         } else if (token.type === "not") {
           negateNext = true;
-        } else if (token.type === "term" && token.value) {
+        } else if (token.type === "term") {
           let matches = cardMatchesTerm(card, token.value);
           if (negateNext) {
             matches = !matches;
@@ -492,6 +492,7 @@ export function CardGrid() {
     if (typeof state.initGame === "function") {
       state.initGame(cards.map((c) => c.id));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- baseCards is derived from cards
   }, [mechanic, cards, mechanicResetCount, topBadgeField, snapRankingCardCount]);
 
   // Hide rank badges during snap-ranking game
@@ -809,9 +810,8 @@ export function CardGrid() {
             rankPlaceholderText={rankPlaceholderText}
             displayConfig={mergedDisplayConfig}
             cardSize={cardSizePreset}
+            overlay={CardOverlay && <CardOverlay cardId={card.id} />}
           />
-          {/* Render mechanic card overlay */}
-          {CardOverlay && <CardOverlay cardId={card.id} />}
         </div>
       );
     });
@@ -823,7 +823,7 @@ export function CardGrid() {
   if (dragModeEnabled && !mechanic && layout === "grid" && !isLoading && !error && cards.length > 0) {
     return (
       <>
-        {showSearchBar && !mechanic && (
+        {showSearchBar && (
           <SearchBar
             totalCards={sourceCards.length}
             filteredCount={cards.length}

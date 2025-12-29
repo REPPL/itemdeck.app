@@ -65,6 +65,8 @@ interface CardProps {
   frontDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
   /** Drag handle props for back face (listeners and attributes from dnd-kit) */
   backDragHandleProps?: React.HTMLAttributes<HTMLDivElement>;
+  /** Optional overlay component to render on top of the card (e.g., mechanic overlays) */
+  overlay?: React.ReactNode;
 }
 
 /**
@@ -99,6 +101,7 @@ export function Card({
   showBackDragHandle = false,
   frontDragHandleProps,
   backDragHandleProps,
+  overlay,
 }: CardProps) {
   const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
@@ -281,6 +284,8 @@ export function Card({
             />
           }
         />
+        {/* Mechanic overlay (renders on top, inside card for hover transform) */}
+        {overlay}
       </motion.article>
       <CardExpanded
         card={displayCard}

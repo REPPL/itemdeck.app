@@ -74,57 +74,57 @@ Create a Top Trumps-style mechanic where cards battle by stats.
 
 ### Phase 1: Mechanic Core
 
-- [ ] Create `src/mechanics/competing/index.ts`
-- [ ] Define `CompetingMechanicManifest`
-- [ ] Identify required fields: at least one numeric field
-- [ ] Create `CompetingMechanic` class
-- [ ] Register factory with mechanic registry
+- [x] Create `src/mechanics/competing/index.ts`
+- [x] Define `CompetingMechanicManifest`
+- [x] Identify required fields: at least one numeric field
+- [x] Create `CompetingMechanic` class
+- [x] Register factory with mechanic registry
 
 ### Phase 2: State Management
 
-- [ ] Create `src/mechanics/competing/store.ts`
-- [ ] Track: `playerDeck`, `cpuDeck`, `selectedStat`, `gamePhase`
-- [ ] Implement `selectStat(field)` action
-- [ ] Implement `revealBattle()` action
-- [ ] Implement `nextRound()` action
-- [ ] Implement `startGame()` / `endGame()` actions
+- [x] Create `src/mechanics/competing/store.ts`
+- [x] Track: `playerDeck`, `cpuDeck`, `selectedStat`, `gamePhase`
+- [x] Implement `selectStat(field)` action
+- [x] Implement `revealBattle()` action
+- [x] Implement `nextRound()` action
+- [x] Implement `startGame()` / `endGame()` actions
 
 ### Phase 3: Battle Overlay
 
-- [ ] Create `CompetingBattleOverlay.tsx` (replaces grid)
-- [ ] Show player card with selectable stats
-- [ ] Show CPU card (hidden until reveal)
-- [ ] Animate reveal and comparison
-- [ ] Show win/lose result
+- [x] Create `CompetingBattleOverlay.tsx` (replaces grid)
+- [x] Show player card with selectable stats
+- [x] Show CPU card (hidden until reveal)
+- [x] Animate reveal and comparison
+- [x] Show win/lose result
 
 ### Phase 4: Stat Selection
 
-- [ ] Display all numeric fields on player card
-- [ ] Highlight selected stat
-- [ ] Confirm selection button
-- [ ] Show which stats have been used (optional variant)
+- [x] Display all numeric fields on player card
+- [x] Highlight selected stat
+- [x] Confirm selection button
+- [x] Show which stats have been used (optional variant)
 
 ### Phase 5: AI Opponent
 
-- [ ] Simple AI: random stat selection
-- [ ] Medium AI: select highest stat
-- [ ] Hard AI: track player patterns
+- [x] Simple AI: random stat selection
+- [x] Medium AI: select highest stat
+- [x] Hard AI: track player patterns
 
 ### Phase 6: Game Completion
 
-- [ ] Show final score
-- [ ] Display winning message
-- [ ] Track win/loss history
-- [ ] Play again button
+- [x] Show final score
+- [x] Display winning message
+- [x] Track win/loss history
+- [x] Play again button
 
 ## Success Criteria
 
-- [ ] Cards dealt correctly
-- [ ] Stat selection works
-- [ ] Battle resolution correct
-- [ ] Cards transfer to winner
-- [ ] Game ends at proper condition
-- [ ] Animations enhance experience
+- [x] Cards dealt correctly
+- [x] Stat selection works
+- [x] Battle resolution correct
+- [x] Cards transfer to winner
+- [x] Game ends at proper condition
+- [x] Animations enhance experience
 
 ## Dependencies
 
@@ -154,4 +154,4 @@ Create a Top Trumps-style mechanic where cards battle by stats.
 
 ---
 
-**Status**: Planned
+**Status**: Complete

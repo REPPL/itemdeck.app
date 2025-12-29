@@ -199,17 +199,17 @@ class MechanicPluginAdapter {
       lifecycle: {
         onActivate: async () => {
           state = { isActive: true };
-          listeners.forEach((l) => l(state));
+          listeners.forEach((l) => { l(state); });
           console.log(`Mechanic ${contribution.id} activated`);
         },
         onDeactivate: () => {
           state = { isActive: false };
-          listeners.forEach((l) => l(state));
+          listeners.forEach((l) => { l(state); });
           console.log(`Mechanic ${contribution.id} deactivated`);
         },
         onReset: () => {
           state = { isActive: false };
-          listeners.forEach((l) => l(state));
+          listeners.forEach((l) => { l(state); });
           console.log(`Mechanic ${contribution.id} reset`);
         },
       },

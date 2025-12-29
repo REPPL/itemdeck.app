@@ -16,7 +16,7 @@
 .errorTitle {
   margin: 0;
   font-size: 1.5rem;
-  color: var(--color-error, #dc2626);
+  color: var(--colour-error, #dc2626);
 }
 
 .noCollectionTitle {
@@ -27,13 +27,13 @@
 
 .errorMessage {
   margin: 0;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--colour-text-secondary, #6b7280);
   max-width: 40ch;
 }
 
 .errorDetails {
   margin-top: 0.5rem;
-  color: var(--color-text-muted, #9ca3af);
+  color: var(--colour-text-muted, #9ca3af);
   font-size: 0.875rem;
   width: 100%;
   max-width: 600px;
@@ -47,7 +47,7 @@
 .errorPre {
   margin-top: 0.5rem;
   padding: 1rem;
-  background: var(--color-surface-secondary, #f3f4f6);
+  background: var(--colour-surface-secondary, #f3f4f6);
   border-radius: 0.5rem;
   overflow-x: auto;
   text-align: left;
@@ -61,7 +61,7 @@
   font-size: 1rem;
   font-weight: 500;
   color: white;
-  background: var(--color-primary, #3b82f6);
+  background: var(--colour-primary, #3b82f6);
   border: none;
   border-radius: 0.5rem;
   cursor: pointer;
@@ -69,11 +69,11 @@
 }
 
 .retryButton:hover {
-  background: var(--color-primary-hover, #2563eb);
+  background: var(--colour-primary-hover, #2563eb);
 }
 
 .retryButton:focus {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--colour-primary, #3b82f6);
   outline-offset: 2px;
 }
 
@@ -101,12 +101,12 @@
 }
 
 .secondaryButton:hover {
-  background: var(--colour-surface, rgba(255, 255, 255, 0.1));
+  background: var(--colour-surface-hover, rgba(255, 255, 255, 0.1));
   border-color: var(--colour-border-hover, rgba(255, 255, 255, 0.3));
 }
 
 .secondaryButton:focus {
-  outline: 2px solid var(--color-primary, #3b82f6);
+  outline: 2px solid var(--colour-primary, #3b82f6);
   outline-offset: 2px;
 }
 

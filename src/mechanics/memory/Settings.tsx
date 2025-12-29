@@ -23,6 +23,7 @@ export function MemorySettingsPanel({
   settings,
   onChange,
   disabled = false,
+  cardCount,
 }: MechanicSettingsProps<MemorySettings>) {
   const handleDifficultyChange = useCallback(
     (difficulty: MemoryDifficulty) => {
@@ -36,6 +37,18 @@ export function MemorySettingsPanel({
       onChange({ pairCount });
     },
     [onChange]
+  );
+
+  /**
+   * Check if a pair count is feasible given the available cards.
+   * Memory game needs at least as many cards as pairs requested.
+   */
+  const isPairCountFeasible = useCallback(
+    (pairCount: PairCount): boolean => {
+      if (cardCount === undefined) return true;
+      return cardCount >= pairCount;
+    },
+    [cardCount]
   );
 
   return (
@@ -71,24 +84,32 @@ export function MemorySettingsPanel({
       <div className={styles.settingRow}>
         <span className={styles.settingLabel}>Pairs</span>
         <div className={styles.segmentedControl}>
-          {PAIR_COUNT_OPTIONS.map((count) => (
-            <button
-              key={count}
-              type="button"
-              className={[
-                styles.segmentButton,
-                settings.pairCount === count ? styles.segmentButtonActive : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              onClick={() => {
-                handlePairCountChange(count);
-              }}
-              disabled={disabled}
-            >
-              {count}
-            </button>
-          ))}
+          {PAIR_COUNT_OPTIONS.map((count) => {
+            const isFeasible = isPairCountFeasible(count);
+            return (
+              <button
+                key={count}
+                type="button"
+                className={[
+                  styles.segmentButton,
+                  settings.pairCount === count ? styles.segmentButtonActive : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => {
+                  handlePairCountChange(count);
+                }}
+                disabled={disabled || !isFeasible}
+                title={
+                  isFeasible
+                    ? undefined
+                    : `Requires at least ${String(count)} cards (${String(cardCount)} available)`
+                }
+              >
+                {count}
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>

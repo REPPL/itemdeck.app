@@ -1,0 +1,9 @@
+{
+  "$schema": "https://itemdeck.app/schemas/mechanic/v1.json",
+  "id": "collection",
+  "name": "Collection Tracker",
+  "description": "Track which items you own and which you want to acquire",
+  "version": "1.0.0",
+  "icon": "collection",
+  "minCards": 1
+}

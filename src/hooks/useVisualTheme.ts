@@ -166,7 +166,7 @@ function applyThemeCustomisation(
   root.style.setProperty("--card-back-background", cardBackgroundColour);
 
   // Apply overlay transparency (for Detail View, Search, Games, Help - but not Settings)
-  const alpha = TRANSPARENCY_VALUES[detailTransparency] ?? 0.5; // Default to 0.5 if undefined
+  const alpha = TRANSPARENCY_VALUES[detailTransparency];
   const bgValue = `rgba(0, 0, 0, ${String(alpha)})`;
   root.style.setProperty("--overlay-transparency-alpha", String(alpha));
   root.style.setProperty("--overlay-transparency-background", bgValue);

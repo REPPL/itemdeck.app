@@ -29,8 +29,8 @@ Prompts used for autonomous implementation of itemdeck milestones.
 | [v0.12.0](v0.12.0/README.md) | UI Polish & Statistics | Complete |
 | [v0.12.5](v0.12.5/README.md) | Snap Ranking & Fit Layout | Complete |
 | [v0.13.0](v0.13.0-wp-a-plugin-core.md) | Modular Plugin Architecture | Complete |
-| **[v0.14.0](v0.14.0/README.md)** | **Advanced Mechanics (Plugin-Based)** | **Planned** |
-| [v0.14.5](v0.14.5/v0.14.5-shared-components.md) | Shared Mechanics Components | Planned |
+| [v0.14.0](v0.14.0/README.md) | Advanced Mechanics (Plugin-Based) | Complete |
+| **[v0.14.5](v0.14.5/v0.14.5-shared-components.md)** | **Shared Mechanics Components** | **Planned** |
 
 ### v0.13.0 Work Packages
 

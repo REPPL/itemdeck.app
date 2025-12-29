@@ -19,6 +19,7 @@ import { CollectionsTab } from "./CollectionsTab";
 import { DataTab } from "./DataTab";
 import { SettingsSearch } from "./SettingsSearch";
 import { useViewportSize } from "@/hooks/useViewportSize";
+import { useSettingsStore } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 
 interface SettingsPanelProps {
@@ -123,6 +124,12 @@ export function SettingsPanel({
   const [activeTab, setActiveTab] = useState<TabId>("quick");
   const [activeSubTab, setActiveSubTab] = useState<string | undefined>(undefined);
 
+  // Draft state management (F-090)
+  const startEditing = useSettingsStore((s) => s.startEditing);
+  const commitDraft = useSettingsStore((s) => s.commitDraft);
+  const discardDraft = useSettingsStore((s) => s.discardDraft);
+  const isDirty = useSettingsStore((s) => s.isDirty);
+
   // Viewport size for responsive behaviour
   const { width } = useViewportSize();
   const isNarrowScreen = width < 360;
@@ -133,6 +140,25 @@ export function SettingsPanel({
     setActiveTab(tab);
     setActiveSubTab(subTab);
   }, []);
+
+  // Start editing when panel opens (F-090)
+  useEffect(() => {
+    if (isOpen) {
+      startEditing();
+    }
+  }, [isOpen, startEditing]);
+
+  // Handle Cancel button - discard draft and close
+  const handleCancel = useCallback(() => {
+    discardDraft();
+    onClose();
+  }, [discardDraft, onClose]);
+
+  // Handle Accept button - commit draft and close
+  const handleAccept = useCallback(() => {
+    commitDraft();
+    onClose();
+  }, [commitDraft, onClose]);
 
   // Focus management
   useEffect(() => {
@@ -150,7 +176,7 @@ export function SettingsPanel({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onClose();
+        handleCancel();
       }
     };
 
@@ -158,7 +184,7 @@ export function SettingsPanel({
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, handleCancel]);
 
   // Prevent body scroll when panel is open
   useEffect(() => {
@@ -205,7 +231,7 @@ export function SettingsPanel({
   ].filter(Boolean).join(" ");
 
   const panelContent = (
-    <div className={styles.overlay} onClick={onClose}>
+    <div className={styles.overlay} onClick={handleCancel}>
       <div
         ref={panelRef}
         className={panelClassName}
@@ -270,12 +296,17 @@ export function SettingsPanel({
         </div>
 
         <footer className={styles.footer}>
+          {isDirty && (
+            <span className={styles.dirtyIndicator}>
+              Unsaved changes
+            </span>
+          )}
           <div className={styles.footerButtons}>
             <div className={styles.footerRight}>
-              <button type="button" className={styles.cancelButton} onClick={onClose}>
+              <button type="button" className={styles.cancelButton} onClick={handleCancel}>
                 Cancel
               </button>
-              <button type="button" className={styles.acceptButton} onClick={onClose}>
+              <button type="button" className={styles.acceptButton} onClick={handleAccept}>
                 Accept
               </button>
             </div>

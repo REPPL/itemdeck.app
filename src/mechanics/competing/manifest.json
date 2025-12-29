@@ -1,0 +1,14 @@
+{
+  "id": "competing",
+  "name": "Top Trumps",
+  "version": "1.0.0",
+  "description": "Battle your cards against a CPU opponent. Compare stats - highest value wins! Capture all cards to claim victory.",
+  "entrypoint": "./index.tsx",
+  "minCards": 4,
+  "author": {
+    "name": "itemdeck",
+    "url": "https://github.com/itemdeck"
+  },
+  "keywords": ["battle", "versus", "stats", "comparison", "top-trumps", "game"],
+  "licence": "GPL-3.0"
+}

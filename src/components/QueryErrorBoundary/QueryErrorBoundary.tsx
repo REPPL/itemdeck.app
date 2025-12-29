@@ -21,15 +21,20 @@ interface QueryErrorBoundaryProps {
 
 /**
  * Check if error is related to missing collection/source.
+ *
+ * NOTE: Be specific here - we don't want to catch generic JS errors
+ * like "Cannot read property of undefined" as collection errors.
  */
 function isNoCollectionError(error: Error): boolean {
   const message = error.message.toLowerCase();
   return (
     message.includes("no collection") ||
-    message.includes("undefined") ||
-    message.includes("null") ||
+    message.includes("no source") ||
+    message.includes("collection not found") ||
+    message.includes("source not found") ||
     message.includes("basepath") ||
-    message.includes("404")
+    // Only treat 404 as collection error if it's about the collection URL
+    (message.includes("404") && (message.includes("collection") || message.includes("source")))
   );
 }
 
@@ -45,7 +50,7 @@ function NoCollectionFallback({
     <div role="alert" className={styles.errorContainer}>
       <h2 className={styles.noCollectionTitle}>No Collection Selected</h2>
       <p className={styles.errorMessage}>
-        You haven't selected a collection yet. Choose a collection from REPPL
+        You have not selected a collection yet. Choose a collection from REPPL
         to get started.
       </p>
       <button

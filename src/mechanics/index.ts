@@ -18,6 +18,24 @@ mechanicRegistry.register("snap-ranking", async () => {
   return snapRankingMechanic;
 });
 
+// v0.14.0: Collection Tracker mechanic
+mechanicRegistry.register("collection", async () => {
+  const { collectionMechanic } = await import("./collection");
+  return collectionMechanic;
+});
+
+// v0.14.0: Quiz mechanic
+mechanicRegistry.register("quiz", async () => {
+  const { quizMechanic } = await import("./quiz");
+  return quizMechanic;
+});
+
+// v0.14.0: Competing (Top Trumps) mechanic
+mechanicRegistry.register("competing", async () => {
+  const { competingMechanic } = await import("./competing");
+  return competingMechanic;
+});
+
 // Export public API
 export { mechanicRegistry } from "./registry";
 export { MechanicProvider, useMechanicContext, useActiveMechanic, useMechanicState, useMechanicCardActions, useMechanicList } from "./context";

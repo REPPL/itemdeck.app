@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import { mechanicRegistry, useMechanicContext, type Mechanic } from "@/mechanics";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { useCollectionData } from "@/context/CollectionDataContext";
 import type { MechanicManifest } from "@/mechanics";
 import styles from "./MechanicPanel.module.css";
 
@@ -63,6 +64,8 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
 
   const activeMechanicId = useSettingsStore((s) => s.activeMechanicId);
   const { mechanic: activeMechanicInstance, state: mechanicState, activateMechanic, deactivateMechanic } = useMechanicContext();
+  const { cards } = useCollectionData();
+  const cardCount = cards.length;
 
   // Load all mechanics on mount
   useEffect(() => {
@@ -213,7 +216,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
           <div className={styles.headerIcon}>
             <GameControllerIcon />
           </div>
-          <h2 className={styles.title}>Game Mechanics</h2>
+          <h2 className={styles.title}>Games</h2>
           <button
             type="button"
             className={styles.closeButton}
@@ -263,20 +266,19 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                         settings={mechanicSettings as Record<string, unknown>}
                         onChange={handleSettingsChange}
                         disabled={false}
+                        cardCount={cardCount}
                       />
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Help text based on state */}
-              <div className={styles.helpText}>
-                {selectedManifest && !activeMechanic
-                  ? "Configure your game settings, then click Start Game."
-                  : activeMechanic
-                    ? "Select a different mechanic or stop the current one."
-                    : "Select a game mechanic to add interactive gameplay to your collection."}
-              </div>
+              {/* Help text - only show when configuring */}
+              {selectedManifest && !activeMechanic && (
+                <div className={styles.helpText}>
+                  Configure your game settings, then click Start Game.
+                </div>
+              )}
 
               {/* None option - only show when a mechanic is active */}
               {activeMechanic && (
@@ -300,40 +302,42 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                 </button>
               )}
 
-              {/* Mechanic options - always visible */}
-              {mechanics.map((manifest) => {
-                const Icon = manifest.icon;
-                const isActive = activeMechanicId === manifest.id;
+              {/* Mechanic options - hide active mechanic (already shown in ACTIVE section above) */}
+              {mechanics
+                .filter((manifest) => manifest.id !== activeMechanicId)
+                .map((manifest) => {
+                  const Icon = manifest.icon;
+                  const minCards = manifest.minCards ?? 1;
+                  const isAvailable = cardCount >= minCards;
 
-                return (
-                  <button
-                    key={manifest.id}
-                    type="button"
-                    className={[styles.mechanicOption, isActive ? styles.mechanicOptionActive : ""].filter(Boolean).join(" ")}
-                    onClick={() => { void handlePreSelect(manifest.id); }}
-                    disabled={isActive}
-                  >
-                    <div className={styles.mechanicIcon}>
-                      <Icon />
-                    </div>
-                    <div className={styles.mechanicInfo}>
-                      <div className={styles.mechanicHeader}>
-                        <span className={styles.mechanicName}>{manifest.name}</span>
-                        <span className={styles.mechanicVersion}>v{manifest.version}</span>
+                  return (
+                    <button
+                      key={manifest.id}
+                      type="button"
+                      className={[
+                        styles.mechanicOption,
+                        !isAvailable ? styles.mechanicOptionDisabled : ""
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => { if (isAvailable) void handlePreSelect(manifest.id); }}
+                      disabled={!isAvailable}
+                    >
+                      <div className={styles.mechanicIcon}>
+                        <Icon />
                       </div>
-                      <span className={styles.mechanicDescription}>
-                        {manifest.description}
-                      </span>
-                      {manifest.minCards && (
-                        <span className={styles.mechanicRequirement}>
-                          Requires at least {manifest.minCards} cards
+                      <div className={styles.mechanicInfo}>
+                        <div className={styles.mechanicHeader}>
+                          <span className={styles.mechanicName}>{manifest.name}</span>
+                          <span className={styles.mechanicVersion}>v{manifest.version}</span>
+                        </div>
+                        <span className={styles.mechanicDescription}>
+                          {isAvailable
+                            ? manifest.description
+                            : `Requires at least ${String(minCards)} cards to play`}
                         </span>
-                      )}
-                    </div>
-                    {isActive && <span className={styles.activeMark}>✓</span>}
-                  </button>
-                );
-              })}
+                      </div>
+                    </button>
+                  );
+                })}
 
               {mechanics.length === 0 && (
                 <div className={styles.status}>
@@ -368,6 +372,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
                     settings={pendingSettings as Record<string, unknown>}
                     onChange={handlePendingSettingsChange}
                     disabled={false}
+                    cardCount={cardCount}
                   />
                 </div>
               )}

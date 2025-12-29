@@ -91,7 +91,7 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
       const smartDefault = computeSmartSelectionDefault(data.cards.length);
       setRandomSelectionCount(smartDefault);
     }
-  }, [data?.cards?.length, setRandomSelectionCount]);
+  }, [data?.cards, setRandomSelectionCount]);
 
   // Merge edits with source cards using overlay pattern
   const mergedCards = useMemo(() => {

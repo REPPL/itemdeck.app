@@ -349,7 +349,7 @@ export function applyDataTransform(
     const pathParts = transform.dataPath.split(".");
     for (const part of pathParts) {
       // Handle array access like "items[0]"
-      const arrayMatch = part.match(/^(\w+)\[(\d+)\]$/);
+      const arrayMatch = /^(\w+)\[(\d+)\]$/.exec(part);
       if (arrayMatch) {
         const [, arrayKey, arrayIndex] = arrayMatch;
         if (arrayKey) {

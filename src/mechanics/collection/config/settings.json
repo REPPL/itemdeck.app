@@ -1,0 +1,41 @@
+{
+  "$schema": "../../../schemas/mechanic-settings.schema.json",
+  "defaults": {
+    "showProgress": true,
+    "showUnownedBadge": true,
+    "keyboardShortcuts": true
+  },
+  "display": {
+    "progressBar": {
+      "enabled": true,
+      "showPercentage": true,
+      "colours": {
+        "owned": "var(--colour-success)",
+        "wishlist": "var(--colour-warning)",
+        "remaining": "var(--colour-background-secondary)"
+      }
+    },
+    "badges": {
+      "owned": {
+        "icon": "check",
+        "label": "Owned"
+      },
+      "wishlist": {
+        "icon": "star",
+        "label": "Wishlist"
+      },
+      "unowned": {
+        "icon": "plus",
+        "label": "Not owned"
+      }
+    }
+  },
+  "keyboardShortcuts": {
+    "owned": "o",
+    "wishlist": "w"
+  },
+  "export": {
+    "version": 1,
+    "format": "json"
+  }
+}

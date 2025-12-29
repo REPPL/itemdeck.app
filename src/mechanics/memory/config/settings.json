@@ -1,0 +1,55 @@
+{
+  "$schema": "../../../schemas/mechanic-settings.schema.json",
+  "difficulty": {
+    "easy": {
+      "label": "Easy",
+      "minPairs": 4,
+      "maxPairs": 6,
+      "flipDelayMs": 1500,
+      "allowMultipleAttempts": true
+    },
+    "medium": {
+      "label": "Medium",
+      "minPairs": 6,
+      "maxPairs": 10,
+      "flipDelayMs": 1000,
+      "allowMultipleAttempts": true
+    },
+    "hard": {
+      "label": "Hard",
+      "minPairs": 8,
+      "maxPairs": 15,
+      "flipDelayMs": 800,
+      "allowMultipleAttempts": true
+    },
+    "extreme": {
+      "label": "Extreme",
+      "minPairs": 10,
+      "maxPairs": 20,
+      "flipDelayMs": 500,
+      "allowMultipleAttempts": false,
+      "description": "First card flips back immediately"
+    }
+  },
+  "scoring": {
+    "basePointsPerMatch": 100,
+    "timeBonus": {
+      "enabled": true,
+      "maxBonusMs": 5000,
+      "bonusPerSecond": 10
+    },
+    "streakBonus": {
+      "enabled": true,
+      "multiplierPerStreak": 0.1,
+      "maxMultiplier": 2.0
+    },
+    "attemptPenalty": {
+      "enabled": true,
+      "penaltyPerFailedAttempt": 5
+    }
+  },
+  "requirements": {
+    "minCards": 4,
+    "errorMessage": "Need at least 4 cards to play Memory"
+  }
+}

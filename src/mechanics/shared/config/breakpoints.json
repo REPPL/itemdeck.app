@@ -1,0 +1,21 @@
+{
+  "$schema": "../../../schemas/mechanic-display-config.schema.json",
+  "breakpoints": [
+    {
+      "name": "mobile",
+      "maxWidth": 480
+    },
+    {
+      "name": "tablet",
+      "maxWidth": 768
+    },
+    {
+      "name": "desktop",
+      "maxWidth": 1024
+    },
+    {
+      "name": "wide",
+      "maxWidth": 1440
+    }
+  ]
+}

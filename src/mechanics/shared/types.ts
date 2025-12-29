@@ -41,41 +41,9 @@ export interface GameStats {
   endedAt: number;
 }
 
-/**
- * Responsive breakpoint configuration.
- */
-export interface BreakpointConfig {
-  /** Maximum width for this breakpoint in pixels */
-  maxWidth: number;
-  /** Breakpoint name (e.g., "mobile", "tablet", "desktop") */
-  name: string;
-}
-
-/**
- * Card size configuration for responsive display.
- */
-export interface CardSizeConfig {
-  /** Minimum card width in pixels */
-  minWidth: number;
-  /** Maximum card width in pixels */
-  maxWidth: number;
-  /** Card aspect ratio (width / height) */
-  aspectRatio: number;
-  /** Gap between cards in pixels */
-  gap: number;
-}
-
-/**
- * Display configuration for responsive layouts.
- */
-export interface DisplayConfig {
-  /** Breakpoints for responsive design */
-  breakpoints: BreakpointConfig[];
-  /** Card size configuration per breakpoint */
-  cardSizes: Record<string, CardSizeConfig>;
-  /** Default card size when no breakpoint matches */
-  defaultCardSize: CardSizeConfig;
-}
+// Display configuration types are defined in hooks/useDisplayConfig.ts
+// to avoid circular dependencies and keep hook-specific types together.
+// Import them from there or from the main shared index.
 
 /**
  * Standard button labels for consistent UI.
@@ -141,7 +109,7 @@ export interface ProgressFormat {
  * Format progress as "X/Y" string.
  */
 export function formatProgress(progress: ProgressFormat): string {
-  return `${progress.current}/${progress.total}`;
+  return `${String(progress.current)}/${String(progress.total)}`;
 }
 
 /**
@@ -151,5 +119,5 @@ export function formatProgressPercent(progress: ProgressFormat): string {
   const percent = progress.total > 0
     ? Math.round((progress.current / progress.total) * 100)
     : 0;
-  return `${percent}%`;
+  return `${String(percent)}%`;
 }

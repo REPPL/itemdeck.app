@@ -1,0 +1,35 @@
+{
+  "$schema": "../../../schemas/mechanic-settings.schema.json",
+  "difficulty": {
+    "easy": {
+      "label": "Easy",
+      "description": "CPU card is visible, CPU makes random choices",
+      "cpuCardVisible": true,
+      "cpuStrategy": "random"
+    },
+    "medium": {
+      "label": "Medium",
+      "description": "CPU card is visible, CPU makes smart choices",
+      "cpuCardVisible": true,
+      "cpuStrategy": "smart"
+    },
+    "hard": {
+      "label": "Hard",
+      "description": "CPU card is hidden until reveal",
+      "cpuCardVisible": false,
+      "cpuStrategy": "smart"
+    }
+  },
+  "gameplay": {
+    "showCpuThinking": true,
+    "cpuThinkingDelayMs": 500,
+    "roundResultDisplayMs": 2000,
+    "cardCollectionDelayMs": 500
+  },
+  "requirements": {
+    "minCards": 4,
+    "requireNumericFields": true,
+    "minNumericFields": 2,
+    "errorMessage": "This game requires cards with numeric fields for stat comparison"
+  }
+}

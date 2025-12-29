@@ -1,0 +1,45 @@
+{
+  "$schema": "../../../schemas/mechanic-display-config.schema.json",
+  "cardSizes": {
+    "mobile": {
+      "minWidth": 80,
+      "maxWidth": 120,
+      "aspectRatio": 0.67,
+      "gap": 8
+    },
+    "tablet": {
+      "minWidth": 100,
+      "maxWidth": 150,
+      "aspectRatio": 0.67,
+      "gap": 12
+    },
+    "desktop": {
+      "minWidth": 120,
+      "maxWidth": 180,
+      "aspectRatio": 0.67,
+      "gap": 16
+    },
+    "wide": {
+      "minWidth": 140,
+      "maxWidth": 200,
+      "aspectRatio": 0.67,
+      "gap": 20
+    }
+  },
+  "defaultCardSize": {
+    "minWidth": 120,
+    "maxWidth": 180,
+    "aspectRatio": 0.67,
+    "gap": 16
+  },
+  "timer": {
+    "showByDefault": true,
+    "warningThresholdMs": 30000,
+    "dangerThresholdMs": 10000
+  },
+  "animations": {
+    "enableByDefault": true,
+    "durationMs": 200,
+    "respectReducedMotion": true
+  }
+}

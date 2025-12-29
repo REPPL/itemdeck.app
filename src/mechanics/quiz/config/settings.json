@@ -1,0 +1,62 @@
+{
+  "$schema": "../../../schemas/mechanic-settings.schema.json",
+  "difficulty": {
+    "easy": {
+      "label": "Easy",
+      "questionCount": 5,
+      "timeLimitMs": 30000,
+      "optionCount": 3
+    },
+    "medium": {
+      "label": "Medium",
+      "questionCount": 10,
+      "timeLimitMs": 20000,
+      "optionCount": 4
+    },
+    "hard": {
+      "label": "Hard",
+      "questionCount": 15,
+      "timeLimitMs": 15000,
+      "optionCount": 4
+    }
+  },
+  "questionTypes": {
+    "imageToName": {
+      "label": "Image to Name",
+      "description": "Identify the item from its image",
+      "enabled": true
+    },
+    "nameToImage": {
+      "label": "Name to Image",
+      "description": "Select the correct image for a name",
+      "enabled": true
+    },
+    "categoryMatch": {
+      "label": "Category Match",
+      "description": "Match items to their categories",
+      "enabled": true
+    },
+    "yearGuess": {
+      "label": "Year Guess",
+      "description": "Guess the year of an item",
+      "enabled": true
+    }
+  },
+  "scoring": {
+    "basePoints": 100,
+    "timeBonus": {
+      "enabled": true,
+      "maxBonusMs": 5000,
+      "bonusPerSecond": 20
+    },
+    "streakBonus": {
+      "enabled": true,
+      "multiplierPerStreak": 0.1,
+      "maxMultiplier": 2.0
+    }
+  },
+  "requirements": {
+    "minCards": 4,
+    "errorMessage": "Need at least 4 cards to play Quiz"
+  }
+}

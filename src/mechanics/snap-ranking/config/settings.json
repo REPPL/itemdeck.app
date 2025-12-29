@@ -1,0 +1,28 @@
+{
+  "$schema": "../../../schemas/mechanic-settings.schema.json",
+  "scoring": {
+    "exact": {
+      "points": 100,
+      "label": "Exact"
+    },
+    "close": {
+      "points": 50,
+      "label": "Close",
+      "tolerance": 1,
+      "numericOnly": true
+    },
+    "wrong": {
+      "points": 0,
+      "label": "Wrong"
+    }
+  },
+  "timer": {
+    "showByDefault": true,
+    "trackPerCard": true
+  },
+  "requirements": {
+    "minCards": 3,
+    "requireTopBadge": true,
+    "errorMessage": "Configure a Top Badge field in Settings to play this game"
+  }
+}

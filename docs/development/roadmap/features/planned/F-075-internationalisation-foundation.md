@@ -185,8 +185,8 @@ function QuickSettings() {
 
 ## Related Documentation
 
-- [State-of-the-Art: Internationalisation](../../research/state-of-the-art-internationalisation.md)
-- [ADR-021: Internationalisation Library](../../decisions/adrs/ADR-021-internationalisation-library.md)
+- [State-of-the-Art: Internationalisation](../../../research/state-of-the-art-internationalisation.md)
+- [ADR-021: Internationalisation Library](../../../decisions/adrs/ADR-021-internationalisation-library.md)
 - [v1.5.0 Milestone](../../milestones/v1.5.0.md)
 
 ---

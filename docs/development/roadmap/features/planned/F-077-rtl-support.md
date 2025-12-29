@@ -219,7 +219,7 @@ All target browsers support CSS logical properties.
 
 ## Related Documentation
 
-- [State-of-the-Art: Internationalisation](../../research/state-of-the-art-internationalisation.md)
+- [State-of-the-Art: Internationalisation](../../../research/state-of-the-art-internationalisation.md)
 - [MDN: CSS Logical Properties](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_logical_properties_and_values)
 - [RTL Styling 101](https://rtlstyling.com/)
 - [v2.0.0 Milestone](../../milestones/v2.0.0.md)

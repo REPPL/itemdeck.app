@@ -225,9 +225,9 @@ import { Icon } from '@/icons';
 
 ## Related Documentation
 
-- [ADR-022: Icon Configuration Registry](../../decisions/adrs/ADR-022-icon-configuration-registry.md)
+- [ADR-022: Icon Configuration Registry](../../../decisions/adrs/ADR-022-icon-configuration-registry.md)
 - [v1.5.0 Milestone](../../milestones/v1.5.0.md)
-- [Current Icons](../../../../src/components/Icons/Icons.tsx)
+- [Current Icons](../../../../../src/components/Icons/Icons.tsx)
 
 ---
 

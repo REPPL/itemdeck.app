@@ -47,7 +47,6 @@ export const snapRankingMechanic: Mechanic<SnapRankingSettings> = {
     minCards: 2,
     displayPreferences: {
       cardSizePreset: "small",
-      layout: "grid",
       uiMode: "inline",
     },
   },

@@ -17,9 +17,6 @@ export interface MechanicDisplayPreferences {
   /** Preferred card aspect ratio */
   cardAspectRatio?: "3:4" | "5:7" | "1:1";
 
-  /** Preferred layout type (games typically need "grid") */
-  layout?: "grid" | "list" | "compact" | "fit";
-
   /** Hide the main card grid when active (for full-screen games) */
   hideCardGrid?: boolean;
 

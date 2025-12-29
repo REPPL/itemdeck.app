@@ -1275,7 +1275,6 @@ export const useSettingsStore = create<SettingsState>()(
           _mechanicOverridesBackup: {
             cardSizePreset: current.cardSizePreset,
             cardAspectRatio: current.cardAspectRatio,
-            layout: current.layout,
             maxVisibleCards: current.maxVisibleCards,
           },
           mechanicOverridesActive: true,
@@ -1288,9 +1287,6 @@ export const useSettingsStore = create<SettingsState>()(
         }
         if (prefs.cardAspectRatio) {
           updates.cardAspectRatio = prefs.cardAspectRatio;
-        }
-        if (prefs.layout) {
-          updates.layout = prefs.layout;
         }
         if (prefs.maxVisibleCards) {
           updates.maxVisibleCards = prefs.maxVisibleCards;
@@ -1309,7 +1305,6 @@ export const useSettingsStore = create<SettingsState>()(
         set({
           cardSizePreset: backup.cardSizePreset ?? state.cardSizePreset,
           cardAspectRatio: backup.cardAspectRatio ?? state.cardAspectRatio,
-          layout: backup.layout ?? state.layout,
           maxVisibleCards: backup.maxVisibleCards ?? state.maxVisibleCards,
           _mechanicOverridesBackup: null,
           mechanicOverridesActive: false,

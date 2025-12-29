@@ -53,7 +53,6 @@ export const competingMechanic: Mechanic<CompetingSettings> = {
     minCards: 4,
     displayPreferences: {
       cardSizePreset: "small",
-      layout: "grid",
       hideCardGrid: true,
       uiMode: "fullscreen",
     },

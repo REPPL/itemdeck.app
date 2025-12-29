@@ -2,12 +2,14 @@
  * Quiz overlay component.
  *
  * Full-screen overlay containing the quiz UI.
+ * Uses shared ErrorOverlay component.
  */
 
-import { useEffect, useCallback } from "react";
+import { useEffect } from "react";
 import { useQuizStore } from "../store";
 import { useCollectionData } from "@/context/CollectionDataContext";
-import { useMechanicContext } from "../../context";
+import { ErrorOverlay } from "../../shared";
+import { useMechanicActions } from "../../shared/hooks";
 import { ProgressIndicator } from "./ProgressIndicator";
 import { QuestionDisplay } from "./QuestionDisplay";
 import { AnswerOptions } from "./AnswerOptions";
@@ -16,40 +18,6 @@ import { ResultsScreen } from "./ResultsScreen";
 import { TimerBar } from "./TimerBar";
 import type { GeneratorCardData } from "../generators";
 import styles from "../Quiz.module.css";
-
-/**
- * Error overlay shown when quiz cannot be played.
- */
-function ErrorOverlay() {
-  const errorMessage = useQuizStore((s) => s.errorMessage);
-  const isActive = useQuizStore((s) => s.isActive);
-  const { deactivateMechanic } = useMechanicContext();
-
-  const handleExit = useCallback(() => {
-    deactivateMechanic();
-  }, [deactivateMechanic]);
-
-  if (!errorMessage || !isActive) return null;
-
-  return (
-    <div className={styles.errorOverlay}>
-      <div className={styles.errorModal}>
-        <h2 className={styles.errorTitle}>Cannot Start Quiz</h2>
-        <p className={styles.errorMessage}>{errorMessage}</p>
-        <p className={styles.errorHint}>
-          Make sure you have at least 4 cards in your collection to play the quiz.
-        </p>
-        <button
-          type="button"
-          className={styles.errorExitButton}
-          onClick={handleExit}
-        >
-          Exit
-        </button>
-      </div>
-    </div>
-  );
-}
 
 /**
  * Skip button component.
@@ -85,12 +53,12 @@ export function QuizOverlay() {
   const isQuizComplete = useQuizStore((s) => s.isQuizComplete);
 
   const { cards } = useCollectionData();
+  const { handleExit } = useMechanicActions();
 
   // Start quiz when activated with cards
   useEffect(() => {
     if (isActive && questions.length === 0 && !errorMessage && cards.length > 0) {
       // Convert DisplayCard to GeneratorCardData
-      // Spread card first to get all fields, then override with explicit fields
       const generatorCards: GeneratorCardData[] = cards.map((card) => {
         const { id, title, imageUrl, year, categoryShort, categoryTitle, ...rest } = card;
         return {
@@ -112,7 +80,15 @@ export function QuizOverlay() {
 
   // Show error overlay if there's an error
   if (errorMessage) {
-    return <ErrorOverlay />;
+    return (
+      <ErrorOverlay
+        title="Cannot Start Quiz"
+        message={errorMessage}
+        hint="Make sure you have at least 4 cards in your collection to play the quiz."
+        onExit={handleExit}
+        visible={true}
+      />
+    );
   }
 
   // Show results if complete

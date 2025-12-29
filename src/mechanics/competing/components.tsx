@@ -2,12 +2,14 @@
  * Competing (Top Trumps) mechanic components.
  *
  * Battle overlay UI for card-versus-card stat comparison.
+ * Uses shared components for error overlay and completion modal.
  */
 
 import { useEffect, useCallback, useState } from "react";
 import { useCompetingStore } from "./store";
 import { useCollectionData } from "@/context/CollectionDataContext";
-import { useMechanicContext } from "../context";
+import { ErrorOverlay, GameCompletionModal } from "../shared";
+import { useMechanicActions, formatTime } from "../shared";
 import { detectNumericFields, getCardValue } from "./utils";
 import { humaniseFieldName } from "./utils/numericFields";
 import type { GridOverlayProps } from "../types";
@@ -15,32 +17,19 @@ import type { NumericFieldInfo, GamePhase, Difficulty } from "./types";
 import styles from "./Competing.module.css";
 
 /**
- * Format time as MM:SS.
- */
-function formatTime(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${String(minutes)}:${String(remainingSeconds).padStart(2, "0")}`;
-}
-
-/**
  * Get image URL from card data.
  */
 function getCardImage(card: Record<string, unknown>): string {
-  // Try common image field names
   const imageFields = ["imageUrl", "image", "img", "thumbnail", "picture", "photo"];
   for (const field of imageFields) {
     const value = card[field];
     if (typeof value === "string" && value.length > 0) {
       return value;
     }
-    // Handle array of images
     if (Array.isArray(value) && value.length > 0 && typeof value[0] === "string") {
       return value[0];
     }
   }
-  // Return placeholder
   return "";
 }
 
@@ -55,14 +44,12 @@ function getCardTitle(card: Record<string, unknown>): string {
       return value;
     }
   }
-  // Fallback to ID
   const id = card.id;
   return typeof id === "string" ? id : "Unknown";
 }
 
 /**
  * Check if CPU card should show the back (hidden).
- * Returns true for Hard difficulty, false for Easy/Medium (which show the front).
  */
 function shouldShowCpuCardBack(difficulty: Difficulty): boolean {
   return difficulty === "hard";
@@ -117,17 +104,13 @@ function BattleCard({
   const cardData = useCompetingStore((s) => (cardId ? s.cardData[cardId] : null));
   const showCpuThinking = useCompetingStore((s) => s.showCpuThinking);
 
-  // Track if the CPU card has been flipped (revealed)
   const [isFlipped, setIsFlipped] = useState(false);
 
-  // Reset flip state when card changes or round starts
   useEffect(() => {
     if (side === "cpu") {
-      // Reset flip when phase changes to player_select or cpu_select (new round)
       if (phase === "player_select" || phase === "cpu_select") {
         setIsFlipped(false);
       }
-      // Flip the card when revealing (after confirmation or for Easy/Medium)
       if (phase === "reveal" || phase === "collecting" || phase === "round_end" || phase === "game_over") {
         setIsFlipped(true);
       }
@@ -150,18 +133,10 @@ function BattleCard({
   const canSelect = isPlayer && phase === "player_select";
   const isCpuThinking = side === "cpu" && phase === "cpu_select" && showCpuThinking;
   const isCpuReveal = phase === "cpu_reveal";
-
-  // Determine if CPU card should show its back
   const isCpu = side === "cpu";
   const showBack = isCpu && shouldShowCpuCardBack(difficulty) && !isFlipped;
-
-  // Show stats when:
-  // - It's the player's card (always)
-  // - It's CPU's card and difficulty is Easy/Medium (always show front)
-  // - It's CPU's card and it's been revealed (flipped)
   const showStats = isPlayer || !shouldShowCpuCardBack(difficulty) || isFlipped;
 
-  // Determine win/lose state
   let cardState = "";
   if (roundResult && (phase === "reveal" || phase === "collecting" || phase === "round_end")) {
     if (roundResult.winner === side) {
@@ -171,7 +146,6 @@ function BattleCard({
     }
   }
 
-  // Build card classes
   const cardClasses = [
     styles.battleCard ?? "",
     styles[side] ?? "",
@@ -183,7 +157,6 @@ function BattleCard({
     <div className={cardClasses}>
       <div className={styles.cardHeader}>{isPlayer ? "You" : "CPU"}</div>
 
-      {/* Card face - shows image or back pattern */}
       {showBack ? (
         <div className={styles.cardBack}>
           <CardBackLogo />
@@ -210,11 +183,8 @@ function BattleCard({
           numericFields.map((field) => {
             const value = getCardValue(cardData, field.key);
             const isSelected = selectedStat === field.key;
-
-            // Determine stat styling
             let statClass = "";
             if (roundResult && roundResult.stat === field.key) {
-              // This is the field that was compared
               const winner = roundResult.winner;
               if (winner === side) {
                 statClass = styles.winner ?? "";
@@ -224,11 +194,8 @@ function BattleCard({
             } else if (isSelected) {
               statClass = styles.selected ?? "";
             }
-
-            // Indicator showing which direction wins
             const directionIndicator = field.higherIsBetter ? "↑" : "↓";
 
-            // Player selecting stat
             if (isPlayer && canSelect && onSelectStat) {
               return (
                 <button
@@ -249,8 +216,6 @@ function BattleCard({
               );
             }
 
-            // CPU reveal phase - make the selected stat clickable to confirm
-            // Only show the selected stat as clickable, hide other values
             if (isCpuReveal && isCpu && shouldShowCpuCardBack(difficulty)) {
               if (isSelected && onConfirmCpuSelection) {
                 return (
@@ -268,7 +233,6 @@ function BattleCard({
                   </button>
                 );
               }
-              // Non-selected stats during CPU reveal - hide values
               return (
                 <div key={field.key} className={styles.statHidden}>
                   <span className={styles.statLabel}>
@@ -280,7 +244,6 @@ function BattleCard({
               );
             }
 
-            // CPU reveal for Easy/Medium - show value for selected stat
             if (isCpuReveal && isCpu && !shouldShowCpuCardBack(difficulty)) {
               if (isSelected && onConfirmCpuSelection) {
                 return (
@@ -337,7 +300,6 @@ function BattleCard({
 
 /**
  * Round result overlay component.
- * Shows feedback as a temporary full-screen overlay that auto-dismisses.
  */
 function RoundResultOverlay() {
   const roundResult = useCompetingStore((s) => s.roundResult);
@@ -351,32 +313,22 @@ function RoundResultOverlay() {
     }
   }, [phase, nextRound]);
 
-  // Auto-dismiss after delay when in round_end phase
   useEffect(() => {
     if (phase !== "round_end") return;
-
-    const timer = setTimeout(() => {
-      handleDismiss();
-    }, 2000);
-
+    const timer = setTimeout(() => { handleDismiss(); }, 2000);
     return () => { clearTimeout(timer); };
   }, [phase, handleDismiss]);
 
-  // Keyboard dismiss (any key)
   useEffect(() => {
     if (phase !== "round_end") return;
-
     const handleKeyDown = (e: KeyboardEvent) => {
       e.preventDefault();
       handleDismiss();
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => { window.removeEventListener("keydown", handleKeyDown); };
   }, [phase, handleDismiss]);
 
-  // Only show during round_end phase (after cards are collected)
-  // Previously showed during reveal/collecting which caused perceived "duplicate" overlay
   if (!roundResult || phase !== "round_end") {
     return null;
   }
@@ -402,10 +354,7 @@ function RoundResultOverlay() {
   }
 
   return (
-    <div
-      className={styles.roundResultOverlay}
-      onClick={handleDismiss}
-    >
+    <div className={styles.roundResultOverlay} onClick={handleDismiss}>
       <div className={`${styles.roundResultContent ?? ""} ${resultClass}`}>
         <div className={styles.resultIcon}>{resultIcon}</div>
         <div className={styles.resultText}>{resultText}</div>
@@ -428,11 +377,7 @@ function RoundResultOverlay() {
  */
 function TiePileIndicator() {
   const tiePile = useCompetingStore((s) => s.tiePile);
-
-  if (tiePile.length === 0) {
-    return null;
-  }
-
+  if (tiePile.length === 0) return null;
   return (
     <div className={styles.tiePile}>
       <span>Tie Pile:</span>
@@ -449,21 +394,11 @@ function ActionPrompt() {
   const currentTurn = useCompetingStore((s) => s.currentTurn);
 
   if (phase === "player_select" && currentTurn === "player") {
-    return (
-      <div className={styles.actionPrompt}>
-        Select a stat to compare!
-      </div>
-    );
+    return <div className={styles.actionPrompt}>Select a stat to compare!</div>;
   }
-
   if (phase === "cpu_select" && currentTurn === "cpu") {
-    return (
-      <div className={styles.actionPrompt}>
-        CPU is choosing a stat...
-      </div>
-    );
+    return <div className={styles.actionPrompt}>CPU is choosing a stat...</div>;
   }
-
   if (phase === "cpu_reveal") {
     return (
       <div className={styles.actionPrompt}>
@@ -473,12 +408,11 @@ function ActionPrompt() {
       </div>
     );
   }
-
   return null;
 }
 
 /**
- * Game over modal.
+ * Game over modal using shared GameCompletionModal.
  */
 function GameOverModal() {
   const phase = useCompetingStore((s) => s.phase);
@@ -489,112 +423,59 @@ function GameOverModal() {
   const gameEndedAt = useCompetingStore((s) => s.gameEndedAt);
   const resetGame = useCompetingStore((s) => s.resetGame);
 
-  const { deactivateMechanic } = useMechanicContext();
+  const { handleExit } = useMechanicActions();
 
   const handlePlayAgain = useCallback(() => {
     resetGame();
   }, [resetGame]);
 
-  const handleExit = useCallback(() => {
-    deactivateMechanic();
-  }, [deactivateMechanic]);
-
-  if (phase !== "game_over") {
-    return null;
-  }
+  if (phase !== "game_over") return null;
 
   const winner = getWinner();
-  const totalRounds = currentRound - 1; // -1 because currentRound increments before game over
+  const totalRounds = currentRound - 1;
   const totalTime = gameEndedAt && gameStartedAt ? gameEndedAt - gameStartedAt : 0;
 
-  let titleClass = "";
-  let titleText = "";
+  let title = "";
   if (winner === "player") {
-    titleClass = styles.playerWin ?? "";
-    titleText = "Victory!";
+    title = "Victory!";
   } else if (winner === "cpu") {
-    titleClass = styles.cpuWin ?? "";
-    titleText = "Defeat";
+    title = "Defeat";
   } else {
-    titleClass = styles.draw ?? "";
-    titleText = "Draw";
+    title = "Draw";
   }
 
   return (
-    <div className={styles.gameOverOverlay}>
-      <div className={styles.gameOverModal}>
-        <h2 className={`${styles.gameOverTitle ?? ""} ${titleClass}`}>{titleText}</h2>
-
-        <div className={styles.gameOverStats}>
-          <div className={styles.statBlock}>
-            <span className={styles.statBlockValue}>{roundsWon.player}</span>
-            <span className={styles.statBlockLabel}>Your Wins</span>
-          </div>
-          <div className={styles.statBlock}>
-            <span className={styles.statBlockValue}>{roundsWon.cpu}</span>
-            <span className={styles.statBlockLabel}>CPU Wins</span>
-          </div>
-        </div>
-
-        <div className={styles.gameOverDetails}>
-          <span>Rounds played: {totalRounds}</span>
-          <span>Time: {formatTime(totalTime)}</span>
-        </div>
-
-        <div className={styles.gameOverActions}>
-          <button
-            type="button"
-            className={`${styles.gameOverButton ?? ""} ${styles.exitButton ?? ""}`}
-            onClick={handleExit}
-          >
-            Exit
-          </button>
-          <button
-            type="button"
-            className={`${styles.gameOverButton ?? ""} ${styles.playAgainButton ?? ""}`}
-            onClick={handlePlayAgain}
-          >
-            Play Again
-          </button>
-        </div>
-      </div>
-    </div>
+    <GameCompletionModal
+      isOpen={true}
+      title={title}
+      stats={[
+        { label: "Your Wins", value: roundsWon.player },
+        { label: "CPU Wins", value: roundsWon.cpu },
+        { label: "Rounds", value: totalRounds },
+        { label: "Time", value: formatTime(totalTime) },
+      ]}
+      primaryAction={{ label: "Play Again", onClick: handlePlayAgain }}
+      onExit={handleExit}
+    />
   );
 }
 
 /**
- * Error overlay component.
+ * Competing error overlay using shared component.
  */
-function ErrorOverlay() {
+function CompetingErrorOverlay() {
   const errorMessage = useCompetingStore((s) => s.errorMessage);
   const isActive = useCompetingStore((s) => s.isActive);
-  const { deactivateMechanic } = useMechanicContext();
-
-  const handleExit = useCallback(() => {
-    deactivateMechanic();
-  }, [deactivateMechanic]);
-
-  if (!errorMessage || !isActive) {
-    return null;
-  }
+  const { handleExit } = useMechanicActions();
 
   return (
-    <div className={styles.errorOverlay}>
-      <div className={styles.errorModal}>
-        <h2 className={styles.errorTitle}>Cannot Play</h2>
-        <p className={styles.errorMessage}>{errorMessage}</p>
-        <p className={styles.errorHint}>
-          This game requires cards with numeric fields for stat comparison.
-        </p>
-        <button
-          type="button"
-          className={styles.errorExitButton}
-          onClick={handleExit}
-        >
-          Exit
-        </button>
-      </div>
-    </div>
+    <ErrorOverlay
+      title="Cannot Play"
+      message={errorMessage ?? ""}
+      hint="This game requires cards with numeric fields for stat comparison."
+      onExit={handleExit}
+      visible={!!errorMessage && isActive}
+    />
   );
 }
 
@@ -617,15 +498,9 @@ function BattleOverlayContent() {
   const errorMessage = useCompetingStore((s) => s.errorMessage);
   const difficulty = useCompetingStore((s) => s.difficulty);
 
-  if (!isActive) {
-    return null;
-  }
+  if (!isActive) return null;
+  if (errorMessage) return <CompetingErrorOverlay />;
 
-  if (errorMessage) {
-    return <ErrorOverlay />;
-  }
-
-  // Calculate card counts
   const playerCardCount = playerDeck.length + (playerCard ? 1 : 0);
   const cpuCardCount = cpuDeck.length + (cpuCard ? 1 : 0);
 
@@ -652,9 +527,7 @@ function BattleOverlayContent() {
             onSelectStat={selectStat}
             onConfirmCpuSelection={confirmCpuSelection}
           />
-
           <div className={styles.vsIndicator}>VS</div>
-
           <BattleCard
             cardId={cpuCard}
             side="cpu"
@@ -666,7 +539,6 @@ function BattleOverlayContent() {
             onConfirmCpuSelection={confirmCpuSelection}
           />
         </div>
-
         <TiePileIndicator />
       </div>
 
@@ -688,17 +560,14 @@ export function CompetingGridOverlay({ position }: GridOverlayProps) {
   const cpuSelectStat = useCompetingStore((s) => s.cpuSelectStat);
   const currentTurn = useCompetingStore((s) => s.currentTurn);
 
-  // Initialise game when activated
   useEffect(() => {
     if (!isActive || phase !== "setup") return;
     if (!cards || cards.length === 0) return;
 
-    // Detect numeric fields
     const numericFields = detectNumericFields(
       cards as unknown as Record<string, unknown>[]
     );
 
-    // Initialise game with detected fields
     initGame({
       cards: cards as unknown as Record<string, unknown>[],
       idField: "id",
@@ -706,22 +575,15 @@ export function CompetingGridOverlay({ position }: GridOverlayProps) {
     });
   }, [isActive, phase, cards, initGame]);
 
-  // Trigger CPU selection when it's CPU's turn
   useEffect(() => {
     if (isActive && phase === "cpu_select" && currentTurn === "cpu") {
-      // Small delay to allow UI to update
-      const timeout = setTimeout(() => {
-        cpuSelectStat();
-      }, 500);
+      const timeout = setTimeout(() => { cpuSelectStat(); }, 500);
       return () => { clearTimeout(timeout); };
     }
     return undefined;
   }, [isActive, phase, currentTurn, cpuSelectStat]);
 
-  // Only render at bottom position
-  if (position !== "bottom") {
-    return null;
-  }
+  if (position !== "bottom") return null;
 
   return <BattleOverlayContent />;
 }

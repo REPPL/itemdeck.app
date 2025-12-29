@@ -2,28 +2,19 @@
  * Snap Ranking mechanic components.
  *
  * A field value guessing game where players guess the value of a hidden
- * field for each card.
+ * field for each card. Uses shared components for timer, error, and results.
  */
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback } from "react";
 import { useSnapRankingStore } from "./store";
 import { useCollectionData } from "@/context/CollectionDataContext";
-import { useMechanicContext } from "../context";
+import { FloatingTimer, ErrorOverlay, GameCompletionModal } from "../shared";
+import { useMechanicActions, useGameTimer, formatTime } from "../shared";
 import { resolveFieldPath } from "@/utils/fieldPathResolver";
 import { getGuessFeedback } from "./types";
 import type { GuessValue } from "./types";
 import type { CardOverlayProps, GridOverlayProps } from "../types";
 import styles from "./SnapRanking.module.css";
-
-/**
- * Format milliseconds as MM:SS.
- */
-function formatTime(ms: number): string {
-  const seconds = Math.floor(ms / 1000);
-  const minutes = Math.floor(seconds / 60);
-  const remainingSeconds = seconds % 60;
-  return `${String(minutes)}:${String(remainingSeconds).padStart(2, "0")}`;
-}
 
 /**
  * Card overlay component - shows current card indicator and guess results.
@@ -201,45 +192,39 @@ function GuessButtons() {
 }
 
 /**
- * Floating timer component - shows time and progress during active play.
- * Consistent with Memory game's floating timer style.
+ * Snap Ranking floating timer using shared component.
  */
-function FloatingTimer() {
+function SnapRankingFloatingTimer() {
   const showTimer = useSnapRankingStore((s) => s.showTimer);
-  const getTotalTime = useSnapRankingStore((s) => s.getTotalTime);
   const isActive = useSnapRankingStore((s) => s.isActive);
   const cardIds = useSnapRankingStore((s) => s.cardIds);
   const currentIndex = useSnapRankingStore((s) => s.currentIndex);
   const gameStartedAt = useSnapRankingStore((s) => s.gameStartedAt);
+  const getTotalTime = useSnapRankingStore((s) => s.getTotalTime);
 
-  // Compute progress from state
   const isComplete = currentIndex >= cardIds.length && cardIds.length > 0;
-
-  // Force re-render for timer updates
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    if (!isActive || isComplete || !showTimer || !gameStartedAt) return;
-    const interval = setInterval(() => {
-      setTick((t) => t + 1);
-    }, 1000);
-    return () => { clearInterval(interval); };
-  }, [isActive, isComplete, showTimer, gameStartedAt]);
-
-  // Only show during active play (game started but not complete)
   const isActivePlay = isActive && gameStartedAt > 0 && !isComplete;
+
+  // Use shared timer hook for consistent updates
+  const { elapsedMs } = useGameTimer({
+    isRunning: isActivePlay && showTimer,
+    startTime: gameStartedAt > 0 ? gameStartedAt : null,
+    endTime: isComplete ? getTotalTime() + gameStartedAt : null,
+  });
+
   if (!isActivePlay || !showTimer) return null;
 
   return (
-    <div className={styles.floatingTimer}>
-      <span className={styles.timerIcon}>⏱</span>
-      <span className={styles.timerValue}>{formatTime(getTotalTime())}</span>
-      <span className={styles.progress}>{currentIndex}/{cardIds.length}</span>
-    </div>
+    <FloatingTimer
+      timeMs={elapsedMs}
+      progressLabel={`${currentIndex}/${cardIds.length}`}
+      visible={true}
+    />
   );
 }
 
 /**
- * Results modal component.
+ * Results modal component using shared GameCompletionModal.
  */
 function ResultsModal() {
   const isActive = useSnapRankingStore((s) => s.isActive);
@@ -255,19 +240,8 @@ function ResultsModal() {
   const uniqueValues = useSnapRankingStore((s) => s.uniqueValues);
 
   const { cards } = useCollectionData();
-  const { deactivateMechanic, openMechanicPanel } = useMechanicContext();
+  const { handleExit, handlePlayAgain } = useMechanicActions();
 
-  const handleExit = useCallback(() => {
-    deactivateMechanic();
-  }, [deactivateMechanic]);
-
-  const handlePlayAgain = useCallback(() => {
-    // Go to config screen to let user adjust settings before playing again
-    deactivateMechanic();
-    openMechanicPanel();
-  }, [deactivateMechanic, openMechanicPanel]);
-
-  // Compute isComplete from state
   const isComplete = currentIndex >= cardIds.length && cardIds.length > 0;
 
   if (!isActive || !isComplete) return null;
@@ -288,118 +262,83 @@ function ResultsModal() {
   };
 
   return (
-    <div className={styles.resultsOverlay}>
-      <div className={styles.resultsModal}>
-        <div className={styles.resultsHeader}>
-          <h2 className={styles.resultsTitle}>Game Complete!</h2>
-          <div className={styles.resultsScore}>
-            <span className={styles.scoreValue}>{totalScore}</span>
-            <span className={styles.scoreMax}>/ {maxScore}</span>
-            <span className={styles.scorePercent}>({percentage}%)</span>
+    <GameCompletionModal
+      isOpen={isComplete}
+      title="Game Complete!"
+      subtitle={`${totalScore}/${maxScore} (${percentage}%)`}
+      stats={[
+        { label: "Cards", value: guesses.length },
+        { label: "Total Time", value: formatTime(totalTime) },
+        { label: "Avg/Card", value: formatTime(avgTime) },
+      ]}
+      primaryAction={{ label: "Play Again", onClick: handlePlayAgain }}
+      onExit={handleExit}
+    >
+      {/* Breakdown section */}
+      <div className={styles.breakdownSection}>
+        <h3 className={styles.breakdownTitle}>Breakdown</h3>
+        <div className={styles.breakdownGrid}>
+          <div className={`${styles.breakdownItem} ${styles.correct}`}>
+            <span className={styles.breakdownCount}>{breakdown.exact}</span>
+            <span className={styles.breakdownLabel}>Exact</span>
           </div>
-          <div className={styles.resultsStats}>
-            <span>{guesses.length} cards</span>
-            <span>{formatTime(totalTime)} total</span>
-            <span>{formatTime(avgTime)}/card avg</span>
-          </div>
-        </div>
-
-        <div className={styles.breakdownSection}>
-          <h3 className={styles.breakdownTitle}>Breakdown</h3>
-          <div className={styles.breakdownGrid}>
-            <div className={`${styles.breakdownItem} ${styles.correct}`}>
-              <span className={styles.breakdownCount}>{breakdown.exact}</span>
-              <span className={styles.breakdownLabel}>Exact</span>
+          {valueType === "numeric" && (
+            <div className={`${styles.breakdownItem} ${styles.close}`}>
+              <span className={styles.breakdownCount}>{breakdown.close}</span>
+              <span className={styles.breakdownLabel}>Close</span>
             </div>
-            {valueType === "numeric" && (
-              <div className={`${styles.breakdownItem} ${styles.close}`}>
-                <span className={styles.breakdownCount}>{breakdown.close}</span>
-                <span className={styles.breakdownLabel}>Close</span>
-              </div>
-            )}
-            <div className={`${styles.breakdownItem} ${styles.wrong}`}>
-              <span className={styles.breakdownCount}>{breakdown.wrong}</span>
-              <span className={styles.breakdownLabel}>Wrong</span>
-            </div>
+          )}
+          <div className={`${styles.breakdownItem} ${styles.wrong}`}>
+            <span className={styles.breakdownCount}>{breakdown.wrong}</span>
+            <span className={styles.breakdownLabel}>Wrong</span>
           </div>
-        </div>
-
-        <div className={styles.guessList}>
-          {guesses.map((guess) => {
-            const title = getCardTitle(guess.cardId);
-            const feedback = getGuessFeedback(
-              guess.guess,
-              guess.actualValue,
-              valueType,
-              uniqueValues
-            );
-            return (
-              <div
-                key={guess.cardId}
-                className={`${styles.guessItem} ${styles[feedback.type]}`}
-              >
-                <span className={styles.guessItemTitle}>{title}</span>
-                <span className={styles.guessItemResult}>
-                  {String(guess.guess)} → {String(guess.actualValue)}
-                </span>
-                <span className={styles.guessItemScore}>+{guess.score}</span>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className={styles.resultsActions}>
-          <button
-            type="button"
-            className={`${styles.actionButton} ${styles.exitButton}`}
-            onClick={handleExit}
-          >
-            Exit
-          </button>
-          <button
-            type="button"
-            className={`${styles.actionButton} ${styles.primaryButton}`}
-            onClick={handlePlayAgain}
-          >
-            Play Again
-          </button>
         </div>
       </div>
-    </div>
+
+      {/* Guess list */}
+      <div className={styles.guessList}>
+        {guesses.map((guess) => {
+          const title = getCardTitle(guess.cardId);
+          const feedback = getGuessFeedback(
+            guess.guess,
+            guess.actualValue,
+            valueType,
+            uniqueValues
+          );
+          return (
+            <div
+              key={guess.cardId}
+              className={`${styles.guessItem} ${styles[feedback.type]}`}
+            >
+              <span className={styles.guessItemTitle}>{title}</span>
+              <span className={styles.guessItemResult}>
+                {String(guess.guess)} → {String(guess.actualValue)}
+              </span>
+              <span className={styles.guessItemScore}>+{guess.score}</span>
+            </div>
+          );
+        })}
+      </div>
+    </GameCompletionModal>
   );
 }
 
 /**
- * Error overlay component - shown when game cannot be played.
+ * Snap Ranking error overlay using shared component.
  */
-function ErrorOverlay() {
+function SnapRankingErrorOverlay() {
   const errorMessage = useSnapRankingStore((s) => s.errorMessage);
   const isActive = useSnapRankingStore((s) => s.isActive);
-  const { deactivateMechanic } = useMechanicContext();
-
-  const handleExit = useCallback(() => {
-    deactivateMechanic();
-  }, [deactivateMechanic]);
-
-  if (!errorMessage || !isActive) return null;
+  const { handleExit } = useMechanicActions();
 
   return (
-    <div className={styles.errorOverlay}>
-      <div className={styles.errorModal}>
-        <h2 className={styles.errorTitle}>Cannot Play</h2>
-        <p className={styles.errorMessage}>{errorMessage}</p>
-        <p className={styles.errorHint}>
-          Configure a Top Badge field in Settings to play this game.
-        </p>
-        <button
-          type="button"
-          className={styles.errorExitButton}
-          onClick={handleExit}
-        >
-          Exit
-        </button>
-      </div>
-    </div>
+    <ErrorOverlay
+      title="Cannot Play"
+      message={errorMessage ?? ""}
+      hint="Configure a Top Badge field in Settings to play this game."
+      onExit={handleExit}
+      visible={!!errorMessage && isActive}
+    />
   );
 }
 
@@ -410,12 +349,12 @@ export function SnapRankingGridOverlay({ position }: GridOverlayProps) {
   const errorMessage = useSnapRankingStore((s) => s.errorMessage);
 
   if (position === "top") {
-    return <FloatingTimer />;
+    return <SnapRankingFloatingTimer />;
   }
 
   // Show error overlay if there's an error
   if (errorMessage) {
-    return <ErrorOverlay />;
+    return <SnapRankingErrorOverlay />;
   }
 
   return (

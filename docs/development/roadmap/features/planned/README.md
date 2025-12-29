@@ -39,6 +39,15 @@ Features queued for future development.
 
 - [F-064-collection-comparison.md](./F-064-collection-comparison.md)
 
+### v1.5.0 - Internationalisation Foundation
+
+- [F-075-internationalisation-foundation.md](./F-075-internationalisation-foundation.md)
+- [F-076-icon-configuration-registry.md](./F-076-icon-configuration-registry.md)
+
+### v2.0.0 - Full Language Support
+
+- [F-077-rtl-support.md](./F-077-rtl-support.md)
+
 ---
 
 ## Related Documentation

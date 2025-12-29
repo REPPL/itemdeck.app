@@ -51,6 +51,7 @@ These reports provide:
 |-------|------|--------|
 | Remote Data Assessment | [state-of-the-art-remote-data-assessment.md](./state-of-the-art-remote-data-assessment.md) | ✅ Complete |
 | Plugin Architecture | [state-of-the-art-plugin-architecture.md](./state-of-the-art-plugin-architecture.md) | ✅ Complete |
+| Internationalisation | [state-of-the-art-internationalisation.md](./state-of-the-art-internationalisation.md) | ✅ Complete |
 
 ### Numbered Research
 

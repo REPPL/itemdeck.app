@@ -26,6 +26,8 @@ Documented architectural decisions for Itemdeck.
 | [018](./ADR-018-mechanic-ui-overlay.md) | Use Slot Props for mechanic overlays | Accepted | [R-005-gaming-mechanics-state](../../research/R-005-gaming-mechanics-state.md) |
 | [019](./ADR-019-configuration-first-mechanics.md) | Use Configuration-First Mechanics | Accepted | [R-009-mechanic-app-integration](../../research/R-009-mechanic-app-integration.md) |
 | [020](./ADR-020-mechanic-settings-isolation.md) | Use Settings Accessor for mechanic isolation | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
+| [021](./ADR-021-internationalisation-library.md) | Use react-i18next for internationalisation | Accepted | [state-of-the-art-internationalisation](../../research/state-of-the-art-internationalisation.md) |
+| [022](./ADR-022-icon-configuration-registry.md) | Use JSON registry for icon configuration | Accepted | [state-of-the-art-internationalisation](../../research/state-of-the-art-internationalisation.md) |
 
 ## ADR Template
 

@@ -34,7 +34,7 @@ Central hub for Itemdeck development planning, roadmap, and process documentatio
 | [v0.12.5 Plugin Architecture](./roadmap/milestones/v0.12.5.md) | ✅ Complete | URL simplification, Snap Ranking |
 | [v0.13.0 Plugin Architecture](./roadmap/milestones/v0.13.0.md) | ✅ Complete | Modular plugin system |
 | [v0.14.0 Advanced Mechanics](./roadmap/milestones/v0.14.0.md) | ✅ Complete | Competing, quiz, collection |
-| [v0.14.5 Shared Components](./roadmap/milestones/v0.14.5.md) | 🔄 In Progress | Component library refactor |
+| [v0.14.5 Shared Components](./roadmap/milestones/v0.14.5.md) | ✅ Complete | Component library refactor |
 | [v0.15.0 Polish & Features](./roadmap/milestones/v0.15.0.md) | 📋 Planned | Deferred features, enhancements |
 
 ## Directory Structure

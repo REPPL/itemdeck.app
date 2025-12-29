@@ -265,7 +265,8 @@ export const useSourceStore = create<SourceState>()(
       },
 
       setDefaultSource: (id: string | null) => {
-        set({ defaultSourceId: id });
+        // Also set as active so the collection loads immediately
+        set({ defaultSourceId: id, activeSourceId: id });
       },
 
       getActiveSourceUrl: () => {

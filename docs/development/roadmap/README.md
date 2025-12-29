@@ -28,8 +28,8 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.11.5](./milestones/v0.11.5.md) | UI Refinements & Field Mapping | ✅ Complete |
 | [v0.12.0](./milestones/v0.12.0.md) | UI Polish & Statistics | ✅ Complete |
 | [v0.12.5](./milestones/v0.12.5.md) | URL Simplification & Snap Ranking | ✅ Complete |
-| [v0.13.0](./milestones/v0.13.0.md) | Modular Plugin Architecture | 🔄 In Progress |
-| [v0.14.0](./milestones/v0.14.0.md) | Advanced Mechanics | 📋 Planned |
+| [v0.13.0](./milestones/v0.13.0.md) | Modular Plugin Architecture | ✅ Complete |
+| [v0.14.0](./milestones/v0.14.0.md) | Advanced Mechanics | ✅ Complete |
 | [v0.14.5](./milestones/v0.14.5.md) | Shared Mechanics Components | 📋 Planned |
 | [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
 
@@ -55,14 +55,14 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-016 | Bundle Optimisation | v0.4.0 | ✅ Complete |
 | F-017 | Testing Infrastructure | v0.3.0 | ✅ Complete |
 | F-018 | Security Hardening | v0.6.0 | ✅ Complete |
-| F-019 | Accessibility Audit | v0.14.0 | 📋 Planned |
+| F-019 | Accessibility Audit | v0.14.5 | 📋 Planned |
 | F-020 | Attribution System | v0.7.0 | ✅ Complete |
 | F-021 | ESLint/TypeScript Fixes | v0.3.0 | ✅ Complete |
 | F-022 | Test Coverage Reporting | v0.3.0 | ✅ Complete |
 | F-023 | Manual Refresh Button | v0.3.0 | ✅ Complete |
 | F-024 | ARIA Live Regions | v0.3.0 | ✅ Complete |
 | F-025 | Bundle Size Monitoring | v0.4.0 | ✅ Complete |
-| F-026 | Component Storybook | v0.14.0 | 📋 Planned |
+| F-026 | Component Storybook | v0.14.5 | 📋 Planned |
 | F-027 | Shuffle by Default | v0.3.0 | ✅ Complete |
 | F-028 | Card Drag and Drop | v0.10.6 | ✅ Complete |
 | F-029 | Card Info Button | v0.3.0 | ✅ Complete |
@@ -73,11 +73,11 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-034 | Card Badges | v0.3.0 | ✅ Complete |
 | F-035 | Card Quick Actions | v0.10.6 | ✅ Complete |
 | F-036 | Card Filtering | v0.11.0 | ✅ Complete |
-| F-037 | Card Sorting (Expanded) | v0.12.0 | 📋 Planned |
+| F-037 | Card Sorting (Expanded) | v0.14.5 | 📋 Planned |
 | F-038 | Card Carousel Mode | v0.10.6 | ✅ Complete |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | ✅ Complete |
-| F-041 | Card Animation Polish | v0.14.0 | 📋 Planned |
+| F-041 | Card Animation Polish | v0.14.5 | 📋 Planned |
 | F-042 | Collection Display Driver | v0.6.2 | ✅ Complete |
 | F-043 | Settings Panel Sub-tabs | v0.6.2 | ✅ Complete |
 | F-044 | Random Card Sampling | v0.8.1 | ✅ Complete |
@@ -93,23 +93,23 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-054 | Mechanic Context Provider | v0.11.0 | ✅ Complete |
 | F-055 | Mechanic Overlay System | v0.11.0 | ✅ Complete |
 | F-056 | Settings Mechanic Selector | v0.11.0 | ✅ Complete |
-| F-057 | Memory Game Mechanic | v0.12.0 | 📋 Planned |
-| F-058 | Collection Mechanic | v0.12.0 | 📋 Planned |
-| F-059 | Competing Mechanic | v0.13.0 | 📋 Planned |
-| F-060 | Quiz Mechanic | v0.13.0 | 📋 Planned |
-| F-061 | Snap Ranking Mechanic | v0.12.0 | 📋 Planned |
+| F-057 | Memory Game Mechanic | v0.12.0 | ✅ Complete |
+| F-058 | Collection Mechanic | v0.14.0 | ✅ Complete |
+| F-059 | Competing Mechanic | v0.14.0 | ✅ Complete |
+| F-060 | Quiz Mechanic | v0.14.0 | ✅ Complete |
+| F-061 | Snap Ranking Mechanic | v0.12.5 | ✅ Complete |
 | F-062 | Collection Statistics | v0.9.0 | ✅ Complete |
 | F-063 | Collection Export | v0.9.0 | ✅ Complete |
 | F-064 | Collection Comparison | v1.0.0 | 📋 Planned |
 | F-065 | Card Grouping | v0.11.0 | ✅ Complete |
 | F-066 | View Mode Toggle | v0.11.0 | ✅ Complete |
-| F-067 | Statistics Dashboard | v0.12.0 | 📋 Planned |
+| F-067 | Statistics Dashboard | v0.14.5 | 📋 Planned |
 | F-068 | Memory Game Status Bar Relocation | v0.11.1 | ✅ Complete |
 | F-069 | YouTube Video Gallery Support | v0.11.1 | ✅ Complete |
 | F-070 | Image Retrieval Validation | v0.11.1 | ✅ Complete |
 | F-071 | MyPlausibleMe Strict URL Format | v0.11.1 | ✅ Complete |
 | F-072 | Settings Panel Redesign | v0.11.1 | ✅ Complete |
-| F-073 | User Documentation Suite | v0.11.1 | 📋 Planned |
+| F-073 | User Documentation Suite | v0.14.5 | 📋 Planned |
 | F-074 | Destructive Action Button Styling | v0.11.1 | ✅ Complete |
 
 ## Contents

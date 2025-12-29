@@ -1,6 +1,6 @@
 {
   "name": "itemdeck",
-  "version": "0.12.5",
+  "version": "0.13.0",
   "description": "Interactive Card Collection Viewer - Display, explore, and play with card collections",
   "type": "module",
   "private": true,

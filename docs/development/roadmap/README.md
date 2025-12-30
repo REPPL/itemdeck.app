@@ -141,6 +141,8 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-116 | Settings Reorganisation | v1.0.0 | 📋 Planned |
 | F-117 | Navigation Standardisation | v1.0.0 | 📋 Planned |
 | F-118 | Mechanics UX Review | v1.0.0 | 📋 Planned |
+| F-119 | Drag-Drop Keyboard Accessibility | v1.0.0 | 📋 Planned |
+| F-120 | Caching Procedure Review | v1.0.0 | 📋 Planned |
 | F-122 | Plugin Manifest Schema | v1.5.0 | 📋 Planned |
 | F-123 | Plugin Loader & Registry | v1.5.0 | 📋 Planned |
 | F-124 | Plugin Security Sandbox | v1.5.0 | 📋 Planned |

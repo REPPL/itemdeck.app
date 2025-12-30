@@ -31,9 +31,9 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.13.0](./milestones/v0.13.0.md) | Modular Plugin Architecture | ✅ Complete |
 | [v0.14.0](./milestones/v0.14.0.md) | Advanced Mechanics | ✅ Complete |
 | [v0.14.5](./milestones/v0.14.5.md) | Shared Mechanics Components | ✅ Complete |
-| [v0.15.0](./milestones/v0.15.0.md) | User Experience & Polish | 🔄 In Progress |
-| [v0.15.5](./milestones/v0.15.5.md) | Infrastructure & Documentation | 📋 Planned |
-| [v1.0.0](./milestones/v1.0.0.md) | Multi-Collection | 📋 Planned |
+| [v0.15.0](./milestones/v0.15.0.md) | User Experience & Polish | ⚠️ Partial |
+| [v0.15.5](./milestones/v0.15.5.md) | Infrastructure & Documentation | ✅ Complete |
+| [v1.0.0](./milestones/v1.0.0.md) | First Production Release | 📋 Planned |
 | [v1.5.0](./milestones/v1.5.0.md) | Full Plugin Ecosystem | 📋 Planned |
 | [v2.0.0](./milestones/v2.0.0.md) | Internationalisation | 📋 Planned |
 
@@ -59,14 +59,14 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-016 | Bundle Optimisation | v0.4.0 | ✅ Complete |
 | F-017 | Testing Infrastructure | v0.3.0 | ✅ Complete |
 | F-018 | Security Hardening | v0.6.0 | ✅ Complete |
-| F-019 | Accessibility Audit | v0.15.5 | 📋 Planned |
+| F-019 | Accessibility Audit | v0.15.5 | ✅ Complete |
 | F-020 | Attribution System | v0.7.0 | ✅ Complete |
 | F-021 | ESLint/TypeScript Fixes | v0.3.0 | ✅ Complete |
 | F-022 | Test Coverage Reporting | v0.3.0 | ✅ Complete |
 | F-023 | Manual Refresh Button | v0.3.0 | ✅ Complete |
 | F-024 | ARIA Live Regions | v0.3.0 | ✅ Complete |
 | F-025 | Bundle Size Monitoring | v0.4.0 | ✅ Complete |
-| F-026 | Component Storybook | v0.15.5 | 📋 Planned |
+| F-026 | Component Storybook | v0.15.5 | ✅ Complete |
 | F-027 | Shuffle by Default | v0.3.0 | ✅ Complete |
 | F-028 | Card Drag and Drop | v0.10.6 | ✅ Complete |
 | F-029 | Card Info Button | v0.3.0 | ✅ Complete |
@@ -77,11 +77,11 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-034 | Card Badges | v0.3.0 | ✅ Complete |
 | F-035 | Card Quick Actions | v0.10.6 | ✅ Complete |
 | F-036 | Card Filtering | v0.11.0 | ✅ Complete |
-| F-037 | Card Sorting (Expanded) | v0.15.0 | 📋 Planned |
+| F-037 | Card Sorting (Expanded) | v1.0.0 | 📋 Planned |
 | F-038 | Card Carousel Mode | v0.10.6 | ✅ Complete |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | ✅ Complete |
-| F-041 | Card Animation Polish | v0.15.0 | 📋 Planned |
+| F-041 | Card Animation Polish | v1.0.0 | 📋 Planned |
 | F-042 | Collection Display Driver | v0.6.2 | ✅ Complete |
 | F-043 | Settings Panel Sub-tabs | v0.6.2 | ✅ Complete |
 | F-044 | Random Card Sampling | v0.8.1 | ✅ Complete |
@@ -107,13 +107,13 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-064 | Collection Comparison | v1.0.0 | 📋 Planned |
 | F-065 | Card Grouping | v0.11.0 | ✅ Complete |
 | F-066 | View Mode Toggle | v0.11.0 | ✅ Complete |
-| F-067 | Statistics Dashboard | v0.15.0 | 📋 Planned |
+| F-067 | Statistics Dashboard | v1.0.0 | 📋 Planned |
 | F-068 | Memory Game Status Bar Relocation | v0.11.1 | ✅ Complete |
 | F-069 | YouTube Video Gallery Support | v0.11.1 | ✅ Complete |
 | F-070 | Image Retrieval Validation | v0.11.1 | ✅ Complete |
 | F-071 | MyPlausibleMe Strict URL Format | v0.11.1 | ✅ Complete |
 | F-072 | Settings Panel Redesign | v0.11.1 | ✅ Complete |
-| F-073 | User Documentation Suite | v0.15.5 | 📋 Planned |
+| F-073 | User Documentation Suite | v0.15.5 | ✅ Complete |
 | F-074 | Destructive Action Button Styling | v0.11.1 | ✅ Complete |
 | F-075 | Internationalisation Foundation | v2.0.0 | 📋 Planned |
 | F-076 | Icon Configuration Registry | v2.0.0 | 📋 Planned |
@@ -129,6 +129,18 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-103 | Configuration Standardisation | v0.14.5 | ✅ Complete |
 | F-104 | Progress Display Consistency | v0.14.5 | ✅ Complete |
 | F-106 | JSON-Based Mechanic Configuration | v0.14.5 | ✅ Complete |
+| F-107 | Empty Collection Handling | v1.0.0 | 📋 Planned |
+| F-108 | Top Trumps Mechanic Review | v1.0.0 | 📋 Planned |
+| F-109 | Launch Screen with Logo | v0.15.0 | ✅ Complete |
+| F-110 | Keyboard Shortcuts Review | v0.15.0 | ✅ Complete |
+| F-111 | Overlay Consistency | v0.15.0 | ✅ Complete |
+| F-112 | Example Loading | v1.0.0 | 📋 Planned |
+| F-113 | Lazy Loading Indicator | v1.0.0 | 📋 Planned |
+| F-114 | Update Checking | v0.15.0 | ✅ Complete |
+| F-115 | Caching Transparency | v0.15.0 | ✅ Complete |
+| F-116 | Settings Reorganisation | v1.0.0 | 📋 Planned |
+| F-117 | Navigation Standardisation | v1.0.0 | 📋 Planned |
+| F-118 | Mechanics UX Review | v1.0.0 | 📋 Planned |
 | F-122 | Plugin Manifest Schema | v1.5.0 | 📋 Planned |
 | F-123 | Plugin Loader & Registry | v1.5.0 | 📋 Planned |
 | F-124 | Plugin Security Sandbox | v1.5.0 | 📋 Planned |

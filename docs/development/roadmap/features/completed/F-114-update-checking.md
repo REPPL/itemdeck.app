@@ -16,14 +16,14 @@ Add subtle update detection and indication:
 
 ## Implementation Tasks
 
-- [ ] Create `src/services/updateChecker.ts`
-- [ ] Implement GitHub API call for commit timestamps
-- [ ] Create `src/hooks/useUpdateChecker.ts` with background polling
-- [ ] Create UpdateBadge component
-- [ ] Update sourceStore with update tracking fields
-- [ ] Add badge to source list in Settings
-- [ ] Add manual "Check for updates" button
-- [ ] Handle rate limiting gracefully
+- [x] Create `src/services/updateChecker.ts`
+- [x] Implement GitHub API call for commit timestamps
+- [x] Create `src/hooks/useUpdateChecker.ts` with background polling
+- [x] Create UpdateBadge component
+- [x] Update sourceStore with update tracking fields
+- [x] Add badge to source list in Settings
+- [x] Add manual "Check for updates" button
+- [x] Handle rate limiting gracefully
 
 ## GitHub API Approach
 
@@ -44,13 +44,13 @@ const remoteTimestamp = new Date(commit.committer.date).getTime();
 
 ## Success Criteria
 
-- [ ] GitHub API checks work correctly
-- [ ] Background polling every 15 minutes
-- [ ] Badge shows when update available
-- [ ] Tooltip provides clear information
-- [ ] User can manually trigger check
-- [ ] Rate limiting handled gracefully
-- [ ] No auto-update (user initiates)
+- [x] GitHub API checks work correctly
+- [x] Background polling every 15 minutes
+- [x] Badge shows when update available
+- [x] Tooltip provides clear information
+- [x] User can manually trigger check
+- [x] Rate limiting handled gracefully
+- [x] No auto-update (user initiates)
 
 ## Dependencies
 
@@ -67,3 +67,7 @@ const remoteTimestamp = new Date(commit.committer.date).getTime();
 
 - [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 - [Implementation Prompt](../../../../prompts/implementation/v0.15.0/track-c2-updates.md)
+
+---
+
+**Status**: ✅ Complete

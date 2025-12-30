@@ -35,17 +35,17 @@ Overlays to audit:
 
 ## Implementation Tasks
 
-- [ ] Create `src/hooks/useOverlay.ts`
-- [ ] Create `src/hooks/useFocusTrap.ts`
-- [ ] Audit Modal.tsx as reference implementation
-- [ ] Update SettingsPanel to use shared hooks
-- [ ] Update HelpModal to use shared hooks
-- [ ] Update MechanicPanel to use shared hooks
-- [ ] Update ConfirmDialog to use shared hooks
-- [ ] Update ViewPopover to use shared hooks
-- [ ] Update ImageGallery to use shared hooks
-- [ ] Add missing ARIA attributes
-- [ ] Standardise animation approach
+- [x] Create `src/hooks/useOverlay.ts`
+- [x] Create `src/hooks/useFocusTrap.ts`
+- [x] Audit Modal.tsx as reference implementation
+- [x] Update SettingsPanel to use shared hooks
+- [x] Update HelpModal to use shared hooks
+- [x] Update MechanicPanel to use shared hooks
+- [x] Update ConfirmDialog to use shared hooks
+- [x] Update ViewPopover to use shared hooks
+- [x] Update ImageGallery to use shared hooks
+- [x] Add missing ARIA attributes
+- [x] Standardise animation approach
 
 ## Overlay Consistency Checklist
 
@@ -60,12 +60,12 @@ Overlays to audit:
 
 ## Success Criteria
 
-- [ ] Shared useOverlay hook created
-- [ ] useFocusTrap hook extracted
-- [ ] All overlays close with Escape
-- [ ] All overlays have proper ARIA attributes
-- [ ] Animation approach consistent
-- [ ] Focus management consistent
+- [x] Shared useOverlay hook created
+- [x] useFocusTrap hook extracted
+- [x] All overlays close with Escape
+- [x] All overlays have proper ARIA attributes
+- [x] Animation approach consistent
+- [x] Focus management consistent
 
 ## Dependencies
 
@@ -82,3 +82,7 @@ Overlays to audit:
 
 - [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 - [Implementation Prompt](../../../../prompts/implementation/v0.15.0/track-b2-overlays.md)
+
+---
+
+**Status**: ✅ Complete

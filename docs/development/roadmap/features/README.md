@@ -164,39 +164,44 @@ Feature specifications for Itemdeck development.
 | [F-017](./completed/F-017-testing-infrastructure.md) | Testing Infrastructure | ✅ Complete |
 | [F-018](./completed/F-018-security-hardening.md) | Security Hardening | ✅ Complete |
 
-### v0.12.0 - Core Mechanics
+### v0.15.0 - User Experience & Polish (Partial)
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-037](./planned/F-037-card-sorting.md) | Card Sorting (Expanded) | 📋 Planned |
-| [F-057](./planned/F-057-memory-game-mechanic.md) | Memory Game Mechanic | 📋 Planned |
-| [F-058](./planned/F-058-collection-mechanic.md) | Collection Mechanic | 📋 Planned |
-| [F-061](./planned/F-061-snap-ranking-mechanic.md) | Snap Ranking Mechanic | 📋 Planned |
-| [F-067](./planned/F-067-statistics-dashboard.md) | Statistics Dashboard | 📋 Planned |
-| [F-091](./planned/F-091-entity-auto-discovery.md) | Entity Auto-Discovery | 📋 Planned |
+| [F-109](./completed/F-109-launch-screen.md) | Launch Screen with Logo | ✅ Complete |
+| [F-110](./completed/F-110-keyboard-shortcuts-review.md) | Keyboard Shortcuts Review | ✅ Complete |
+| [F-111](./completed/F-111-overlay-consistency.md) | Overlay Consistency Review | ✅ Complete |
+| [F-114](./completed/F-114-update-checking.md) | Update Checking | ✅ Complete |
+| [F-115](./completed/F-115-caching-transparency.md) | Caching Transparency | ✅ Complete |
 
-### v0.13.0 - Advanced Mechanics
+### v0.15.5 - Infrastructure & Documentation
 
 | ID | Feature | Status |
 |----|---------|--------|
-| [F-059](./planned/F-059-competing-mechanic.md) | Competing Mechanic (Top Trumps) | 📋 Planned |
-| [F-060](./planned/F-060-quiz-mechanic.md) | Quiz Mechanic | 📋 Planned |
+| [F-019](./completed/F-019-accessibility-audit.md) | Accessibility Audit | ✅ Complete |
+| [F-026](./completed/F-026-component-storybook.md) | Component Storybook | ✅ Complete |
+| [F-073](./completed/F-073-user-documentation.md) | User Documentation Suite | ✅ Complete |
+| [F-081](./completed/F-081-settings-json-export.md) | Settings JSON Export/Import | ✅ Complete |
+| [F-082](./completed/F-082-theme-json-export.md) | Theme JSON Export/Import | ✅ Complete |
+| [F-091](./completed/F-091-entity-auto-discovery.md) | Entity Auto-Discovery | ✅ Complete |
+| [F-102](./completed/F-102-mechanic-display-preferences.md) | Mechanic Display Preferences | ✅ Complete |
 
-### v1.0.0 - Multi-Collection
+### v1.0.0 - First Production Release
 
 | ID | Feature | Status |
 |----|---------|--------|
 | [F-064](./planned/F-064-collection-comparison.md) | Collection Comparison Mode | 📋 Planned |
-
-### Future Features (Unassigned)
-
-| ID | Feature | Status |
-|----|---------|--------|
-| [F-019](./planned/F-019-accessibility-audit.md) | Accessibility Audit | 📋 Planned |
-| [F-026](./planned/F-026-component-storybook.md) | Component Storybook | 📋 Planned |
+| [F-107](./planned/F-107-empty-collection-handling.md) | Empty Collection Handling | 📋 Planned |
+| [F-108](./planned/F-108-top-trumps-review.md) | Top Trumps Mechanic Review | 📋 Planned |
+| [F-112](./planned/F-112-example-loading.md) | Example Loading | 📋 Planned |
+| [F-113](./planned/F-113-lazy-loading-indicator.md) | Lazy Loading Indicator | 📋 Planned |
+| [F-116](./planned/F-116-settings-reorganisation.md) | Settings Reorganisation | 📋 Planned |
+| [F-117](./planned/F-117-navigation-standardisation.md) | Navigation Standardisation | 📋 Planned |
+| [F-118](./planned/F-118-mechanics-ux-review.md) | Mechanics UX Review | 📋 Planned |
+| [F-037](./planned/F-037-card-sorting.md) | Card Sorting (Expanded) | 📋 Planned |
 | [F-041](./planned/F-041-card-animations-polish.md) | Card Animation Polish | 📋 Planned |
-| [F-081](./planned/F-081-settings-json-export.md) | Settings JSON Export/Import | 📋 Planned |
-| [F-082](./planned/F-082-theme-json-export.md) | Theme Customisation Export/Import | 📋 Planned |
+| [F-067](./planned/F-067-statistics-dashboard.md) | Statistics Dashboard | 📋 Planned |
+| [F-119](./planned/F-119-drag-drop-keyboard-accessibility.md) | Drag-Drop Keyboard Accessibility | 📋 Planned |
 
 ## Status Legend
 

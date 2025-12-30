@@ -26,13 +26,13 @@ Current issues:
 
 ## Implementation Tasks
 
-- [ ] Create `src/config/keyboardShortcuts.ts`
-- [ ] Define NAVIGATION_KEYS and ACTION_KEYS
-- [ ] Update App.tsx to use Ctrl modifier for actions
-- [ ] Add vim-style keys to useGridNavigation
-- [ ] Update HelpModal to group shortcuts by category
-- [ ] Update useGlobalKeyboard to use centralised config
-- [ ] Test all shortcuts work correctly
+- [x] Create `src/config/keyboardShortcuts.ts`
+- [x] Define NAVIGATION_KEYS and ACTION_KEYS
+- [x] Update App.tsx to use Ctrl modifier for actions
+- [x] Add vim-style keys to useGridNavigation
+- [x] Update HelpModal to group shortcuts by category
+- [x] Update useGlobalKeyboard to use centralised config
+- [x] Test all shortcuts work correctly
 
 ## Keyboard Shortcut Convention
 
@@ -57,11 +57,11 @@ Current issues:
 
 ## Success Criteria
 
-- [ ] All action shortcuts require Ctrl modifier
-- [ ] Vim-style navigation works (j/k/h/l)
-- [ ] HelpModal displays grouped shortcuts
-- [ ] Centralised config is single source of truth
-- [ ] No conflicts between navigation and actions
+- [x] All action shortcuts require Ctrl modifier
+- [x] Vim-style navigation works (j/k/h/l)
+- [x] HelpModal displays grouped shortcuts
+- [x] Centralised config is single source of truth
+- [x] No conflicts between navigation and actions
 
 ## Dependencies
 
@@ -78,3 +78,7 @@ Current issues:
 
 - [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 - [Implementation Prompt](../../../../prompts/implementation/v0.15.0/track-b1-keyboard.md)
+
+---
+
+**Status**: ✅ Complete

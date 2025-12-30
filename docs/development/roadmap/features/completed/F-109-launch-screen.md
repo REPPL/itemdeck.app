@@ -10,20 +10,20 @@ Add the itemdeck logo to the launch/loading screen with a visually pleasing fade
 
 ## Implementation Tasks
 
-- [ ] Copy logo from `docs/assets/img/logo.png` to `src/assets/img/logo.png`
-- [ ] Update `LoadingScreen.tsx` to import and display logo
-- [ ] Replace inline SVG card-deck icon with logo image
-- [ ] Add fade-in animation to logo
-- [ ] Ensure logo displays correctly on all screen sizes
-- [ ] Test reduced motion preference
+- [x] Copy logo from `docs/assets/img/logo.png` to `src/assets/img/logo.png`
+- [x] Update `LoadingScreen.tsx` to import and display logo
+- [x] Replace inline SVG card-deck icon with logo image
+- [x] Add fade-in animation to logo
+- [x] Ensure logo displays correctly on all screen sizes
+- [x] Test reduced motion preference
 
 ## Success Criteria
 
-- [ ] Logo displays on app launch
-- [ ] Fade-in animation is smooth
-- [ ] Logo is appropriately sized (128px width)
-- [ ] Reduced motion preference respected
-- [ ] No layout shift during load
+- [x] Logo displays on app launch
+- [x] Fade-in animation is smooth
+- [x] Logo is appropriately sized (128px width)
+- [x] Reduced motion preference respected
+- [x] No layout shift during load
 
 ## Dependencies
 
@@ -40,3 +40,7 @@ Add the itemdeck logo to the launch/loading screen with a visually pleasing fade
 
 - [v0.15.0 Milestone](../../milestones/v0.15.0.md)
 - [Implementation Prompt](../../../../prompts/implementation/v0.15.0/track-a-onboarding.md)
+
+---
+
+**Status**: ✅ Complete

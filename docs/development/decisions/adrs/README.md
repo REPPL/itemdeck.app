@@ -32,6 +32,9 @@ Documented architectural decisions for Itemdeck.
 | [024](./ADR-024-plugin-sandbox-implementation.md) | Use sandboxed iframes for external plugins | Accepted | [state-of-the-art-web-security-sandbox](../../research/state-of-the-art-web-security-sandbox.md) |
 | [025](./ADR-025-plugin-distribution-strategy.md) | Static registry + GitHub for distribution | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
 | [026](./ADR-026-plugin-manifest-schema.md) | JSON manifest with Zod validation | Accepted | [state-of-the-art-plugin-architecture](../../research/state-of-the-art-plugin-architecture.md) |
+| [027](./ADR-027-translation-management-workflow.md) | Use Git-based translation workflow | Accepted | [R-013-community-translation-workflow](../../research/R-013-community-translation-workflow.md) |
+| [028](./ADR-028-plugin-translation-contributions.md) | Plugin translation contribution model | Accepted | [R-013-community-translation-workflow](../../research/R-013-community-translation-workflow.md) |
+| [029](./ADR-029-card-elevation-strategy.md) | Use tonal elevation with shadow fallback | Accepted | [card-ui-design-patterns](../../research/card-ui-design-patterns.md) |
 
 ## ADR Template
 

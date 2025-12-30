@@ -81,6 +81,7 @@ v0.3.0
 ## Related Documentation
 
 - [Card UI Design Patterns Research](../../../research/card-ui-design-patterns.md)
+- [ADR-029: Card Elevation Strategy](../../../decisions/adrs/ADR-029-card-elevation-strategy.md)
 - [Theme System](./F-010-theme-system.md)
 - [v0.3.0 Milestone](../../milestones/v0.3.0.md)
 

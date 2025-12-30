@@ -1,5 +1,7 @@
 # Modern Card UI/UX Design Patterns Research
 
+> **Note**: For state-of-the-art implementation research (2024-2025) including Material Design 3 and specific itemdeck recommendations, see [Card UI Design Patterns Research](../development/research/card-ui-design-patterns.md). This document contains general design exploration.
+
 Comprehensive research on card-based interface design patterns, focusing on rich data display, information density, progressive disclosure, and user interaction patterns.
 
 ---

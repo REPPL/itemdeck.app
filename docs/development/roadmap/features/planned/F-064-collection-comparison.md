@@ -11,6 +11,21 @@ Users with multiple collections cannot find relationships:
 
 ## Design Approach
 
+Implement comparison as a **mechanic** rather than core navigation:
+
+- Reuses existing mechanic infrastructure (activation, deactivation, lifecycle)
+- Accessed via Mechanics menu or Play settings tab
+- Clean activation/deactivation lifecycle
+- Display preferences for split view layout
+- Settings integration via F-116 Play tab
+
+### Why as a Mechanic?
+
+1. **Consistency** - Same UX patterns as other mechanics (Memory, Quiz, etc.)
+2. **Lifecycle** - Clean start/stop with proper state cleanup
+3. **Settings** - Integrates naturally with F-116 Play tab
+4. **Future-proof** - v1.5.0 plugin system supports mechanic plugins
+
 Add side-by-side comparison view with matching algorithms.
 
 ### Comparison View
@@ -70,11 +85,14 @@ Add side-by-side comparison view with matching algorithms.
 
 ## Implementation Tasks
 
-### Phase 1: Multi-Collection Loading
+### Phase 1: Comparison Mechanic Setup
 
-- [ ] Enable loading two collections simultaneously
-- [ ] Create comparison mode toggle
-- [ ] Store both collections in memory
+- [ ] Create `src/mechanics/comparison/index.tsx`
+- [ ] Create `src/mechanics/comparison/ComparisonView.tsx`
+- [ ] Register in mechanic registry
+- [ ] Add manifest with display preferences (split view)
+- [ ] Create `src/stores/comparisonStore.ts` for comparison state
+- [ ] Extend sourceStore to support secondary collection
 
 ### Phase 2: Matching Engine
 
@@ -122,6 +140,8 @@ Add side-by-side comparison view with matching algorithms.
 
 ## Dependencies
 
+- **F-116**: Settings Reorganisation - Play tab for mechanic settings
+- **F-118**: Mechanics UX Review - Consistent mechanic patterns
 - **Remote Source Management** (v0.9.0): Multiple collection sources
 - **R-008**: Fuzzy Matching (Fuse.js integration)
 
@@ -137,12 +157,19 @@ Add side-by-side comparison view with matching algorithms.
 - E2E test for comparison workflow
 - Performance test with large collections
 
+## Estimated Effort
+
+**24-32 hours**
+
 ---
 
 ## Related Documentation
 
 - [R-008: Fuzzy Matching](../../research/R-008-fuzzy-matching.md)
-- [F-063: Collection Export](./F-063-collection-export.md)
+- [F-063: Collection Export](../completed/F-063-collection-export.md)
+- [F-116: Settings Reorganisation](./F-116-settings-reorganisation.md)
+- [F-118: Mechanics UX Review](./F-118-mechanics-ux-review.md)
+- [v1.0.0 Milestone](../../milestones/v1.0.0.md)
 
 ---
 

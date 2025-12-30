@@ -33,6 +33,7 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | [v0.14.5](./milestones/v0.14.5.md) | Shared Mechanics Components | ✅ Complete |
 | [v0.15.0](./milestones/v0.15.0.md) | User Experience & Polish | ⚠️ Partial |
 | [v0.15.5](./milestones/v0.15.5.md) | Infrastructure & Documentation | ✅ Complete |
+| [v0.15.6](./milestones/v0.15.6.md) | Settings Consistency & Bug Fixes | ✅ Complete |
 | [v1.0.0](./milestones/v1.0.0.md) | First Production Release | 📋 Planned |
 | [v1.5.0](./milestones/v1.5.0.md) | Full Plugin Ecosystem | 📋 Planned |
 | [v2.0.0](./milestones/v2.0.0.md) | Internationalisation | 📋 Planned |

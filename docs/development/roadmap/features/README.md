@@ -185,6 +185,7 @@ Feature specifications for Itemdeck development.
 | [F-082](./completed/F-082-theme-json-export.md) | Theme JSON Export/Import | ✅ Complete |
 | [F-091](./completed/F-091-entity-auto-discovery.md) | Entity Auto-Discovery | ✅ Complete |
 | [F-102](./completed/F-102-mechanic-display-preferences.md) | Mechanic Display Preferences | ✅ Complete |
+| [F-067](./completed/F-067-statistics-dashboard.md) | Statistics Dashboard | ✅ Complete |
 
 ### v1.0.0 - First Production Release
 
@@ -200,7 +201,6 @@ Feature specifications for Itemdeck development.
 | [F-118](./planned/F-118-mechanics-ux-review.md) | Mechanics UX Review | 📋 Planned |
 | [F-037](./planned/F-037-card-sorting.md) | Card Sorting (Expanded) | 📋 Planned |
 | [F-041](./planned/F-041-card-animations-polish.md) | Card Animation Polish | 📋 Planned |
-| [F-067](./planned/F-067-statistics-dashboard.md) | Statistics Dashboard | 📋 Planned |
 | [F-119](./planned/F-119-drag-drop-keyboard-accessibility.md) | Drag-Drop Keyboard Accessibility | 📋 Planned |
 
 ## Status Legend

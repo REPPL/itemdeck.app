@@ -6,47 +6,50 @@ Features queued for future development.
 
 ### Quality & Accessibility (Unscheduled)
 
-- [F-019-accessibility-audit.md](./F-019-accessibility-audit.md)
-- [F-026-component-storybook.md](./F-026-component-storybook.md)
-- [F-041-card-animations-polish.md](./F-041-card-animations-polish.md)
+- [F-041-card-animations-polish.md](./F-041-card-animations-polish.md) - Spring physics animations
 
-### v0.12.0 - Core Mechanics
+### v1.0.0 - Multi-Collection & Polish
 
-**Gaming Mechanics:**
-- [F-057-memory-game-mechanic.md](./F-057-memory-game-mechanic.md)
-- [F-058-collection-mechanic.md](./F-058-collection-mechanic.md)
-- [F-061-snap-ranking-mechanic.md](./F-061-snap-ranking-mechanic.md)
+**Core Features:**
+- [F-037-card-sorting.md](./F-037-card-sorting.md) - Expanded sort field options (partial in v0.15.5)
+- [F-064-collection-comparison.md](./F-064-collection-comparison.md) - Compare multiple collections
+- [F-107-empty-collection-handling.md](./F-107-empty-collection-handling.md) - Empty state UX
+- [F-108-top-trumps-review.md](./F-108-top-trumps-review.md) - Top Trumps mechanic polish
+- [F-112-example-loading.md](./F-112-example-loading.md) - MyPlausibleMe example loading
+- [F-113-lazy-loading-indicator.md](./F-113-lazy-loading-indicator.md) - Visual loading indicator
 
-**Deferred Features:**
-- [F-037-card-sorting.md](./F-037-card-sorting.md) - Expanded sort field options
-- [F-067-statistics-dashboard.md](./F-067-statistics-dashboard.md) - Enhanced statistics with charts
+**UX Improvements:**
+- [F-116-settings-reorganisation.md](./F-116-settings-reorganisation.md) - Settings menu restructure
+- [F-117-navigation-standardisation.md](./F-117-navigation-standardisation.md) - Navigation patterns
+- [F-118-mechanics-ux-review.md](./F-118-mechanics-ux-review.md) - Mechanics UX audit
+- [F-119-drag-drop-keyboard-accessibility.md](./F-119-drag-drop-keyboard-accessibility.md) - Keyboard accessibility
+- [F-120-caching-procedure-review.md](./F-120-caching-procedure-review.md) - Caching UX review
 
-**Collection Loading:**
-- [F-091-entity-auto-discovery.md](./F-091-entity-auto-discovery.md) - GitHub API directory scanning fallback
+### v1.5.0 - Full Plugin Ecosystem
 
-### v0.13.0 - Advanced Mechanics
+**Plugin Infrastructure:**
+- [F-122-plugin-manifest-schema.md](./F-122-plugin-manifest-schema.md) - Plugin manifest format
+- [F-123-plugin-loader-registry.md](./F-123-plugin-loader-registry.md) - Plugin loader system
+- [F-124-plugin-security-sandbox.md](./F-124-plugin-security-sandbox.md) - Security sandbox
+- [F-125-plugin-permission-model.md](./F-125-plugin-permission-model.md) - Permission model
 
-- [F-059-competing-mechanic.md](./F-059-competing-mechanic.md)
-- [F-060-quiz-mechanic.md](./F-060-quiz-mechanic.md)
+**Plugin Types:**
+- [F-126-settings-schema-plugins.md](./F-126-settings-schema-plugins.md) - Settings schema plugins
+- [F-127-theme-package-plugins.md](./F-127-theme-package-plugins.md) - Theme package plugins
+- [F-128-mechanic-plugins-external.md](./F-128-mechanic-plugins-external.md) - External mechanic plugins
+- [F-129-source-adapter-plugins.md](./F-129-source-adapter-plugins.md) - Source adapter plugins
+- [F-130-builtin-plugin-bundling.md](./F-130-builtin-plugin-bundling.md) - Built-in plugin bundling
 
-### v0.14.0+ - Settings & Export
+**Plugin Distribution:**
+- [F-131-curated-registry-api.md](./F-131-curated-registry-api.md) - Curated registry API
+- [F-132-community-plugin-loading.md](./F-132-community-plugin-loading.md) - Community plugin loading
+- [F-133-plugin-activation-ui.md](./F-133-plugin-activation-ui.md) - Plugin activation UI
 
-- [F-081-settings-json-export.md](./F-081-settings-json-export.md)
-- [F-082-theme-json-export.md](./F-082-theme-json-export.md)
-- [F-090-settings-draft-state.md](./F-090-settings-draft-state.md)
+### v2.0.0 - Internationalisation
 
-### v1.0.0 - Multi-Collection
-
-- [F-064-collection-comparison.md](./F-064-collection-comparison.md)
-
-### v1.5.0 - Internationalisation Foundation
-
-- [F-075-internationalisation-foundation.md](./F-075-internationalisation-foundation.md)
-- [F-076-icon-configuration-registry.md](./F-076-icon-configuration-registry.md)
-
-### v2.0.0 - Full Language Support
-
-- [F-077-rtl-support.md](./F-077-rtl-support.md)
+- [F-075-internationalisation-foundation.md](./F-075-internationalisation-foundation.md) - i18n foundation
+- [F-076-icon-configuration-registry.md](./F-076-icon-configuration-registry.md) - Icon configuration
+- [F-077-rtl-support.md](./F-077-rtl-support.md) - Right-to-left support
 
 ---
 

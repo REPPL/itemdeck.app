@@ -1,6 +1,6 @@
 # Completed Features
 
-Archive of completed feature implementations.
+Archive of completed feature implementations (81 features).
 
 ## Completed
 
@@ -42,6 +42,32 @@ Archive of completed feature implementations.
 | [F-034](./F-034-card-badges.md) | Card Badges | v0.3.0 |
 | [F-039](./F-039-responsive-typography.md) | Responsive Typography | v0.3.0 |
 
+### v0.4.0 - Performance & Interaction
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-014](./F-014-virtual-scrolling.md) | Virtual Scrolling | v0.4.0 |
+| [F-015](./F-015-image-lazy-loading.md) | Image Lazy Loading | v0.4.0 |
+| [F-016](./F-016-bundle-optimisation.md) | Bundle Optimisation | v0.4.0 |
+| [F-017](./F-017-testing-infrastructure.md) | Testing Infrastructure | v0.4.0 |
+| [F-018](./F-018-security-hardening.md) | Security Hardening | v0.4.0 |
+| [F-019](./F-019-accessibility-audit.md) | Accessibility Audit | v0.4.0 |
+| [F-025](./F-025-bundle-size-monitoring.md) | Bundle Size Monitoring | v0.4.0 |
+| [F-026](./F-026-component-storybook.md) | Component Storybook | v0.4.0 |
+| [F-028](./F-028-card-drag-and-drop.md) | Card Drag and Drop | v0.4.0 |
+| [F-032](./F-032-card-stack-view.md) | Card Stack View | v0.4.0 |
+| [F-035](./F-035-card-quick-actions.md) | Card Quick Actions | v0.4.0 |
+| [F-040](./F-040-touch-gestures.md) | Touch Gestures | v0.4.0 |
+
+### v0.6.0 - Schema Loader
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-038](./F-038-card-carousel-mode.md) | Card Carousel Mode | v0.6.0 |
+| [F-042](./F-042-collection-display-driver.md) | Collection Display Driver | v0.6.0 |
+| [F-043](./F-043-settings-panel-subtabs.md) | Settings Panel Subtabs | v0.6.0 |
+| [F-044](./F-044-random-card-sampling.md) | Random Card Sampling | v0.6.0 |
+
 ### v0.7.0 - Schema Flexibility
 
 | ID | Feature | Milestone |
@@ -77,6 +103,7 @@ Archive of completed feature implementations.
 | [F-054](./F-054-mechanic-context-provider.md) | Mechanic Context Provider | v0.11.0 |
 | [F-055](./F-055-mechanic-overlay-system.md) | Mechanic Overlay System | v0.11.0 |
 | [F-056](./F-056-settings-mechanic-selector.md) | Settings Mechanic Selector | v0.11.0 |
+| [F-057](./F-057-memory-game-mechanic.md) | Memory Game Mechanic | v0.11.0 |
 | [F-065](./F-065-card-grouping.md) | Card Grouping | v0.11.0 |
 | [F-066](./F-066-view-mode-toggle.md) | View Mode Toggle | v0.11.0 |
 
@@ -91,11 +118,60 @@ Archive of completed feature implementations.
 | [F-072](./F-072-settings-panel-redesign.md) | Settings Panel Redesign (4 tabs) | v0.11.1 |
 | [F-074](./F-074-destructive-action-styling.md) | Destructive Action Button Styling | v0.11.1 |
 
+### v0.11.5 - UI Refinements & Documentation Sync
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-031](./F-031-fit-to-viewport.md) | Fit to Viewport | v0.11.5 |
+| [F-073](./F-073-user-documentation.md) | User Documentation | v0.11.5 |
+| [F-091](./F-091-entity-auto-discovery.md) | Entity Auto-Discovery | v0.11.5 |
+
+### v0.12.5 - Core Mechanics & Documentation
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-061](./F-061-snap-ranking-mechanic.md) | Snap Ranking Mechanic | v0.12.5 |
+
+### v0.14.0 - Advanced Mechanics
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-058](./F-058-collection-mechanic.md) | Collection Mechanic | v0.14.0 |
+| [F-059](./F-059-competing-mechanic.md) | Competing Mechanic (Top Trumps) | v0.14.0 |
+| [F-060](./F-060-quiz-mechanic.md) | Quiz Mechanic | v0.14.0 |
+| [F-090](./F-090-settings-draft-state.md) | Settings Draft State Pattern | v0.14.0 |
+
+### v0.14.5 - Shared Mechanics Components
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-102](./F-102-mechanic-display-preferences.md) | Mechanic Display Preferences | v0.14.5 |
+
+### v0.15.0 - User Experience & Polish
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-109](./F-109-launch-screen.md) | Launch Screen with Logo | v0.15.0 |
+| [F-110](./F-110-keyboard-shortcuts-review.md) | Keyboard Shortcuts Review | v0.15.0 |
+| [F-111](./F-111-overlay-consistency.md) | Overlay Consistency Review | v0.15.0 |
+| [F-114](./F-114-update-checking.md) | Remote Collection Update Checking | v0.15.0 |
+| [F-115](./F-115-caching-transparency.md) | Caching Policy Transparency | v0.15.0 |
+
+### v0.15.5 - Infrastructure & Documentation
+
+| ID | Feature | Milestone |
+|----|---------|-----------|
+| [F-067](./F-067-statistics-dashboard.md) | Statistics Dashboard | v0.15.5 |
+| [F-081](./F-081-settings-json-export.md) | Settings JSON Export | v0.15.5 |
+| [F-082](./F-082-theme-json-export.md) | Theme JSON Export | v0.15.5 |
+
+---
+
 ## Moving Features Here
 
 When a feature is complete:
 1. Move the feature file from `active/` to `completed/`
-2. Update the feature index in `../README.md`
+2. Update this index
 3. Update success criteria checkboxes
 4. Create devlog entry if significant
 
@@ -104,4 +180,5 @@ When a feature is complete:
 ## Related Documentation
 
 - [Features Index](../README.md)
+- [Planned Features](../planned/)
 - [Active Features](../active/)

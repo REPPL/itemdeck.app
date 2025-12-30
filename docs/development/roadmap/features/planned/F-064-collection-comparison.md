@@ -161,11 +161,34 @@ Add side-by-side comparison view with matching algorithms.
 
 **24-32 hours**
 
+## Matching Algorithm Summary
+
+The comparison mechanic uses multiple matching strategies (see [R-023: Collection Matching Algorithms](../../research/R-023-collection-matching-algorithms.md)):
+
+| Match Type | Confidence | Algorithm |
+|------------|------------|-----------|
+| Exact ID | 100% | String equality |
+| Title Exact | 95% | Case-insensitive equality |
+| Title Fuzzy | 70-90% | Levenshtein distance |
+| Multi-Field | 50-85% | Weighted field matching |
+| Potential | 30-50% | Low-confidence, needs review |
+
+### Performance Considerations
+
+For large collections (500+ cards), use Web Workers for matching (see [R-020: Multi-Collection State Patterns](../../research/R-020-multi-collection-state-patterns.md)):
+
+- Progressive matching with UI updates
+- Memory pressure monitoring
+- Automatic cleanup on navigation
+- Maximum 2 collections loaded simultaneously
+
 ---
 
 ## Related Documentation
 
 - [R-008: Fuzzy Matching](../../research/R-008-fuzzy-matching.md)
+- [R-020: Multi-Collection State Patterns](../../research/R-020-multi-collection-state-patterns.md)
+- [R-023: Collection Matching Algorithms](../../research/R-023-collection-matching-algorithms.md)
 - [F-063: Collection Export](../completed/F-063-collection-export.md)
 - [F-116: Settings Reorganisation](./F-116-settings-reorganisation.md)
 - [F-118: Mechanics UX Review](./F-118-mechanics-ux-review.md)

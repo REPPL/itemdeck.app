@@ -35,6 +35,9 @@ Documented architectural decisions for Itemdeck.
 | [027](./ADR-027-translation-management-workflow.md) | Use Git-based translation workflow | Accepted | [R-013-community-translation-workflow](../../research/R-013-community-translation-workflow.md) |
 | [028](./ADR-028-plugin-translation-contributions.md) | Plugin translation contribution model | Accepted | [R-013-community-translation-workflow](../../research/R-013-community-translation-workflow.md) |
 | [029](./ADR-029-card-elevation-strategy.md) | Use tonal elevation with shadow fallback | Accepted | [card-ui-design-patterns](../../research/card-ui-design-patterns.md) |
+| [030](./ADR-030-error-boundary-architecture.md) | Layered error boundary architecture | Accepted | [R-018-error-handling-strategies](../../research/R-018-error-handling-strategies.md) |
+| [031](./ADR-031-logging-telemetry-strategy.md) | Local-first structured logging | Accepted | [R-019-logging-observability](../../research/R-019-logging-observability.md) |
+| [032](./ADR-032-plugin-api-versioning.md) | API adapter pattern with semver | Accepted | [R-022-plugin-versioning-breaking-changes](../../research/R-022-plugin-versioning-breaking-changes.md) |
 
 ## ADR Template
 

@@ -55,6 +55,8 @@ These reports provide:
 | Internationalisation | [state-of-the-art-internationalisation.md](./state-of-the-art-internationalisation.md) | ✅ Complete |
 | Web Security Sandboxing | [state-of-the-art-web-security-sandbox.md](./state-of-the-art-web-security-sandbox.md) | ✅ Complete |
 | Visual Consistency | [state-of-the-art-visual-consistency.md](./state-of-the-art-visual-consistency.md) | ✅ Complete |
+| Error Handling in React | [state-of-the-art-error-handling.md](./state-of-the-art-error-handling.md) | ✅ Complete |
+| Observability in Browser Apps | [state-of-the-art-observability.md](./state-of-the-art-observability.md) | ✅ Complete |
 
 ### Numbered Research
 
@@ -75,6 +77,12 @@ These reports provide:
 | R-015 | i18n Performance Benchmarks | [R-015-i18n-performance-benchmarks.md](./R-015-i18n-performance-benchmarks.md) | ✅ Complete |
 | R-016 | Accessibility i18n Integration | [R-016-accessibility-i18n-integration.md](./R-016-accessibility-i18n-integration.md) | ✅ Complete |
 | R-017 | Disabled vs Hidden Options | [R-017-disabled-vs-hidden-options.md](./R-017-disabled-vs-hidden-options.md) | ✅ Complete |
+| R-018 | Error Handling Strategies | [R-018-error-handling-strategies.md](./R-018-error-handling-strategies.md) | ✅ Complete |
+| R-019 | Logging & Observability | [R-019-logging-observability.md](./R-019-logging-observability.md) | ✅ Complete |
+| R-020 | Multi-Collection State Patterns | [R-020-multi-collection-state-patterns.md](./R-020-multi-collection-state-patterns.md) | ✅ Complete |
+| R-021 | Plugin Distribution Models | [R-021-plugin-distribution-models.md](./R-021-plugin-distribution-models.md) | ✅ Complete |
+| R-022 | Plugin Versioning & Breaking Changes | [R-022-plugin-versioning-breaking-changes.md](./R-022-plugin-versioning-breaking-changes.md) | ✅ Complete |
+| R-023 | Collection Matching Algorithms | [R-023-collection-matching-algorithms.md](./R-023-collection-matching-algorithms.md) | ✅ Complete |
 
 ## Report Structure
 

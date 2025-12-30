@@ -33,6 +33,7 @@ Post-milestone reflections and lessons learned.
 | [v0.15.0](./v0.15.0/README.md) | User Experience & Polish | Complete |
 | [v0.15.5](./v0.15.5/README.md) | Infrastructure, Accessibility & Documentation | Complete |
 | [v0.15.6](./v0.15.6/README.md) | Settings Consistency & Bug Fixes | Complete |
+| [v0.15.7](./v0.15.7/README.md) | Research & Architecture Documentation | Complete |
 
 ## Structure
 

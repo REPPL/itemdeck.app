@@ -86,6 +86,8 @@ export interface CardActions {
   canInteract?: (cardId: string) => boolean;
   /** Check if card should show special styling */
   isHighlighted?: (cardId: string) => boolean;
+  /** Whether clicking card should open expanded view instead of flipping */
+  openExpandedOnClick?: boolean;
 }
 
 /**

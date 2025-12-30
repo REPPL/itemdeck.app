@@ -11,6 +11,7 @@
  * @returns The same array, shuffled
  */
 export function shuffleInPlace<T>(array: T[]): T[] {
+  if (!array || array.length === 0) return array ?? [];
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     const temp = array[i];
@@ -27,6 +28,7 @@ export function shuffleInPlace<T>(array: T[]): T[] {
  * @returns A new shuffled array
  */
 export function shuffle<T>(array: readonly T[]): T[] {
+  if (!array) return [];
   return shuffleInPlace([...array]);
 }
 
@@ -53,6 +55,7 @@ export function seededRandom(seed: number): () => number {
  * @returns A new shuffled array
  */
 export function shuffleWithSeed<T>(array: readonly T[], seed: number): T[] {
+  if (!array || array.length === 0) return [];
   const random = seededRandom(seed);
   const result = [...array];
 

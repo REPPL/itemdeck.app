@@ -88,3 +88,9 @@
   overflow: hidden;
   padding: var(--grid-gap, 1rem);
 }
+
+/* v0.15.5: Fit grid using CSS Grid for poster wall layout */
+.fitGrid {
+  display: grid;
+  justify-content: center;
+}

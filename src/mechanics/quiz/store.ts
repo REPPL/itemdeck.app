@@ -131,6 +131,11 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
   startQuiz: (cards: GeneratorCardData[]) => {
     const state = get();
 
+    // Guard: Don't restart if quiz is already running
+    if (state.questions.length > 0 && state.currentIndex < state.questions.length) {
+      return;
+    }
+
     // Check if quiz can be generated
     const check = canGenerateQuiz(cards, state.enabledQuestionTypes);
     if (!check.canGenerate) {
@@ -193,8 +198,9 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
     const now = Date.now();
     const timeToAnswer = now - state.questionStartedAt;
 
-    // Check if answer is correct
-    const isCorrect = question.correctAnswer.id === answerId;
+    // Check if answer is correct (including alternative correct answers)
+    const isCorrect = question.correctAnswer.id === answerId ||
+      (question.alternativeCorrectIds?.includes(answerId) ?? false);
 
     // Calculate score
     const { score: pointsEarned, newStreak } = calculateScore(

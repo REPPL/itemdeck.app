@@ -18,12 +18,16 @@ interface CardCompactItemProps {
   cardNumber?: number;
   /** Tab index for keyboard navigation */
   tabIndex?: 0 | -1;
+  /** Custom width in pixels (overrides CSS default) */
+  width?: number;
+  /** Custom height in pixels (overrides CSS default) */
+  height?: number;
 }
 
 /**
  * Compact view thumbnail card.
  */
-export function CardCompactItem({ card, cardNumber, tabIndex = 0 }: CardCompactItemProps) {
+export function CardCompactItem({ card, cardNumber, tabIndex = 0, width, height }: CardCompactItemProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
 
@@ -32,6 +36,9 @@ export function CardCompactItem({ card, cardNumber, tabIndex = 0 }: CardCompactI
     setOriginRect(target.getBoundingClientRect());
     setIsModalOpen(true);
   }, []);
+
+  // Custom style for dynamic sizing (fit view)
+  const customStyle = width && height ? { width: `${width}px`, height: `${height}px` } : undefined;
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {
@@ -53,6 +60,7 @@ export function CardCompactItem({ card, cardNumber, tabIndex = 0 }: CardCompactI
     <>
       <motion.article
         className={styles.item}
+        style={customStyle}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         role="button"

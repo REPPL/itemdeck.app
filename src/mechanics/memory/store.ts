@@ -72,6 +72,45 @@ export const DIFFICULTY_SETTINGS: Record<MemoryDifficulty, {
 };
 
 /**
+ * Timeout IDs for cleanup - stored outside store to avoid serialisation issues.
+ */
+let pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+/**
+ * Clear all pending timeouts.
+ */
+function clearPendingTimeouts(): void {
+  for (const id of pendingTimeouts) {
+    clearTimeout(id);
+  }
+  pendingTimeouts = [];
+}
+
+/**
+ * Register a timeout for later cleanup.
+ */
+function registerTimeout(id: ReturnType<typeof setTimeout>): void {
+  pendingTimeouts.push(id);
+}
+
+/**
+ * Fisher-Yates shuffle for unbiased randomisation.
+ */
+function fisherYatesShuffle<T>(array: T[]): T[] {
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = result[i];
+    const swap = result[j];
+    if (temp !== undefined && swap !== undefined) {
+      result[i] = swap;
+      result[j] = temp;
+    }
+  }
+  return result;
+}
+
+/**
  * Available pair count options.
  */
 export const PAIR_COUNT_OPTIONS = [4, 6, 8, 10, 12] as const;
@@ -315,10 +354,8 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
           SCORING.BASE_SCORE - (elapsedSeconds * SCORING.TIME_PENALTY_PER_SECOND)
         );
 
-        let newScore = state.score + timeBasedScore;
-        if (isComplete) {
-          newScore = newScore * totalPairs;
-        }
+        // Add score for this match
+        const newScore = state.score + timeBasedScore;
 
         // If game is complete, don't start new selection
         if (isComplete) {
@@ -366,7 +403,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
       // Handle Extreme mode hide timer for the new first card
       if (isExtremeMode) {
         const hideDelay = settings.firstCardViewTime ?? (FLIP_ANIMATION_DURATION + 400);
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           const current = get();
           if (current.phase === "first_selected" && current.firstCard === cardId) {
             set({
@@ -375,6 +412,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
             });
           }
         }, hideDelay);
+        registerTimeout(timeoutId);
       }
       return;
     }
@@ -394,7 +432,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
 
         // Hide after flip animation completes + brief view time
         const hideDelay = settings.firstCardViewTime ?? (FLIP_ANIMATION_DURATION + 400);
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           const current = get();
           // Only hide if we're still waiting for second card
           if (current.phase === "first_selected" && current.firstCard === cardId) {
@@ -404,6 +442,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
             });
           }
         }, hideDelay);
+        registerTimeout(timeoutId);
       } else {
         // Normal mode: Show card and wait for second
         set({
@@ -426,7 +465,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
       });
 
       // Check match after delay (can be interrupted by third card click)
-      setTimeout(() => {
+      const matchTimeoutId = setTimeout(() => {
         const current = get();
 
         // Safety: Check if we're still in the expected locked state
@@ -451,10 +490,8 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
             SCORING.BASE_SCORE - (elapsedSeconds * SCORING.TIME_PENALTY_PER_SECOND)
           );
 
-          let newScore = current.score + timeBasedScore;
-          if (isComplete) {
-            newScore = newScore * totalPairs;
-          }
+          // Add score for this match
+          const newScore = current.score + timeBasedScore;
 
           set({
             phase: "idle",
@@ -480,6 +517,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
           });
         }
       }, settings.flipDelay);
+      registerTimeout(matchTimeoutId);
     }
   },
 
@@ -494,9 +532,11 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
   },
 
   resetGame: () => {
+    clearPendingTimeouts();
     const state = get();
+    // Use Fisher-Yates shuffle for unbiased randomisation
     const shuffled = state.cardIds.length > 0
-      ? [...state.cardIds].sort(() => Math.random() - 0.5)
+      ? fisherYatesShuffle([...state.cardIds])
       : [];
 
     set({
@@ -544,6 +584,7 @@ export const useMemoryStore = create<MemoryStore>((set, get) => ({
   },
 
   deactivate: () => {
+    clearPendingTimeouts();
     set({ ...INITIAL_STATE, isActive: false });
   },
 

@@ -39,6 +39,12 @@ export interface Question {
   wrongAnswers: Answer[];
   /** ID of the card this question is about */
   relatedCardId: string;
+  /**
+   * Alternative correct answer IDs.
+   * Used when the same title appears on multiple cards with different values
+   * (e.g., "Puzznic" on both Arcade and NES).
+   */
+  alternativeCorrectIds?: string[];
   /** Additional metadata based on question type */
   metadata?: {
     /** Field name for fill-the-blank */

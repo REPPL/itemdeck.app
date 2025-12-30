@@ -78,6 +78,30 @@
 
    **Outcome:** Created dev-only component that renders nothing in production, providing a checklist during development
 
+5. **Manual Testing Value**
+
+   **Context:** Comprehensive testing suite passed (722 tests), yet manual testing revealed several UX issues
+
+   **Outcome:** Automated tests catch regressions but can't substitute for actual user interaction. The Reset View bug, mechanic visibility in List view, and ViewPopover UX were all caught through manual testing. This validates the importance of the manual testing phase.
+
+---
+
+## Manual Testing Fixes Applied
+
+Post-feature-completion manual testing revealed and fixed several issues:
+
+1. **Reset View Bug** - `clearAllFilters()` wasn't clearing search query; fixed by using `clearSearch()`
+
+2. **CollectionInfoBar Unification** - Combined separate CollectionHeader and StatisticsBar into single dismissable component with view mode display
+
+3. **ViewPopover Enhancement** - Expanded from single column to three-column layout (View, Sort, Group By) with disabled state styling for unavailable options
+
+4. **Top Trumps View Compatibility** - GridOverlay wasn't rendered in List/Compact views, preventing mechanics from displaying; added overlay rendering to all view modes
+
+5. **View Mode Visibility** - Added current view mode (Grid/List/Compact/Fit) label to CollectionInfoBar
+
+These fixes demonstrate the value of manual testing as a complement to automated tests.
+
 ---
 
 ## Deferred Items

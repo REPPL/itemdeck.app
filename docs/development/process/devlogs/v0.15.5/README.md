@@ -325,6 +325,61 @@ GitHub API rate limiting needed careful handling:
 
 ---
 
+## Manual Testing Fixes
+
+After completing the main features, manual testing revealed several issues that were promptly addressed:
+
+### Reset View Bug Fix
+
+**Issue:** The "Reset View" button didn't clear the search query - only filters were being reset.
+
+**Root Cause:** `clearAllFilters()` only cleared `activeFilters: []` but not `searchQuery`.
+
+**Solution:** Changed to use `clearSearch()` which clears both filters and search query in `src/App.tsx`.
+
+### CollectionInfoBar Component
+
+**Issue:** Collection name and statistics were displayed in separate components, creating visual clutter.
+
+**Solution:** Created unified `CollectionInfoBar` component (`src/components/Statistics/CollectionInfoBar.tsx`) that combines:
+- Collection name and description
+- Current view mode label (Grid/List/Compact/Fit)
+- Statistics summary
+- Expandable dashboard for distributions
+- Single dismiss button
+
+### ViewPopover Three-Column Layout
+
+**Issue:** ViewPopover only had View Mode options; user requested Sort and Group By controls.
+
+**Changes:**
+- Added three-column layout: View Mode, Sort, Group By
+- Sort options: Shuffle, By Rank, By Year, By Title
+- Group By options: None, Platform, Year, Decade, Genre
+- Disabled options shown with reduced opacity instead of hidden
+- Group By disabled for Grid and Fit views (only available for List and Compact)
+- Sort disabled for Fit view
+
+**Files Modified:**
+- `src/components/ViewPopover/ViewPopover.tsx`
+- `src/components/ViewPopover/ViewPopover.module.css`
+
+### Top Trumps Mechanic Fix
+
+**Issue:** Top Trumps (Competing mechanic) wouldn't start when in List or Compact view - the selection window closed but the game didn't appear.
+
+**Root Cause:** List and Compact view render paths didn't include the `GridOverlay` component that mechanics use to display their UI.
+
+**Solution:** Added `{GridOverlay && <GridOverlay position="top" />}` and `{GridOverlay && <GridOverlay position="bottom" />}` to both List and Compact views in `src/components/CardGrid/CardGrid.tsx`.
+
+### View Mode Display in Info Bar
+
+**Issue:** User requested current view mode to be shown in the collection info bar.
+
+**Solution:** Added view mode label (Grid/List/Compact/Fit) as a styled pill/tag in `CollectionInfoBar` using `useSettingsStore` to read current layout.
+
+---
+
 ## Related Documentation
 
 - [v0.15.5 Retrospective](../../retrospectives/v0.15.5/README.md)

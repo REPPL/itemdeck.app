@@ -63,7 +63,7 @@ const INITIAL_STATE: SnapRankingState = {
   currentIndex: 0,
   guesses: [],
   cardShownAt: 0,
-  gameStartedAt: 0,
+  gameStartedAt: 0, // 0 = not started, set on first card flip
   gameEndedAt: null,
   resetCount: 0,
   isCurrentCardFlipped: false,

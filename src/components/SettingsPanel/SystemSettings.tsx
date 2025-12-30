@@ -5,13 +5,16 @@
  * - Top level: Dark Mode toggle (always visible)
  * - Accessibility: Reduce motion, high contrast
  * - UI Visibility: Help, settings, search, view, statistics bar toggles
- * - Developer: TanStack devtools, edit mode, debug info
+ * - Developer: TanStack devtools, edit mode, debug info, hard reset
  *
  * v0.11.5: Restructured with sub-tabs. Use Placeholder Images moved to Appearance > Cards.
+ * v0.15.5: Added Hard Reset feature to Developer tab.
  */
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { deleteDB } from "@/db";
 import {
   useSettingsStore,
   type ReduceMotionPreference,
@@ -48,6 +51,34 @@ export function SystemSettings({
   onDevtoolsToggle,
 }: SystemSettingsProps) {
   const [activeSubTab, setActiveSubTab] = useState<SystemSubTab>("accessibility");
+  const [showHardResetDialog, setShowHardResetDialog] = useState(false);
+
+  // Hard reset handler - clears all persisted data
+  const handleHardReset = useCallback(async () => {
+    try {
+      // Clear all localStorage keys used by itemdeck
+      const localStorageKeys = [
+        "itemdeck-settings",
+        "itemdeck-sources",
+        "itemdeck-edits",
+        "itemdeck-theme",
+        "itemdeck-plugins",
+      ];
+      for (const key of localStorageKeys) {
+        localStorage.removeItem(key);
+      }
+
+      // Delete IndexedDB database
+      await deleteDB();
+
+      // Reload the page to apply fresh state
+      window.location.reload();
+    } catch (error) {
+      console.error("Hard reset failed:", error);
+      // Still try to reload even if something failed
+      window.location.reload();
+    }
+  }, []);
 
   // Draft state for preview (F-090)
   const getEffective = useSettingsStore((s) => s.getEffective);
@@ -247,6 +278,35 @@ export function SystemSettings({
               Add <code>?reset=1</code> to the URL to reset all settings to defaults.
               This clears localStorage and reloads the page.
             </div>
+
+            <div className={styles.divider} />
+
+            <h3 className={styles.sectionHeader}>Hard Reset</h3>
+
+            <div className={styles.helpText}>
+              Completely reset the application. This will delete all settings,
+              cached data, edits, themes, and sources. The page will reload with
+              a fresh state.
+            </div>
+
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={() => { setShowHardResetDialog(true); }}
+            >
+              Hard Reset
+            </button>
+
+            <ConfirmDialog
+              isOpen={showHardResetDialog}
+              title="Hard Reset"
+              message="This will permanently delete all your settings, cached data, edits, custom themes, and data sources. This action cannot be undone. Are you sure you want to continue?"
+              confirmLabel="Reset Everything"
+              cancelLabel="Cancel"
+              variant="danger"
+              onConfirm={() => { void handleHardReset(); }}
+              onCancel={() => { setShowHardResetDialog(false); }}
+            />
           </>
         );
     }

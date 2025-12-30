@@ -425,7 +425,7 @@ export function CardGrid() {
           cards: [],
           valueType: "categorical",
           uniqueValues: [],
-          errorMessage: "No badge field configured. Set a Top Badge field in Settings to play.",
+          errorMessage: "No Top Badge field configured. Go to Settings → Card Display → Top Badge to select a field (e.g., year, category, or a numeric stat).",
         });
         return;
       }
@@ -835,6 +835,7 @@ export function CardGrid() {
                 cardNumber={index + 1}
                 isFlipped={isFlipped}
                 onFlip={() => { handleFlip(card.id); }}
+                onOpenExpanded={mechanicCardActions?.openExpandedOnClick ? () => { mechanicCardActions.onClick?.(card.id); } : undefined}
                 tabIndex={tabIndex}
                 cardBackDisplay={cardBackDisplay}
                 showRankBadge={showRankBadge}
@@ -883,10 +884,16 @@ export function CardGrid() {
     );
   }
 
+  // Get GridOverlay component from active mechanic (needed for all views)
+  const GridOverlay = mechanic?.GridOverlay;
+
   // Render list view
   if (layout === "list" && !isLoading && !error) {
     return (
       <>
+        {/* Mechanic top overlay */}
+        {GridOverlay && <GridOverlay position="top" />}
+
         {showSearchBar && !mechanic && (
           <SearchBar
             totalCards={sourceCards.length}
@@ -925,6 +932,9 @@ export function CardGrid() {
             <div className={styles.empty}>No cards to display</div>
           )}
         </div>
+
+        {/* Mechanic bottom overlay */}
+        {GridOverlay && <GridOverlay position="bottom" />}
       </>
     );
   }
@@ -933,6 +943,9 @@ export function CardGrid() {
   if (layout === "compact" && !isLoading && !error) {
     return (
       <>
+        {/* Mechanic top overlay */}
+        {GridOverlay && <GridOverlay position="top" />}
+
         {showSearchBar && !mechanic && (
           <SearchBar
             totalCards={sourceCards.length}
@@ -975,14 +988,15 @@ export function CardGrid() {
             <div className={styles.empty}>No cards to display</div>
           )}
         </div>
+
+        {/* Mechanic bottom overlay */}
+        {GridOverlay && <GridOverlay position="bottom" />}
       </>
     );
   }
 
-  // Get GridOverlay component from active mechanic
-  const GridOverlay = mechanic?.GridOverlay;
-
   // v0.12.5: Fit-to-viewport view - fills available space without scrolling
+  // Uses compact thumbnail cards (no flip state) for a clean poster wall effect
   if (isFitMode) {
     return (
       <>
@@ -1004,16 +1018,30 @@ export function CardGrid() {
           {/* Loading/error states rendered outside grid to avoid aria-required-children violation */}
           {renderNonGridState()}
           {shouldShowGrid && (
-            <section
+            <div
               ref={containerRef}
-              className={styles.grid}
-              style={{ minHeight: `${String(containerHeight)}px` }}
+              className={styles.fitGrid}
+              style={{
+                gridTemplateColumns: `repeat(${String(fitResult.columns)}, ${String(fitResult.cardWidth)}px)`,
+                gap: `${String(GAP)}px`,
+              }}
               role="grid"
               aria-label="Card collection"
-              onKeyDown={handleKeyDown}
             >
-              {renderContent()}
-            </section>
+              {cards.length === 0 ? (
+                <div className={styles.empty}>No cards to display</div>
+              ) : (
+                cards.map((card, idx) => (
+                  <CardCompactItem
+                    key={card.id}
+                    card={card}
+                    cardNumber={idx + 1}
+                    width={fitResult.cardWidth}
+                    height={fitResult.cardHeight}
+                  />
+                ))
+              )}
+            </div>
           )}
         </div>
 

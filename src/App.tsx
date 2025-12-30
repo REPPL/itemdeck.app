@@ -13,7 +13,7 @@ import { LoadingScreen } from "@/components/LoadingScreen";
 import { CollectionPicker } from "@/components/CollectionPicker";
 import { CollectionToast } from "@/components/CollectionToast";
 import { EditModeIndicator } from "@/components/EditModeIndicator";
-import { StatisticsBar } from "@/components/Statistics";
+import { CollectionInfoBar } from "@/components/Statistics";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Toast } from "@/components/Toast";
 import { ConfigProvider } from "@/context/ConfigContext";
@@ -161,7 +161,7 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
   }, [editModeEnabled, setEditModeEnabled]);
 
   // Soft refresh handlers (Cmd-R)
-  const clearAllFilters = useSettingsStore((state) => state.clearAllFilters);
+  const clearSearch = useSettingsStore((state) => state.clearSearch);
 
   // Listen for early keyboard interception event from main.tsx
   useEffect(() => {
@@ -179,8 +179,8 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
     setShowReloadDialog(false);
 
     // Soft refresh: reset transient state without full page reload
-    // 1. Clear search and filters
-    clearAllFilters();
+    // 1. Clear search query and filters
+    clearSearch();
 
     // 2. Close all panels/overlays
     setSettingsOpen(false);
@@ -199,7 +199,7 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
 
     // 4. Show confirmation toast
     setResetToastVisible(true);
-  }, [clearAllFilters, shuffleOnLoad, setShuffleOnLoad, setMechanicPanelOpen]);
+  }, [clearSearch, shuffleOnLoad, setShuffleOnLoad, setMechanicPanelOpen]);
 
   const handleReloadCancel = useCallback(() => {
     setShowReloadDialog(false);
@@ -350,9 +350,9 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
 
       {/* Main content */}
       <main id="main-content" className={styles.main}>
-        {/* Statistics bar (shows above card grid when enabled and loaded) */}
+        {/* Collection info bar (shows name, description, stats when enabled and loaded) */}
         {loadingComplete && showStatisticsBar && (
-          <StatisticsBar onDismiss={handleStatisticsDismiss} />
+          <CollectionInfoBar onDismiss={handleStatisticsDismiss} />
         )}
         <QueryErrorBoundary>
           <CardGrid />

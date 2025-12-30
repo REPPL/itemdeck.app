@@ -178,18 +178,50 @@ function generatePrompt(cardTitle: string, relationshipLabel: string): string {
 }
 
 /**
+ * Build a map of titles to all their relationship values across cards.
+ * This handles cases where the same item (e.g., "Puzznic") appears multiple
+ * times in a collection with different values (e.g., Arcade and NES).
+ */
+function buildTitleToValuesMap(
+  cards: GeneratorCardData[],
+  field: string
+): Map<string, Set<string>> {
+  const titleToValues = new Map<string, Set<string>>();
+
+  for (const card of cards) {
+    const names = getResolvedNames(card, field);
+    if (names.length === 0) continue;
+
+    const existingValues = titleToValues.get(card.title) ?? new Set();
+    for (const name of names) {
+      existingValues.add(name);
+    }
+    titleToValues.set(card.title, existingValues);
+  }
+
+  return titleToValues;
+}
+
+/**
  * Generate a relationship question.
  */
 function generateQuestion(
   card: GeneratorCardData,
-  relationship: RelationshipInfo
+  relationship: RelationshipInfo,
+  titleToValuesMap: Map<string, Set<string>>
 ): Question | null {
   const correctNames = getResolvedNames(card, relationship.field);
   if (correctNames.length === 0) {
     return null;
   }
 
-  // Use first correct answer (for many-to-many, pick one)
+  // Get all correct values for this title (handles duplicate titles like "Puzznic")
+  const allCorrectForTitle = titleToValuesMap.get(card.title);
+  const allCorrectNames = allCorrectForTitle
+    ? Array.from(allCorrectForTitle)
+    : correctNames;
+
+  // Use first correct answer as primary
   const correctName = correctNames[0];
   if (!correctName) {
     return null;
@@ -201,17 +233,33 @@ function generateQuestion(
     label: correctName,
   };
 
-  // Select wrong answers from other unique values
-  const otherValues = relationship.uniqueValues.filter((v) => !correctNames.includes(v));
-  if (otherValues.length < WRONG_ANSWER_COUNT) {
+  // Create alternative correct answers (other valid values for same title)
+  // These will be included as selectable options and tracked for correct-answer checking
+  const alternativeNames = allCorrectNames.filter((name) => name !== correctName);
+  const alternativeAnswers: Answer[] = alternativeNames.map((name) => ({
+    id: generateAnswerId(),
+    label: name,
+  }));
+
+  // Select wrong answers from other unique values (excluding ALL correct values)
+  const otherValues = relationship.uniqueValues.filter((v) => !allCorrectNames.includes(v));
+
+  // Need enough wrong answers after accounting for alternative correct answers
+  // (alternatives take up slots that would otherwise be wrong answers)
+  const wrongAnswersNeeded = Math.max(0, WRONG_ANSWER_COUNT - alternativeAnswers.length);
+  if (otherValues.length < wrongAnswersNeeded) {
     return null;
   }
 
   const shuffledOthers = shuffle(otherValues);
-  const wrongAnswers: Answer[] = shuffledOthers.slice(0, WRONG_ANSWER_COUNT).map((value) => ({
+  const wrongAnswers: Answer[] = shuffledOthers.slice(0, wrongAnswersNeeded).map((value) => ({
     id: generateAnswerId(),
     label: value,
   }));
+
+  // Add alternative correct answers to wrong answers array
+  // (they display as options but are tracked as correct via alternativeCorrectIds)
+  const allWrongAnswers = [...wrongAnswers, ...alternativeAnswers];
 
   // Generate prompt
   const prompt = generatePrompt(card.title, relationship.label);
@@ -221,8 +269,12 @@ function generateQuestion(
     type: "relationshipToName",
     prompt,
     correctAnswer,
-    wrongAnswers,
+    wrongAnswers: allWrongAnswers,
     relatedCardId: card.id,
+    // Include alternative correct IDs if there are any
+    alternativeCorrectIds: alternativeAnswers.length > 0
+      ? alternativeAnswers.map((a) => a.id)
+      : undefined,
     metadata: {
       field: relationship.field,
     },
@@ -267,6 +319,7 @@ export const relationshipToNameGenerator: QuestionGenerator = {
 
     const questions: Question[] = [];
     const usedCardIds = new Set<string>(options.excludeCardIds);
+    const usedTitles = new Set<string>(); // Track titles to avoid duplicate questions
 
     // Distribute questions across available relationships
     const questionsPerRelationship = Math.ceil(options.count / relationships.length);
@@ -276,8 +329,13 @@ export const relationshipToNameGenerator: QuestionGenerator = {
         break;
       }
 
-      // Filter to unused cards
-      let candidateCards = relationship.cards.filter((c) => !usedCardIds.has(c.id));
+      // Build title-to-values map for this relationship
+      const titleToValuesMap = buildTitleToValuesMap(relationship.cards, relationship.field);
+
+      // Filter to unused cards (and unused titles to avoid duplicate questions)
+      let candidateCards = relationship.cards.filter(
+        (c) => !usedCardIds.has(c.id) && !usedTitles.has(c.title)
+      );
       const questionsToGenerate = Math.min(
         questionsPerRelationship,
         options.count - questions.length,
@@ -291,10 +349,11 @@ export const relationshipToNameGenerator: QuestionGenerator = {
         const card = candidateCards[i];
         if (!card) continue;
 
-        const question = generateQuestion(card, relationship);
+        const question = generateQuestion(card, relationship, titleToValuesMap);
         if (question) {
           questions.push(question);
           usedCardIds.add(card.id);
+          usedTitles.add(card.title); // Mark title as used
         }
       }
     }

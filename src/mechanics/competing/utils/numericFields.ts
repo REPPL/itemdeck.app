@@ -23,11 +23,11 @@ const EXCLUDED_FIELD_PATTERNS = [
   /^sort/i,
   /^position$/i,
   /^order$/i, // generic order field (often just display order, not meaningful stat)
-  /^rank$/i, // generic rank field (prefer specific variants like myRank)
+  // Note: 'rank' is NOT excluded - it's a valid stat for comparison
 ];
 
 /**
- * Fields where LOWER values are better (ranks, orders, positions).
+ * Fields where LOWER values are better (ranks, orders, positions, years owned).
  * These will have higherIsBetter = false.
  */
 const LOWER_IS_BETTER_PATTERNS = [
@@ -35,6 +35,7 @@ const LOWER_IS_BETTER_PATTERNS = [
   /order/i,
   /place/i,
   /position/i,
+  /^my\s*year$/i, // "myYear", "my year" - year acquired (lower = owned longer)
 ];
 
 /**
@@ -126,7 +127,7 @@ export function getCardValue(card: CardData, fieldKey: string): number | null {
  * @returns Array of detected numeric field information, sorted by variance
  */
 export function detectNumericFields(cards: CardData[]): NumericFieldInfo[] {
-  if (cards.length === 0) {
+  if (!cards || cards.length === 0) {
     return [];
   }
 

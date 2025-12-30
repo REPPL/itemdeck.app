@@ -49,33 +49,14 @@ function getCardTitle(card: Record<string, unknown>): string {
 }
 
 /**
- * Check if CPU card should show the back (hidden).
+ * Check if CPU stats should be hidden.
+ * Always true - CPU stats are always hidden until reveal.
+ * Note: CPU image and title are always visible.
  */
-function shouldShowCpuCardBack(difficulty: Difficulty): boolean {
-  return difficulty === "hard";
+function shouldHideCpuStats(_difficulty: Difficulty): boolean {
+  return true;
 }
 
-/**
- * App logo icon for card back.
- */
-function CardBackLogo() {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 100"
-      fill="currentColor"
-      aria-hidden="true"
-      className={styles.cardBackLogo}
-    >
-      <g opacity="0.9">
-        <rect x="18" y="12" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.4"/>
-        <rect x="24" y="18" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="2.5" opacity="0.6"/>
-        <rect x="30" y="24" width="50" height="70" rx="6" fill="none" stroke="currentColor" strokeWidth="3"/>
-        <path d="M55 44 L65 59 L55 74 L45 59 Z" fill="currentColor" opacity="0.8"/>
-      </g>
-    </svg>
-  );
-}
 
 /**
  * Battle card component.
@@ -134,8 +115,12 @@ function BattleCard({
   const isCpuThinking = side === "cpu" && phase === "cpu_select" && showCpuThinking;
   const isCpuReveal = phase === "cpu_reveal";
   const isCpu = side === "cpu";
-  const showBack = isCpu && shouldShowCpuCardBack(difficulty) && !isFlipped;
-  const showStats = isPlayer || !shouldShowCpuCardBack(difficulty) || isFlipped;
+  // CPU stats are hidden until reveal, but image and title are always shown
+  const hideCpuStats = isCpu && shouldHideCpuStats(difficulty) && !isFlipped;
+  // Player always sees their stats; CPU stats only visible after reveal
+  const showStats = isPlayer || !hideCpuStats;
+  // During CPU reveal phase, player clicks on THEIR card to confirm
+  const canConfirmCpuSelection = isPlayer && isCpuReveal;
 
   let cardState = "";
   if (roundResult && (phase === "reveal" || phase === "collecting" || phase === "round_end")) {
@@ -150,24 +135,20 @@ function BattleCard({
     styles.battleCard ?? "",
     styles[side] ?? "",
     cardState,
-    showBack ? styles.showingBack ?? "" : "",
   ].filter(Boolean).join(" ");
 
   return (
     <div className={cardClasses}>
       <div className={styles.cardHeader}>{isPlayer ? "You" : "CPU"}</div>
 
-      {showBack ? (
-        <div className={styles.cardBack}>
-          <CardBackLogo />
-        </div>
-      ) : imageUrl ? (
+      {/* Always show image and title for both player and CPU */}
+      {imageUrl ? (
         <img className={styles.cardImage} src={imageUrl} alt={title} />
       ) : (
         <div className={styles.cardImage} />
       )}
 
-      <div className={styles.cardTitle}>{showBack ? "Hidden" : title}</div>
+      <div className={styles.cardTitle}>{title}</div>
 
       <div className={styles.statsList}>
         {isCpuThinking ? (
@@ -196,6 +177,7 @@ function BattleCard({
             }
             const directionIndicator = field.higherIsBetter ? "↑" : "↓";
 
+            // Player's turn: player can select stats on their card
             if (isPlayer && canSelect && onSelectStat) {
               return (
                 <button
@@ -216,36 +198,10 @@ function BattleCard({
               );
             }
 
-            if (isCpuReveal && isCpu && shouldShowCpuCardBack(difficulty)) {
-              if (isSelected && onConfirmCpuSelection) {
-                return (
-                  <button
-                    key={field.key}
-                    type="button"
-                    className={`${styles.statButton ?? ""} ${styles.cpuSelected ?? ""}`}
-                    onClick={onConfirmCpuSelection}
-                  >
-                    <span className={styles.statLabel}>
-                      {field.label}
-                      <span className={styles.directionIndicator}>{directionIndicator}</span>
-                    </span>
-                    <span className={styles.statValue}>???</span>
-                  </button>
-                );
-              }
-              return (
-                <div key={field.key} className={styles.statHidden}>
-                  <span className={styles.statLabel}>
-                    {field.label}
-                    <span className={styles.directionIndicator}>{directionIndicator}</span>
-                  </span>
-                  <span className={styles.statValue}>???</span>
-                </div>
-              );
-            }
-
-            if (isCpuReveal && isCpu && !shouldShowCpuCardBack(difficulty)) {
-              if (isSelected && onConfirmCpuSelection) {
+            // CPU's turn: player clicks the highlighted stat on THEIR card to confirm
+            if (canConfirmCpuSelection && onConfirmCpuSelection) {
+              const isCpuSelectedStat = isSelected;
+              if (isCpuSelectedStat) {
                 return (
                   <button
                     key={field.key}
@@ -263,8 +219,37 @@ function BattleCard({
                   </button>
                 );
               }
+              // Non-selected stats during CPU reveal - not clickable
+              return (
+                <div
+                  key={field.key}
+                  className={styles.statHidden ?? ""}
+                >
+                  <span className={styles.statLabel}>
+                    {field.label}
+                    <span className={styles.directionIndicator}>{directionIndicator}</span>
+                  </span>
+                  <span className={styles.statValue}>
+                    {value !== null ? String(value) : "-"}
+                  </span>
+                </div>
+              );
             }
 
+            // CPU card during CPU reveal: show hidden stats (???)
+            if (isCpu && isCpuReveal) {
+              return (
+                <div key={field.key} className={`${styles.statHidden ?? ""} ${isSelected ? styles.cpuSelected ?? "" : ""}`}>
+                  <span className={styles.statLabel}>
+                    {field.label}
+                    <span className={styles.directionIndicator}>{directionIndicator}</span>
+                  </span>
+                  <span className={styles.statValue}>???</span>
+                </div>
+              );
+            }
+
+            // Default: show stats if allowed
             if (showStats) {
               return (
                 <div
@@ -282,6 +267,7 @@ function BattleCard({
               );
             }
 
+            // CPU card hidden stats
             return (
               <div key={field.key} className={styles.statHidden}>
                 <span className={styles.statLabel}>
@@ -377,7 +363,7 @@ function RoundResultOverlay() {
  */
 function TiePileIndicator() {
   const tiePile = useCompetingStore((s) => s.tiePile);
-  if (tiePile.length === 0) return null;
+  if (!tiePile || tiePile.length === 0) return null;
   return (
     <div className={styles.tiePile}>
       <span>Tie Pile:</span>
@@ -403,7 +389,7 @@ function ActionPrompt() {
   } else if (phase === "cpu_reveal") {
     content = (
       <span className={styles.cpuSelectedPrompt}>
-        CPU chose a stat! Tap the highlighted stat to compare.
+        CPU chose a stat! Tap the highlighted stat on YOUR card to compare.
       </span>
     );
   }
@@ -501,8 +487,9 @@ function BattleOverlayContent() {
   if (!isActive) return null;
   if (errorMessage) return <CompetingErrorOverlay />;
 
-  const playerCardCount = playerDeck.length + (playerCard ? 1 : 0);
-  const cpuCardCount = cpuDeck.length + (cpuCard ? 1 : 0);
+  // Defensive check for undefined decks (shouldn't happen but prevents crash)
+  const playerCardCount = (playerDeck?.length ?? 0) + (playerCard ? 1 : 0);
+  const cpuCardCount = (cpuDeck?.length ?? 0) + (cpuCard ? 1 : 0);
 
   return (
     <div className={styles.battleOverlay}>
@@ -562,7 +549,8 @@ export function CompetingGridOverlay({ position }: GridOverlayProps) {
 
   useEffect(() => {
     if (!isActive || phase !== "setup") return;
-    if (cards.length === 0) return;
+    // Defensive check for undefined cards (shouldn't happen but prevents crash)
+    if (!cards || cards.length === 0) return;
 
     const numericFields = detectNumericFields(
       cards as unknown as Record<string, unknown>[]

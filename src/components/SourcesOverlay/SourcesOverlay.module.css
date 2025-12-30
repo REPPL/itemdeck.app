@@ -66,6 +66,7 @@
   flex: 1;
   overflow-y: auto;
   padding: var(--spacing-sm, 12px) var(--spacing-md, 16px);
+  padding-bottom: var(--spacing-lg, 24px);
 }
 
 .emptyMessage {

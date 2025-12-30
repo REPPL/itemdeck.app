@@ -44,6 +44,8 @@ interface CardProps {
   isFlipped?: boolean;
   /** Callback when card is clicked */
   onFlip?: () => void;
+  /** Callback when card should open expanded view (takes precedence over onFlip) */
+  onOpenExpanded?: () => void;
   /** Tab index for keyboard navigation (roving tabindex) */
   tabIndex?: 0 | -1;
   /** What to display on card back */
@@ -91,6 +93,7 @@ export function Card({
   cardNumber,
   isFlipped = false,
   onFlip,
+  onOpenExpanded,
   tabIndex = 0,
   cardBackDisplay = "logo",
   showRankBadge = true,
@@ -202,16 +205,26 @@ export function Card({
     height: `${String(cardDimensions.height)}px`,
   };
 
-  const handleClick = () => {
+  const handleClick = useCallback(() => {
+    // If onOpenExpanded is provided, open expanded view instead of flipping
+    if (onOpenExpanded) {
+      // Capture card position for animation origin
+      if (cardRef.current) {
+        setOriginRect(cardRef.current.getBoundingClientRect());
+      }
+      setIsModalOpen(true);
+      onOpenExpanded();
+      return;
+    }
     onFlip?.();
-  };
+  }, [onFlip, onOpenExpanded]);
 
-  const handleKeyDown = (event: React.KeyboardEvent) => {
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      onFlip?.();
+      handleClick();
     }
-  };
+  }, [handleClick]);
 
   const handleInfoClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();

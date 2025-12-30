@@ -38,7 +38,7 @@ describe("CollectionUIProvider", () => {
       </CollectionUIProvider>
     );
 
-    expect(screen.getByTestId("moreButton")).toHaveTextContent("Verdict");
+    expect(screen.getByTestId("moreButton")).toHaveTextContent("More");
     expect(screen.getByTestId("platformLabel")).toHaveTextContent("Platform");
     expect(screen.getByTestId("acknowledgementButton")).toHaveTextContent("Acknowledgement");
     expect(screen.getByTestId("imageSourceLabel")).toHaveTextContent("Image Source");
@@ -105,7 +105,7 @@ describe("CollectionUIProvider", () => {
     );
 
     // Should fall back to defaults
-    expect(screen.getByTestId("moreButton")).toHaveTextContent("Verdict");
+    expect(screen.getByTestId("moreButton")).toHaveTextContent("More");
     expect(screen.getByTestId("rankPlaceholder")).toHaveTextContent("The one that got away!");
   });
 });
@@ -115,7 +115,7 @@ describe("useUILabels", () => {
     // Note: This works because we use defaultValue in createContext
     render(<TestComponent />);
 
-    expect(screen.getByTestId("moreButton")).toHaveTextContent("Verdict");
+    expect(screen.getByTestId("moreButton")).toHaveTextContent("More");
     expect(screen.getByTestId("platformLabel")).toHaveTextContent("Platform");
   });
 });

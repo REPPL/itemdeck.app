@@ -32,7 +32,7 @@ const FILL_BLANK_FIELDS = [
  */
 function findBestField(
   cards: GeneratorCardData[]
-): { field: string; promptTemplate: string; uniqueValues: string[] } | null {
+): { field: string; promptTemplate: string; uniqueValues: string[]; cards: GeneratorCardData[] } | null {
   for (const config of FILL_BLANK_FIELDS) {
     const cardsWithField = filterCardsWithField(cards, config.field);
     const uniqueValues = getUniqueFieldValues(cardsWithField, config.field);
@@ -43,10 +43,36 @@ function findBestField(
         field: config.field,
         promptTemplate: config.promptTemplate,
         uniqueValues,
+        cards: cardsWithField,
       };
     }
   }
   return null;
+}
+
+/**
+ * Build a map of titles to all their field values across cards.
+ * Handles cases where the same item appears multiple times with different values.
+ */
+function buildTitleToValuesMap(
+  cards: GeneratorCardData[],
+  field: string
+): Map<string, Set<string>> {
+  const titleToValues = new Map<string, Set<string>>();
+
+  for (const card of cards) {
+    const value = card[field];
+    if (value === undefined || value === null || value === "" || typeof value === "object") {
+      continue;
+    }
+
+    const valueStr = typeof value === "string" ? value : String(value as number | boolean);
+    const existingValues = titleToValues.get(card.title) ?? new Set();
+    existingValues.add(valueStr);
+    titleToValues.set(card.title, existingValues);
+  }
+
+  return titleToValues;
 }
 
 /**
@@ -56,7 +82,8 @@ function generateQuestion(
   card: GeneratorCardData,
   field: string,
   promptTemplate: string,
-  allUniqueValues: string[]
+  allUniqueValues: string[],
+  titleToValuesMap: Map<string, Set<string>>
 ): Question | null {
   const correctValue = card[field];
   if (correctValue === undefined || correctValue === null || correctValue === "") {
@@ -70,23 +97,42 @@ function generateQuestion(
 
   const correctLabel = typeof correctValue === "string" ? correctValue : String(correctValue as number | boolean);
 
+  // Get all correct values for this title (handles duplicate titles)
+  const allCorrectForTitle = titleToValuesMap.get(card.title);
+  const allCorrectLabels = allCorrectForTitle
+    ? Array.from(allCorrectForTitle)
+    : [correctLabel];
+
   // Create correct answer
   const correctAnswer: Answer = {
     id: generateAnswerId(),
     label: correctLabel,
   };
 
-  // Select wrong answers from unique values
-  const otherValues = allUniqueValues.filter((v) => v !== correctLabel);
-  if (otherValues.length < WRONG_ANSWER_COUNT) {
+  // Create alternative correct answers (other valid values for same title)
+  const alternativeLabels = allCorrectLabels.filter((label) => label !== correctLabel);
+  const alternativeAnswers: Answer[] = alternativeLabels.map((label) => ({
+    id: generateAnswerId(),
+    label,
+  }));
+
+  // Select wrong answers from unique values (excluding ALL correct values)
+  const otherValues = allUniqueValues.filter((v) => !allCorrectLabels.includes(v));
+
+  // Need enough wrong answers after accounting for alternative correct answers
+  const wrongAnswersNeeded = Math.max(0, WRONG_ANSWER_COUNT - alternativeAnswers.length);
+  if (otherValues.length < wrongAnswersNeeded) {
     return null;
   }
 
   const shuffledOthers = shuffle(otherValues);
-  const wrongAnswers: Answer[] = shuffledOthers.slice(0, WRONG_ANSWER_COUNT).map((value) => ({
+  const wrongAnswers: Answer[] = shuffledOthers.slice(0, wrongAnswersNeeded).map((value) => ({
     id: generateAnswerId(),
     label: value,
   }));
+
+  // Add alternative correct answers to wrong answers array
+  const allWrongAnswers = [...wrongAnswers, ...alternativeAnswers];
 
   // Generate prompt from template
   const prompt = promptTemplate.replace("{title}", card.title);
@@ -96,8 +142,11 @@ function generateQuestion(
     type: "fillTheBlank",
     prompt,
     correctAnswer,
-    wrongAnswers,
+    wrongAnswers: allWrongAnswers,
     relatedCardId: card.id,
+    alternativeCorrectIds: alternativeAnswers.length > 0
+      ? alternativeAnswers.map((a) => a.id)
+      : undefined,
     metadata: {
       field,
     },
@@ -134,12 +183,17 @@ export const fillTheBlankGenerator: QuestionGenerator = {
       return [];
     }
 
-    const cardsWithField = filterCardsWithField(cards, fieldConfig.field);
+    // Build title-to-values map for handling duplicate titles
+    const titleToValuesMap = buildTitleToValuesMap(fieldConfig.cards, fieldConfig.field);
+
     const questions: Question[] = [];
     const usedCardIds = new Set<string>(options.excludeCardIds);
+    const usedTitles = new Set<string>(); // Track titles to avoid duplicate questions
 
-    // Filter out already used cards
-    let candidateCards = cardsWithField.filter((c) => !usedCardIds.has(c.id));
+    // Filter out already used cards (and titles)
+    let candidateCards = fieldConfig.cards.filter(
+      (c) => !usedCardIds.has(c.id) && !usedTitles.has(c.title)
+    );
 
     // Generate questions up to the count
     const count = Math.min(options.count, candidateCards.length);
@@ -156,15 +210,18 @@ export const fillTheBlankGenerator: QuestionGenerator = {
         card,
         fieldConfig.field,
         fieldConfig.promptTemplate,
-        fieldConfig.uniqueValues
+        fieldConfig.uniqueValues,
+        titleToValuesMap
       );
 
       if (question) {
         questions.push(question);
         usedCardIds.add(card.id);
+        usedTitles.add(card.title); // Mark title as used
       }
 
-      candidateCards = candidateCards.filter((c) => c.id !== card.id);
+      // Remove this card AND other cards with same title from candidates
+      candidateCards = candidateCards.filter((c) => c.title !== card.title);
     }
 
     return questions;

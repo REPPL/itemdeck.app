@@ -21,6 +21,7 @@ import styles from "../Quiz.module.css";
 
 /**
  * Skip button component.
+ * Stays visible during feedback to prevent layout shift.
  */
 function SkipButton() {
   const feedbackVisible = useQuizStore((s) => s.feedbackVisible);
@@ -29,13 +30,16 @@ function SkipButton() {
 
   const question = getCurrentQuestion();
 
-  if (!question || feedbackVisible) return null;
+  if (!question) return null;
 
+  // Keep button visible but disabled during feedback to prevent layout shift
   return (
     <button
       type="button"
       className={styles.skipButton}
       onClick={skipQuestion}
+      disabled={feedbackVisible}
+      style={{ visibility: feedbackVisible ? "hidden" : "visible" }}
     >
       Skip Question
     </button>

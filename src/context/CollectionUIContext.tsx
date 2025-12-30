@@ -11,7 +11,7 @@ import { createContext, useContext, useMemo, type ReactNode } from "react";
  * UI labels that can be customised per collection.
  */
 export interface UILabels {
-  /** Label for the "More" button in detail view (e.g., "Verdict", "Details") */
+  /** Label for the "More" button in detail view (e.g., "More", "Details") */
   moreButton: string;
   /** Label for platform/device category (e.g., "Platform", "System") */
   platformLabel: string;
@@ -33,7 +33,7 @@ export interface UILabels {
  * Default UI labels used when collection doesn't specify custom values.
  */
 export const DEFAULT_UI_LABELS: UILabels = {
-  moreButton: "Verdict",
+  moreButton: "More",
   platformLabel: "Platform",
   acknowledgementButton: "Acknowledgement",
   imageSourceLabel: "Image Source",

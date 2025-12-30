@@ -96,17 +96,19 @@ export const collectionMechanic: Mechanic<CollectionSettings> = {
 
   getCardActions: (): CardActions => ({
     onClick: () => {
-      // Collection mechanic: card click does nothing
-      // Only the heart button toggles ownership (handled by CardOverlay)
+      // Collection mechanic: card click opens expanded view
+      // (openExpandedOnClick flag tells CardGrid to pass onOpenExpanded to Card)
+      // The heart button in the corner toggles ownership (handled by CardOverlay)
     },
     canInteract: () => {
-      // Prevent card flip interaction
-      return false;
+      // Allow card interaction (for opening expanded view)
+      return true;
     },
     isHighlighted: () => {
       // Always show front face - all cards appear "flipped"
       return useCollectionStore.getState().isActive;
     },
+    openExpandedOnClick: true,
   }),
 
   CardOverlay: CollectionCardOverlay,

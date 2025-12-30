@@ -431,28 +431,39 @@ export function CardGrid() {
         return;
       }
 
-      // "order" field is valid - players can guess the card's position number
-      // (handled below with other numeric fields)
-
-      // Extract values from cards in the game (filtered subset)
-      const cardsWithValues: { id: string; value: string | number }[] = [];
-      for (const card of cards) {
-        const value = resolveFieldPath(card as unknown as Record<string, unknown>, topBadgeField);
-        if (value !== undefined && value !== null && value !== "") {
-          cardsWithValues.push({
-            id: card.id,
-            value: value as string | number,
-          });
+      // Helper to extract card values for a given field
+      const extractValuesForField = (field: string) => {
+        const cardsWithValues: { id: string; value: string | number }[] = [];
+        for (const card of cards) {
+          const value = resolveFieldPath(card as unknown as Record<string, unknown>, field);
+          if (value !== undefined && value !== null && value !== "") {
+            cardsWithValues.push({
+              id: card.id,
+              value: value as string | number,
+            });
+          }
         }
+        return cardsWithValues;
+      };
+
+      // Try the configured field first
+      let effectiveField = topBadgeField;
+      let cardsWithValues = extractValuesForField(effectiveField);
+
+      // If configured field has no values, fall back to "order" (always available)
+      if (cardsWithValues.length === 0 && effectiveField !== "order") {
+        effectiveField = "order";
+        cardsWithValues = extractValuesForField(effectiveField);
       }
 
+      // If still no values (shouldn't happen with "order"), show error
       if (cardsWithValues.length === 0) {
         snapState.initGame({
           guessField: topBadgeField,
           cards: [],
           valueType: "categorical",
           uniqueValues: [],
-          errorMessage: `No cards have values for "${topBadgeField}".`,
+          errorMessage: `No cards have values for "${topBadgeField}". Try selecting a different Top Badge field in Settings.`,
         });
         return;
       }
@@ -461,7 +472,7 @@ export function CardGrid() {
       // This ensures the same guess options appear regardless of card count setting
       const allCollectionValues: (string | number)[] = [];
       for (const card of baseCards) {
-        const value = resolveFieldPath(card as unknown as Record<string, unknown>, topBadgeField);
+        const value = resolveFieldPath(card as unknown as Record<string, unknown>, effectiveField);
         if (value !== undefined && value !== null && value !== "") {
           allCollectionValues.push(value as string | number);
         }
@@ -473,7 +484,7 @@ export function CardGrid() {
 
       if (uniqueValues.length < 2) {
         snapState.initGame({
-          guessField: topBadgeField,
+          guessField: effectiveField,
           cards: [],
           valueType: "categorical",
           uniqueValues: [],
@@ -486,11 +497,17 @@ export function CardGrid() {
       const valueType = uniqueValues.every((v) => typeof v === "number") ? "numeric" : "categorical";
 
       snapState.initGame({
-        guessField: topBadgeField,
+        guessField: effectiveField,
         cards: cardsWithValues,
         valueType,
         uniqueValues,
       });
+      return;
+    }
+
+    // Competing (Top Trumps): Skip here - CompetingGridOverlay handles its own initialization
+    // because it requires a config object with numeric fields, not just card IDs
+    if (mechanicId === "competing") {
       return;
     }
 

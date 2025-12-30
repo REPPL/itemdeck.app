@@ -190,11 +190,14 @@ export function useAvailableFields() {
     ];
 
     // Top badge fields: numeric or short text fields suitable for corner badges
+    // Only include fields that actually exist in the collection (except "order" which is always available)
     const topBadgeFields: FieldOption[] = [
       { value: "order", label: "Order/Rank" },
-      { value: "myRank", label: "My Rank" },
       ...allFields.filter((f) =>
+        f.value === "myRank" ||
         f.value === "myVerdict" ||
+        f.value === "rank" ||
+        f.value === "year" ||
         f.value.toLowerCase().includes("verdict") ||
         f.value.toLowerCase().includes("rating") ||
         f.value.toLowerCase().includes("score")

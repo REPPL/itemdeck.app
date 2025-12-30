@@ -65,7 +65,7 @@ http://localhost:5173/gh?u=REPPL&c=retro-games
 http://localhost:5173/gh/REPPL/c/retro-games
 
 # Nested folders supported
-http://localhost:5173/gh/REPPL/c/retro/my_games
+http://localhost:5173/gh/REPPL/c/retro/games/
 ```
 
 ## Documentation

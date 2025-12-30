@@ -140,7 +140,7 @@ class RegistryClient {
 ### Phase 4: Installation Flow
 
 - [ ] Add "Install" button to plugin cards
-- [ ] Show permission request dialog
+- [ ] Show permission request dialogue
 - [ ] Download plugin bundle
 - [ ] Register and activate plugin
 

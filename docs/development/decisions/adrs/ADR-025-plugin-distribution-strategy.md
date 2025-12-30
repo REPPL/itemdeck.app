@@ -317,7 +317,7 @@ function AddCommunityPlugin() {
   const handleInstall = async () => {
     if (!preview) return;
 
-    // Show warning dialog
+    // Show warning dialogue
     const confirmed = await showConfirmDialog({
       title: 'Install Community Plugin?',
       message: `

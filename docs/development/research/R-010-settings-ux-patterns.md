@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Research into settings panel UX patterns from leading applications reveals a clear trend toward progressive disclosure, search-first navigation, and minimal tab structures. For Itemdeck, consolidating from 5 tabs to 3 (Quick, Appearance, Data) with fuzzy search will significantly improve the user experience.
+Research into settings panel UX patterns from leading applications reveals a clear trend towards progressive disclosure, search-first navigation, and minimal tab structures. For Itemdeck, consolidating from 5 tabs to 3 (Quick, Appearance, Data) with fuzzy search will significantly improve the user experience.
 
 ## Current State Analysis
 

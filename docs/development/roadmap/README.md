@@ -77,7 +77,7 @@ Development roadmap for Itemdeck v0.1.0 through v1.0.0.
 | F-034 | Card Badges | v0.3.0 | ✅ Complete |
 | F-035 | Card Quick Actions | v0.10.6 | ✅ Complete |
 | F-036 | Card Filtering | v0.11.0 | ✅ Complete |
-| F-037 | Card Sorting (Expanded) | v1.0.0 | 📋 Planned |
+| F-037 | Card Sorting (Expanded) | v1.0.0 | ⚠️ Partial |
 | F-038 | Card Carousel Mode | v0.10.6 | ✅ Complete |
 | F-039 | Responsive Typography | v0.3.0 | ✅ Complete |
 | F-040 | Touch Gestures | v0.4.0 | ✅ Complete |

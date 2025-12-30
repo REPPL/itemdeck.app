@@ -74,6 +74,7 @@ These reports provide:
 | R-014 | RTL Testing Strategy | [R-014-rtl-testing-strategy.md](./R-014-rtl-testing-strategy.md) | ✅ Complete |
 | R-015 | i18n Performance Benchmarks | [R-015-i18n-performance-benchmarks.md](./R-015-i18n-performance-benchmarks.md) | ✅ Complete |
 | R-016 | Accessibility i18n Integration | [R-016-accessibility-i18n-integration.md](./R-016-accessibility-i18n-integration.md) | ✅ Complete |
+| R-017 | Disabled vs Hidden Options | [R-017-disabled-vs-hidden-options.md](./R-017-disabled-vs-hidden-options.md) | ✅ Complete |
 
 ## Report Structure
 

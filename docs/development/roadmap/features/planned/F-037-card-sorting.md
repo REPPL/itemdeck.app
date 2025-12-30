@@ -80,9 +80,11 @@ const SORT_FIELD_OPTIONS = [
 
 ### Remaining (v1.0.0)
 
+- [ ] Fix Sort/Group By interaction bug (see Known Issues below)
 - [ ] Expand `SORT_FIELD_OPTIONS` with platform, category, rating
 - [ ] Verify `createFieldSortComparator` handles new field paths
 - [ ] Add secondary sort field support (multi-level sorting)
+- [ ] Review invalid option combinations (see R-017)
 - [ ] Write tests for expanded sort logic
 
 ## Success Criteria
@@ -96,6 +98,8 @@ const SORT_FIELD_OPTIONS = [
 
 ### Remaining (v1.0.0)
 
+- [ ] Sort/Group By interaction works correctly (no conflicting selections)
+- [ ] Invalid combinations prevented or handled gracefully
 - [ ] Cards sort by platform, category, rating
 - [ ] Direction toggle switches asc/desc in ViewPopover
 - [ ] Field path resolution works for nested fields
@@ -129,6 +133,25 @@ The ViewPopover was enhanced with a three-column layout during v0.15.5 manual te
 
 The Sort column provides quick access to the four most common sort options. Extended sort fields (platform, category, rating) and multi-level sorting remain planned for v1.0.0.
 
+## Known Issues (v0.15.5)
+
+### Sort/Group By Interaction Bug
+
+**Issue:** Selecting List | By Rank | Year displays cards sorted by year, not by rank within year groups.
+
+**Expected behaviour:** When "By Rank" is selected as Sort and "Year" is selected as Group By, cards should be:
+1. Grouped by year (visual separation)
+2. Sorted by rank within each year group
+
+**Actual behaviour:** Cards appear sorted by year overall, ignoring the "By Rank" sort selection.
+
+**Root cause:** The Group By field is overriding the Sort field rather than being applied as a secondary grouping.
+
+**Resolution:** v1.0.0 must:
+1. Fix the Sort/Group By interaction logic
+2. Consider whether certain combinations are invalid and should be prevented
+3. Reference R-017 research on disabled vs hidden options UX pattern
+
 ---
 
 ## Related Documentation
@@ -137,6 +160,7 @@ The Sort column provides quick access to the four most common sort options. Exte
 - [Card Drag and Drop](../completed/F-028-card-drag-and-drop.md)
 - [v0.15.5 Devlog](../../../process/devlogs/v0.15.5/README.md)
 - [v1.0.0 Milestone](../../milestones/v1.0.0.md)
+- [R-017: Disabled vs Hidden Options](../../../research/R-017-disabled-vs-hidden-options.md)
 
 ---
 

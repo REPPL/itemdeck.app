@@ -39,6 +39,7 @@ export function CardGrid() {
   const displayConfig = collectionDisplayConfig?.card;
   const { cardDimensions } = useSettingsContext();
   const dragModeEnabled = useSettingsStore((state) => state.dragModeEnabled);
+  const showDragIcon = useSettingsStore((state) => state.showDragIcon);
   // Derive showRankBadge from topBadgeField (when not "none")
   // Note: effectiveTopBadgeField (defined later) hides badge during snap-ranking game
   const topBadgeField = useSettingsStore((state) => state.fieldMapping.topBadgeField);
@@ -620,7 +621,9 @@ export function CardGrid() {
     if (cards.length === 0 || !cardsAreStable) return;
 
     // Create a stable identifier for the current card set
-    const currentIdsKey = cards.map(c => c.id).join(',');
+    // Use sorted IDs so reordering doesn't trigger re-initialization
+    const sortedIds = cards.map(c => c.id).sort();
+    const currentIdsKey = sortedIds.join(',');
     const isNewCardSet = lastInitializedIdsRef.current !== currentIdsKey;
     const settingChanged = prevDefaultFaceRef.current !== null &&
                           prevDefaultFaceRef.current !== defaultCardFace;
@@ -876,6 +879,7 @@ export function CardGrid() {
           showFooterBadge={showFooterBadge}
           rankPlaceholderText={rankPlaceholderText}
           dragFace={dragFace}
+          showDragIcon={showDragIcon}
           cardBackDisplay={cardBackDisplay}
           displayConfig={mergedDisplayConfig}
           cardSize={cardSizePreset}

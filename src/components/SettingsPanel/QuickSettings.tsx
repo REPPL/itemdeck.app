@@ -111,10 +111,13 @@ export function QuickSettings() {
   const totalCardCount = cards.length;
 
   // Use getEffective for reading values (shows draft if editing)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
   const getEffective = useSettingsStore((s) => s.getEffective);
   const updateDraft = useSettingsStore((s) => s.updateDraft);
 
   // Get effective values
+  // Note: _draft subscription above ensures re-render when these values change
   const visualTheme = getEffective("visualTheme");
   const cardSizePreset = getEffective("cardSizePreset");
   const shuffleOnLoad = getEffective("shuffleOnLoad");

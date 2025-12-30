@@ -31,8 +31,9 @@ Release planning for Itemdeck v0.1.0 through v2.0.0.
 | [v0.13.0](./v0.13.0.md) | Modular Plugin Architecture | ✅ Complete | 5 work packages |
 | [v0.14.0](./v0.14.0.md) | Advanced Mechanics | ✅ Complete | 3 |
 | [v0.14.5](./v0.14.5.md) | Shared Mechanics Components | ✅ Complete | 12 |
-| [v0.15.0](./v0.15.0.md) | User Experience & Polish | 🔄 In Progress | 12 |
-| [v0.15.5](./v0.15.5.md) | Infrastructure & Documentation | 📋 Planned | 4 |
+| [v0.15.0](./v0.15.0.md) | User Experience & Polish | ✅ Complete | 12 |
+| [v0.15.5](./v0.15.5.md) | Infrastructure & Documentation | ✅ Complete | 4 |
+| [v0.15.6](./v0.15.6.md) | Settings Consistency & Bug Fixes | ✅ Complete | 5 bugs |
 | [v1.0.0](./v1.0.0.md) | Multi-Collection | 📋 Planned | 1 |
 | [v1.5.0](./v1.5.0.md) | Full Plugin Ecosystem | 📋 Planned | 12 |
 | [v2.0.0](./v2.0.0.md) | Internationalisation | 📋 Planned | 3 |
@@ -118,10 +119,13 @@ v0.14.0 Advanced Mechanics ✅
 v0.14.5 Shared Mechanics ✅
     │
     ▼
-v0.15.0 UX & Polish 🔄
+v0.15.0 UX & Polish ✅
     │
     ▼
-v0.15.5 Infrastructure 📋
+v0.15.5 Infrastructure ✅
+    │
+    ▼
+v0.15.6 Settings Bug Fixes ✅
     │
     ▼
 v1.0.0 Multi-Collection 📋

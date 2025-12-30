@@ -15,7 +15,7 @@ import { useState, useEffect } from "react";
 import { ThemeSettingsTabs } from "./ThemeSettingsTabs";
 import { CardSettingsTabs } from "./CardSettingsTabs";
 import { ConfigSettingsTabs } from "./ConfigSettingsTabs";
-import { useSettingsStore } from "@/stores/settingsStore";
+import { useSettingsStore, type DefaultCardFace, type DragFace } from "@/stores/settingsStore";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
@@ -46,14 +46,35 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
     }
   }, [initialSubTab]);
 
-  const {
-    dragModeEnabled,
-    showDragIcon,
-    defaultCardFace,
-    setDragModeEnabled,
-    setShowDragIcon,
-    setDefaultCardFace,
-  } = useSettingsStore();
+  // Use draft pattern for settings (F-090)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
+
+  // Get effective values from draft
+  // Note: _draft subscription above ensures re-render when these values change
+  const dragModeEnabled = getEffective("dragModeEnabled");
+  const showDragIcon = getEffective("showDragIcon");
+  const dragFace = getEffective("dragFace");
+  const defaultCardFace = getEffective("defaultCardFace");
+
+  // Handlers that update draft
+  const handleDragModeChange = (enabled: boolean) => {
+    updateDraft({ dragModeEnabled: enabled });
+  };
+
+  const handleShowDragIconChange = (show: boolean) => {
+    updateDraft({ showDragIcon: show });
+  };
+
+  const handleDragFaceChange = (face: DragFace) => {
+    updateDraft({ dragFace: face });
+  };
+
+  const handleDefaultCardFaceChange = (face: DefaultCardFace) => {
+    updateDraft({ defaultCardFace: face });
+  };
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -77,7 +98,7 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
                 <input
                   type="checkbox"
                   checked={dragModeEnabled}
-                  onChange={(e) => { setDragModeEnabled(e.target.checked); }}
+                  onChange={(e) => { handleDragModeChange(e.target.checked); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -87,17 +108,63 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
               Enable drag and drop to reorder cards in the grid.
             </div>
 
-            <div className={styles.row}>
-              <span className={styles.label}>Show Drag Icon</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={showDragIcon}
-                  onChange={(e) => { setShowDragIcon(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
+            {dragModeEnabled && (
+              <>
+                <div className={styles.row}>
+                  <span className={styles.label}>Drag Face</span>
+                  <div className={styles.segmentedControl} role="radiogroup" aria-label="Which card face to drag">
+                    <button
+                      type="button"
+                      className={[
+                        styles.segmentButton,
+                        dragFace === "front" ? styles.segmentButtonActive : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => { handleDragFaceChange("front"); }}
+                      role="radio"
+                      aria-checked={dragFace === "front"}
+                    >
+                      Front
+                    </button>
+                    <button
+                      type="button"
+                      className={[
+                        styles.segmentButton,
+                        dragFace === "back" ? styles.segmentButtonActive : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => { handleDragFaceChange("back"); }}
+                      role="radio"
+                      aria-checked={dragFace === "back"}
+                    >
+                      Back
+                    </button>
+                    <button
+                      type="button"
+                      className={[
+                        styles.segmentButton,
+                        dragFace === "both" ? styles.segmentButtonActive : "",
+                      ].filter(Boolean).join(" ")}
+                      onClick={() => { handleDragFaceChange("both"); }}
+                      role="radio"
+                      aria-checked={dragFace === "both"}
+                    >
+                      Both
+                    </button>
+                  </div>
+                </div>
+
+                <div className={styles.row}>
+                  <span className={styles.label}>Show Drag Icon</span>
+                  <label className={styles.toggle}>
+                    <input
+                      type="checkbox"
+                      checked={showDragIcon}
+                      onChange={(e) => { handleShowDragIconChange(e.target.checked); }}
+                    />
+                    <span className={styles.toggleSlider} />
+                  </label>
+                </div>
+              </>
+            )}
 
             <div className={styles.divider} />
 
@@ -112,7 +179,7 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
                     styles.segmentButton,
                     defaultCardFace === "front" ? styles.segmentButtonActive : "",
                   ].filter(Boolean).join(" ")}
-                  onClick={() => { setDefaultCardFace("front"); }}
+                  onClick={() => { handleDefaultCardFaceChange("front"); }}
                   role="radio"
                   aria-checked={defaultCardFace === "front"}
                 >
@@ -124,7 +191,7 @@ export function AppearanceSettingsTabs({ initialSubTab }: AppearanceSettingsTabs
                     styles.segmentButton,
                     defaultCardFace === "back" ? styles.segmentButtonActive : "",
                   ].filter(Boolean).join(" ")}
-                  onClick={() => { setDefaultCardFace("back"); }}
+                  onClick={() => { handleDefaultCardFaceChange("back"); }}
                   role="radio"
                   aria-checked={defaultCardFace === "back"}
                 >

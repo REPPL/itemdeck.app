@@ -166,8 +166,8 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
   initGame: (config: CompetingGameConfig) => {
     const state = get();
 
-    // Defensive checks for undefined config properties
-    if (!config.cards || config.cards.length < 4) {
+    // Check minimum card count
+    if (config.cards.length < 4) {
       set({
         ...INITIAL_STATE,
         isActive: state.isActive,
@@ -181,7 +181,7 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
       return;
     }
 
-    if (!config.numericFields || config.numericFields.length === 0) {
+    if (config.numericFields.length === 0) {
       set({
         ...INITIAL_STATE,
         isActive: state.isActive,
@@ -354,7 +354,7 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
       comparison === 1 ? "player" : comparison === -1 ? "cpu" : "tie";
 
     // Calculate cards won (both battle cards + tie pile)
-    const cardsWon = winner !== "tie" ? 2 + (state.tiePile?.length ?? 0) : 0;
+    const cardsWon = winner !== "tie" ? 2 + state.tiePile.length : 0;
 
     const result: RoundResult = {
       winner,
@@ -382,10 +382,10 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
     if (!state.playerCard || !state.cpuCard || !state.roundResult) return;
 
     const { winner } = state.roundResult;
-    // Defensive: use empty arrays if undefined
-    let playerDeck = [...(state.playerDeck ?? [])];
-    let cpuDeck = [...(state.cpuDeck ?? [])];
-    let tiePile = [...(state.tiePile ?? [])];
+    // Copy deck arrays for modification
+    const playerDeck = [...state.playerDeck];
+    const cpuDeck = [...state.cpuDeck];
+    let tiePile = [...state.tiePile];
     const roundsWon = { ...state.roundsWon };
     const cardsWon = { ...state.cardsWon };
 
@@ -523,11 +523,8 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
     if (state.phase !== "game_over") return null;
 
     // Count total cards (deck + current card if any)
-    // Defensive null checks for undefined decks
-    const playerTotal =
-      (state.playerDeck?.length ?? 0) + (state.playerCard ? 1 : 0);
-    const cpuTotal =
-      (state.cpuDeck?.length ?? 0) + (state.cpuCard ? 1 : 0);
+    const playerTotal = state.playerDeck.length + (state.playerCard ? 1 : 0);
+    const cpuTotal = state.cpuDeck.length + (state.cpuCard ? 1 : 0);
 
     // Also count captured cards
     if (playerTotal === 0 && cpuTotal === 0) {
@@ -554,8 +551,8 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
   getProgress: () => {
     const state = get();
     return {
-      playerCards: (state.playerDeck?.length ?? 0) + (state.playerCard ? 1 : 0),
-      cpuCards: (state.cpuDeck?.length ?? 0) + (state.cpuCard ? 1 : 0),
+      playerCards: state.playerDeck.length + (state.playerCard ? 1 : 0),
+      cpuCards: state.cpuDeck.length + (state.cpuCard ? 1 : 0),
       round: state.currentRound,
     };
   },
@@ -564,10 +561,10 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
     const state = get();
     return {
       round: state.currentRound,
-      playerDeckSize: (state.playerDeck?.length ?? 0) + (state.playerCard ? 1 : 0),
-      cpuDeckSize: (state.cpuDeck?.length ?? 0) + (state.cpuCard ? 1 : 0),
-      tiePileSize: state.tiePile?.length ?? 0,
-      playerSelectionHistory: state.playerSelectionHistory ?? [],
+      playerDeckSize: state.playerDeck.length + (state.playerCard ? 1 : 0),
+      cpuDeckSize: state.cpuDeck.length + (state.cpuCard ? 1 : 0),
+      tiePileSize: state.tiePile.length,
+      playerSelectionHistory: state.playerSelectionHistory,
     };
   },
 }));

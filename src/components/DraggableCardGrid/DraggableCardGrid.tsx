@@ -54,6 +54,8 @@ interface DraggableCardGridProps {
   rankPlaceholderText?: string;
   /** Which card face allows dragging */
   dragFace?: DragFace;
+  /** Whether to show drag icons on cards */
+  showDragIcon?: boolean;
   /** What to display on card back */
   cardBackDisplay?: CardBackDisplay;
   /** Display configuration for dynamic field resolution */
@@ -76,6 +78,7 @@ interface SortableCardProps {
   rankPlaceholderText?: string;
   canDragFront: boolean;
   canDragBack: boolean;
+  showDragIcon?: boolean;
   cardBackDisplay?: CardBackDisplay;
   displayConfig?: CardDisplayConfig;
   cardSize?: "small" | "medium" | "large";
@@ -92,6 +95,7 @@ function SortableCard({
   rankPlaceholderText,
   canDragFront,
   canDragBack,
+  showDragIcon = true,
   cardBackDisplay,
   displayConfig,
   cardSize,
@@ -149,8 +153,8 @@ function SortableCard({
         cardBackDisplay={cardBackDisplay}
         displayConfig={displayConfig}
         cardSize={cardSize}
-        showFrontDragHandle={canDragFront}
-        showBackDragHandle={canDragBack}
+        showFrontDragHandle={canDragFront && showDragIcon}
+        showBackDragHandle={canDragBack && showDragIcon}
         frontDragHandleProps={canDragFront ? dragHandleProps : undefined}
         backDragHandleProps={canDragBack ? dragHandleProps : undefined}
       />
@@ -192,6 +196,7 @@ export function DraggableCardGrid({
   showFooterBadge,
   rankPlaceholderText,
   dragFace = "back",
+  showDragIcon = true,
   cardBackDisplay,
   displayConfig,
   cardSize,
@@ -287,6 +292,7 @@ export function DraggableCardGrid({
                 rankPlaceholderText={rankPlaceholderText}
                 canDragFront={canDragFront}
                 canDragBack={canDragBack}
+                showDragIcon={showDragIcon}
                 cardBackDisplay={cardBackDisplay}
                 displayConfig={displayConfig}
                 cardSize={cardSize}

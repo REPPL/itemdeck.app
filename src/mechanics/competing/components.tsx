@@ -363,7 +363,7 @@ function RoundResultOverlay() {
  */
 function TiePileIndicator() {
   const tiePile = useCompetingStore((s) => s.tiePile);
-  if (!tiePile || tiePile.length === 0) return null;
+  if (tiePile.length === 0) return null;
   return (
     <div className={styles.tiePile}>
       <span>Tie Pile:</span>
@@ -487,9 +487,9 @@ function BattleOverlayContent() {
   if (!isActive) return null;
   if (errorMessage) return <CompetingErrorOverlay />;
 
-  // Defensive check for undefined decks (shouldn't happen but prevents crash)
-  const playerCardCount = (playerDeck?.length ?? 0) + (playerCard ? 1 : 0);
-  const cpuCardCount = (cpuDeck?.length ?? 0) + (cpuCard ? 1 : 0);
+  // Calculate total card counts (deck + current card in play)
+  const playerCardCount = playerDeck.length + (playerCard ? 1 : 0);
+  const cpuCardCount = cpuDeck.length + (cpuCard ? 1 : 0);
 
   return (
     <div className={styles.battleOverlay}>
@@ -549,8 +549,8 @@ export function CompetingGridOverlay({ position }: GridOverlayProps) {
 
   useEffect(() => {
     if (!isActive || phase !== "setup") return;
-    // Defensive check for undefined cards (shouldn't happen but prevents crash)
-    if (!cards || cards.length === 0) return;
+    // Check for empty cards array
+    if (cards.length === 0) return;
 
     const numericFields = detectNumericFields(
       cards as unknown as Record<string, unknown>[]

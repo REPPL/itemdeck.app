@@ -87,40 +87,43 @@ export function CardSettingsTabs() {
   // Get available field options based on collection data
   const { footerBadgeFields, topBadgeFields } = useAvailableFields();
 
-  const {
-    cardSizePreset,
-    cardAspectRatio,
-    cardBackBackground,
-    titleDisplayMode,
-    showDeviceBadge,
-    rankPlaceholderText,
-    usePlaceholderImages,
-    fieldMapping,
-    setCardSizePreset,
-    setCardAspectRatio,
-    setCardBackBackground,
-    setTitleDisplayMode,
-    setShowDeviceBadge,
-    setRankPlaceholderText,
-    setUsePlaceholderImages,
-    setFieldMapping,
-  } = useSettingsStore();
+  // Use draft pattern for settings (F-090)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
+
+  // Get effective values from draft
+  // Note: _draft subscription above ensures re-render when these values change
+  const cardSizePreset = getEffective("cardSizePreset");
+  const cardAspectRatio = getEffective("cardAspectRatio");
+  const cardBackBackground = getEffective("cardBackBackground");
+  const titleDisplayMode = getEffective("titleDisplayMode");
+  const showDeviceBadge = getEffective("showDeviceBadge");
+  const rankPlaceholderText = getEffective("rankPlaceholderText");
+  const usePlaceholderImages = getEffective("usePlaceholderImages");
+  const fieldMapping = getEffective("fieldMapping");
 
   // Derive whether top badge is shown from field mapping
   const showTopBadge = fieldMapping.topBadgeField !== "none";
 
   const handlePlaceholderChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setRankPlaceholderText(event.target.value);
+      updateDraft({ rankPlaceholderText: event.target.value });
     },
-    [setRankPlaceholderText]
+    [updateDraft]
   );
 
   const handleFieldMappingChange = useCallback(
     (field: keyof FieldMappingConfig, value: string) => {
-      setFieldMapping({ [field]: value });
+      updateDraft({
+        fieldMapping: {
+          ...fieldMapping,
+          [field]: value,
+        },
+      });
     },
-    [setFieldMapping]
+    [updateDraft, fieldMapping]
   );
 
   const renderSubTabContent = () => {
@@ -139,7 +142,7 @@ export function CardSettingsTabs() {
                       styles.segmentButton,
                       cardSizePreset === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardSizePreset(value); }}
+                    onClick={() => { updateDraft({ cardSizePreset: value }); }}
                     role="radio"
                     aria-checked={cardSizePreset === value}
                   >
@@ -159,7 +162,7 @@ export function CardSettingsTabs() {
                       styles.segmentButton,
                       cardAspectRatio === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setCardAspectRatio(value); }}
+                    onClick={() => { updateDraft({ cardAspectRatio: value }); }}
                     role="radio"
                     aria-checked={cardAspectRatio === value}
                   >
@@ -185,7 +188,7 @@ export function CardSettingsTabs() {
                       styles.segmentButton,
                       titleDisplayMode === value ? styles.segmentButtonActive : "",
                     ].filter(Boolean).join(" ")}
-                    onClick={() => { setTitleDisplayMode(value); }}
+                    onClick={() => { updateDraft({ titleDisplayMode: value }); }}
                     role="radio"
                     aria-checked={titleDisplayMode === value}
                   >
@@ -214,7 +217,7 @@ export function CardSettingsTabs() {
                 <input
                   type="checkbox"
                   checked={usePlaceholderImages}
-                  onChange={(e) => { setUsePlaceholderImages(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ usePlaceholderImages: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -260,7 +263,7 @@ export function CardSettingsTabs() {
                 <input
                   type="checkbox"
                   checked={showDeviceBadge}
-                  onChange={(e) => { setShowDeviceBadge(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ showDeviceBadge: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -291,7 +294,7 @@ export function CardSettingsTabs() {
               <select
                 className={styles.select}
                 value={cardBackBackground}
-                onChange={(e) => { setCardBackBackground(e.target.value); }}
+                onChange={(e) => { updateDraft({ cardBackBackground: e.target.value }); }}
                 aria-label="Card back background"
               >
                 <optgroup label="Built-in Patterns">

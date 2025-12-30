@@ -127,7 +127,7 @@ export function getCardValue(card: CardData, fieldKey: string): number | null {
  * @returns Array of detected numeric field information, sorted by variance
  */
 export function detectNumericFields(cards: CardData[]): NumericFieldInfo[] {
-  if (!cards || cards.length === 0) {
+  if (cards.length === 0) {
     return [];
   }
 

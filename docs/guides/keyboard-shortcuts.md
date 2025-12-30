@@ -8,10 +8,11 @@ These work anywhere in the application:
 
 | Shortcut | Action |
 |----------|--------|
-| `S` | Toggle Settings panel |
+| `Ctrl+S` / `Cmd+S` | Toggle Settings panel |
 | `?` (Shift + /) | Show keyboard help |
-| `E` | Toggle Edit Mode |
-| `R` | Shuffle cards |
+| `Ctrl+E` / `Cmd+E` | Toggle Edit Mode |
+| `Ctrl+R` / `Cmd+R` | Shuffle cards |
+| `Ctrl+A` / `Cmd+A` | Toggle Admin Mode |
 | `/` | Focus search bar |
 | `Escape` | Close overlay/panel |
 
@@ -73,9 +74,9 @@ During the Memory game mechanic:
 
 ### Modifier Keys
 
-- Most shortcuts work without modifiers
+- Navigation uses single keys (arrows, H/J/K/L for vim)
+- Global actions use Ctrl/Cmd modifiers (S, E, R, A)
 - `?` requires Shift (it's Shift + /)
-- Ctrl/Cmd + A is reserved for Settings toggle
 
 ### Focus States
 

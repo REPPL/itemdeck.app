@@ -33,6 +33,7 @@ import {
   type AnimationStyle,
   type DetailTransparencyPreset,
   type OverlayStyle,
+  type ThemeCustomisation,
 } from "@/stores/settingsStore";
 import { ThemeBrowser } from "@/components/ThemeBrowser";
 import styles from "./SettingsPanel.module.css";
@@ -113,83 +114,105 @@ function toHex6(hex: string | undefined): string {
  * Theme settings with sub-tabs.
  */
 export function ThemeSettingsTabs() {
-  const {
-    visualTheme,
-    setVisualTheme,
-    themeCustomisations,
-    setThemeCustomisation,
-  } = useSettingsStore();
+  // Use draft pattern for settings (F-090)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
+
   const [activeSubTab, setActiveSubTab] = useState<ThemeSubTab>("style");
 
+  // Get effective values from draft
+  // Note: _draft subscription above ensures re-render when these values change
+  const visualTheme = getEffective("visualTheme");
+  const themeCustomisations = getEffective("themeCustomisations");
   const currentCustomisation = themeCustomisations[visualTheme];
 
+  // Helper to update theme customisation via draft
+  const updateThemeCustomisation = useCallback((updates: Partial<ThemeCustomisation>) => {
+    updateDraft({
+      themeCustomisations: {
+        ...themeCustomisations,
+        [visualTheme]: {
+          ...themeCustomisations[visualTheme],
+          ...updates,
+        },
+      },
+    });
+  }, [updateDraft, themeCustomisations, visualTheme]);
+
+  // Handler for visual theme change
+  const handleVisualThemeChange = useCallback((theme: VisualTheme) => {
+    updateDraft({ visualTheme: theme });
+  }, [updateDraft]);
+
   const handleBorderRadiusChange = useCallback((value: BorderRadiusPreset) => {
-    setThemeCustomisation(visualTheme, { borderRadius: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ borderRadius: value });
+  }, [updateThemeCustomisation]);
 
   const handleBorderWidthChange = useCallback((value: BorderWidthPreset) => {
-    setThemeCustomisation(visualTheme, { borderWidth: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ borderWidth: value });
+  }, [updateThemeCustomisation]);
 
   const handleShadowIntensityChange = useCallback((value: ShadowIntensity) => {
-    setThemeCustomisation(visualTheme, { shadowIntensity: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ shadowIntensity: value });
+  }, [updateThemeCustomisation]);
 
   const handleAnimationStyleChange = useCallback((value: AnimationStyle) => {
-    setThemeCustomisation(visualTheme, { animationStyle: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ animationStyle: value });
+  }, [updateThemeCustomisation]);
 
   const handleAccentColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { accentColour: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ accentColour: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleHoverColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { hoverColour: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ hoverColour: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleCardBackgroundChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { cardBackgroundColour: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ cardBackgroundColour: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleBorderColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { borderColour: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ borderColour: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleTextColourChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { textColour: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ textColour: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleTransparencyChange = useCallback((value: DetailTransparencyPreset) => {
-    setThemeCustomisation(visualTheme, { detailTransparency: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ detailTransparency: value });
+  }, [updateThemeCustomisation]);
 
   const handleOverlayStyleChange = useCallback((value: OverlayStyle) => {
-    setThemeCustomisation(visualTheme, { overlayStyle: value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ overlayStyle: value });
+  }, [updateThemeCustomisation]);
 
   const handleMoreButtonLabelChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { moreButtonLabel: event.target.value });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ moreButtonLabel: event.target.value });
+  }, [updateThemeCustomisation]);
 
   const handleAutoExpandChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { autoExpandMore: event.target.checked });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ autoExpandMore: event.target.checked });
+  }, [updateThemeCustomisation]);
 
   const handleZoomImageChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { zoomImage: event.target.checked });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ zoomImage: event.target.checked });
+  }, [updateThemeCustomisation]);
 
   const handleFlipAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { flipAnimation: event.target.checked });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ flipAnimation: event.target.checked });
+  }, [updateThemeCustomisation]);
 
   const handleDetailAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { detailAnimation: event.target.checked });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ detailAnimation: event.target.checked });
+  }, [updateThemeCustomisation]);
 
   const handleOverlayAnimationChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setThemeCustomisation(visualTheme, { overlayAnimation: event.target.checked });
-  }, [visualTheme, setThemeCustomisation]);
+    updateThemeCustomisation({ overlayAnimation: event.target.checked });
+  }, [updateThemeCustomisation]);
 
   const renderSubTabContent = () => {
     switch (activeSubTab) {
@@ -470,7 +493,7 @@ export function ThemeSettingsTabs() {
                 themeStyles.themeButton,
                 visualTheme === value ? themeStyles.themeButtonActive : "",
               ].filter(Boolean).join(" ")}
-              onClick={() => { setVisualTheme(value); }}
+              onClick={() => { handleVisualThemeChange(value); }}
               role="radio"
               aria-checked={visualTheme === value}
             >

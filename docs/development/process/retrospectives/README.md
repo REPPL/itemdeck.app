@@ -32,6 +32,7 @@ Post-milestone reflections and lessons learned.
 | [v0.14.5](./v0.14.5/README.md) | Shared Mechanics Components & Standardisation | Complete |
 | [v0.15.0](./v0.15.0/README.md) | User Experience & Polish | Complete |
 | [v0.15.5](./v0.15.5/README.md) | Infrastructure, Accessibility & Documentation | Complete |
+| [v0.15.6](./v0.15.6/README.md) | Settings Consistency & Bug Fixes | Complete |
 
 ## Structure
 

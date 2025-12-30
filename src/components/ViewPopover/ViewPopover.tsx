@@ -222,10 +222,11 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
   // Group By is available in List and Compact only (not Grid or Fit)
   const groupByEnabled = layout === "list" || layout === "compact";
 
-  // Get current sort option
+  // Get current sort option (shuffleOnLoad can be toggled by user)
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const currentSort: SortOption = shuffleOnLoad
     ? "shuffle"
-    : (fieldMapping.sortField as SortOption) || "order";
+    : (fieldMapping.sortField as SortOption);
 
   // Use shared focus trap hook for consistent behaviour
   useFocusTrap({
@@ -278,7 +279,7 @@ export function ViewPopover({ isOpen, onClose }: ViewPopoverProps) {
   }, [isOpen]);
 
   // Helper to build class names
-  const getOptionClass = (isActive: boolean, isDisabled: boolean = false) =>
+  const getOptionClass = (isActive: boolean, isDisabled = false) =>
     [
       styles.option,
       isActive && styles.optionActive,

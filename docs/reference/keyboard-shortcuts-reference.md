@@ -8,10 +8,11 @@ Work anywhere in the application when not typing in an input field.
 
 | Shortcut | Action | Notes |
 |----------|--------|-------|
-| `S` | Toggle Settings panel | Opens/closes settings |
+| `Ctrl+S` / `Cmd+S` | Toggle Settings panel | Opens/closes settings |
 | `?` (Shift + /) | Show keyboard help | Displays shortcut overlay |
-| `E` | Toggle Edit Mode | Enables card editing |
-| `R` | Shuffle cards | Randomise card order |
+| `Ctrl+E` / `Cmd+E` | Toggle Edit Mode | Enables card editing |
+| `Ctrl+R` / `Cmd+R` | Shuffle cards | Randomise card order |
+| `Ctrl+A` / `Cmd+A` | Toggle Admin Mode | Opens admin panel |
 | `/` | Focus search bar | Jump to search input |
 | `Escape` | Close overlay/panel | Closes topmost UI element |
 
@@ -183,13 +184,15 @@ Navigation                    Actions
 Arrow Keys: Move focus        Space: Flip card
 Home/End: First/Last          Enter: Detail view
 PgUp/PgDn: Skip 5             Escape: Close
+H/J/K/L: Vim navigation
 
 Global                        Search
 ------                        ------
-S: Settings                   /: Focus search
+Ctrl+S: Settings              /: Focus search
 ?: Help                       Escape: Clear
-E: Edit mode                  Enter: Submit
-R: Shuffle
+Ctrl+E: Edit mode             Enter: Submit
+Ctrl+R: Shuffle
+Ctrl+A: Admin mode
 ```
 
 ---

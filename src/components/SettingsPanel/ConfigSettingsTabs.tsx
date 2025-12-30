@@ -2,17 +2,16 @@
  * ConfigSettingsTabs - Sub-tabbed interface for configuration settings.
  *
  * Top-level Configuration tab with sub-tabs:
- * - Display: Random Selection, Max Visible, Show Cards, Sort By, Sort Direction
- * - Behaviour: Shuffle on Load, Drag to Reorder
+ * - Display: Random Selection, Max Visible, Sort By, Sort Direction
  * - Edit: Edit Mode toggle
+ *
+ * Note: Drag mode settings moved to Appearance > Interactions (v0.15.6)
  */
 
 import { useState, useCallback, useMemo } from "react";
 import {
   useSettingsStore,
   type FieldMappingConfig,
-  type DragFace,
-  type DefaultCardFace,
 } from "@/stores/settingsStore";
 import {
   SORT_FIELD_OPTIONS,
@@ -23,23 +22,10 @@ import { useAvailableFields } from "@/hooks/useAvailableFields";
 import styles from "./SettingsPanel.module.css";
 import tabStyles from "./CardSettingsTabs.module.css";
 
-const dragModeOptions: { value: DragFace | "none"; label: string }[] = [
-  { value: "none", label: "None" },
-  { value: "front", label: "Front" },
-  { value: "back", label: "Back" },
-  { value: "both", label: "Both" },
-];
-
-const defaultFaceOptions: { value: DefaultCardFace; label: string }[] = [
-  { value: "back", label: "Back" },
-  { value: "front", label: "Front" },
-];
-
-type ConfigSubTab = "display" | "behaviour" | "edit";
+type ConfigSubTab = "display" | "edit";
 
 const subTabs: { id: ConfigSubTab; label: string }[] = [
   { id: "display", label: "Display" },
-  { id: "behaviour", label: "Behaviour" },
   { id: "edit", label: "Edit" },
 ];
 
@@ -67,45 +53,32 @@ export function ConfigSettingsTabs() {
     return merged;
   }, [dynamicSortFields]);
 
-  const {
-    shuffleOnLoad,
-    setShuffleOnLoad,
-    maxVisibleCards,
-    setMaxVisibleCards,
-    dragModeEnabled,
-    setDragModeEnabled,
-    dragFace,
-    setDragFace,
-    defaultCardFace,
-    setDefaultCardFace,
-    randomSelectionEnabled,
-    setRandomSelectionEnabled,
-    randomSelectionCount,
-    setRandomSelectionCount,
-    fieldMapping,
-    setFieldMapping,
-    editModeEnabled,
-    setEditModeEnabled,
-  } = useSettingsStore();
+  // Use draft pattern for settings (F-090)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
+  const getEffective = useSettingsStore((s) => s.getEffective);
+  const updateDraft = useSettingsStore((s) => s.updateDraft);
 
-  // Compute effective drag mode from dragModeEnabled and dragFace
-  const effectiveDragMode: DragFace | "none" = dragModeEnabled ? dragFace : "none";
-
-  // Handle drag mode change
-  const handleDragModeChange = useCallback((value: DragFace | "none") => {
-    if (value === "none") {
-      setDragModeEnabled(false);
-    } else {
-      setDragModeEnabled(true);
-      setDragFace(value);
-    }
-  }, [setDragModeEnabled, setDragFace]);
+  // Get effective values from draft
+  // Note: _draft subscription above ensures re-render when these values change
+  const shuffleOnLoad = getEffective("shuffleOnLoad");
+  const maxVisibleCards = getEffective("maxVisibleCards");
+  const randomSelectionEnabled = getEffective("randomSelectionEnabled");
+  const randomSelectionCount = getEffective("randomSelectionCount");
+  const fieldMapping = getEffective("fieldMapping");
+  const editModeEnabled = useSettingsStore((s) => s.editModeEnabled);
+  const setEditModeEnabled = useSettingsStore((s) => s.setEditModeEnabled);
 
   const handleFieldMappingChange = useCallback(
     (field: keyof FieldMappingConfig, value: string) => {
-      setFieldMapping({ [field]: value });
+      updateDraft({
+        fieldMapping: {
+          ...fieldMapping,
+          [field]: value,
+        },
+      });
     },
-    [setFieldMapping]
+    [updateDraft, fieldMapping]
   );
 
   const renderSubTabContent = () => {
@@ -120,7 +93,7 @@ export function ConfigSettingsTabs() {
                 <input
                   type="checkbox"
                   checked={randomSelectionEnabled}
-                  onChange={(e) => { setRandomSelectionEnabled(e.target.checked); }}
+                  onChange={(e) => { updateDraft({ randomSelectionEnabled: e.target.checked }); }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -137,7 +110,7 @@ export function ConfigSettingsTabs() {
                       min={1}
                       max={Math.max(totalCards, 1)}
                       value={Math.min(randomSelectionCount, totalCards || 1)}
-                      onChange={(e) => { setRandomSelectionCount(Number(e.target.value)); }}
+                      onChange={(e) => { updateDraft({ randomSelectionCount: Number(e.target.value) }); }}
                       className={styles.slider}
                       aria-label="Number of cards to show"
                     />
@@ -160,7 +133,7 @@ export function ConfigSettingsTabs() {
                 <button
                   type="button"
                   className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.max(1, maxVisibleCards - 1)); }}
+                  onClick={() => { updateDraft({ maxVisibleCards: Math.max(1, maxVisibleCards - 1) }); }}
                   aria-label="Decrease"
                   disabled={maxVisibleCards <= 1}
                 >
@@ -170,7 +143,7 @@ export function ConfigSettingsTabs() {
                 <button
                   type="button"
                   className={styles.numberButton}
-                  onClick={() => { setMaxVisibleCards(Math.min(10, maxVisibleCards + 1)); }}
+                  onClick={() => { updateDraft({ maxVisibleCards: Math.min(10, maxVisibleCards + 1) }); }}
                   aria-label="Increase"
                   disabled={maxVisibleCards >= 10}
                 >
@@ -178,27 +151,6 @@ export function ConfigSettingsTabs() {
                 </button>
               </div>
             </div>
-            <div className={styles.row}>
-              <span className={styles.label}>Show Cards</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Default card face">
-                {defaultFaceOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      defaultCardFace === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { setDefaultCardFace(value); }}
-                    role="radio"
-                    aria-checked={defaultCardFace === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             <div className={styles.divider} />
 
             <div className={styles.row}>
@@ -248,55 +200,9 @@ export function ConfigSettingsTabs() {
             </div>
             {shuffleOnLoad && (
               <div className={styles.helpText}>
-                Sorting is disabled when Shuffle on Load is enabled (see Behaviour tab).
+                Sorting is disabled when Shuffle on Load is enabled (see Quick tab).
               </div>
             )}
-          </>
-        );
-
-      case "behaviour":
-        return (
-          <>
-            <div className={styles.row}>
-              <span className={styles.label}>Shuffle on Load</span>
-              <label className={styles.toggle}>
-                <input
-                  type="checkbox"
-                  checked={shuffleOnLoad}
-                  onChange={(e) => { setShuffleOnLoad(e.target.checked); }}
-                />
-                <span className={styles.toggleSlider} />
-              </label>
-            </div>
-            <div className={styles.helpText}>
-              Randomises card order each time the page loads.
-            </div>
-
-            <div className={styles.divider} />
-
-            <div className={styles.row}>
-              <span className={styles.label}>Drag to Reorder</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Drag mode">
-                {dragModeOptions.map(({ value, label }) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={[
-                      styles.segmentButton,
-                      effectiveDragMode === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleDragModeChange(value); }}
-                    role="radio"
-                    aria-checked={effectiveDragMode === value}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className={styles.helpText}>
-              Allows manually reordering cards by dragging.
-            </div>
           </>
         );
 

@@ -81,6 +81,8 @@ export function SystemSettings({
   }, []);
 
   // Draft state for preview (F-090)
+  // Subscribe to _draft to trigger re-renders when draft changes
+  useSettingsStore((s) => s._draft);
   const getEffective = useSettingsStore((s) => s.getEffective);
   const updateDraft = useSettingsStore((s) => s.updateDraft);
 
@@ -89,6 +91,7 @@ export function SystemSettings({
   const setHighContrast = useSettingsStore((s) => s.setHighContrast);
 
   // Get effective values from draft
+  // Note: _draft subscription above ensures re-render when these values change
   const reduceMotion = getEffective("reduceMotion");
   const highContrast = getEffective("highContrast");
   const showHelpButton = getEffective("showHelpButton");

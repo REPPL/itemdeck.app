@@ -38,7 +38,7 @@ export function CardCompactItem({ card, cardNumber, tabIndex = 0, width, height 
   }, []);
 
   // Custom style for dynamic sizing (fit view)
-  const customStyle = width && height ? { width: `${width}px`, height: `${height}px` } : undefined;
+  const customStyle = width && height ? { width: `${String(width)}px`, height: `${String(height)}px` } : undefined;
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent) => {

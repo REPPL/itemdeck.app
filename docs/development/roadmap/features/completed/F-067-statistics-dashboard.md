@@ -104,28 +104,28 @@ function StatisticsDashboard({ cards, expanded, onToggle }) {
 
 ## Implementation Tasks
 
-- [ ] Create `StatisticsDashboard` component
-- [ ] Implement expandable/collapsible toggle
-- [ ] Create CSS-only bar chart component
-- [ ] Calculate platform distribution
-- [ ] Calculate year distribution (by decade)
-- [ ] Calculate rating distribution (if data available)
-- [ ] Add genre distribution (if data available)
-- [ ] Ensure responsive layout
-- [ ] Theme-aware styling
-- [ ] Add accessibility labels to charts
-- [ ] Write tests for statistics calculations
+- [x] Create `StatisticsDashboard` component
+- [x] Implement expandable/collapsible toggle
+- [x] Create CSS-only bar chart component
+- [x] Calculate platform distribution
+- [x] Calculate year distribution (by decade)
+- [x] Calculate rating distribution (if data available)
+- [x] Add genre distribution (if data available)
+- [x] Ensure responsive layout
+- [x] Theme-aware styling
+- [x] Add accessibility labels to charts
+- [x] Write tests for statistics calculations
 
 ## Success Criteria
 
-- [ ] Dashboard shows total, platform count, year range
-- [ ] Expand/collapse toggle works
-- [ ] Bar charts display distribution visually
-- [ ] Charts are responsive
-- [ ] Charts use theme colours
-- [ ] Charts have accessible labels
-- [ ] Statistics update when cards are filtered
-- [ ] Performance acceptable for 1000+ cards
+- [x] Dashboard shows total, platform count, year range
+- [x] Expand/collapse toggle works
+- [x] Bar charts display distribution visually
+- [x] Charts are responsive
+- [x] Charts use theme colours
+- [x] Charts have accessible labels
+- [x] Statistics update when cards are filtered
+- [x] Performance acceptable for 1000+ cards
 
 ## Components
 
@@ -158,7 +158,24 @@ Small
 
 ## Milestone
 
-v0.15.0
+v0.15.5
+
+## Implementation Notes (v0.15.5)
+
+Implemented as part of v0.15.5 manual testing phase. The original StatisticsBar was unified with CollectionHeader into a new `CollectionInfoBar` component that provides:
+
+- **Unified header**: Collection name, description, and current view mode label
+- **Statistics summary**: Total cards, platforms, year range
+- **Expandable dashboard**: Distribution charts for platforms, years, genres
+- **Single dismiss button**: Cleaner UI with one action to hide
+
+**Components created:**
+- `src/components/Statistics/CollectionInfoBar.tsx` (216 lines)
+- `src/components/Statistics/CollectionInfoBar.module.css` (160 lines)
+- `src/components/Statistics/CollectionHeader.tsx` (53 lines)
+- `src/components/Statistics/CollectionHeader.module.css` (48 lines)
+
+See [v0.15.5 Devlog](../../../process/devlogs/v0.15.5/README.md) for full implementation details.
 
 ---
 
@@ -166,8 +183,9 @@ v0.15.0
 
 - [Collection Statistics (F-062)](../completed/F-062-collection-statistics.md)
 - [Card Filtering](../completed/F-036-card-filtering.md)
-- [v0.15.0 Milestone](../../milestones/v0.15.0.md)
+- [v0.15.5 Milestone](../../milestones/v0.15.5.md)
+- [v0.15.5 Devlog](../../../process/devlogs/v0.15.5/README.md)
 
 ---
 
-**Status**: Planned
+**Status**: Complete

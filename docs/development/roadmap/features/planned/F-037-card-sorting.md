@@ -6,12 +6,14 @@ Users may want to view cards in a specific order (newest first, alphabetical, by
 
 ## Current State
 
-Sorting **already exists** in `ConfigSettingsTabs.tsx`:
-- Sort field dropdown (order, title, year, playedSince)
-- Sort direction toggle (asc/desc)
-- Persists to localStorage via settingsStore
+**v0.15.5 Implementation Status:**
 
-This feature expands the existing implementation.
+The ViewPopover three-column layout (implemented in v0.15.5) provides quick sort access:
+- Sort options: Shuffle, By Rank, By Year, By Title
+- Available in Grid, List, and Compact views (disabled in Fit view)
+- Persists to localStorage via settingsStore/fieldMapping
+
+This feature spec now tracks **remaining enhancements** beyond the v0.15.5 implementation.
 
 ## Design Approach
 
@@ -68,22 +70,36 @@ const SORT_FIELD_OPTIONS = [
 
 ## Implementation Tasks
 
+### Completed (v0.15.5)
+
+- [x] Add quick sort buttons in ViewPopover (three-column layout)
+- [x] Sort options: Shuffle, By Rank, By Year, By Title
+- [x] Animate card position changes
+- [x] Ensure sort controls accessible
+- [x] Sort preference persists to localStorage
+
+### Remaining (v1.0.0)
+
 - [ ] Expand `SORT_FIELD_OPTIONS` with platform, category, rating
 - [ ] Verify `createFieldSortComparator` handles new field paths
-- [ ] Add quick sort buttons near search bar (optional)
-- [ ] Add secondary sort field support (optional)
-- [ ] Animate card position changes (already works)
-- [ ] Ensure sort controls accessible
+- [ ] Add secondary sort field support (multi-level sorting)
 - [ ] Write tests for expanded sort logic
 
 ## Success Criteria
 
+### Completed (v0.15.5)
+
+- [x] Quick sort buttons in ViewPopover
+- [x] Sort by Shuffle, Rank, Year, Title works
+- [x] Cards animate to new positions
+- [x] Sort preference persists to localStorage
+
+### Remaining (v1.0.0)
+
 - [ ] Cards sort by platform, category, rating
-- [ ] Existing sort fields continue to work
-- [ ] Direction toggle switches asc/desc
-- [ ] Cards animate to new positions
-- [ ] Sort preference persists to localStorage
+- [ ] Direction toggle switches asc/desc in ViewPopover
 - [ ] Field path resolution works for nested fields
+- [ ] Multi-level sorting (primary + secondary)
 
 ## Dependencies
 
@@ -93,11 +109,25 @@ const SORT_FIELD_OPTIONS = [
 
 ## Complexity
 
-Small
+Small (remaining work)
 
 ## Milestone
 
-v0.15.0
+v1.0.0 (partial implementation in v0.15.5)
+
+## Implementation Notes (v0.15.5)
+
+The ViewPopover was enhanced with a three-column layout during v0.15.5 manual testing:
+
+- **View column**: Grid, List, Compact, Fit modes
+- **Sort column**: Shuffle, By Rank, By Year, By Title
+- **Group By column**: None, Platform, Year, Decade, Genre
+
+**Files modified:**
+- `src/components/ViewPopover/ViewPopover.tsx` (411 lines)
+- `src/components/ViewPopover/ViewPopover.module.css`
+
+The Sort column provides quick access to the four most common sort options. Extended sort fields (platform, category, rating) and multi-level sorting remain planned for v1.0.0.
 
 ---
 
@@ -105,8 +135,9 @@ v0.15.0
 
 - [Shuffle by Default](../completed/F-027-shuffle-by-default.md)
 - [Card Drag and Drop](../completed/F-028-card-drag-and-drop.md)
-- [v0.15.0 Milestone](../../milestones/v0.15.0.md)
+- [v0.15.5 Devlog](../../../process/devlogs/v0.15.5/README.md)
+- [v1.0.0 Milestone](../../milestones/v1.0.0.md)
 
 ---
 
-**Status**: Planned
+**Status**: Partial (core sorting complete v0.15.5, extended fields deferred to v1.0.0)

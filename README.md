@@ -59,13 +59,13 @@ Load remote collections using simplified URL formats:
 
 ```
 # Short query format
-http://localhost:5173/gh?u=REPPL&c=retro-games
+http://localhost:5173/gh?u=REPPL&c=retro/games/
 
 # Clean path format
-http://localhost:5173/gh/REPPL/c/retro-games
+http://localhost:5173/gh/REPPL/c/retro/games/
 
 # Nested folders supported
-http://localhost:5173/gh/REPPL/c/retro/games/
+http://localhost:5173/gh/REPPL/c/retro/games/my-collection
 ```
 
 ## Documentation

@@ -20,23 +20,6 @@ export interface CardFilters {
 }
 
 /**
- * GitHub data source configuration.
- */
-export interface GitHubSourceConfig {
-  /** Repository owner */
-  owner: string;
-
-  /** Repository name */
-  repo: string;
-
-  /** Collection name/path */
-  collection: string;
-
-  /** Git branch (defaults to 'main') */
-  branch?: string;
-}
-
-/**
  * Query keys for card-related queries.
  *
  * Structured hierarchically for granular cache invalidation:
@@ -72,17 +55,6 @@ export const collectionKeys = {
 
   /** Key for local collection queries */
   local: (path: string) => [...collectionKeys.all, "local", path] as const,
-
-  /** Key for GitHub collection queries */
-  github: (config: GitHubSourceConfig) =>
-    [
-      ...collectionKeys.all,
-      "github",
-      config.owner,
-      config.repo,
-      config.collection,
-      config.branch ?? "main",
-    ] as const,
 };
 
 /**
@@ -96,17 +68,3 @@ export const categoryKeys = {
   list: () => [...categoryKeys.all, "list"] as const,
 };
 
-/**
- * Query keys for GitHub-specific queries.
- */
-export const githubKeys = {
-  /** Base key for all GitHub queries */
-  all: ["github"] as const,
-
-  /** Key for manifest queries */
-  manifest: (owner: string, repo: string, branch?: string) =>
-    [...githubKeys.all, "manifest", owner, repo, branch ?? "main"] as const,
-
-  /** Key for raw content queries */
-  raw: (url: string) => [...githubKeys.all, "raw", url] as const,
-};

@@ -1,0 +1,31 @@
+# Pre-commit hooks for Claude Code projects
+# Install: pre-commit install
+# Run all: pre-commit run --all-files
+
+repos:
+  # TruffleHog for secret scanning (no API key required)
+  - repo: https://github.com/trufflesecurity/trufflehog
+    rev: v3.88.0
+    hooks:
+      - id: trufflehog
+        entry: trufflehog git file://. --since-commit HEAD --only-verified --fail
+        stages: [pre-commit]
+
+  # Local hooks for project-specific checks
+  - repo: local
+    hooks:
+      # PII and hardcoded path detection
+      - id: check-pii
+        name: Check for PII and hardcoded paths
+        entry: scripts/check-pii.sh
+        language: script
+        types: [text]
+        pass_filenames: false
+
+      # British English compliance
+      - id: check-british
+        name: Check British English
+        entry: scripts/check-british.sh
+        language: script
+        types: [markdown]
+        pass_filenames: false

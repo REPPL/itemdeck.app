@@ -33,6 +33,12 @@ npm-debug.log*
 # Claude Code local settings
 .claude/settings.local.json
 
+# Claude Code skills (local symlinks to shared skills outside the repo)
+.claude/skills/
+
+# SpecStory local session data
+.specstory/
+
 # TypeScript cache
 *.tsbuildinfo
 

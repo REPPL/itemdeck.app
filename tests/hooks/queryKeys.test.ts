@@ -3,12 +3,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import {
-  cardKeys,
-  collectionKeys,
-  categoryKeys,
-  githubKeys,
-} from "@/hooks/queryKeys";
+import { cardKeys, collectionKeys, categoryKeys } from "@/hooks/queryKeys";
 
 describe("cardKeys", () => {
   describe("all", () => {
@@ -79,41 +74,6 @@ describe("collectionKeys", () => {
       ]);
     });
   });
-
-  describe("github", () => {
-    it("includes full config", () => {
-      const config = {
-        owner: "REPPL",
-        repo: "MyPlausibleMe",
-        collection: "retro-games",
-        branch: "develop",
-      };
-      expect(collectionKeys.github(config)).toEqual([
-        "collections",
-        "github",
-        "REPPL",
-        "MyPlausibleMe",
-        "retro-games",
-        "develop",
-      ]);
-    });
-
-    it("defaults branch to main", () => {
-      const config = {
-        owner: "REPPL",
-        repo: "MyPlausibleMe",
-        collection: "retro-games",
-      };
-      expect(collectionKeys.github(config)).toEqual([
-        "collections",
-        "github",
-        "REPPL",
-        "MyPlausibleMe",
-        "retro-games",
-        "main",
-      ]);
-    });
-  });
 });
 
 describe("categoryKeys", () => {
@@ -130,43 +90,6 @@ describe("categoryKeys", () => {
   });
 });
 
-describe("githubKeys", () => {
-  describe("all", () => {
-    it("returns base key array", () => {
-      expect(githubKeys.all).toEqual(["github"]);
-    });
-  });
-
-  describe("manifest", () => {
-    it("includes owner repo and branch", () => {
-      expect(githubKeys.manifest("REPPL", "data", "main")).toEqual([
-        "github",
-        "manifest",
-        "REPPL",
-        "data",
-        "main",
-      ]);
-    });
-
-    it("defaults branch to main", () => {
-      expect(githubKeys.manifest("REPPL", "data")).toEqual([
-        "github",
-        "manifest",
-        "REPPL",
-        "data",
-        "main",
-      ]);
-    });
-  });
-
-  describe("raw", () => {
-    it("includes url", () => {
-      const url = "https://raw.githubusercontent.com/REPPL/data/main/items.json";
-      expect(githubKeys.raw(url)).toEqual(["github", "raw", url]);
-    });
-  });
-});
-
 describe("key hierarchy", () => {
   it("card list keys start with card base key", () => {
     const listKey = cardKeys.list({ category: "test" });
@@ -176,10 +99,5 @@ describe("key hierarchy", () => {
   it("card detail keys start with card base key", () => {
     const detailKey = cardKeys.detail("123");
     expect(detailKey.slice(0, 1)).toEqual(cardKeys.all);
-  });
-
-  it("github manifest keys start with github base key", () => {
-    const manifestKey = githubKeys.manifest("owner", "repo");
-    expect(manifestKey.slice(0, 1)).toEqual(githubKeys.all);
   });
 });

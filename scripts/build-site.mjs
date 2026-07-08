@@ -9,7 +9,7 @@
  *    data-content="key" in the HTML.
  * 5. Computes the sha256 hash of the final inline script and
  *    substitutes it into the CSP meta placeholder.
- * 6. Writes dist/index.html and copies site/fonts/, site/assets/,
+ * 6. Writes dist/index.html and copies site/fonts/, site/assets/, site/media/,
  *    and (if present) site/_redirects and site/_headers into dist/.
  *
  * Plain Node >= 20, no dependencies. Exits non-zero on any failure.
@@ -152,7 +152,7 @@ html = applyCspHash(html);
 mkdirSync(distDir, { recursive: true });
 writeFileSync(join(distDir, "index.html"), html);
 
-for (const dir of ["fonts", "assets"]) {
+for (const dir of ["fonts", "assets", "media"]) {
   const from = join(siteDir, dir);
   if (!existsSync(from)) fail(`missing required directory ${from}`);
   cpSync(from, join(distDir, dir), { recursive: true });

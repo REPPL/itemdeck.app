@@ -22,6 +22,7 @@ built-in copy in the HTML is used instead.
 | `content.md` | The editable copy — your editing surface |
 | `fonts/` | Self-hosted Space Grotesk and Inter (woff2) |
 | `assets/` | Logo marks and lockups (SVG and PNG) |
+| `media/` | Tutorial video (light and dark cuts, MP4) and poster stills |
 | `_redirects`, `_headers` | Hosting configuration, copied into `dist/` |
 
 The canonical design values (colours, spacing, type) live inline in

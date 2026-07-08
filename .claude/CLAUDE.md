@@ -66,7 +66,7 @@ npm run lint
 ### Pre-Implementation
 
 - [ ] All existing tests pass
-- [ ] Feature spec exists in `docs/development/features/`
+- [ ] Feature spec exists in `.abcd/development/roadmap/features/`
 - [ ] Dependencies installed (`npm install`)
 
 ### Post-Implementation
@@ -145,22 +145,29 @@ Co-Authored-By: Claude <noreply@anthropic.com>
 
 ## Documentation Structure
 
-This project uses **Feature-Centric Roadmap** documentation:
+`docs/` is **user-facing only** — the four Diátaxis types plus supporting
+assets. Developer-facing records live outside `docs/`, under
+`.abcd/development/`.
 
 ```
-docs/
+docs/                            # User-facing (Diátaxis)
 ├── README.md                    # Documentation hub
+├── tutorials/                   # Learning-oriented
+├── guides/                      # Task-oriented how-tos
+├── reference/                   # Information-oriented
+├── explanation/                 # Understanding-oriented
 ├── prompts/                     # AI setup prompts
-│   └── setup/
-│       ├── README.md            # v1 prompt
-│       └── v2.md                # v2 prompt with design decisions
-├── assets/
-│   └── img/
-│       └── logo.png             # Project logo
-└── development/                 # (future)
-    ├── features/
-    ├── milestones/
-    └── process/
+└── assets/                      # Images and other assets
+
+.abcd/development/               # Developer-facing records
+├── README.md
+├── architecture.md
+├── decisions/                   # ADRs (MADR, NNNN-title.md)
+├── research/                    # Dated research notes
+├── planning/
+├── implementation/
+├── process/                     # Devlogs, retrospectives
+└── roadmap/                     # Features and milestones
 ```
 
 ---

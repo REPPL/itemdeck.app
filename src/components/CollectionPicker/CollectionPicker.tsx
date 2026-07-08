@@ -31,6 +31,8 @@ interface CollectionPickerProps {
   onSelect: (sourceId: string) => void;
   /** Initial username to prefill (from URL) */
   initialUsername?: string;
+  /** Notice to display (e.g. a URL was rejected before the picker opened) */
+  notice?: string | null;
 }
 
 /**
@@ -41,7 +43,7 @@ const DEFAULT_USERNAME = "REPPL";
 /**
  * Collection picker for startup flow.
  */
-export function CollectionPicker({ onSelect, initialUsername }: CollectionPickerProps) {
+export function CollectionPicker({ onSelect, initialUsername, notice }: CollectionPickerProps) {
   const startUsername = initialUsername ?? DEFAULT_USERNAME;
   const [username, setUsername] = useState(startUsername);
   const [inputValue, setInputValue] = useState(startUsername);
@@ -105,6 +107,13 @@ export function CollectionPicker({ onSelect, initialUsername }: CollectionPicker
         />
         <h1 className={styles.title}>itemdeck</h1>
         <p className={styles.subtitle}>Select a collection to view</p>
+
+        {/* Notice (e.g. a URL was rejected before the picker opened) */}
+        {notice && (
+          <div className={styles.error} role="alert">
+            <p>{notice}</p>
+          </div>
+        )}
 
         {/* Username input */}
         <form className={styles.usernameForm} onSubmit={handleUsernameSubmit}>

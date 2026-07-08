@@ -16,12 +16,50 @@ import type {
 import { getPrimaryEntityType, detectSchemaVersion } from "@/types/schema";
 import {
   safeValidateCollectionDefinition,
+  safeValidateEntity,
   formatValidationError,
 } from "@/schemas/v2";
 import {
   discoverEntitiesViaGitHub,
   isJsDelivrGitHubUrl,
 } from "./githubDiscovery";
+import { isAllowedCollectionSource } from "@/config/allowedSources";
+
+/**
+ * Fetch a collection resource, refusing non-allowlisted origins.
+ *
+ * Defence in depth: even if a caller bypasses URL-ingestion checks,
+ * no collection data is ever fetched from an origin outside the
+ * allowlist (same-origin relative paths are always allowed).
+ */
+async function fetchAllowed(url: string): Promise<Response> {
+  if (!isAllowedCollectionSource(url)) {
+    throw new Error(`Refusing to fetch from non-allowlisted source: ${url}`);
+  }
+  return fetch(url);
+}
+
+/**
+ * Validate raw data as an entity, tolerantly.
+ *
+ * Returns the entity when valid; otherwise warns (naming the source and
+ * the first validation issue) and returns null so the caller can skip it
+ * without aborting the whole collection.
+ */
+function parseEntityTolerant(data: unknown, source: string): Entity | null {
+  const result = safeValidateEntity(data);
+
+  if (result.success) {
+    return result.data as Entity;
+  }
+
+  const firstIssue = result.error.issues[0];
+  const issueText = firstIssue
+    ? `${firstIssue.path.join(".") || "(root)"}: ${firstIssue.message}`
+    : "unknown validation issue";
+  console.warn(`Skipping invalid entity from ${source}: ${issueText}`);
+  return null;
+}
 
 /**
  * Load a collection definition from a path.
@@ -32,7 +70,7 @@ import {
 export async function loadCollectionDefinition(
   basePath: string
 ): Promise<CollectionDefinition> {
-  const response = await fetch(`${basePath}/collection.json`);
+  const response = await fetchAllowed(`${basePath}/collection.json`);
 
   if (!response.ok) {
     throw new Error(
@@ -134,7 +172,7 @@ export async function loadEntities(
   // Try index-based loading first
   for (const url of [indexUrl, altIndexUrl]) {
     try {
-      const response = await fetch(url);
+      const response = await fetchAllowed(url);
 
       if (response.ok) {
         // Verify content type is JSON before parsing
@@ -184,7 +222,7 @@ export async function loadEntities(
   const pluralFileUrl = `${basePath}/${entityType}s.json`;
 
   try {
-    const response = await fetch(pluralFileUrl);
+    const response = await fetchAllowed(pluralFileUrl);
 
     if (response.ok) {
       const contentType = response.headers.get("content-type");
@@ -192,10 +230,15 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return data as Entity[];
+          return data
+            .map((item, index) =>
+              parseEntityTolerant(item, `${pluralFileUrl}[${String(index)}]`)
+            )
+            .filter((entity): entity is Entity => entity !== null);
         }
 
-        return [data as Entity];
+        const single = parseEntityTolerant(data, pluralFileUrl);
+        return single ? [single] : [];
       }
     }
   } catch {
@@ -206,7 +249,7 @@ export async function loadEntities(
   const singleFileUrl = `${basePath}/${entityType}.json`;
 
   try {
-    const response = await fetch(singleFileUrl);
+    const response = await fetchAllowed(singleFileUrl);
 
     if (response.ok) {
       const contentType = response.headers.get("content-type");
@@ -214,11 +257,16 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return data as Entity[];
+          return data
+            .map((item, index) =>
+              parseEntityTolerant(item, `${singleFileUrl}[${String(index)}]`)
+            )
+            .filter((entity): entity is Entity => entity !== null);
         }
 
         // Single entity in file
-        return [data as Entity];
+        const single = parseEntityTolerant(data, singleFileUrl);
+        return single ? [single] : [];
       }
     }
   } catch {
@@ -244,12 +292,13 @@ async function loadEntitiesFromDirectory(
     const entityUrl = `${directoryPath}/${id}.json`;
 
     try {
-      const response = await fetch(entityUrl);
+      const response = await fetchAllowed(entityUrl);
 
       if (response.ok) {
         const contentType = response.headers.get("content-type");
         if (contentType?.includes("application/json")) {
-          return (await response.json()) as Entity;
+          const data = (await response.json()) as unknown;
+          return parseEntityTolerant(data, entityUrl);
         }
       }
     } catch {
@@ -368,7 +417,7 @@ export async function detectCollectionVersion(
   basePath: string
 ): Promise<SchemaVersion | undefined> {
   try {
-    const response = await fetch(`${basePath}/collection.json`);
+    const response = await fetchAllowed(`${basePath}/collection.json`);
 
     if (!response.ok) {
       return undefined;

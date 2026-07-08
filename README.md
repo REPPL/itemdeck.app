@@ -79,10 +79,10 @@ http://localhost:5173/gh/REPPL/c/retro/games/my-collection
 
 For developers and contributors:
 
-- **[Development Guide](./docs/development/README.md)** - Technical documentation
-- **[Available Scripts](./docs/development/scripts.md)** - npm commands
-- **[Architecture](./docs/development/architecture.md)** - Project structure and patterns
-- **[Roadmap](./docs/development/roadmap/)** - Planned features
+- **[Development Guide](./.abcd/development/README.md)** - Technical documentation
+- **[Available Scripts](./.abcd/development/scripts.md)** - npm commands
+- **[Architecture](./.abcd/development/architecture.md)** - Project structure and patterns
+- **[Roadmap](./.abcd/development/roadmap/)** - Planned features
 
 ## Requirements
 

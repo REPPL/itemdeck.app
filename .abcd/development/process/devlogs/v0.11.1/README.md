@@ -180,7 +180,7 @@ Established documentation structure using Diataxis framework:
 | `docs/tutorials/getting-started.md` | User onboarding |
 | `docs/guides/keyboard-shortcuts.md` | Keyboard reference |
 | `docs/guides/search-and-filters.md` | Discovery guide |
-| `docs/development/research/R-010-settings-ux-patterns.md` | UX research |
+| `.abcd/development/research/R-010-settings-ux-patterns.md` | UX research |
 
 ### Feature Specs
 

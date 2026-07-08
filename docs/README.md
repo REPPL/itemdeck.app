@@ -61,11 +61,11 @@ Technical specifications and lookup tables.
 
 ## For Developers
 
-See the [Development Documentation](./development/) for technical docs, architecture decisions, and contributor guides.
+See the [Development Documentation](../.abcd/development/) for technical docs, architecture decisions, and contributor guides.
 
 ---
 
 ## Related Documentation
 
-- [Development Documentation](./development/) - Technical docs
+- [Development Documentation](../.abcd/development/) - Technical docs
 - [Project README](../README.md) - Project overview

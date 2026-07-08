@@ -344,7 +344,7 @@ Settings panel has 5 tabs with 15+ sub-tabs and 50+ settings. It's overwhelming 
 
 ### Research Document
 
-**File**: `docs/development/research/R-010-settings-ux-patterns.md`
+**File**: `.abcd/development/research/R-010-settings-ux-patterns.md`
 
 Covers:
 - VS Code, Figma, Notion, Discord patterns
@@ -364,7 +364,7 @@ Covers:
 
 | File | Purpose |
 |------|---------|
-| `docs/development/research/R-010-settings-ux-patterns.md` | UX research |
+| `.abcd/development/research/R-010-settings-ux-patterns.md` | UX research |
 | `src/components/SettingsPanel/QuickSettings.tsx` | Quick settings tab |
 | `src/components/SettingsPanel/AppearanceSettings.tsx` | Merged appearance |
 | `src/components/SettingsPanel/DataSettings.tsx` | Renamed storage |
@@ -553,15 +553,15 @@ Create a consistent "danger" button style for all destructive actions:
    - Fix any cross-reference inconsistencies
 
 2. Create implementation prompt: `docs/prompts/implementation/v0.11.1/README.md`
-3. Create milestone document: `docs/development/roadmap/milestones/v0.11.1.md`
+3. Create milestone document: `.abcd/development/roadmap/milestones/v0.11.1.md`
 4. Create feature specs for F-068 through F-074
 
 ### Roadmap Audit Checklist
 
 **Files to verify:**
-- `docs/development/roadmap/README.md` - Main feature table
-- `docs/development/roadmap/features/README.md` - Feature index by milestone
-- `docs/development/roadmap/milestones/*.md` - Each milestone document
+- `.abcd/development/roadmap/README.md` - Main feature table
+- `.abcd/development/roadmap/features/README.md` - Feature index by milestone
+- `.abcd/development/roadmap/milestones/*.md` - Each milestone document
 - All files in `features/completed/` and `features/planned/`
 
 **Known issues to check:**

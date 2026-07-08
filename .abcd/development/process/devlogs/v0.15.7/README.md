@@ -74,7 +74,7 @@ The README's nested folder URL example is corrected, and URL examples use the re
 ### New Files (14)
 
 ```
-docs/development/research/
+.abcd/development/research/
 ├── R-018-error-handling-strategies.md
 ├── R-019-logging-observability.md
 ├── R-020-multi-collection-state-patterns.md
@@ -84,16 +84,16 @@ docs/development/research/
 ├── state-of-the-art-error-handling.md
 └── state-of-the-art-observability.md
 
-docs/development/decisions/adrs/
+.abcd/development/decisions/adrs/
 ├── ADR-030-error-boundary-architecture.md
 ├── ADR-031-logging-telemetry-strategy.md
 └── ADR-032-plugin-api-versioning.md
 
-docs/development/process/
+.abcd/development/process/
 ├── devlogs/v0.15.7/README.md
 └── retrospectives/v0.15.7/README.md
 
-docs/development/roadmap/milestones/
+.abcd/development/roadmap/milestones/
 └── v0.15.7.md
 ```
 
@@ -101,20 +101,20 @@ docs/development/roadmap/milestones/
 
 ```
 README.md                                              # URL example fixes
-docs/development/research/README.md                    # 8 new entries
-docs/development/decisions/adrs/README.md              # 3 new ADR entries
-docs/development/process/devlogs/README.md             # v0.15.7 entry
-docs/development/process/retrospectives/README.md      # v0.15.7 entry
-docs/development/roadmap/README.md                     # v0.15.7 entry
-docs/development/roadmap/features/README.md            # F-067 location fix
-docs/development/roadmap/features/completed/README.md  # Index updates
-docs/development/roadmap/features/planned/README.md    # Index updates
-docs/development/roadmap/features/planned/F-064-*.md   # Algorithm refs
-docs/development/roadmap/milestones/v0.11.0.md         # Stale link fixes
-docs/development/roadmap/milestones/v0.11.5.md         # Stale link fixes
-docs/development/roadmap/milestones/v0.12.0.md         # Stale link fixes
-docs/development/roadmap/milestones/v0.12.5.md         # Stale link fixes
-docs/development/roadmap/milestones/v0.13.0.md         # Stale link fixes
+.abcd/development/research/README.md                    # 8 new entries
+.abcd/development/decisions/adrs/README.md              # 3 new ADR entries
+.abcd/development/process/devlogs/README.md             # v0.15.7 entry
+.abcd/development/process/retrospectives/README.md      # v0.15.7 entry
+.abcd/development/roadmap/README.md                     # v0.15.7 entry
+.abcd/development/roadmap/features/README.md            # F-067 location fix
+.abcd/development/roadmap/features/completed/README.md  # Index updates
+.abcd/development/roadmap/features/planned/README.md    # Index updates
+.abcd/development/roadmap/features/planned/F-064-*.md   # Algorithm refs
+.abcd/development/roadmap/milestones/v0.11.0.md         # Stale link fixes
+.abcd/development/roadmap/milestones/v0.11.5.md         # Stale link fixes
+.abcd/development/roadmap/milestones/v0.12.0.md         # Stale link fixes
+.abcd/development/roadmap/milestones/v0.12.5.md         # Stale link fixes
+.abcd/development/roadmap/milestones/v0.13.0.md         # Stale link fixes
 src/components/CardGrid/CardGrid.tsx                   # Top Trumps init fix
 src/hooks/useAvailableFields.ts                        # Snap Ranking fields fix
 ```

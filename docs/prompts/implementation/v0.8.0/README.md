@@ -659,7 +659,7 @@ Storage Settings Tab:
 
 | Document | Purpose |
 |----------|---------|
-| `docs/development/roadmap/milestones/v0.8.0.md` | Milestone document |
+| `.abcd/development/roadmap/milestones/v0.8.0.md` | Milestone document |
 | `public/themes/README.md` | Theme creation guide |
 | `docs/reference/collection-config.md` | Configuration reference |
 
@@ -680,8 +680,8 @@ Storage Settings Tab:
 
 **Create:**
 
-- `docs/development/process/devlogs/v0.8.0/README.md`
-- `docs/development/process/retrospectives/v0.8.0/README.md`
+- `.abcd/development/process/devlogs/v0.8.0/README.md`
+- `.abcd/development/process/retrospectives/v0.8.0/README.md`
 
 **Devlog Content:**
 - Implementation narrative

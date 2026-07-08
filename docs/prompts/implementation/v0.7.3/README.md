@@ -154,8 +154,8 @@ const { titleOptions, subtitleOptions, badgeOptions } = useFieldOptions();
 
 ## Post-Implementation
 
-1. Create devlog: `docs/development/process/devlogs/v0.7.3/README.md`
-2. Create retrospective: `docs/development/process/retrospectives/v0.7.3/README.md`
+1. Create devlog: `.abcd/development/process/devlogs/v0.7.3/README.md`
+2. Create retrospective: `.abcd/development/process/retrospectives/v0.7.3/README.md`
 3. Create settings audit report: `docs/reference/settings-audit.md`
 4. Run verification: `/verify-docs`, `/sync-docs`, `/pii-scan`
 5. Create git tag: `v0.7.3`

@@ -55,19 +55,19 @@ Since this is a documentation-only release, implementation involved:
 ## Files Changed
 
 ### Created
-- `docs/development/roadmap/milestones/v0.10.6.md`
+- `.abcd/development/roadmap/milestones/v0.10.6.md`
 - `docs/prompts/implementation/v0.10.6/README.md`
-- `docs/development/process/devlogs/v0.10.6/README.md`
-- `docs/development/process/retrospectives/v0.10.6/README.md`
+- `.abcd/development/process/devlogs/v0.10.6/README.md`
+- `.abcd/development/process/retrospectives/v0.10.6/README.md`
 
 ### Moved
 - 6 feature files from `features/planned/` to `features/completed/`
 
 ### Modified
 - `package.json` - Version update
-- `docs/development/roadmap/README.md` - Added milestones, updated features
-- `docs/development/roadmap/milestones/README.md` - Added v0.10.6
-- `docs/development/roadmap/features/README.md` - Added v0.10.6 section
+- `.abcd/development/roadmap/README.md` - Added milestones, updated features
+- `.abcd/development/roadmap/milestones/README.md` - Added v0.10.6
+- `.abcd/development/roadmap/features/README.md` - Added v0.10.6 section
 
 ## Key Insight
 

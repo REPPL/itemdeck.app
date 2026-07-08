@@ -128,7 +128,7 @@ Standardise to 3 distinct navigation patterns with consistent behaviour:
 ### Phase 5: Documentation (~2 hours)
 
 - [ ] Document patterns in code comments
-- [ ] Create `docs/development/patterns/navigation.md`
+- [ ] Create `.abcd/development/patterns/navigation.md`
 - [ ] Add pattern selection guide for new components
 - [ ] Update component stories in Storybook
 

@@ -13,7 +13,7 @@ Settings panel has 5 tabs with 15+ sub-tabs and 50+ settings. It's overwhelming 
 
 ## Research Document
 
-**File**: `docs/development/research/R-010-settings-ux-patterns.md`
+**File**: `.abcd/development/research/R-010-settings-ux-patterns.md`
 
 Covers:
 - VS Code, Figma, Notion, Discord patterns
@@ -34,7 +34,7 @@ Covers:
 
 | File | Purpose |
 |------|---------|
-| `docs/development/research/R-010-settings-ux-patterns.md` | UX research |
+| `.abcd/development/research/R-010-settings-ux-patterns.md` | UX research |
 | `src/components/SettingsPanel/QuickSettings.tsx` | Quick settings tab |
 | `src/components/SettingsPanel/AppearanceSettings.tsx` | Merged appearance |
 | `src/components/SettingsPanel/DataSettings.tsx` | Renamed storage |

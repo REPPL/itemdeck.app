@@ -449,7 +449,7 @@ npm run build
 
 ### 8.1 Create Devlog
 
-**New file**: `docs/development/process/devlogs/v0.10.5/README.md`
+**New file**: `.abcd/development/process/devlogs/v0.10.5/README.md`
 
 Document:
 - Implementation narrative
@@ -459,7 +459,7 @@ Document:
 
 ### 8.2 Create Retrospective
 
-**New file**: `docs/development/process/retrospectives/v0.10.5/README.md`
+**New file**: `.abcd/development/process/retrospectives/v0.10.5/README.md`
 
 Document:
 - What went well
@@ -469,7 +469,7 @@ Document:
 
 ### 8.3 Update Milestone
 
-**File**: `docs/development/roadmap/milestones/README.md`
+**File**: `.abcd/development/roadmap/milestones/README.md`
 
 Add v0.10.5 entry:
 ```markdown
@@ -478,7 +478,7 @@ Add v0.10.5 entry:
 
 ### 8.4 Create Feature Spec
 
-**New file**: `docs/development/roadmap/features/completed/F-068-field-descriptions.md`
+**New file**: `.abcd/development/roadmap/features/completed/F-068-field-descriptions.md`
 
 Document the field descriptions and tooltip feature.
 
@@ -542,7 +542,7 @@ Technical:
 | Category | Files |
 |----------|-------|
 | Components | `InfoTooltip/InfoTooltip.tsx`, `InfoTooltip/InfoTooltip.module.css`, `InfoTooltip/index.ts` |
-| Documentation | `docs/development/roadmap/features/completed/F-068-field-descriptions.md` |
+| Documentation | `.abcd/development/roadmap/features/completed/F-068-field-descriptions.md` |
 
 ### Modified Files (~17)
 
@@ -563,7 +563,7 @@ Technical:
 | `public/data/retro-games/platforms/switch.json` | Add MobyGames URL |
 | `public/data/retro-games/platforms/vcs2600.json` | Add MobyGames URL |
 | `public/data/retro-games/platforms/vic20.json` | Add MobyGames URL |
-| `docs/development/roadmap/milestones/README.md` | Add v0.10.5 entry |
+| `.abcd/development/roadmap/milestones/README.md` | Add v0.10.5 entry |
 
 ---
 

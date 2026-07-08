@@ -151,7 +151,7 @@ Created `BarChart.tsx` component for visualising distribution data:
 | `src/mechanics/memory/Settings.module.css` | Memory settings styles |
 | `src/mechanics/memory/types.ts` | Memory mechanic type definitions |
 | `src/loaders/githubDiscovery.ts` | GitHub API entity discovery |
-| `docs/development/process/devlogs/v0.12.0/README.md` | This devlog |
+| `.abcd/development/process/devlogs/v0.12.0/README.md` | This devlog |
 
 ### Modified Components
 

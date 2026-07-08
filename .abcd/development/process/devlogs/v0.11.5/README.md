@@ -143,10 +143,10 @@ Added features and bug fixes to v0.12.0 milestone:
 
 | File | Purpose |
 |------|---------|
-| `docs/development/roadmap/milestones/v0.11.5.md` | Milestone documentation |
-| `docs/development/roadmap/features/planned/F-091-entity-auto-discovery.md` | New feature spec |
-| `docs/development/process/devlogs/v0.11.5/README.md` | This devlog |
-| `docs/development/process/retrospectives/v0.11.5/README.md` | Retrospective |
+| `.abcd/development/roadmap/milestones/v0.11.5.md` | Milestone documentation |
+| `.abcd/development/roadmap/features/planned/F-091-entity-auto-discovery.md` | New feature spec |
+| `.abcd/development/process/devlogs/v0.11.5/README.md` | This devlog |
+| `.abcd/development/process/retrospectives/v0.11.5/README.md` | Retrospective |
 
 ### Modified Components
 

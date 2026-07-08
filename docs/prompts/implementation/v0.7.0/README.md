@@ -543,8 +543,8 @@ The Gemini-enriched data was prepared separately and will be copied into the pro
 
 | File | Purpose |
 |------|---------|
-| `docs/development/process/devlogs/v0.7.0/README.md` | Development narrative |
-| `docs/development/process/retrospectives/v0.7.0/README.md` | Post-milestone reflection |
+| `.abcd/development/process/devlogs/v0.7.0/README.md` | Development narrative |
+| `.abcd/development/process/retrospectives/v0.7.0/README.md` | Post-milestone reflection |
 
 ### Verification Steps
 
@@ -576,8 +576,8 @@ The Gemini-enriched data was prepared separately and will be copied into the pro
 | `public/data/recipes/entities/recipes.json` | 7 |
 | `public/data/recipes/entities/cuisines.json` | 7 |
 | `docs/reference/schemas/v2/README.md` | 8 |
-| `docs/development/process/devlogs/v0.7.0/README.md` | 9 |
-| `docs/development/process/retrospectives/v0.7.0/README.md` | 9 |
+| `.abcd/development/process/devlogs/v0.7.0/README.md` | 9 |
+| `.abcd/development/process/retrospectives/v0.7.0/README.md` | 9 |
 
 ### Modified Files (17)
 

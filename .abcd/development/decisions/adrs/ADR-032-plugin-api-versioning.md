@@ -281,7 +281,7 @@ const v2Api = {
 ### Migration Guide Location
 
 ```
-docs/development/guides/plugin-api-migration/
+.abcd/development/guides/plugin-api-migration/
 ├── README.md                # Overview of migration guides
 ├── v1-to-v2.md              # v1 → v2 migration
 └── v2-to-v3.md              # v2 → v3 migration

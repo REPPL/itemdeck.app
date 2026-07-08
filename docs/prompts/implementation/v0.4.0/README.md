@@ -16,7 +16,7 @@ Implement the v0.4.0 Performance & Interaction milestone for itemdeck autonomous
 - Create new branch: feature/v0.4.0-performance
 
 ## Milestone Documentation
-Read the milestone document at: docs/development/roadmap/milestones/v0.4.0.md
+Read the milestone document at: .abcd/development/roadmap/milestones/v0.4.0.md
 
 ## Features to Implement (12 features)
 
@@ -72,7 +72,7 @@ Read the milestone document at: docs/development/roadmap/milestones/v0.4.0.md
 14. Ensure all tests pass before completing
 
 ## Key Files to Reference
-- Feature specs in docs/development/roadmap/features/planned/
+- Feature specs in .abcd/development/roadmap/features/planned/
 - Existing components in src/components/
 - Settings store in src/stores/settingsStore.ts
 - Theme system in src/styles/theme.css
@@ -88,8 +88,8 @@ Read the milestone document at: docs/development/roadmap/milestones/v0.4.0.md
 - All layout modes functional
 
 ## Important Requirements
-- Write devlog at docs/development/process/devlogs/v0.4.0/README.md BEFORE final commit
-- Write retrospective at docs/development/process/retrospectives/v0.4.0/README.md BEFORE final commit
+- Write devlog at .abcd/development/process/devlogs/v0.4.0/README.md BEFORE final commit
+- Write retrospective at .abcd/development/process/retrospectives/v0.4.0/README.md BEFORE final commit
 - Run /sync-docs to verify documentation consistency
 - Move completed features from planned/ to completed/
 - Update milestone status to Complete

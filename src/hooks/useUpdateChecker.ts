@@ -51,8 +51,17 @@ export interface UpdateCheckerState {
  * ```
  */
 export function useUpdateChecker(sourceId: string): UpdateCheckerState {
-  const source = useSourceStore((state) =>
-    state.sources.find((s) => s.id === sourceId)
+  // Subscribe to primitives only: depending on the source OBJECT would
+  // re-trigger the check effect every time setSourceUpdateCheck rebuilds
+  // it (lastRemoteCheck changes on every check), causing a check loop.
+  const sourceExists = useSourceStore((state) =>
+    state.sources.some((s) => s.id === sourceId)
+  );
+  const hasUpdate = useSourceStore(
+    (state) => state.sources.find((s) => s.id === sourceId)?.hasUpdate ?? false
+  );
+  const lastChecked = useSourceStore(
+    (state) => state.sources.find((s) => s.id === sourceId)?.lastRemoteCheck
   );
   const setSourceUpdateCheck = useSourceStore((state) => state.setSourceUpdateCheck);
 
@@ -60,6 +69,9 @@ export function useUpdateChecker(sourceId: string): UpdateCheckerState {
   const [error, setError] = useState<string | undefined>();
 
   const performCheck = useCallback(async () => {
+    // Read the source imperatively so this callback stays referentially
+    // stable across the store writes it performs itself
+    const source = useSourceStore.getState().getSource(sourceId);
     if (!source) {
       return;
     }
@@ -91,11 +103,11 @@ export function useUpdateChecker(sourceId: string): UpdateCheckerState {
     } finally {
       setIsChecking(false);
     }
-  }, [source, sourceId, setSourceUpdateCheck]);
+  }, [sourceId, setSourceUpdateCheck]);
 
   // Run initial check and set up interval
   useEffect(() => {
-    if (!sourceId || !source) {
+    if (!sourceId || !sourceExists) {
       return;
     }
 
@@ -110,11 +122,11 @@ export function useUpdateChecker(sourceId: string): UpdateCheckerState {
     return () => {
       clearInterval(intervalId);
     };
-  }, [sourceId, source, performCheck]);
+  }, [sourceId, sourceExists, performCheck]);
 
   return {
-    hasUpdate: source?.hasUpdate ?? false,
-    lastChecked: source?.lastRemoteCheck,
+    hasUpdate,
+    lastChecked,
     isChecking,
     error,
     checkNow: performCheck,
@@ -149,7 +161,12 @@ export function useUpdateCheckerAll(): {
     setIsChecking(true);
 
     try {
-      const checks = sources.map(async (source) => {
+      // Read sources imperatively so this callback stays referentially
+      // stable when setSourceUpdateCheck rebuilds the sources array,
+      // avoiding a self-triggering check loop.
+      const currentSources = useSourceStore.getState().sources;
+
+      const checks = currentSources.map(async (source) => {
         const cacheMetadata = await getCacheMetadata(source.id);
         const localTimestamp = cacheMetadata.cachedAt?.getTime();
         const result = await checkForUpdates(source, localTimestamp);
@@ -165,11 +182,13 @@ export function useUpdateCheckerAll(): {
     } finally {
       setIsChecking(false);
     }
-  }, [sources, setSourceUpdateCheck]);
+  }, [setSourceUpdateCheck]);
 
-  // Run initial check and set up interval
+  // Run initial check and set up interval (keyed on the source COUNT,
+  // a stable primitive, not the array identity)
+  const sourceCount = sources.length;
   useEffect(() => {
-    if (sources.length === 0) {
+    if (sourceCount === 0) {
       return;
     }
 
@@ -184,7 +203,7 @@ export function useUpdateCheckerAll(): {
     return () => {
       clearInterval(intervalId);
     };
-  }, [sources.length, checkAllNow]);
+  }, [sourceCount, checkAllNow]);
 
   const sourcesWithUpdates = sources.filter((s) => s.hasUpdate);
 

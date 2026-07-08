@@ -17,7 +17,13 @@ import {
   getPrimaryImage,
   getLogoUrl,
 } from "@/loaders";
-import { cacheCollection, isCollectionCached } from "@/lib/cardCache";
+import {
+  cacheCollection,
+  getCachedCollection,
+  isCollectionCached,
+} from "@/lib/cardCache";
+import { useSourceStore } from "@/stores/sourceStore";
+import { useSettingsStore } from "@/stores/settingsStore";
 import type { Image } from "@/types/image";
 import type { ResolvedEntity, CollectionConfig } from "@/types/schema";
 import type { DisplayConfig } from "@/types/display";
@@ -135,6 +141,9 @@ interface CollectionResult {
 
   /** Collection-specific settings (from settings.json) */
   settings?: CollectionSettings;
+
+  /** True when data was served from the offline cache after a failed fetch */
+  isStale?: boolean;
 }
 
 /**
@@ -175,12 +184,65 @@ function formatAttribution(images: Image[] | undefined): string | undefined {
 }
 
 /**
+ * Placeholder image URL for cards without images.
+ */
+function placeholderImage(id: string): string {
+  return `https://picsum.photos/seed/${id}/400/300`;
+}
+
+/**
+ * Resolve the sourceStore source.id for a base path.
+ *
+ * Cache entries are keyed by the sourceStore source.id — the canonical
+ * convention shared with LoadingScreen, CacheIndicator, and useUpdateChecker.
+ * Returns null when no registered source matches the base path (nothing
+ * reads cache entries for unregistered sources, so none are written).
+ */
+function resolveSourceId(basePath: string): string | null {
+  const normalized = basePath.endsWith("/") ? basePath.slice(0, -1) : basePath;
+  const source = useSourceStore
+    .getState()
+    .sources.find((s) => s.url === normalized);
+  return source?.id ?? null;
+}
+
+/**
+ * Build a CollectionResult from a cached legacy Collection.
+ *
+ * Used as the offline fallback when fetching fresh data fails.
+ */
+function buildResultFromCache(collection: Collection): CollectionResult {
+  const cards: DisplayCard[] = collection.items.map((item) => {
+    const orderValue = item.metadata?.order ?? item.metadata?.rank;
+    const parsedOrder = orderValue !== undefined ? Number(orderValue) : Number.NaN;
+    const order = Number.isFinite(parsedOrder) ? parsedOrder : null;
+    const imageUrl = item.imageUrl ?? placeholderImage(item.id);
+
+    return {
+      ...item,
+      imageUrl,
+      imageUrls:
+        item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : [imageUrl],
+      order,
+      // Legacy alias
+      rank: order,
+    };
+  });
+
+  return {
+    cards,
+    collection,
+    isStale: true,
+  };
+}
+
+/**
  * Fetch and process v2 schema collection.
  *
  * @param basePath - Base path for the collection
  * @returns Collection result with display cards
  */
-async function fetchCollection(basePath: string): Promise<CollectionResult> {
+async function loadFreshCollection(basePath: string): Promise<CollectionResult> {
   // Load collection and settings in parallel
   const [loaded, settings] = await Promise.all([
     loadCollection(basePath),
@@ -196,8 +258,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
   );
 
   // Convert to DisplayCard format
-  const placeholder = (id: string) =>
-    `https://picsum.photos/seed/${id}/400/300`;
+  const placeholder = placeholderImage;
 
   const cards: DisplayCard[] = resolvedEntities.map((entity: ResolvedEntity) => {
     const images = entity.images;
@@ -408,20 +469,6 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
     }),
   };
 
-  // Cache the collection for offline use (fire and forget)
-  // Only cache if not already cached (incremental caching)
-  const sourceId = basePath.replace(/\//g, "-");
-  void (async () => {
-    try {
-      const alreadyCached = await isCollectionCached(sourceId);
-      if (!alreadyCached) {
-        await cacheCollection(sourceId, legacyCollection);
-      }
-    } catch (error: unknown) {
-      console.warn("Failed to cache collection:", error);
-    }
-  })();
-
   return {
     cards,
     collection: legacyCollection,
@@ -430,6 +477,51 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
     config: loaded.definition.config,
     settings: settings ?? undefined,
   };
+}
+
+/**
+ * Fetch a collection with offline caching.
+ *
+ * On success, persists the collection to IndexedDB keyed by the
+ * sourceStore source.id — only with cache consent (settingsStore).
+ * On failure, falls back to the cached copy when one exists.
+ *
+ * @param basePath - Base path for the collection
+ * @returns Collection result with display cards
+ */
+async function fetchCollection(basePath: string): Promise<CollectionResult> {
+  const sourceId = resolveSourceId(basePath);
+
+  try {
+    const result = await loadFreshCollection(basePath);
+
+    // Cache the collection for offline use (fire and forget).
+    // Requires a registered source id and cache consent; only caches
+    // if not already cached (incremental caching).
+    if (sourceId && useSettingsStore.getState().hasCacheConsent(sourceId)) {
+      void (async () => {
+        try {
+          const alreadyCached = await isCollectionCached(sourceId);
+          if (!alreadyCached) {
+            await cacheCollection(sourceId, result.collection);
+          }
+        } catch (error: unknown) {
+          console.warn("Failed to cache collection:", error);
+        }
+      })();
+    }
+
+    return result;
+  } catch (error) {
+    // Offline fallback: serve the cached copy when the fetch fails
+    if (sourceId) {
+      const cached = await getCachedCollection(sourceId);
+      if (cached) {
+        return buildResultFromCache(cached);
+      }
+    }
+    throw error;
+  }
 }
 
 /**

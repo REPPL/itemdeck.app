@@ -4,93 +4,86 @@
 
 set -e
 
-# American English patterns to flag (word boundaries)
-# Format: american|british
-PATTERNS=(
-    "organize|organise"
-    "organizing|organising"
-    "organized|organised"
-    "organization|organisation"
-    "color|colour"
-    "colors|colours"
-    "colored|coloured"
-    "behavior|behaviour"
-    "behaviors|behaviours"
-    "behavioral|behavioural"
-    "optimize|optimise"
-    "optimizing|optimising"
-    "optimized|optimised"
-    "optimization|optimisation"
-    "specialize|specialise"
-    "specializing|specialising"
-    "specialized|specialised"
-    "specialization|specialisation"
-    "customize|customise"
-    "customizing|customising"
-    "customized|customised"
-    "customization|customisation"
-    "analyze|analyse"
-    "analyzing|analysing"
-    "analyzed|analysed"
-    "favor|favour"
-    "favoring|favouring"
-    "favored|favoured"
-    "favorite|favourite"
-    "center|centre"
-    "centers|centres"
-    "centered|centred"
-    "labor|labour"
-    "labeling|labelling"
-    "labeled|labelled"
-    "honor|honour"
-    "honored|honoured"
-    "catalog|catalogue"
-    "dialog|dialogue"
-    "traveled|travelled"
-    "traveling|travelling"
-    "canceled|cancelled"
-    "canceling|cancelling"
-    "modeled|modelled"
-    "modeling|modelling"
-    "signaled|signalled"
-    "signaling|signalling"
-    "fulfill|fulfil"
-    "fulfilling|fulfilling"
-    "enrollment|enrolment"
-    "license|licence"
+source "$(dirname "$0")/lib/staged-files.sh"
+
+# American English spellings to flag (word boundaries)
+# Note: no entry for "license" (valid British verb form; the noun is
+# "licence") or "fulfilling" (spelled the same in both dialects).
+AMERICAN_SPELLINGS=(
+    "organize"
+    "organizing"
+    "organized"
+    "organization"
+    "color"
+    "colors"
+    "colored"
+    "behavior"
+    "behaviors"
+    "behavioral"
+    "optimize"
+    "optimizing"
+    "optimized"
+    "optimization"
+    "specialize"
+    "specializing"
+    "specialized"
+    "specialization"
+    "customize"
+    "customizing"
+    "customized"
+    "customization"
+    "analyze"
+    "analyzing"
+    "analyzed"
+    "favor"
+    "favoring"
+    "favored"
+    "favorite"
+    "center"
+    "centers"
+    "centered"
+    "labor"
+    "labeling"
+    "labeled"
+    "honor"
+    "honored"
+    "catalog"
+    "dialog"
+    "traveled"
+    "traveling"
+    "canceled"
+    "canceling"
+    "modeled"
+    "modeling"
+    "signaled"
+    "signaling"
+    "fulfill"
+    "enrollment"
 )
 
-# Build grep pattern from American spellings only
-AMERICAN_WORDS=""
-for pair in "${PATTERNS[@]}"; do
-    american="${pair%%|*}"
-    if [ -z "$AMERICAN_WORDS" ]; then
-        AMERICAN_WORDS="$american"
-    else
-        AMERICAN_WORDS="$AMERICAN_WORDS|$american"
-    fi
-done
+# Build grep pattern from American spellings
+AMERICAN_WORDS=$(IFS='|'; echo "${AMERICAN_SPELLINGS[*]}")
 
 found_issues=0
 
 # Get staged markdown files
-staged_files=$(git diff --cached --name-only --diff-filter=d 2>/dev/null | grep -E '\.md$' || echo "")
+staged_files=$(list_staged_files '\.md$')
 
 if [ -z "$staged_files" ]; then
     exit 0
 fi
 
-for file in $staged_files; do
-    # Skip if file doesn't exist
-    if [ ! -f "$file" ]; then
-        continue
-    fi
-
-    # Check for American English (case insensitive, word boundaries)
-    matches=$(grep -niE "\b($AMERICAN_WORDS)\b" "$file" 2>/dev/null || true)
+while IFS= read -r file; do
+    # Check the STAGED content (index blob), not the worktree copy: what
+    # gets committed is the index, which may differ from the file on disk.
+    # Strip fenced code block content (toggling on ``` delimiter lines),
+    # then check for American English (case insensitive, word boundaries)
+    matches=$(git show ":$file" 2>/dev/null \
+        | awk '/^[[:space:]]*```/ { in_fence = !in_fence; next } !in_fence { printf "%d:%s\n", NR, $0 }' \
+        | grep -iE "\b($AMERICAN_WORDS)\b" || true)
 
     if [ -n "$matches" ]; then
-        # Filter out exceptions (code blocks, URLs, library names)
+        # Filter out exceptions (inline code, URLs, library names)
         filtered=$(echo "$matches" | grep -vE '```|https?://|colorama|behavior-tree|node_modules' || true)
 
         if [ -n "$filtered" ]; then
@@ -99,7 +92,7 @@ for file in $staged_files; do
             found_issues=1
         fi
     fi
-done
+done <<< "$staged_files"
 
 if [ $found_issues -eq 1 ]; then
     echo ""

@@ -1,0 +1,24 @@
+<svg width="1000" height="280" viewBox="0 0 1000 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="itemdeck.app">
+  <title>itemdeck.app logo</title>
+  <!-- ===== Mark ===== -->
+  <g transform="translate(20 20) scale(0.9)">
+    <g transform="rotate(-17 120 196)">
+      <rect x="72" y="60" width="96" height="132" rx="20" fill="#E7A72C"/>
+      <rect x="72" y="60" width="96" height="132" rx="20" fill="#000" opacity="0.06"/>
+    </g>
+    <g transform="rotate(-1 120 196)">
+      <rect x="72" y="56" width="96" height="132" rx="20" fill="#0E9C99"/>
+      <rect x="86" y="72" width="68" height="46" rx="9" fill="#FFFFFF" opacity="0.22"/>
+    </g>
+    <g transform="rotate(15 120 196)">
+      <rect x="72" y="52" width="96" height="132" rx="20" fill="#E85C46"/>
+      <rect x="86" y="68" width="68" height="48" rx="10" fill="#FBF6EC" opacity="0.92"/>
+      <circle cx="120" cy="92" r="15" fill="#E85C46"/>
+      <path d="M113 92h14M120 85v14" stroke="#FBF6EC" stroke-width="4.5" stroke-linecap="round"/>
+      <rect x="86" y="128" width="52" height="9" rx="4.5" fill="#FBF6EC" opacity="0.7"/>
+      <rect x="86" y="145" width="34" height="8" rx="4" fill="#FBF6EC" opacity="0.5"/>
+    </g>
+  </g>
+  <!-- ===== Wordmark (live text; outline the text if you need it font-independent) ===== -->
+  <text x="270" y="170" font-family="'Space Grotesk','Segoe UI',Arial,sans-serif" font-size="112" font-weight="700" letter-spacing="-3" fill="#201B14">itemdeck<tspan fill="#E85C46">.app</tspan></text>
+</svg>

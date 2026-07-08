@@ -1,0 +1,26 @@
+<svg width="512" height="512" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="itemdeck">
+  <title>itemdeck mark</title>
+  <!-- Fanned deck of three "cartridge" cards. Colours: gold, teal, coral. -->
+  <g>
+    <!-- back card: gold -->
+    <g transform="rotate(-17 120 196)">
+      <rect x="72" y="60" width="96" height="132" rx="20" fill="#E7A72C"/>
+      <rect x="72" y="60" width="96" height="132" rx="20" fill="#000" opacity="0.06"/>
+    </g>
+    <!-- middle card: teal -->
+    <g transform="rotate(-1 120 196)">
+      <rect x="72" y="56" width="96" height="132" rx="20" fill="#0E9C99"/>
+      <rect x="86" y="72" width="68" height="46" rx="9" fill="#FFFFFF" opacity="0.22"/>
+    </g>
+    <!-- front card: coral -->
+    <g transform="rotate(15 120 196)">
+      <rect x="72" y="52" width="96" height="132" rx="20" fill="#E85C46"/>
+      <!-- little "collection item" detail -->
+      <rect x="86" y="68" width="68" height="48" rx="10" fill="#FBF6EC" opacity="0.92"/>
+      <circle cx="120" cy="92" r="15" fill="#E85C46"/>
+      <path d="M113 92h14M120 85v14" stroke="#FBF6EC" stroke-width="4.5" stroke-linecap="round"/>
+      <rect x="86" y="128" width="52" height="9" rx="4.5" fill="#FBF6EC" opacity="0.7"/>
+      <rect x="86" y="145" width="34" height="8" rx="4" fill="#FBF6EC" opacity="0.5"/>
+    </g>
+  </g>
+</svg>

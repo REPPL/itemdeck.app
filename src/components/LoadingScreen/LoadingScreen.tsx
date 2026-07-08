@@ -10,6 +10,8 @@
  */
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { collectionKeys } from "@/hooks/queryKeys";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { useImagePreloader } from "@/hooks/useImageCache";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -67,6 +69,7 @@ export function LoadingScreen({
   const { cards, isLoading: isLoadingCollection, error } = useCollectionData();
   const { preload, isPreloading, progressPercent } = useImagePreloader();
   const visualTheme = useSettingsStore((s) => s.visualTheme);
+  const queryClient = useQueryClient();
 
   // Cache consent state (F-080)
   const cacheConsentPreference = useSettingsStore((s) => s.cacheConsentPreference);
@@ -149,17 +152,32 @@ export function LoadingScreen({
     return !hasCacheConsent(activeSourceId);
   }, [activeSourceId, activeSource?.isBuiltIn, cacheConsentPreference, hasCacheConsent]);
 
+  // Start image preloading; a failed preload must not strand the
+  // loading screen, so advance to complete on rejection
+  const startImagePreload = useCallback(() => {
+    setPhase("images");
+    preload(imageUrls).catch((err: unknown) => {
+      console.error("Image preloading failed; continuing without cached images:", err);
+      setPhase("complete");
+    });
+  }, [imageUrls, preload]);
+
   // Handle consent dialog responses
   const handleConsentAllow = useCallback(() => {
     setConsentDialogOpen(false);
+    // Consent was granted (in the store) only after the initial fetch
+    // completed with no consent, so the collection JSON was not cached.
+    // Invalidate the collection query so fetchCollection re-runs and now
+    // caches it. This also covers image-less collections, which never
+    // reach the image-preload cache path.
+    void queryClient.invalidateQueries({ queryKey: collectionKeys.all });
     // Proceed to image preloading
     if (shouldPreloadImages && imageUrls.length > 0) {
-      setPhase("images");
-      void preload(imageUrls);
+      startImagePreload();
     } else {
       setPhase("complete");
     }
-  }, [shouldPreloadImages, imageUrls, preload]);
+  }, [shouldPreloadImages, imageUrls, startImagePreload, queryClient]);
 
   const handleConsentDeny = useCallback(() => {
     setConsentDialogOpen(false);
@@ -167,21 +185,25 @@ export function LoadingScreen({
     setPhase("complete");
   }, []);
 
-  // Handle collection loading complete
+  // Handle collection loading complete. A loaded-but-empty collection
+  // (zero cards, no error) also completes; the grid renders its own
+  // empty state. Requires an active source so the gated query (no
+  // source yet) does not complete the screen prematurely.
   useEffect(() => {
-    if (!isLoadingCollection && cards.length > 0 && phase === "collection") {
-      // Check if we need consent before caching images
-      if (needsCacheConsent && shouldPreloadImages && imageUrls.length > 0) {
+    if (!isLoadingCollection && !error && activeSourceId && phase === "collection") {
+      // Ask for consent before caching anything. This must not depend on
+      // the collection having images: an image-less external collection
+      // still needs consent to cache its JSON for offline use.
+      if (needsCacheConsent) {
         setPhase("consent");
         setConsentDialogOpen(true);
       } else if (shouldPreloadImages && imageUrls.length > 0) {
-        setPhase("images");
-        void preload(imageUrls);
+        startImagePreload();
       } else {
         setPhase("complete");
       }
     }
-  }, [isLoadingCollection, cards.length, phase, shouldPreloadImages, imageUrls, preload, needsCacheConsent]);
+  }, [isLoadingCollection, error, activeSourceId, phase, shouldPreloadImages, imageUrls, startImagePreload, needsCacheConsent]);
 
   // Handle image preloading complete
   useEffect(() => {

@@ -80,8 +80,14 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
     preventScroll: true,
   });
 
-  // Load all mechanics on mount
+  // Load all mechanics when the panel first opens (not on mount: the panel
+  // is always mounted, and loading eagerly would dynamically import every
+  // game bundle at startup, defeating lazy loading).
+  const hasLoadedMechanicsRef = useRef(false);
   useEffect(() => {
+    if (!isOpen || hasLoadedMechanicsRef.current) return;
+    hasLoadedMechanicsRef.current = true;
+
     const loadMechanics = async () => {
       try {
         setIsLoading(true);
@@ -96,7 +102,7 @@ export function MechanicPanel({ isOpen, onClose }: MechanicPanelProps) {
     };
 
     void loadMechanics();
-  }, []);
+  }, [isOpen]);
 
   // Handle mechanic selection (first step - show configuration)
   const handlePreSelect = useCallback(

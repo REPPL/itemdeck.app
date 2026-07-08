@@ -110,6 +110,11 @@ export function Card({
   const { cardDimensions } = useSettingsContext();
   const { config } = useConfig();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Mount CardExpanded lazily: each instance registers a window resize
+  // listener (via useViewportSize), so collapsed cards must not mount it.
+  // Once opened, it stays mounted so its internal AnimatePresence exit
+  // animation can play when the modal closes.
+  const [hasOpenedExpanded, setHasOpenedExpanded] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
   const [isFlipping, setIsFlipping] = useState(false);
   const cardRef = useRef<HTMLElement>(null);
@@ -212,6 +217,7 @@ export function Card({
       if (cardRef.current) {
         setOriginRect(cardRef.current.getBoundingClientRect());
       }
+      setHasOpenedExpanded(true);
       setIsModalOpen(true);
       onOpenExpanded();
       return;
@@ -232,6 +238,7 @@ export function Card({
     if (cardRef.current) {
       setOriginRect(cardRef.current.getBoundingClientRect());
     }
+    setHasOpenedExpanded(true);
     setIsModalOpen(true);
   }, []);
 
@@ -306,12 +313,14 @@ export function Card({
         {/* Mechanic overlay (renders on top, inside card for hover transform) */}
         {overlay}
       </motion.article>
-      <CardExpanded
-        card={displayCard}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        originRect={originRect}
-      />
+      {hasOpenedExpanded && (
+        <CardExpanded
+          card={displayCard}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          originRect={originRect}
+        />
+      )}
     </>
   );
 }

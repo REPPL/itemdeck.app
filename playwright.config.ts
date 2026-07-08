@@ -16,7 +16,8 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
-    baseURL: 'http://localhost:5173',
+    // The app is served from /demo/ (see base in vite.config.ts).
+    baseURL: 'http://localhost:5173/demo/',
     trace: 'on-first-retry',
   },
   projects: [
@@ -27,7 +28,7 @@ export default defineConfig({
   ],
   webServer: {
     command: 'npm run dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:5173/demo/',
     reuseExistingServer: !process.env.CI,
   },
 });

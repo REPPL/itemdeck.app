@@ -61,7 +61,7 @@ async function waitForAppReady(page: import('@playwright/test').Page) {
 
 test.describe('WCAG 2.2 AA Compliance', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -153,7 +153,7 @@ test.describe('WCAG 2.2 AA Compliance', () => {
 
 test.describe('Component-Specific Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 

@@ -33,7 +33,7 @@ async function waitForAppReady(page: import('@playwright/test').Page) {
 
 test.describe('Keyboard Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -110,7 +110,7 @@ test.describe('Keyboard Navigation', () => {
 
 test.describe('Card Grid Navigation', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
     // Wait for cards to load
     await page.waitForSelector('[data-card-id]', { timeout: 30000 });
@@ -215,7 +215,7 @@ test.describe('Card Grid Navigation', () => {
 
 test.describe('Modal Focus Trap', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -285,7 +285,7 @@ test.describe('Modal Focus Trap', () => {
 
 test.describe('Global Keyboard Shortcuts', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 

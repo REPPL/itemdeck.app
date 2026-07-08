@@ -28,6 +28,7 @@
 import { useMemo } from "react";
 import { parseProviderUrl, buildCollectionUrl } from "@/providers";
 import { isAllowedCollectionSource } from "@/config/allowedSources";
+import { getBasePath, stripBase } from "@/config/basePath";
 
 /**
  * Parsed URL collection info.
@@ -71,7 +72,7 @@ function parseAbsoluteUrl(value: string): URL | null {
  * 5. Path-based: /gh/REPPL/collection/my_games/ (legacy)
  * 6. Legacy full URL: ?collection=https://cdn.jsdelivr.net/...
  *
- * @param pathname - URL pathname
+ * @param pathname - URL pathname (the app base path is stripped first)
  * @param searchParams - URL search parameters
  * @returns Parsed collection info from URL
  */
@@ -80,6 +81,10 @@ export function parseUrlPath(
   searchParams?: URLSearchParams
 ): UrlCollectionInfo {
   const params = searchParams ?? new URLSearchParams();
+
+  // Strip the app base path (e.g. "/demo/") so the route patterns below
+  // keep matching root-relative paths like "/gh/USER/c/PATH".
+  const path = stripBase(pathname);
 
   // 1. Check for legacy full URL format: ?collection=https://...
   const legacyCollectionUrl = params.get("collection");
@@ -119,7 +124,7 @@ export function parseUrlPath(
     normalizedParams.set("collection", shortCollection);
   }
 
-  const providerResult = parseProviderUrl(pathname, normalizedParams);
+  const providerResult = parseProviderUrl(path, normalizedParams);
   if (providerResult) {
     const { providerId, params: providerParams } = providerResult;
     const collectionUrl = buildCollectionUrl(providerId, providerParams);
@@ -138,7 +143,7 @@ export function parseUrlPath(
   }
 
   // 3. Check for path-based formats: /gh/REPPL/...
-  const ghMatch = /^\/gh\/([^/]+)\/?(.*)$/.exec(pathname);
+  const ghMatch = /^\/gh\/([^/]+)\/?(.*)$/.exec(path);
 
   if (!ghMatch) {
     return {
@@ -233,9 +238,15 @@ export function useUrlCollection(): UrlCollectionInfo {
 
 /**
  * Clear the URL path after loading (to avoid re-triggering on refresh).
+ *
+ * Resets to the app base path (e.g. "/demo/"), not the origin root.
  */
 export function clearUrlPath(): void {
-  if (typeof window !== "undefined" && window.location.pathname !== "/") {
-    window.history.replaceState({}, "", "/");
+  if (typeof window === "undefined") {
+    return;
+  }
+  const base = getBasePath();
+  if (window.location.pathname !== base) {
+    window.history.replaceState({}, "", base);
   }
 }

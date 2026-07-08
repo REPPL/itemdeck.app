@@ -31,7 +31,7 @@ async function waitForAppReady(page: import('@playwright/test').Page) {
 
 test.describe('ARIA Live Regions', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -57,7 +57,7 @@ test.describe('ARIA Live Regions', () => {
 
   test('Loading screen has aria-busy state', async ({ page }) => {
     // Navigate to force a new load
-    await page.goto('/');
+    await page.goto('/demo/');
 
     // Look for loading indicators with aria-busy
     const loadingElements = page.locator('[aria-busy="true"]');
@@ -66,7 +66,7 @@ test.describe('ARIA Live Regions', () => {
   });
 
   test('Loading status has aria-live for screen readers', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
 
     // Check for status elements during loading
     const statusElements = page.locator('[role="status"][aria-live]');
@@ -78,7 +78,7 @@ test.describe('ARIA Live Regions', () => {
 
 test.describe('Card Flip Announcements', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
     await page.waitForSelector('[data-card-id]', { timeout: 30000 });
   });
@@ -133,7 +133,7 @@ test.describe('Card Flip Announcements', () => {
 
 test.describe('Error Announcements', () => {
   test('Error messages use role="alert"', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
 
     // Check if any error elements use role="alert"
     const alertElements = page.locator('[role="alert"]');
@@ -152,7 +152,7 @@ test.describe('Error Announcements', () => {
 
 test.describe('Modal Dialog Accessibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -205,7 +205,7 @@ test.describe('Modal Dialog Accessibility', () => {
 
 test.describe('Main Content Landmark', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -222,7 +222,7 @@ test.describe('Main Content Landmark', () => {
 
 test.describe('Heading Structure', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -243,7 +243,7 @@ test.describe('Heading Structure', () => {
 
 test.describe('Form Controls', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
     // Open settings to access form controls
     await page.keyboard.press('Control+a');

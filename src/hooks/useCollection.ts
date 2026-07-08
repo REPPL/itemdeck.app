@@ -22,6 +22,7 @@ import {
   getCachedCollection,
   isCollectionCached,
 } from "@/lib/cardCache";
+import { withBase } from "@/config/basePath";
 import { useSourceStore } from "@/stores/sourceStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import type { Image } from "@/types/image";
@@ -559,7 +560,7 @@ export function useLocalCollection(
 /**
  * Default local data path.
  */
-const DEFAULT_LOCAL_PATH = "/data/retro-games";
+const DEFAULT_LOCAL_PATH = withBase("/data/retro-games");
 
 /**
  * Hook for fetching the default local collection.

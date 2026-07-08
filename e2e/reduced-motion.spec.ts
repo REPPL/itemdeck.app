@@ -35,7 +35,7 @@ test.describe('Prefers Reduced Motion', () => {
     // Enable reduced motion preference
     await page.emulateMedia({ reducedMotion: 'reduce' });
 
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Check that the document has reduced motion applied
@@ -48,7 +48,7 @@ test.describe('Prefers Reduced Motion', () => {
 
   test('Animations are disabled with reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Wait for cards to load
@@ -77,7 +77,7 @@ test.describe('Prefers Reduced Motion', () => {
     // Explicitly set no motion preference
     await page.emulateMedia({ reducedMotion: 'no-preference' });
 
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Check data attribute
@@ -91,7 +91,7 @@ test.describe('Prefers Reduced Motion', () => {
 
 test.describe('User Override Settings', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -169,7 +169,7 @@ test.describe('User Override Settings', () => {
 test.describe('Animation Behaviour with Reduced Motion', () => {
   test('Card hover effects respect reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     await page.waitForSelector('[data-card-id]', { timeout: 30000 });
@@ -185,7 +185,7 @@ test.describe('Animation Behaviour with Reduced Motion', () => {
 
   test('Modal transitions respect reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Time modal opening
@@ -201,7 +201,7 @@ test.describe('Animation Behaviour with Reduced Motion', () => {
 
   test('Toast animations respect reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Trigger an action that shows a toast (e.g., soft refresh)
@@ -226,7 +226,7 @@ test.describe('Animation Behaviour with Reduced Motion', () => {
 test.describe('CSS Reduced Motion Query', () => {
   test('CSS respects prefers-reduced-motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Inject a test to check if CSS media query is active
@@ -239,7 +239,7 @@ test.describe('CSS Reduced Motion Query', () => {
 
   test('CSS animations have fallbacks for reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Check that animated elements have reduced motion styles
@@ -254,7 +254,7 @@ test.describe('CSS Reduced Motion Query', () => {
 test.describe('Focus and Interaction with Reduced Motion', () => {
   test('Focus transitions work with reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Tab through elements
@@ -271,7 +271,7 @@ test.describe('Focus and Interaction with Reduced Motion', () => {
 
   test('Keyboard navigation works with reduced motion', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     await page.waitForSelector('[data-card-id]', { timeout: 30000 });

@@ -16,6 +16,7 @@ import { ExternalLinkIcon, CloseIcon, InfoIcon, EditIcon, ImageIcon } from "@/co
 import { EditForm } from "@/components/EditForm";
 import { InfoTooltip } from "@/components/InfoTooltip";
 import { getDisplayableFields, categoriseFields } from "@/utils/entityFields";
+import { safeExternalUrl } from "@/utils/safeUrl";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { isYouTubeUrl, extractYouTubeId, getYouTubeThumbnail } from "@/types/media";
 import { useUILabels } from "@/context/CollectionUIContext";
@@ -228,6 +229,19 @@ export function CardExpanded({
 
   // Check if card has additional fields to display
   const hasAdditionalFields = additionalFields.length > 0;
+
+  // Detail links for the Sources overlay: prefer v2 detailUrls, fall back
+  // to the legacy detailUrl (including when detailUrls is an empty array).
+  // Unsafe collection-supplied URLs (e.g. javascript:) are dropped.
+  const detailLinks = useMemo(() => {
+    const links: DetailLink[] =
+      card.detailUrls && card.detailUrls.length > 0
+        ? card.detailUrls
+        : card.detailUrl
+          ? [{ url: card.detailUrl }]
+          : [];
+    return links.filter((link) => safeExternalUrl(link.url) !== null);
+  }, [card.detailUrls, card.detailUrl]);
 
   // Format edit timestamp for display
   const formattedEditDate = useMemo(() => {
@@ -451,7 +465,7 @@ export function CardExpanded({
                   )}
 
                   {/* Consolidated Sources button (F-084) */}
-                  {((card.detailUrls && card.detailUrls.length > 0) ?? card.detailUrl) && (
+                  {detailLinks.length > 0 && (
                     <button
                       type="button"
                       className={styles.outlineButton}
@@ -460,7 +474,7 @@ export function CardExpanded({
                       aria-controls="sources-overlay"
                     >
                       <span>
-                        {card.detailUrls && card.detailUrls.length > 1
+                        {detailLinks.length > 1
                           ? "Sources"
                           : "Source"}
                       </span>
@@ -511,7 +525,12 @@ export function CardExpanded({
                           const match = /File:(.+)$/.exec(card.imageAttribution);
                           if (match?.[1]) {
                             const fileName = match[1].trim();
-                            const wikipediaUrl = `https://en.wikipedia.org/wiki/File:${encodeURIComponent(fileName)}`;
+                            const wikipediaUrl = safeExternalUrl(
+                              `https://en.wikipedia.org/wiki/File:${encodeURIComponent(fileName)}`
+                            );
+                            if (!wikipediaUrl) {
+                              return null;
+                            }
                             return (
                               <a
                                 href={wikipediaUrl}
@@ -544,7 +563,7 @@ export function CardExpanded({
               <AnimatePresence>
                 {sourcesOverlayOpen && (
                   <SourcesOverlay
-                    detailUrls={card.detailUrls ?? (card.detailUrl ? [{ url: card.detailUrl }] : [])}
+                    detailUrls={detailLinks}
                     isOpen={sourcesOverlayOpen}
                     onClose={() => { setSourcesOverlayOpen(false); }}
                     animationEnabled={overlayAnimationEnabled}
@@ -684,6 +703,11 @@ export function CardExpanded({
                   {card.categoryInfo.detailUrls && card.categoryInfo.detailUrls.length > 0 && (
                     <div className={styles.platformOverlayFooter}>
                       {deduplicateLinksBySource(card.categoryInfo.detailUrls).map((link, index) => {
+                        // Guard against unsafe collection-supplied URLs (e.g. javascript:)
+                        const safeUrl = safeExternalUrl(link.url);
+                        if (!safeUrl) {
+                          return null;
+                        }
                         const hasKnownIcon = isKnownSource(link.url);
                         const sourceInfo = getSourceShortName(link.url);
                         const displayName = sourceInfo?.shortName ?? link.source ?? link.label ?? uiLabels.sourceButtonDefault;
@@ -691,7 +715,7 @@ export function CardExpanded({
                         return (
                           <a
                             key={index}
-                            href={link.url}
+                            href={safeUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className={hasKnownIcon ? styles.sourceIconButton : styles.platformOverlayLink}

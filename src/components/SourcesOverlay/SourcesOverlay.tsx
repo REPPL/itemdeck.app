@@ -10,6 +10,7 @@
 import { motion } from "framer-motion";
 import { SourceIcon, isKnownSource, getSourceShortName } from "@/components/SourceIcon";
 import { ExternalLinkIcon, CloseIcon } from "@/components/Icons";
+import { safeExternalUrl } from "@/utils/safeUrl";
 import type { DetailLink } from "@/types/links";
 import styles from "./SourcesOverlay.module.css";
 
@@ -137,6 +138,12 @@ export function SourcesOverlay({
   const showCategorised = categoriesWithItems.length > 1;
 
   const renderLink = (link: DetailLink, index: number) => {
+    // Guard against unsafe collection-supplied URLs (e.g. javascript:)
+    const safeUrl = safeExternalUrl(link.url);
+    if (!safeUrl) {
+      return null;
+    }
+
     const hasKnownIcon = isKnownSource(link.url);
     const sourceInfo = getSourceShortName(link.url);
     const displayName =
@@ -145,7 +152,7 @@ export function SourcesOverlay({
     return (
       <a
         key={index}
-        href={link.url}
+        href={safeUrl}
         target="_blank"
         rel="noopener noreferrer"
         className={styles.sourceLink}

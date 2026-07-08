@@ -3,6 +3,7 @@
  */
 
 import { Modal } from "@/components/Modal";
+import { safeExternalUrl } from "@/utils/safeUrl";
 import type { DisplayCard } from "@/hooks/useCollection";
 import styles from "./CardDetailModal.module.css";
 
@@ -21,6 +22,9 @@ interface CardDetailModalProps {
  * Modal displaying extended card information.
  */
 export function CardDetailModal({ card, isOpen, onClose }: CardDetailModalProps) {
+  // Guard against unsafe collection-supplied URLs (e.g. javascript:)
+  const detailUrl = safeExternalUrl(card.detailUrl);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={card.title}>
       <div className={styles.container}>
@@ -49,9 +53,9 @@ export function CardDetailModal({ card, isOpen, onClose }: CardDetailModalProps)
 
           {card.summary && <p className={styles.summary}>{card.summary}</p>}
 
-          {card.detailUrl && (
+          {detailUrl && (
             <a
-              href={card.detailUrl}
+              href={detailUrl}
               target="_blank"
               rel="noopener noreferrer"
               className={styles.link}

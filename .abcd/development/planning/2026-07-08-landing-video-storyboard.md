@@ -7,6 +7,8 @@ A gentle, friendly walkthrough for complete beginners. Warm and a little nostalg
 **Music:** soft, upbeat, slightly retro (think a warm synth pad with a light shuffle) — kept low, fading under the voice. Nothing plays with sound until the viewer presses play.
 **On-screen style:** the real product, captured cleanly, with a light VHS/tracking-line flourish on the intro and outro title cards only — never so heavy it obscures the interface.
 
+**Produced:** light and dark cuts (85 s / 82 s) live at `site/media/tutorial-{light,dark}.mp4`, wired into the landing page's "Watch" section. Captions are burned in; the voiceover is an en-GB neural voice. Two lines were adjusted from this script to match the shipped app: there is no "Try a demo collection" button (the app opens a collection picker), and a card's details live in its info overlay rather than literally "on the back", so scene 3 shows the flip and then the overlay. Music was deferred (voice + captions only). The committed MP4s under `site/media/` are the deliverable; production used throwaway tooling (Playwright screen capture of the real app, then a JSON2Video render assembling title cards, an en-GB voiceover and burned-in captions) that was not retained in the repo. To reproduce, re-capture the app flows and re-assemble per the scene list and script below.
+
 ---
 
 ## Scene 1 — Welcome (0:00–0:12)

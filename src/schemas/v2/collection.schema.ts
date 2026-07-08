@@ -24,7 +24,15 @@ export type AttributionSchema = z.infer<typeof attributionSchema>;
 // Image Schema
 // ============================================================================
 
-export const imageTypeSchema = z.enum([
+/**
+ * Image type is an open vocabulary: collections may define their own
+ * values (e.g. "flag", "poster", "boxart"). Well-known values the app
+ * gives special treatment to are listed in {@link KNOWN_IMAGE_TYPES};
+ * unknown values are valid and treated as plain labels.
+ */
+export const imageTypeSchema = z.string().min(1);
+
+export const KNOWN_IMAGE_TYPES = [
   "cover",
   "screenshot",
   "title-screen",
@@ -33,7 +41,8 @@ export const imageTypeSchema = z.enum([
   "fan-art",
   "photo",
   "artwork",
-]);
+  "boxart",
+] as const;
 
 export const imageSchema = z.object({
   url: z.url(),

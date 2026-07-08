@@ -6,9 +6,11 @@
  */
 
 /**
- * Image type identifiers.
+ * Well-known image type identifiers the app gives special treatment to
+ * (e.g. primary-image selection). The vocabulary is open: collections
+ * may define their own values, which are treated as plain labels.
  */
-export type ImageType =
+export type KnownImageType =
   | "cover"
   | "screenshot"
   | "title-screen"
@@ -16,7 +18,15 @@ export type ImageType =
   | "promotional"
   | "fan-art"
   | "photo"
-  | "artwork";
+  | "artwork"
+  | "boxart";
+
+/**
+ * Image type: a well-known value or any collection-defined label.
+ * The `string & {}` intersection keeps editor autocompletion for the
+ * well-known values while accepting arbitrary strings.
+ */
+export type ImageType = KnownImageType | (string & {});
 
 /**
  * Attribution information for an image.
@@ -78,7 +88,7 @@ export interface Image {
  *
  * Priority:
  * 1. Image with isPrimary=true
- * 2. Image with type "cover" or "boxart"
+ * 2. Image with type "cover", "boxart", or "artwork"
  * 3. First image in array
  *
  * @param images - Array of images
@@ -95,9 +105,10 @@ export function getPrimaryImage(images: Image[]): Image | undefined {
     return primary;
   }
 
-  // 2. Type-based fallback (cover or boxart)
+  // 2. Type-based fallback (cover, boxart, or artwork)
   const cover = images.find(
-    (img) => img.type === "cover" || img.type === "artwork"
+    (img) =>
+      img.type === "cover" || img.type === "boxart" || img.type === "artwork"
   );
   if (cover) {
     return cover;

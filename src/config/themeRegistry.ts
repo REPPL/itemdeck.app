@@ -5,6 +5,8 @@
  * Only themes from trusted sources are loaded by default.
  */
 
+import { withBase } from "@/config/basePath";
+
 /**
  * A source for external themes.
  */
@@ -31,7 +33,7 @@ export const CURATED_THEME_SOURCES: ThemeSource[] = [
   {
     id: "local",
     name: "Local Themes",
-    url: "/themes/",
+    url: withBase("/themes/"),
     trusted: true,
     description: "Themes from your local themes folder",
   },

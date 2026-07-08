@@ -34,7 +34,7 @@ test.describe('Light Theme Contrast', () => {
   test.beforeEach(async ({ page }) => {
     // Set light theme preference
     await page.emulateMedia({ colorScheme: 'light' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -82,7 +82,7 @@ test.describe('Dark Theme Contrast', () => {
   test.beforeEach(async ({ page }) => {
     // Set dark theme preference
     await page.emulateMedia({ colorScheme: 'dark' });
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -123,7 +123,7 @@ test.describe('Dark Theme Contrast', () => {
 
 test.describe('High Contrast Mode', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -187,7 +187,7 @@ test.describe('High Contrast Mode', () => {
 
 test.describe('Focus Indicator Visibility', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
   });
 
@@ -231,7 +231,7 @@ test.describe('Theme-Specific Elements', () => {
   test('Cards maintain contrast in all themes', async ({ page }) => {
     for (const scheme of ['light', 'dark'] as const) {
       await page.emulateMedia({ colorScheme: scheme });
-      await page.goto('/');
+      await page.goto('/demo/');
       await waitForAppReady(page);
 
       // Wait for cards
@@ -259,7 +259,7 @@ test.describe('Theme-Specific Elements', () => {
   });
 
   test('Modal overlays maintain readability', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/demo/');
     await waitForAppReady(page);
 
     // Open help modal

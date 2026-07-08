@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en-GB" data-theme="auto">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>itemdeck — every collection deserves to be played with</title>
+<meta name="description" content="A free, browser-based viewer that turns your collection into a beautiful, interactive deck of cards you can browse, search, and actually play with.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-__CSP_SCRIPT_HASH__'; style-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="assets/itemdeck-mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/itemdeck-mark-512.png">
+<style>
+/* ============================================================
+   Self-hosted fonts (Fontsource builds; latin subset)
+   ============================================================ */
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:400; font-display:swap; src:url('fonts/space-grotesk-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:500; font-display:swap; src:url('fonts/space-grotesk-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:600; font-display:swap; src:url('fonts/space-grotesk-latin-600-normal.woff2') format('woff2'); }
+@font-face { font-family:'Space Grotesk'; font-style:normal; font-weight:700; font-display:swap; src:url('fonts/space-grotesk-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:400; font-display:swap; src:url('fonts/inter-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:500; font-display:swap; src:url('fonts/inter-latin-500-normal.woff2') format('woff2'); }
+@font-face { font-family:'Inter'; font-style:normal; font-weight:600; font-display:swap; src:url('fonts/inter-latin-600-normal.woff2') format('woff2'); }
+
+/* ============================================================
+   itemdeck landing page — self-contained
+   Design system → hero → how it works → features → video →
+   audiences → footer. Every animation degrades gracefully.
+   ============================================================ */
+
+:root {
+  /* --- Base neutrals (light) --- */
+  --bg:            #FBF6EC;
+  --bg-2:          #F3EADA;
+  --surface:       #FFFFFF;
+  --surface-2:     #FBF6EC;
+  --ink:           #201B14;
+  --ink-soft:      #4A4034;
+  --ink-faint:     #6E6252;
+  --line:          #E4D8C4;
+  --line-strong:   #CBBBA0;
+
+  /* --- Retro accents --- */
+  --coral:         #E85C46;   /* sunset coral   */
+  --coral-ink:     #B33A28;   /* coral for text on light */
+  --teal:          #0E9C99;   /* electric teal  */
+  --teal-ink:      #0A7876;
+  --gold:          #E7A72C;   /* golden yellow  */
+  --gold-ink:      #9A6C0E;
+
+  --accent:        var(--coral);
+  --accent-ink:    var(--coral-ink);
+
+  /* --- Card faces for illustrations --- */
+  --card-1: #F6D8CF;
+  --card-2: #CDECEA;
+  --card-3: #F6E6C4;
+
+  /* --- Effects --- */
+  --shadow-sm: 0 2px 6px rgba(40,28,14,.08);
+  --shadow-md: 0 10px 30px rgba(40,28,14,.12);
+  --shadow-lg: 0 24px 60px rgba(40,28,14,.18);
+  --glow: 0 0 0 rgba(232,92,70,0);
+
+  --radius:    18px;   /* cartridge corners */
+  --radius-sm: 12px;
+  --radius-lg: 26px;
+
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+
+  /* Primary button — darkened coral so white text passes WCAG AA (5.24:1) */
+  --btn-bg: #C0402C;
+  --btn-fg: #FFFFFF;
+
+  --wrap: 1160px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+/* --- Dark theme --- */
+[data-theme="dark"] {
+  --bg:            #16130E;
+  --bg-2:          #1F1A13;
+  --surface:       #221D16;
+  --surface-2:     #1B1610;
+  --ink:           #F3ECDE;
+  --ink-soft:      #CDC3B2;
+  --ink-faint:     #9A8F7C;
+  --line:          #352C20;
+  --line-strong:   #4B3F2E;
+
+  --coral:         #FF7A63;
+  --coral-ink:     #FF9781;
+  --teal:          #2FD4CF;
+  --teal-ink:      #58E0DB;
+  --gold:          #F5C25A;
+  --gold-ink:      #F7D084;
+
+  --accent:        var(--coral);
+  --accent-ink:    var(--coral-ink);
+
+  /* Dark ink on coral passes WCAG AA (6.69:1) */
+  --btn-bg: #FF7A63;
+  --btn-fg: #201B14;
+
+  --card-1: #5a2f28;
+  --card-2: #1e4b49;
+  --card-3: #4d3c1c;
+
+  --shadow-sm: 0 2px 6px rgba(0,0,0,.4);
+  --shadow-md: 0 12px 34px rgba(0,0,0,.5);
+  --shadow-lg: 0 26px 64px rgba(0,0,0,.6);
+}
+
+/* --- High-contrast theme --- */
+[data-theme="contrast"] {
+  --bg:            #000000;
+  --bg-2:          #0a0a0a;
+  --surface:       #0d0d0d;
+  --surface-2:     #000000;
+  --ink:           #FFFFFF;
+  --ink-soft:      #FFFFFF;
+  --ink-faint:     #E8E8E8;
+  --line:          #FFFFFF;
+  --line-strong:   #FFFFFF;
+  --coral:         #FF9E4F;
+  --coral-ink:     #FFB86B;
+  --teal:          #4FF2ED;
+  --teal-ink:      #6FF6F1;
+  --gold:          #FFD84F;
+  --gold-ink:      #FFE270;
+  --accent:        #FFD84F;
+  --accent-ink:    #FFE270;
+  --btn-bg:        #FFD84F;   /* black on gold: 15.19:1 */
+  --btn-fg:        #000000;
+  --card-1:#222; --card-2:#222; --card-3:#222;
+  --line: #FFFFFF; --line-strong:#FFFFFF;
+}
+
+/* Follow OS preference when theme is "auto" */
+@media (prefers-color-scheme: dark) {
+  [data-theme="auto"] {
+    --bg:#16130E; --bg-2:#1F1A13; --surface:#221D16; --surface-2:#1B1610;
+    --ink:#F3ECDE; --ink-soft:#CDC3B2; --ink-faint:#9A8F7C;
+    --line:#352C20; --line-strong:#4B3F2E;
+    --coral:#FF7A63; --coral-ink:#FF9781; --teal:#2FD4CF; --teal-ink:#58E0DB;
+    --gold:#F5C25A; --gold-ink:#F7D084; --accent:var(--coral); --accent-ink:var(--coral-ink);
+    --btn-bg:#FF7A63; --btn-fg:#201B14;
+    --card-1:#5a2f28; --card-2:#1e4b49; --card-3:#4d3c1c;
+    --shadow-sm:0 2px 6px rgba(0,0,0,.4); --shadow-md:0 12px 34px rgba(0,0,0,.5); --shadow-lg:0 26px 64px rgba(0,0,0,.6);
+  }
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: var(--bg);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background .4s var(--ease), color .4s var(--ease);
+}
+
+h1,h2,h3 { font-family: var(--font-display); font-weight: 700; line-height: 1.08; letter-spacing: -.02em; margin: 0 0 .4em; }
+h2 { font-size: clamp(1.8rem, 4vw, 2.9rem); }
+h3 { font-size: clamp(1.15rem, 2vw, 1.4rem); letter-spacing: -.01em; }
+p { margin: 0 0 1em; color: var(--ink-soft); }
+a { color: var(--accent-ink); }
+
+.wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: clamp(20px, 5vw, 40px); }
+section { position: relative; }
+.eyebrow {
+  font-family: var(--font-display);
+  font-weight: 600; font-size: .82rem; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--accent-ink);
+  display: inline-flex; align-items: center; gap: .5em; margin-bottom: .8rem;
+}
+.eyebrow::before { content:""; width: 22px; height: 2px; background: var(--accent); border-radius: 2px; }
+
+/* Accessibility: visible focus + skip link */
+:focus-visible {
+  outline: 3px solid var(--teal);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+[data-theme="contrast"] :focus-visible { outline-color: var(--gold); }
+.skip {
+  position: absolute; left: 12px; top: -60px; z-index: 200;
+  background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 10px;
+  font-weight: 600; text-decoration: none; transition: top .2s var(--ease);
+}
+.skip:focus { top: 12px; }
+.sr-only { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0; }
+
+/* ============================================================
+   Buttons
+   ============================================================ */
+.btn {
+  --b: var(--accent);
+  display: inline-flex; align-items: center; gap: .6em;
+  font-family: var(--font-display); font-weight: 600; font-size: 1.02rem;
+  padding: .85em 1.5em; border-radius: 999px; border: 2px solid transparent;
+  text-decoration: none; cursor: pointer; position: relative;
+  transition: transform .18s var(--ease), box-shadow .25s var(--ease), background .2s;
+}
+.btn-primary {
+  background: var(--btn-bg); color: var(--btn-fg); box-shadow: var(--shadow-md);
+}
+[data-theme="contrast"] .btn-primary { border-color:#fff; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg), 0 0 26px rgba(232,92,70,.35); }
+.btn-ghost {
+  background: transparent; color: var(--ink); border-color: var(--line-strong);
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-ink); transform: translateY(-2px); }
+.btn:active { transform: translateY(0); }
+.btn svg { width: 1.15em; height: 1.15em; }
+
+/* ============================================================
+   Header / nav
+   ============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  backdrop-filter: blur(10px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid transparent;
+  transition: border-color .3s, background .3s;
+}
+.site-header.scrolled { border-bottom-color: var(--line); }
+.nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 14px; }
+.brand { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--ink); font-family: var(--font-display); font-weight: 700; font-size: 1.15rem; letter-spacing: -.01em; }
+.brand-mark { width: 34px; height: 34px; flex: none; }
+.nav-links { display: flex; align-items: center; gap: .3rem; }
+.nav-links a { color: var(--ink-soft); text-decoration: none; font-weight: 500; font-size: .95rem; padding: .5em .8em; border-radius: 10px; transition: color .2s, background .2s; }
+.nav-links a:hover { color: var(--ink); background: var(--bg-2); }
+.nav-tools { display: flex; align-items: center; gap: .5rem; }
+
+/* Theme control */
+.theme-toggle {
+  display: inline-flex; align-items: center; background: var(--bg-2);
+  border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px;
+}
+.theme-toggle button {
+  border: 0; background: transparent; color: var(--ink-faint); cursor: pointer;
+  width: 34px; height: 30px; border-radius: 999px; display: grid; place-items: center;
+  transition: background .2s, color .2s;
+}
+.theme-toggle button svg { width: 17px; height: 17px; }
+.theme-toggle button[aria-pressed="true"] { background: var(--surface); color: var(--accent-ink); box-shadow: var(--shadow-sm); }
+
+.nav-toggle {
+  display: none; border: 1px solid var(--line); background: var(--bg-2); color: var(--ink);
+  width: 40px; height: 36px; border-radius: 10px; cursor: pointer; place-items: center;
+}
+.nav-toggle svg { width: 20px; height: 20px; }
+@media (max-width: 720px) {
+  .nav-toggle { display: grid; }
+  .nav-links {
+    display: none; position: absolute; top: 100%; left: 0; right: 0;
+    flex-direction: column; align-items: stretch;
+    background: var(--bg); border-bottom: 1px solid var(--line);
+    padding: .6rem clamp(20px, 5vw, 40px) 1rem; box-shadow: var(--shadow-md);
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: .7em .4em; }
+}
+
+/* ============================================================
+   Textures — scanlines + halftone (removable, decorative)
+   ============================================================ */
+.tex-scan::before {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background: repeating-linear-gradient(to bottom, rgba(0,0,0,.035) 0 1px, transparent 1px 4px);
+  mix-blend-mode: multiply; opacity:.5;
+}
+[data-theme="dark"] .tex-scan::before,
+[data-theme="contrast"] .tex-scan::before { background: repeating-linear-gradient(to bottom, rgba(255,255,255,.045) 0 1px, transparent 1px 4px); mix-blend-mode: screen; }
+.tex-halftone::after {
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image: radial-gradient(var(--line-strong) 1px, transparent 1.4px);
+  background-size: 18px 18px; opacity:.16;
+  -webkit-mask-image: radial-gradient(120% 90% at 80% 0%, #000 0%, transparent 70%);
+          mask-image: radial-gradient(120% 90% at 80% 0%, #000 0%, transparent 70%);
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+.hero { padding-top: clamp(2rem, 6vw, 4.5rem); padding-bottom: clamp(3rem, 7vw, 5rem); overflow: hidden; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: clamp(2rem, 5vw, 4rem); align-items: center; position: relative; z-index: 1; }
+.hero h1 { font-size: clamp(2.4rem, 6vw, 4.1rem); }
+.hero h1 .hl { color: var(--coral-ink); position: relative; white-space: nowrap; }
+.hero h1 .hl::after {
+  content:""; position:absolute; left:0; right:0; bottom:.06em; height:.22em; z-index:-1;
+  background: var(--gold); opacity:.45; border-radius: 4px; transform: skewX(-8deg);
+}
+/* the "…with" beat — a small pause, then "with" lands */
+.hero h1 .beat { letter-spacing: .05em; color: var(--ink-faint); margin: 0 .04em; opacity: .5; }
+.hero h1 .with-word {
+  display: inline-block;
+  opacity: 0; transform: translateY(.18em);
+  animation: withLand .55s var(--ease) .7s forwards;
+}
+@keyframes withLand { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .hero h1 .with-word { opacity: 1 !important; transform: none !important; animation: none !important; }
+}
+.hero-lede { font-size: clamp(1.05rem, 1.8vw, 1.28rem); color: var(--ink-soft); max-width: 34ch; }
+.hero-cta { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.6rem; align-items: center; }
+.hero-note { font-size: .9rem; color: var(--ink-faint); display:flex; align-items:center; gap:.45em; margin-top:1.1rem; }
+.hero-note svg { width: 1.1em; height: 1.1em; color: var(--teal-ink); flex:none; }
+
+/* Fanning deck */
+.deck-stage { position: relative; height: clamp(320px, 42vw, 460px); perspective: 1400px; }
+.deck { position: absolute; inset: 0; display: grid; place-items: center; transform-style: preserve-3d; }
+.deck-card {
+  position: absolute; width: clamp(150px, 20vw, 210px); aspect-ratio: 3/4.2;
+  border-radius: 16px; box-shadow: var(--shadow-md);
+  transform-origin: bottom center; will-change: transform;
+  border: 1px solid rgba(255,255,255,.35);
+  overflow: hidden; background: var(--surface);
+}
+[data-theme="dark"] .deck-card, [data-theme="contrast"] .deck-card { border-color: rgba(255,255,255,.12); }
+.deck-card svg { width: 100%; height: 100%; display: block; }
+
+/* Fan-out entrance animation (JS sets custom props per card) */
+.deck-card {
+  transform: rotate(0deg) translateY(30px) scale(.9);
+  opacity: 0;
+  animation: fanIn .9s var(--ease) forwards;
+  animation-delay: var(--d, 0s);
+}
+@keyframes fanIn {
+  to { transform: rotate(var(--r,0deg)) translate(var(--x,0), var(--y,0)) scale(1); opacity: 1; }
+}
+/* gentle idle float on the top card */
+.deck-card.lead { animation: fanIn .9s var(--ease) forwards, floaty 6s ease-in-out 1.1s infinite; }
+@keyframes floaty {
+  0%,100% { transform: rotate(var(--r,0deg)) translate(var(--x,0), var(--y,0)) scale(1); }
+  50%     { transform: rotate(var(--r,0deg)) translate(var(--x,0), calc(var(--y,0) - 14px)) scale(1.015); }
+}
+.deck-hint { position:absolute; bottom:-6px; left:50%; transform:translateX(-50%); font-size:.8rem; color:var(--ink-faint); }
+
+@media (max-width: 880px) {
+  .hero-grid { grid-template-columns: 1fr; text-align: left; }
+  .hero-lede { max-width: 46ch; }
+  .deck-stage { height: clamp(300px, 70vw, 400px); order: -1; }
+}
+
+/* ============================================================
+   How it works
+   ============================================================ */
+.section-pad { padding-block: clamp(3.5rem, 8vw, 6rem); }
+.head { max-width: 620px; margin-bottom: 2.6rem; }
+.head.center { margin-inline: auto; text-align: center; }
+.head p { font-size: 1.08rem; }
+
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(1rem, 2.4vw, 1.8rem); counter-reset: step; }
+.step {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 1.6rem 1.5rem 1.7rem; position: relative; box-shadow: var(--shadow-sm);
+  transition: transform .3s var(--ease), box-shadow .3s;
+}
+.step:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+.step-num {
+  font-family: var(--font-display); font-weight: 700; font-size: .95rem;
+  width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center;
+  background: var(--bg-2); color: var(--accent-ink); border: 1px solid var(--line); margin-bottom: 1rem;
+}
+.step-art { height: 92px; margin: .2rem 0 1rem; }
+.step-art svg { height: 100%; width: auto; }
+.step h3 { margin-bottom: .3rem; }
+.step p { margin: 0; font-size: .98rem; }
+.step-arrow { position:absolute; right:-1.15rem; top:50%; transform:translateY(-50%); color:var(--line-strong); z-index:2; }
+.step-arrow svg{ width:24px; height:24px; }
+@media (max-width: 780px) {
+  .steps { grid-template-columns: 1fr; }
+  .step-arrow { display:none; }
+}
+
+/* ============================================================
+   Feature tour — alternating
+   ============================================================ */
+.feature { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4.5rem); align-items: center; padding-block: clamp(2.5rem, 5vw, 4rem); }
+.feature + .feature { border-top: 1px dashed var(--line); }
+.feature.flip .feature-media { order: 2; }
+.feature-copy .tag { font-size:.85rem; }
+.feature-copy h2 { margin-bottom:.5rem; }
+.feature-copy p { font-size:1.06rem; }
+.feature-list { list-style:none; padding:0; margin:1.1rem 0 0; display:grid; gap:.6rem; }
+.feature-list li { display:flex; gap:.6rem; align-items:flex-start; color:var(--ink-soft); font-size:.98rem; }
+.feature-list svg { width:1.25em; height:1.25em; color:var(--teal-ink); flex:none; margin-top:.15em; }
+
+.demo {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md); padding: 1.4rem; position: relative; overflow: hidden;
+}
+.demo-bar { display:flex; align-items:center; gap:.4rem; margin-bottom:1rem; }
+.demo-dot { width:11px; height:11px; border-radius:50%; background:var(--line-strong); }
+.demo-dot.c1{background:var(--coral);} .demo-dot.c2{background:var(--gold);} .demo-dot.c3{background:var(--teal);}
+.demo-title { margin-left:.6rem; font-family:var(--font-display); font-weight:600; font-size:.85rem; color:var(--ink-faint); }
+
+/* --- Views demo: flipping card --- */
+.flip-card { width: 168px; aspect-ratio: 3/4.2; margin: .4rem auto 1rem; perspective: 1000px; cursor: pointer; }
+.flip-inner { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; transition: transform .7s var(--ease); }
+.flip-card.flipped .flip-inner { transform: rotateY(180deg); }
+.flip-face { position:absolute; inset:0; backface-visibility:hidden; border-radius:14px; overflow:hidden; box-shadow: var(--shadow-sm); border:1px solid var(--line); }
+.flip-back { transform: rotateY(180deg); }
+.flip-face svg { width:100%; height:100%; display:block; }
+.view-switch { display:flex; gap:.4rem; justify-content:center; flex-wrap:wrap; }
+.chip { font-family:var(--font-display); font-weight:500; font-size:.82rem; padding:.4em .9em; border-radius:999px; border:1px solid var(--line); background:var(--bg-2); color:var(--ink-soft); cursor:pointer; transition:.2s; }
+.chip[aria-pressed="true"]{ background:var(--btn-bg); color:var(--btn-fg); border-color:var(--btn-bg); }
+[data-theme="contrast"] .chip[aria-pressed="true"]{ background:var(--gold); color:#000; }
+
+/* --- Discovery demo: filter narrowing grid --- */
+.mini-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.55rem; margin-top:.4rem; }
+.mini-card {
+  aspect-ratio: 3/4; border-radius:10px; border:1px solid var(--line); overflow:hidden;
+  transition: opacity .4s var(--ease), transform .4s var(--ease), filter .4s;
+}
+.mini-card svg{ width:100%; height:100%; display:block; }
+.mini-card.dim { opacity:.14; transform:scale(.94); filter:grayscale(1); }
+.filter-row { display:flex; gap:.4rem; flex-wrap:wrap; margin:0 0 .9rem; }
+.search-fake { display:flex; align-items:center; gap:.5rem; background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:.5rem .7rem; margin-bottom:.7rem; color:var(--ink-faint); font-size:.9rem; }
+.search-fake svg{ width:1.05em; height:1.05em; }
+.search-caret{ display:inline-block; width:1px; height:1.05em; background:var(--accent); animation: blink 1.1s step-end infinite; }
+@keyframes blink { 50%{opacity:0;} }
+.count-pill { font-size:.8rem; color:var(--ink-faint); margin-top:.7rem; text-align:center; font-family:var(--font-display); }
+.count-pill b { color:var(--accent-ink); }
+
+/* --- Games demo: memory match --- */
+.mem-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:.5rem; max-width:300px; margin:.3rem auto .6rem; }
+.mem { aspect-ratio:3/4; border-radius:10px; border:1px solid var(--line); position:relative; cursor:pointer; perspective:600px; background:transparent; padding:0; }
+.mem-inner{ position:absolute; inset:0; transform-style:preserve-3d; transition:transform .5s var(--ease); border-radius:10px; }
+.mem.up .mem-inner, .mem.matched .mem-inner{ transform:rotateY(180deg); }
+.mem-face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:10px; overflow:hidden; display:grid; place-items:center; }
+.mem-front{ background:linear-gradient(135deg,var(--teal),var(--teal-ink)); }
+.mem-front svg{ width:46%; opacity:.9; color:#fff; }
+.mem-back{ transform:rotateY(180deg); background:var(--surface); border:1px solid var(--line); }
+.mem-back span{ font-size:1.5rem; }
+.mem.matched{ animation: pop .45s var(--ease); }
+.mem.matched .mem-back{ box-shadow: inset 0 0 0 2px var(--teal); }
+@keyframes pop { 40%{transform:scale(1.08);} }
+.mem-status{ text-align:center; font-family:var(--font-display); font-weight:500; font-size:.9rem; color:var(--ink-soft); min-height:1.4em; }
+.mem-status b{ color:var(--teal-ink); }
+.demo-reset{ display:block; margin:.4rem auto 0; font-family:var(--font-display); font-size:.82rem; background:transparent; border:1px solid var(--line); color:var(--ink-soft); border-radius:999px; padding:.35em 1em; cursor:pointer; }
+.demo-reset:hover{ border-color:var(--accent); color:var(--accent-ink); }
+
+@media (max-width: 820px) {
+  .feature { grid-template-columns: 1fr; gap: 2rem; }
+  .feature.flip .feature-media { order: 0; }
+}
+
+/* ============================================================
+   Video / VHS player
+   ============================================================ */
+.video-wrap { max-width: 900px; margin-inline: auto; }
+.vhs {
+  position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 16/9;
+  background: radial-gradient(120% 130% at 50% 20%, #2a2620, #100d09);
+  box-shadow: var(--shadow-lg); border: 1px solid var(--line-strong);
+  display: grid; place-items: center; cursor: pointer;
+}
+.vhs::before { /* tracking lines */
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(to bottom, rgba(255,255,255,.06) 0 2px, transparent 2px 5px);
+  opacity:.5; z-index:2;
+}
+.vhs::after { /* scan sweep */
+  content:""; position:absolute; left:0; right:0; height:34%; top:-40%; z-index:2; pointer-events:none;
+  background: linear-gradient(to bottom, transparent, rgba(255,255,255,.09), transparent);
+  animation: sweep 6.5s linear infinite;
+}
+@keyframes sweep { to { top: 130%; } }
+.vhs-poster { position:absolute; inset:0; display:grid; place-items:center; z-index:1; }
+.vhs-poster svg { width:min(70%, 380px); height:auto; opacity:.9; }
+.vhs-osd { position:absolute; top:14px; left:16px; z-index:3; font-family:var(--font-display); font-weight:600; letter-spacing:.12em; font-size:.8rem; color:#e9e2d2; text-shadow:0 1px 3px #000; display:flex; align-items:center; gap:.5em; }
+.rec-dot{ width:9px; height:9px; border-radius:50%; background:var(--coral); box-shadow:0 0 8px var(--coral); animation:recblink 1.4s ease-in-out infinite; }
+@keyframes recblink{ 50%{opacity:.25;} }
+.vhs-time{ position:absolute; top:14px; right:16px; z-index:3; font-family:var(--font-display); font-size:.8rem; letter-spacing:.1em; color:#e9e2d2; text-shadow:0 1px 3px #000; }
+.play-btn {
+  position:relative; z-index:3; width:82px; height:82px; border-radius:50%; border:0; cursor:pointer;
+  background:rgba(255,255,255,.92); display:grid; place-items:center; box-shadow:0 10px 40px rgba(0,0,0,.4);
+  transition: transform .2s var(--ease), background .2s;
+}
+.play-btn:hover{ transform:scale(1.07); background:#fff; }
+.play-btn svg{ width:30px; height:30px; color:var(--coral); margin-left:4px; }
+.vhs-caption{ text-align:center; color:var(--ink-faint); font-size:.92rem; margin-top:1rem; }
+
+/* Storyboard strip */
+.storyboard { margin-top:2.4rem; }
+.sb-track { display:grid; grid-template-columns:repeat(5,1fr); gap:1rem; }
+.sb-cell { background:var(--surface); border:1px solid var(--line); border-radius:14px; overflow:hidden; box-shadow:var(--shadow-sm); }
+.sb-thumb { aspect-ratio:16/10; background:var(--bg-2); position:relative; }
+.sb-thumb svg{ width:100%; height:100%; display:block; }
+.sb-time{ position:absolute; bottom:6px; right:8px; font-family:var(--font-display); font-size:.72rem; background:rgba(0,0,0,.55); color:#fff; padding:.1em .5em; border-radius:6px; }
+.sb-body{ padding:.7rem .8rem .9rem; }
+.sb-body h4{ font-family:var(--font-display); font-size:.9rem; margin:0 0 .25rem; }
+.sb-body p{ font-size:.82rem; margin:0; color:var(--ink-faint); line-height:1.45; }
+@media (max-width: 900px){ .sb-track{ grid-template-columns:repeat(2,1fr);} }
+@media (max-width: 520px){ .sb-track{ grid-template-columns:1fr;} }
+
+/* ============================================================
+   Made for you
+   ============================================================ */
+.audience { display:grid; grid-template-columns:repeat(3,1fr); gap:clamp(1rem,2.4vw,1.8rem); }
+.aud {
+  border-radius:var(--radius); padding:1.8rem 1.6rem 2rem; border:1px solid var(--line);
+  background:var(--surface); box-shadow:var(--shadow-sm); position:relative; overflow:hidden;
+  transition: transform .3s var(--ease), box-shadow .3s;
+}
+.aud:hover{ transform:translateY(-5px); box-shadow:var(--shadow-md); }
+.aud::before{ content:""; position:absolute; top:0; left:0; right:0; height:5px; background:var(--ac,var(--coral)); }
+.aud.collectors{ --ac:var(--coral); } .aud.curators{ --ac:var(--gold); } .aud.players{ --ac:var(--teal); }
+.aud-ic{ width:54px; height:54px; border-radius:14px; display:grid; place-items:center; margin-bottom:1.1rem; background:color-mix(in srgb, var(--ac) 16%, var(--surface)); color:var(--ac); }
+.aud-ic svg{ width:28px; height:28px; }
+.aud h3{ margin-bottom:.4rem; }
+.aud p{ font-size:.98rem; margin:0; }
+
+@media (max-width: 820px){ .audience{ grid-template-columns:1fr; } }
+
+/* ============================================================
+   Footer CTA
+   ============================================================ */
+.cta-band {
+  margin-top:2rem; border-radius:var(--radius-lg); overflow:hidden; position:relative;
+  background: linear-gradient(135deg, color-mix(in srgb,var(--coral) 22%, var(--surface)), color-mix(in srgb,var(--teal) 16%, var(--surface)));
+  border:1px solid var(--line); box-shadow:var(--shadow-md);
+  padding: clamp(2.4rem,5vw,3.6rem);
+  text-align:center;
+}
+.cta-band h2{ font-size:clamp(1.8rem,4vw,2.7rem); }
+.cta-band p{ max-width:46ch; margin-inline:auto; font-size:1.08rem; }
+.cta-band .hero-cta{ justify-content:center; }
+
+footer.site-footer { padding-block: 3rem 3.5rem; border-top:1px solid var(--line); margin-top:clamp(3rem,7vw,5rem); }
+.foot-grid{ display:flex; flex-wrap:wrap; justify-content:space-between; gap:2rem; align-items:flex-start; }
+.foot-brand{ max-width:320px; }
+.foot-brand p{ font-size:.92rem; margin-top:.6rem; }
+.foot-cols{ display:flex; gap:clamp(2rem,6vw,4rem); flex-wrap:wrap; }
+.foot-col h4{ font-family:var(--font-display); font-size:.8rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-faint); margin:0 0 .8rem; }
+.foot-col a{ display:block; color:var(--ink-soft); text-decoration:none; font-size:.95rem; padding:.28em 0; }
+.foot-col a:hover{ color:var(--accent-ink); }
+.foot-bottom{ margin-top:2.4rem; padding-top:1.4rem; border-top:1px solid var(--line); display:flex; flex-wrap:wrap; gap:.6rem 1.4rem; justify-content:space-between; align-items:center; font-size:.85rem; color:var(--ink-faint); }
+.foot-badges{ display:flex; gap:.6rem; flex-wrap:wrap; }
+.badge{ display:inline-flex; align-items:center; gap:.4em; font-size:.78rem; font-weight:600; padding:.35em .8em; border-radius:999px; background:var(--bg-2); border:1px solid var(--line); color:var(--ink-soft); font-family:var(--font-display); }
+.badge svg{ width:1em; height:1em; color:var(--teal-ink); }
+
+/* ============================================================
+   Scroll-reveal
+   ============================================================ */
+.reveal { opacity:0; transform: translateY(22px); transition: opacity .7s var(--ease), transform .7s var(--ease); }
+.reveal.in { opacity:1; transform:none; }
+
+/* ============================================================
+   Reduced motion — dignified static fallbacks
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .deck-card { opacity:1 !important; }
+  .reveal { opacity:1 !important; transform:none !important; }
+  .vhs::after { display:none; }
+  .search-caret, .rec-dot { animation:none !important; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<!-- ============ HEADER ============ -->
+<header class="site-header" id="top">
+  <div class="wrap nav">
+    <a class="brand" href="#top" aria-label="itemdeck home">
+      <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+        <rect x="7" y="9" width="20" height="26" rx="5" fill="var(--gold)" transform="rotate(-9 17 22)"/>
+        <rect x="11" y="7" width="20" height="26" rx="5" fill="var(--teal)" transform="rotate(3 21 20)"/>
+        <rect x="14" y="6" width="20" height="26" rx="5" fill="var(--coral)" transform="rotate(12 24 19)"/>
+        <circle cx="24" cy="15" r="3" fill="#fff" opacity=".9"/>
+      </svg>
+      itemdeck.app
+    </a>
+    <nav class="nav-links" id="navLinks" aria-label="Primary">
+      <!-- Links are generated from the SITE.nav config in the script below. -->
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#watch">Watch</a>
+      <a href="#made-for-you">Who it's for</a>
+    </nav>
+    <div class="nav-tools">
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navLinks" aria-label="Menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke-linecap="round"/></svg>
+      </button>
+      <div class="theme-toggle" role="group" aria-label="Colour theme">
+        <button data-theme-set="light" aria-pressed="false" title="Light theme" aria-label="Light theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        </button>
+        <button data-theme-set="dark" aria-pressed="false" title="Dark theme" aria-label="Dark theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        </button>
+        <button data-theme-set="contrast" aria-pressed="false" title="High-contrast theme" aria-label="High-contrast theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" fill="currentColor"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" stroke="none"/></svg>
+        </button>
+      </div>
+      <a class="btn btn-primary" data-link="demo" href="/demo/">Try a demo</a>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- ============ HERO ============ -->
+<section class="hero tex-halftone">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow">Your collection, brought to life</span>
+      <h1>Every collection deserves to be played<span class="beat" aria-hidden="true">…</span> <span class="hl with-word">with</span>.</h1>
+      <p class="hero-lede" data-content="hero.lede">itemdeck turns your collection into a beautiful, interactive deck of cards — right in your browser. Browse it, search it, show it off, and actually play with it.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" data-link="demo" href="/demo/">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span data-link-text>Try a demo collection</span>
+        </a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20 6L9 17l-5-5"/></svg>
+        Free, nothing to install — and the app keeps working offline once it has loaded.
+      </p>
+    </div>
+
+    <div class="deck-stage" aria-hidden="true">
+      <div class="deck" id="heroDeck"><!-- cards injected by JS, static fallback below --></div>
+      <span class="deck-hint">a deck that fans out as you arrive</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section-pad" id="how">
+  <div class="wrap">
+    <div class="head center reveal">
+      <span class="eyebrow" style="justify-content:center;">Three friendly steps</span>
+      <h2>From a pile of things to a deck you can play</h2>
+      <p data-content="how.intro">No jargon, no setup wizardry. If you can share a link, you can make a deck.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal">
+        <div class="step-num">1</div>
+        <div class="step-art">
+          <svg viewBox="0 0 120 92" fill="none" aria-hidden="true">
+            <rect x="18" y="24" width="60" height="44" rx="8" fill="var(--card-2)" stroke="var(--line-strong)"/>
+            <path d="M78 46h22" stroke="var(--coral)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M94 40l8 6-8 6" stroke="var(--coral)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="38" cy="40" r="6" fill="var(--gold)"/><path d="M30 58l10-10 8 8 10-12" stroke="var(--teal-ink)" stroke-width="3" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Point it at a collection</h3>
+        <p data-content="step1.body">Paste a link to a collection and itemdeck loads it instantly. Your data stays yours.</p>
+        <div class="step-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">2</div>
+        <div class="step-art">
+          <svg viewBox="0 0 120 92" fill="none" aria-hidden="true">
+            <rect x="14" y="26" width="26" height="40" rx="5" fill="var(--card-1)" stroke="var(--line-strong)"/>
+            <rect x="47" y="26" width="26" height="40" rx="5" fill="var(--card-3)" stroke="var(--line-strong)"/>
+            <rect x="80" y="26" width="26" height="40" rx="5" fill="var(--card-2)" stroke="var(--line-strong)"/>
+            <circle cx="93" cy="63" r="12" fill="none" stroke="var(--teal-ink)" stroke-width="3"/>
+            <path d="M101 71l7 7" stroke="var(--teal-ink)" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Browse and search</h3>
+        <p data-content="step2.body">Flip through a tidy grid, search by anything, and sort by category, year or maker.</p>
+        <div class="step-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      </div>
+      <div class="step reveal">
+        <div class="step-num">3</div>
+        <div class="step-art">
+          <svg viewBox="0 0 120 92" fill="none" aria-hidden="true">
+            <rect x="30" y="22" width="28" height="42" rx="6" fill="var(--card-1)" stroke="var(--line-strong)" transform="rotate(-10 44 43)"/>
+            <rect x="58" y="22" width="28" height="42" rx="6" fill="var(--card-2)" stroke="var(--line-strong)" transform="rotate(10 72 43)"/>
+            <path d="M60 74c-6-4-16-6-16-14M60 74c6-4 16-6 16-14" stroke="var(--gold)" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M56 30l4 8 4-8" stroke="var(--coral)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h3>Play games with your cards</h3>
+        <p data-content="step3.body">Turn your own collection into a round of Memory, a game of Guess the Value, or a Top Trumps duel.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURE TOUR ============ -->
+<section class="section-pad tex-scan" id="features" style="background:var(--bg-2);">
+  <div class="wrap">
+    <div class="head center reveal">
+      <span class="eyebrow" style="justify-content:center;">A closer look</span>
+      <h2>Three things itemdeck does beautifully</h2>
+      <p>Every screen is quick, tactile and made to be shown off. Have a play with the little demos below.</p>
+    </div>
+
+    <!-- Views -->
+    <div class="feature reveal">
+      <div class="feature-copy">
+        <span class="eyebrow tag">Views</span>
+        <h2>See it the way it looks best</h2>
+        <p data-content="feature.views.body">The same collection, four ways. A responsive grid for the big picture, a list with room for the detail, a compact view for browsing big collections, and Fit-to-Viewport for the full-screen showcase. Cards flip with a satisfying turn to reveal the details on the back.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Grid, List, Compact and Fit-to-Viewport views</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Card flips and full keyboard navigation throughout</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Light, dark and high-contrast, to match your mood</li>
+        </ul>
+      </div>
+      <div class="feature-media">
+        <div class="demo">
+          <div class="demo-bar"><span class="demo-dot c1"></span><span class="demo-dot c2"></span><span class="demo-dot c3"></span><span class="demo-title">Grid · flip to reveal</span></div>
+          <div class="flip-card" id="flipCard" tabindex="0" role="button" aria-pressed="false" aria-label="Demo card. Activate to flip.">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <svg viewBox="0 0 120 168" aria-hidden="true"><rect width="120" height="168" rx="12" fill="var(--card-1)"/><rect x="14" y="14" width="92" height="60" rx="8" fill="var(--coral)" opacity=".85"/><circle cx="60" cy="44" r="18" fill="#fff" opacity=".85"/><path d="M52 44h16M60 36v16" stroke="var(--coral)" stroke-width="4" stroke-linecap="round"/><rect x="14" y="86" width="70" height="9" rx="4" fill="var(--ink-faint)" opacity=".4"/><rect x="14" y="104" width="50" height="8" rx="4" fill="var(--ink-faint)" opacity=".28"/><rect x="14" y="132" width="92" height="22" rx="7" fill="var(--gold)" opacity=".55"/></svg>
+              </div>
+              <div class="flip-face flip-back">
+                <svg viewBox="0 0 120 168" aria-hidden="true"><rect width="120" height="168" rx="12" fill="var(--card-3)"/><rect x="14" y="16" width="92" height="10" rx="5" fill="var(--ink-soft)" opacity=".6"/><rect x="14" y="34" width="60" height="8" rx="4" fill="var(--ink-faint)" opacity=".45"/><g stroke="var(--teal-ink)" stroke-width="3" fill="none"><path d="M16 60h88M16 78h88M16 96h64"/></g><rect x="14" y="120" width="40" height="30" rx="7" fill="var(--teal)" opacity=".5"/><rect x="62" y="120" width="44" height="30" rx="7" fill="var(--coral)" opacity=".45"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="view-switch" role="group" aria-label="Demo view (illustrative)">
+            <button class="chip" aria-pressed="true">Grid</button>
+            <button class="chip" aria-pressed="false">List</button>
+            <button class="chip" aria-pressed="false">Compact</button>
+            <button class="chip" aria-pressed="false">Fit</button>
+          </div>
+          <p class="count-pill" style="margin-top:.8rem;">Tap the card to flip it →</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discovery -->
+    <div class="feature flip reveal">
+      <div class="feature-copy">
+        <span class="eyebrow tag">Discovery</span>
+        <h2>Find any one thing in seconds</h2>
+        <p data-content="feature.discovery.body">Start typing and the grid narrows to match. Filter by category, platform or year, and group your cards however makes sense to you. Big collections stop feeling overwhelming the moment you can slice them.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Instant search as you type</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Filter by category, platform and year</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Group things your way, then rearrange</li>
+        </ul>
+      </div>
+      <div class="feature-media">
+        <div class="demo" id="discoveryDemo">
+          <div class="demo-bar"><span class="demo-dot c1"></span><span class="demo-dot c2"></span><span class="demo-dot c3"></span><span class="demo-title">Search &amp; filter</span></div>
+          <div class="search-fake"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span id="searchText">Search your collection</span><span class="search-caret"></span></div>
+          <div class="filter-row" role="group" aria-label="Demo filters (illustrative)">
+            <button class="chip" data-filter="all" aria-pressed="true">All</button>
+            <button class="chip" data-filter="coral" aria-pressed="false">Arcade</button>
+            <button class="chip" data-filter="teal" aria-pressed="false">Handheld</button>
+            <button class="chip" data-filter="gold" aria-pressed="false">Console</button>
+          </div>
+          <div class="mini-grid" id="miniGrid"></div>
+          <p class="count-pill">Showing <b id="miniCount">12</b> of 12 cards</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Games -->
+    <div class="feature reveal">
+      <div class="feature-copy">
+        <span class="eyebrow tag">Games</span>
+        <h2>Your collection is the deck</h2>
+        <p data-content="feature.games.body">Because it is already a deck of cards, itemdeck can play with it. Match pairs in Memory, test your knowledge in Guess the Value, or go head-to-head Top Trumps style comparing stats. Same cards you admire, now a game night.</p>
+        <ul class="feature-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Memory — find the matching pairs</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Guess the Value — flip a face-down card and guess its number</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Top Trumps — highest stat wins</li>
+        </ul>
+      </div>
+      <div class="feature-media">
+        <div class="demo">
+          <div class="demo-bar"><span class="demo-dot c1"></span><span class="demo-dot c2"></span><span class="demo-dot c3"></span><span class="demo-title">Memory · find a pair</span></div>
+          <div class="mem-grid" id="memGrid" role="group" aria-label="Memory game demo"></div>
+          <p class="mem-status" id="memStatus" aria-live="polite">Flip two cards to find a match.</p>
+          <button class="demo-reset" id="memReset">Shuffle &amp; restart</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIDEO ============ -->
+<section class="section-pad" id="watch">
+  <div class="wrap">
+    <div class="head center reveal">
+      <span class="eyebrow" style="justify-content:center;">Ninety seconds, start to finish</span>
+      <h2>Watch a whole collection come to life</h2>
+      <p>A quick, friendly walkthrough — load a demo, flip a card, play a round, and you're off.</p>
+    </div>
+
+    <div class="video-wrap reveal">
+      <div class="vhs" id="vhsPlayer" role="button" tabindex="0" aria-label="Play the 90-second tutorial (placeholder)">
+        <div class="vhs-osd"><span class="rec-dot"></span> PLAY</div>
+        <div class="vhs-time">SP · 00:00</div>
+        <div class="vhs-poster">
+          <svg viewBox="0 0 380 190" aria-hidden="true">
+            <rect x="40" y="40" width="70" height="104" rx="10" fill="var(--card-1)" transform="rotate(-12 75 92)"/>
+            <rect x="120" y="34" width="70" height="104" rx="10" fill="var(--card-3)" transform="rotate(-4 155 86)"/>
+            <rect x="200" y="34" width="70" height="104" rx="10" fill="var(--card-2)" transform="rotate(5 235 86)"/>
+            <rect x="270" y="42" width="70" height="104" rx="10" fill="var(--card-1)" transform="rotate(13 305 94)"/>
+            <text x="190" y="176" text-anchor="middle" fill="#e9e2d2" font-family="Space Grotesk, sans-serif" font-size="15" letter-spacing="3">A GUIDED TOUR</text>
+          </svg>
+        </div>
+        <button class="play-btn" aria-hidden="true" tabindex="-1">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        </button>
+      </div>
+      <p class="vhs-caption" id="vhsCaption">A 90-second tour. Nothing plays with sound until you press play.</p>
+
+      <div class="storyboard">
+        <div class="sb-track">
+          <div class="sb-cell reveal">
+            <div class="sb-thumb"><svg viewBox="0 0 160 100" aria-hidden="true"><rect width="160" height="100" fill="var(--bg-2)"/><circle cx="80" cy="44" r="20" fill="var(--coral)" opacity=".8"/><path d="M74 44h12M80 38v12" stroke="#fff" stroke-width="3" stroke-linecap="round"/><rect x="44" y="74" width="72" height="8" rx="4" fill="var(--line-strong)"/></svg><span class="sb-time">0:00–0:12</span></div>
+            <div class="sb-body"><h4>1 · Welcome</h4><p>Warm hello and the promise: any collection, brought to life in your browser.</p></div>
+          </div>
+          <div class="sb-cell reveal">
+            <div class="sb-thumb"><svg viewBox="0 0 160 100" aria-hidden="true"><rect width="160" height="100" fill="var(--bg-2)"/><rect x="30" y="30" width="30" height="40" rx="5" fill="var(--card-1)"/><rect x="65" y="30" width="30" height="40" rx="5" fill="var(--card-3)"/><rect x="100" y="30" width="30" height="40" rx="5" fill="var(--card-2)"/><path d="M22 84h116" stroke="var(--teal)" stroke-width="3" stroke-linecap="round"/></svg><span class="sb-time">0:12–0:35</span></div>
+            <div class="sb-body"><h4>2 · Load a demo</h4><p>Pick a demo collection; the grid fills in with a gentle shuffle.</p></div>
+          </div>
+          <div class="sb-cell reveal">
+            <div class="sb-thumb"><svg viewBox="0 0 160 100" aria-hidden="true"><rect width="160" height="100" fill="var(--bg-2)"/><rect x="58" y="24" width="44" height="56" rx="7" fill="var(--card-2)" stroke="var(--line-strong)"/><path d="M80 20c14 8 14 64 0 72" stroke="var(--coral)" stroke-width="2.5" fill="none" stroke-dasharray="4 4"/><path d="M104 30l6-6M104 30l8 2" stroke="var(--gold-ink)" stroke-width="2.5" stroke-linecap="round"/></svg><span class="sb-time">0:35–0:55</span></div>
+            <div class="sb-body"><h4>3 · Flip a card</h4><p>Tap a card, it turns over — details on the back, satisfying and quick.</p></div>
+          </div>
+          <div class="sb-cell reveal">
+            <div class="sb-thumb"><svg viewBox="0 0 160 100" aria-hidden="true"><rect width="160" height="100" fill="var(--bg-2)"/><rect x="34" y="26" width="24" height="32" rx="4" fill="var(--teal)"/><rect x="66" y="26" width="24" height="32" rx="4" fill="var(--surface)" stroke="var(--teal-ink)" stroke-width="2"/><rect x="98" y="26" width="24" height="32" rx="4" fill="var(--surface)" stroke="var(--teal-ink)" stroke-width="2"/><path d="M40 76l10 8 12-16" stroke="var(--gold-ink)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="sb-time">0:55–1:20</span></div>
+            <div class="sb-body"><h4>4 · Play Memory</h4><p>One quick round — two cards turn, they match, a little cheer.</p></div>
+          </div>
+          <div class="sb-cell reveal">
+            <div class="sb-thumb"><svg viewBox="0 0 160 100" aria-hidden="true"><rect width="160" height="100" fill="var(--bg-2)"/><rect x="52" y="26" width="56" height="34" rx="9" fill="var(--coral)"/><path d="M66 43h20M80 36l6 7-6 7" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="46" y="72" width="68" height="9" rx="4" fill="var(--line-strong)"/></svg><span class="sb-time">1:20–1:30</span></div>
+            <div class="sb-body"><h4>5 · Your turn</h4><p>Gentle invitation: make your own, it's free — with a link to start.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MADE FOR YOU ============ -->
+<section class="section-pad tex-scan" id="made-for-you" style="background:var(--bg-2);">
+  <div class="wrap">
+    <div class="head center reveal">
+      <span class="eyebrow" style="justify-content:center;">Made for you</span>
+      <h2>Whatever you collect, and however you love it</h2>
+    </div>
+    <div class="audience">
+      <div class="aud collectors reveal">
+        <div class="aud-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="7" height="16" rx="2"/><rect x="14" y="4" width="7" height="16" rx="2"/><path d="M6.5 8v8M17.5 8v8"/></svg></div>
+        <h3>Collectors</h3>
+        <p data-content="audience.collectors">Bring order to the shelf. See everything at a glance, sort it the way your brain does, and admire the whole set the way it deserves.</p>
+      </div>
+      <div class="aud curators reveal">
+        <div class="aud-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.6l6.8-4M8.6 13.4l6.8 4"/></svg></div>
+        <h3>Curators</h3>
+        <p data-content="audience.curators">Tell a story with a themed set — a best-of, a museum wing, a birthday gift — and share it with a single link that just works.</p>
+      </div>
+      <div class="aud players reveal">
+        <div class="aud-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="7" width="20" height="11" rx="4"/><path d="M7 12h4M9 10v4"/><circle cx="16" cy="11" r="1.2" fill="currentColor"/><circle cx="18.5" cy="14" r="1.2" fill="currentColor"/></svg></div>
+        <h3>Players</h3>
+        <p data-content="audience.players">Turn a rainy afternoon into a game. Memory rounds, guessing games and stat duels, all built from the cards you already treasure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA + FOOTER ============ -->
+<section class="section-pad">
+  <div class="wrap">
+    <div class="cta-band reveal tex-halftone">
+      <span class="eyebrow" style="justify-content:center;">Ready when you are</span>
+      <h2 data-content="cta.title">Let's bring your collection to life</h2>
+      <p data-content="cta.body">Open a ready-made demo and have a play — no account, no install, nothing to lose.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" data-link="demo" href="/demo/">
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span data-link-text>Try a demo collection</span>
+        </a>
+        <a class="btn btn-ghost" href="#how">How it works</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <svg class="brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+            <rect x="7" y="9" width="20" height="26" rx="5" fill="var(--gold)" transform="rotate(-9 17 22)"/>
+            <rect x="11" y="7" width="20" height="26" rx="5" fill="var(--teal)" transform="rotate(3 21 20)"/>
+            <rect x="14" y="6" width="20" height="26" rx="5" fill="var(--coral)" transform="rotate(12 24 19)"/>
+          </svg>
+          itemdeck.app
+        </a>
+        <p>A free, browser-based viewer that turns any collection into a deck of cards you can browse, search and play with.</p>
+      </div>
+      <div class="foot-cols" id="footCols">
+        <!-- Columns are generated from the SITE.footer config in the script below. -->
+        <div class="foot-col">
+          <h4>Explore</h4>
+          <a href="#how">How it works</a>
+          <a href="#features">Features</a>
+          <a href="#watch">Watch the tour</a>
+          <a href="#made-for-you">Who it's for</a>
+        </div>
+        <div class="foot-col">
+          <h4>For the curious</h4>
+          <a href="/demo/">Try a demo</a>
+          <a href="#hosting">Free hosting, explained</a>
+          <a href="https://github.com/REPPL/itemdeck.app/tree/main/docs" target="_blank" rel="noopener">Documentation</a>
+          <a href="https://github.com/REPPL/itemdeck.app/blob/main/docs/tutorials/getting-started.md" target="_blank" rel="noopener">Build your first deck</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- gentle GitHub / hosting note, framed for non-experts -->
+    <div id="hosting" style="margin-top:2.4rem; background:var(--surface); border:1px solid var(--line); border-radius:var(--radius); padding:1.4rem 1.5rem; box-shadow:var(--shadow-sm);">
+      <h3 style="font-size:1.05rem; margin-bottom:.4rem;">Where does my collection live?</h3>
+      <p style="margin:0; font-size:.95rem;" data-content="hosting.body">Your collection is stored using GitHub — a free, reliable home for your files on the web. Think of it as a tidy online folder that itemdeck reads from. You don't need to be technical: our step-by-step guide walks you through it, and once it's set up, sharing is as simple as sending a link.</p>
+    </div>
+
+    <div class="foot-bottom">
+      <span>© 2026 itemdeck · Made for people who love their collections.</span>
+      <div class="foot-badges">
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>WCAG 2.1 AA</span>
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>Keyboard-friendly</span>
+        <span class="badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>App works offline</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Copy for elements marked data-content="key" is injected at build
+     time from site/content.md by scripts/build-site.mjs. The text in
+     this file is the fallback if a block is missing from content.md. */
+
+  /* ============================================================
+     LINKS & BUTTONS — the ONE place to add, edit or remove every
+     link and call-to-action on the page.
+
+       • Change a URL here → it updates everywhere it's used.
+       • Add a line to a list → adds a link.  Delete a line → removes it.
+       • href "#id"    → smooth-scrolls to a section on this page
+       • href "http…"  → opens in a new tab
+       • href "@demo"  → uses SITE.demoUrl (the main call-to-action)
+
+     Buttons marked data-link="demo" in the HTML all point at
+     SITE.demoUrl, so the demo link lives in exactly one spot.
+     ============================================================ */
+  var SITE = {
+    demoUrl:   '/demo/',                          // the main "Try a demo" destination
+    demoLabel: 'Try a demo collection',           // label for the big demo buttons
+
+    // Top navigation (left → right)
+    nav: [
+      { label: 'How it works', href: '#how' },
+      { label: 'Features',     href: '#features' },
+      { label: 'Watch',        href: '#watch' },
+      { label: "Who it's for", href: '#made-for-you' }
+    ],
+
+    // Footer link columns — add/remove whole columns or individual links
+    footer: [
+      { title: 'Explore', links: [
+        { label: 'How it works',   href: '#how' },
+        { label: 'Features',       href: '#features' },
+        { label: 'Watch the tour', href: '#watch' },
+        { label: "Who it's for",   href: '#made-for-you' }
+      ]},
+      { title: 'For the curious', links: [
+        { label: 'Try a demo',              href: '@demo' },
+        { label: 'Free hosting, explained', href: '#hosting' },
+        { label: 'Documentation',           href: 'https://github.com/REPPL/itemdeck.app/tree/main/docs' },
+        { label: 'Build your first deck',   href: 'https://github.com/REPPL/itemdeck.app/blob/main/docs/tutorials/getting-started.md' }
+      ]}
+    ]
+  };
+
+  function resolveHref(h){ return h === '@demo' ? SITE.demoUrl : h; }
+  function anchorAttrs(h){
+    var href = resolveHref(h);
+    var ext = /^https?:/.test(href);
+    return 'href="' + href + '"' + (ext ? ' target="_blank" rel="noopener"' : '');
+  }
+  function renderNav(){
+    var el = document.getElementById('navLinks'); if(!el) return;
+    el.innerHTML = SITE.nav.map(function(l){ return '<a ' + anchorAttrs(l.href) + '>' + l.label + '</a>'; }).join('');
+  }
+  function renderFooter(){
+    var el = document.getElementById('footCols'); if(!el) return;
+    el.innerHTML = SITE.footer.map(function(col){
+      return '<div class="foot-col"><h4>' + col.title + '</h4>' +
+        col.links.map(function(l){ return '<a ' + anchorAttrs(l.href) + '>' + l.label + '</a>'; }).join('') +
+      '</div>';
+    }).join('');
+  }
+  function applyDemoButtons(){
+    document.querySelectorAll('[data-link="demo"]').forEach(function(a){
+      a.setAttribute('href', SITE.demoUrl);
+      if(/^https?:/.test(SITE.demoUrl)){ a.setAttribute('target','_blank'); a.setAttribute('rel','noopener'); }
+      else { a.removeAttribute('target'); a.removeAttribute('rel'); }
+      var t = a.querySelector('[data-link-text]');  // swap label but keep any icon
+      if(t) t.textContent = SITE.demoLabel;
+    });
+  }
+  renderNav(); renderFooter(); applyDemoButtons();
+
+  /* ---------- Theme toggle ---------- */
+  var root = document.documentElement;
+  var buttons = document.querySelectorAll('[data-theme-set]');
+  function currentEffective(){
+    var t = root.getAttribute('data-theme');
+    if (t === 'auto') return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    return t;
+  }
+  function syncButtons(){
+    var eff = currentEffective();
+    buttons.forEach(function(b){ b.setAttribute('aria-pressed', b.dataset.themeSet === eff ? 'true':'false'); });
+  }
+  buttons.forEach(function(b){
+    b.addEventListener('click', function(){ root.setAttribute('data-theme', b.dataset.themeSet); syncButtons(); });
+  });
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', syncButtons);
+  syncButtons();
+
+  /* ---------- Mobile nav disclosure ---------- */
+  var navToggle = document.getElementById('navToggle');
+  var navLinksEl = document.getElementById('navLinks');
+  if(navToggle && navLinksEl){
+    navToggle.addEventListener('click', function(){
+      var open = navLinksEl.classList.toggle('open');
+      navToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    navLinksEl.addEventListener('click', function(e){
+      if(e.target.closest('a')){ navLinksEl.classList.remove('open'); navToggle.setAttribute('aria-expanded','false'); }
+    });
+  }
+
+  /* ---------- Header shadow on scroll ---------- */
+  var header = document.querySelector('.site-header');
+  var onScroll = function(){ header.classList.toggle('scrolled', window.scrollY > 8); };
+  onScroll(); window.addEventListener('scroll', onScroll, {passive:true});
+
+  /* ---------- Hero deck (SVG card faces) ---------- */
+  var faces = [
+    // trading card (coral)
+    '<svg viewBox="0 0 210 294" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="294" rx="16" fill="var(--card-1)"/><rect x="16" y="16" width="178" height="150" rx="12" fill="var(--coral)" opacity=".85"/><circle cx="105" cy="84" r="42" fill="#fff" opacity=".9"/><path d="M86 84h38M105 65v38" stroke="var(--coral)" stroke-width="8" stroke-linecap="round"/><rect x="16" y="188" width="130" height="14" rx="7" fill="var(--ink-faint)" opacity=".45"/><rect x="16" y="216" width="90" height="12" rx="6" fill="var(--ink-faint)" opacity=".3"/><rect x="16" y="250" width="178" height="30" rx="9" fill="var(--gold)" opacity=".5"/></svg>',
+    // game cartridge (teal)
+    '<svg viewBox="0 0 210 294" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="294" rx="16" fill="var(--card-2)"/><rect x="40" y="30" width="130" height="180" rx="14" fill="var(--teal)" opacity=".9"/><rect x="40" y="30" width="130" height="46" rx="14" fill="#fff" opacity=".25"/><rect x="60" y="96" width="90" height="70" rx="8" fill="#fff" opacity=".8"/><rect x="72" y="210" width="66" height="20" rx="6" fill="var(--teal-ink)"/><rect x="80" y="238" width="50" height="10" rx="5" fill="var(--ink-faint)" opacity=".4"/></svg>',
+    // vinyl record (gold)
+    '<svg viewBox="0 0 210 294" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="294" rx="16" fill="var(--card-3)"/><circle cx="105" cy="120" r="82" fill="#2a2620"/><circle cx="105" cy="120" r="60" fill="none" stroke="#4a453c" stroke-width="2"/><circle cx="105" cy="120" r="44" fill="none" stroke="#4a453c" stroke-width="2"/><circle cx="105" cy="120" r="26" fill="var(--gold)"/><circle cx="105" cy="120" r="5" fill="#2a2620"/><rect x="30" y="228" width="150" height="14" rx="7" fill="var(--ink-faint)" opacity=".4"/><rect x="30" y="252" width="100" height="12" rx="6" fill="var(--ink-faint)" opacity=".28"/></svg>',
+    // photo/postcard (coral-2)
+    '<svg viewBox="0 0 210 294" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="294" rx="16" fill="var(--card-2)"/><rect x="18" y="18" width="174" height="120" rx="10" fill="var(--gold)" opacity=".7"/><circle cx="70" cy="70" r="20" fill="#fff" opacity=".9"/><path d="M18 138l50-40 40 30 34-26 50 36v18a10 10 0 0 1-10 10H28a10 10 0 0 1-10-10z" fill="var(--coral)" opacity=".55"/><rect x="18" y="160" width="140" height="14" rx="7" fill="var(--ink-faint)" opacity=".4"/><rect x="18" y="186" width="96" height="12" rx="6" fill="var(--ink-faint)" opacity=".28"/></svg>',
+    // stamp/badge (teal-2)
+    '<svg viewBox="0 0 210 294" xmlns="http://www.w3.org/2000/svg"><rect width="210" height="294" rx="16" fill="var(--card-1)"/><rect x="34" y="34" width="142" height="150" rx="12" fill="#fff" opacity=".7" stroke="var(--coral)" stroke-width="4" stroke-dasharray="8 8"/><circle cx="105" cy="109" r="46" fill="var(--teal)" opacity=".85"/><path d="M105 78l9 20 22 2-16 15 5 22-20-11-20 11 5-22-16-15 22-2z" fill="#fff" opacity=".95"/><rect x="34" y="206" width="142" height="14" rx="7" fill="var(--ink-faint)" opacity=".4"/><rect x="34" y="232" width="100" height="12" rx="6" fill="var(--ink-faint)" opacity=".28"/></svg>'
+  ];
+  var deck = document.getElementById('heroDeck');
+  // spread positions: rotation, x, y, delay
+  var layout = [
+    {r:-24, x:'-118px', y:'26px', d:.05},
+    {r:-12, x:'-60px',  y:'8px',  d:.14},
+    {r:0,   x:'0px',    y:'0px',  d:.24, lead:true},
+    {r:12,  x:'60px',   y:'8px',  d:.34},
+    {r:24,  x:'118px',  y:'26px', d:.44}
+  ];
+  layout.forEach(function(pos, i){
+    var el = document.createElement('div');
+    el.className = 'deck-card' + (pos.lead ? ' lead':'');
+    el.style.setProperty('--r', pos.r+'deg');
+    el.style.setProperty('--x', pos.x);
+    el.style.setProperty('--y', pos.y);
+    el.style.setProperty('--d', (reduce?0:pos.d)+'s');
+    el.style.zIndex = (i===2)?5:(5-Math.abs(2-i));
+    el.innerHTML = faces[i % faces.length];
+    deck.appendChild(el);
+  });
+
+  /* ---------- Views demo: flip card ---------- */
+  var flip = document.getElementById('flipCard');
+  function toggleFlip(){
+    var f = flip.classList.toggle('flipped');
+    flip.setAttribute('aria-pressed', f ? 'true':'false');
+  }
+  flip.addEventListener('click', toggleFlip);
+  flip.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); toggleFlip(); }});
+  // view chips (illustrative — front card style unchanged, just visual pressed state)
+  document.querySelectorAll('.view-switch .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      c.parentElement.querySelectorAll('.chip').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      c.setAttribute('aria-pressed','true');
+    });
+  });
+
+  /* ---------- Discovery demo: filtering grid ---------- */
+  var miniColors = ['coral','teal','gold'];
+  var miniData = [];
+  for(var i=0;i<12;i++){ miniData.push(miniColors[i%3]); }
+  var miniGrid = document.getElementById('miniGrid');
+  var swatch = { coral:'var(--card-1)', teal:'var(--card-2)', gold:'var(--card-3)' };
+  var accent = { coral:'var(--coral)', teal:'var(--teal)', gold:'var(--gold)' };
+  miniData.forEach(function(cat){
+    var d = document.createElement('div');
+    d.className='mini-card'; d.dataset.cat=cat;
+    d.innerHTML='<svg viewBox="0 0 60 80" xmlns="http://www.w3.org/2000/svg"><rect width="60" height="80" fill="'+swatch[cat]+'"/><rect x="8" y="8" width="44" height="30" rx="5" fill="'+accent[cat]+'" opacity=".75"/><rect x="8" y="46" width="34" height="6" rx="3" fill="var(--ink-faint)" opacity=".4"/><rect x="8" y="58" width="24" height="5" rx="2" fill="var(--ink-faint)" opacity=".3"/></svg>';
+    miniGrid.appendChild(d);
+  });
+  var searchLabels = { all:'Search your collection', coral:'arcade', teal:'handheld', gold:'console' };
+  var countEl = document.getElementById('miniCount');
+  var searchText = document.getElementById('searchText');
+  document.querySelectorAll('#discoveryDemo .chip').forEach(function(c){
+    c.addEventListener('click', function(){
+      document.querySelectorAll('#discoveryDemo .chip').forEach(function(x){ x.setAttribute('aria-pressed','false'); });
+      c.setAttribute('aria-pressed','true');
+      var f = c.dataset.filter;
+      var shown = 0;
+      miniGrid.querySelectorAll('.mini-card').forEach(function(card){
+        var match = (f==='all' || card.dataset.cat===f);
+        card.classList.toggle('dim', !match);
+        if(match) shown++;
+      });
+      countEl.textContent = shown;
+      searchText.textContent = f==='all' ? searchLabels.all : searchLabels[f];
+      searchText.style.color = f==='all' ? '' : 'var(--ink)';
+    });
+  });
+
+  /* ---------- Games demo: Memory ---------- */
+  var memGrid = document.getElementById('memGrid');
+  var memStatus = document.getElementById('memStatus');
+  var memReset = document.getElementById('memReset');
+  var symbols = ['★','●','▲','◆'];
+  var lock = false, first=null, matched=0;
+  function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+  function buildMemory(){
+    memGrid.innerHTML=''; lock=false; first=null; matched=0;
+    memStatus.textContent='Flip two cards to find a match.';
+    var pool = shuffle(symbols.concat(symbols).slice());
+    pool.forEach(function(sym, idx){
+      var b = document.createElement('button');
+      b.className='mem'; b.type='button'; b.dataset.sym=sym;
+      b.dataset.hidden='Hidden card '+(idx+1);
+      b.setAttribute('aria-label', b.dataset.hidden);
+      b.innerHTML =
+        '<span class="mem-inner">'+
+          '<span class="mem-face mem-front"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 5h16v14H4z" opacity="0"/><path d="M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm5 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"/></svg></span>'+
+          '<span class="mem-face mem-back"><span>'+sym+'</span></span>'+
+        '</span>';
+      b.addEventListener('click', function(){ onPick(b); });
+      memGrid.appendChild(b);
+    });
+  }
+  function onPick(b){
+    if(lock || b.classList.contains('up') || b.classList.contains('matched')) return;
+    b.classList.add('up'); b.setAttribute('aria-label','Card showing '+b.dataset.sym);
+    if(!first){ first=b; return; }
+    if(first.dataset.sym === b.dataset.sym){
+      first.classList.add('matched'); b.classList.add('matched');
+      matched++; first=null;
+      memStatus.innerHTML = matched>=symbols.length ? 'A perfect deck! <b>You matched them all.</b>' : '<b>Match!</b> Keep going.';
+    } else {
+      lock=true;
+      memStatus.textContent='Not a pair — try again.';
+      var a=first; first=null;
+      setTimeout(function(){
+        a.classList.remove('up'); b.classList.remove('up');
+        a.setAttribute('aria-label', a.dataset.hidden); b.setAttribute('aria-label', b.dataset.hidden);
+        lock=false;
+      }, reduce?200:850);
+    }
+  }
+  memReset.addEventListener('click', buildMemory);
+  buildMemory();
+
+  /* ---------- VHS player (placeholder, no autoplay) ---------- */
+  var vhs = document.getElementById('vhsPlayer');
+  var cap = document.getElementById('vhsCaption');
+  function playMsg(){
+    cap.textContent = 'This is a placeholder for the finished 90-second tutorial — see the storyboard below for the full script.';
+    vhs.setAttribute('aria-label','Tutorial placeholder — video coming soon');
+  }
+  vhs.addEventListener('click', playMsg);
+  vhs.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); playMsg(); }});
+
+  /* ---------- Scroll reveal ---------- */
+  var reveals = document.querySelectorAll('.reveal');
+  if(reduce || !('IntersectionObserver' in window)){
+    reveals.forEach(function(r){ r.classList.add('in'); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(en){ if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+    }, {threshold:.14, rootMargin:'0px 0px -40px 0px'});
+    reveals.forEach(function(r){ io.observe(r); });
+  }
+})();
+</script>
+</body>
+</html>

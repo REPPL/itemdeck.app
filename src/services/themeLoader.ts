@@ -11,8 +11,9 @@ import {
   type ThemeIndex,
   type ThemeIndexEntry,
 } from "@/schemas/theme.schema";
+import { withBase } from "@/config/basePath";
 
-const DEFAULT_THEMES_URL = "/themes/index.json";
+const DEFAULT_THEMES_URL = withBase("/themes/index.json");
 
 // Cache for loaded themes
 const themeCache = new Map<string, Theme>();
@@ -50,7 +51,9 @@ export async function loadTheme(urlOrPath: string): Promise<Theme> {
   }
 
   // Resolve relative paths
-  const url = urlOrPath.startsWith("http") ? urlOrPath : `/themes/${urlOrPath}`;
+  const url = urlOrPath.startsWith("http")
+    ? urlOrPath
+    : withBase(`/themes/${urlOrPath}`);
 
   const response = await fetch(url, {
     cache: "no-cache",

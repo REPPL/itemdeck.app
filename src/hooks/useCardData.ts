@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { type CardData } from "@/types/card";
+import { withBase } from "@/config/basePath";
 
 interface UseCardDataResult {
   cards: CardData[];
@@ -7,7 +8,7 @@ interface UseCardDataResult {
   error: string | null;
 }
 
-const DATA_BASE_URL = "/data/collections/retro-games";
+const DATA_BASE_URL = withBase("/data/collections/retro-games");
 
 /**
  * Hook to fetch and manage card data from local JSON files.

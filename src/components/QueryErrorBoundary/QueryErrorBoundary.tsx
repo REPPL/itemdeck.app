@@ -9,6 +9,7 @@ import { QueryErrorResetBoundary } from "@tanstack/react-query";
 import { ErrorBoundary } from "react-error-boundary";
 import type { ReactNode } from "react";
 import { useSourceStore } from "@/stores/sourceStore";
+import { getBasePath } from "@/config/basePath";
 import styles from "./QueryErrorBoundary.module.css";
 
 interface QueryErrorBoundaryProps {
@@ -139,7 +140,7 @@ export function QueryErrorBoundary({
     // Clear the active source to trigger the collection picker
     setActiveSource(null);
     // Reload the page to reset all state cleanly
-    window.location.href = "/";
+    window.location.href = getBasePath();
   };
 
   return (

@@ -46,6 +46,13 @@ For a complete list of dependencies, see `package.json`.
 
 - [Claude Code](https://claude.ai/claude-code) - AI-assisted development
 
+## Design Contributions
+
+The marketing landing page, the itemdeck logo artwork, and the tutorial
+video storyboard originated from an AI-assisted design session
+([Claude](https://claude.ai), Anthropic) and were adopted after
+adversarial code and security review.
+
 ---
 
 ## Contributing Acknowledgements

@@ -13,6 +13,7 @@ import {
   themeIndexSchema,
 } from "@/schemas/theme.schema";
 import { isFromTrustedSource } from "@/config/themeRegistry";
+import { withBase } from "@/config/basePath";
 
 /**
  * Result of loading a theme.
@@ -169,7 +170,7 @@ export async function loadThemeIndex(baseUrl: string): Promise<ThemeIndexLoadRes
  * @returns List of available local themes
  */
 export async function discoverLocalThemes(): Promise<ThemeIndexEntry[]> {
-  const result = await loadThemeIndex("/themes/");
+  const result = await loadThemeIndex(withBase("/themes/"));
 
   if (result.success && result.themes && result.themes.length > 0) {
     return result.themes;
@@ -181,7 +182,7 @@ export async function discoverLocalThemes(): Promise<ThemeIndexEntry[]> {
   const themes: ThemeIndexEntry[] = [];
 
   for (const themeName of knownThemes) {
-    const url = `/themes/${themeName}.json`;
+    const url = withBase(`/themes/${themeName}.json`);
     const loadResult = await loadTheme(url);
 
     if (loadResult.success && loadResult.theme) {

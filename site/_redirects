@@ -1,0 +1,13 @@
+# Legacy short share URLs: serve the app at the old root paths via 200
+# rewrites, NOT redirects — the browser URL is untouched, so ?u=&c= query
+# strings always survive; the app parses legacy /gh paths itself and
+# normalises the address bar after loading.
+/gh /demo/index.html 200
+/gh/* /demo/index.html 200
+
+# App deep links: rewrite only the virtual /gh route namespace. A catch-all
+# /demo/* would break the app — Cloudflare Pages follows redirect rules even
+# when a real static asset matches, so it would shadow every script/style
+# under /demo/assets/.
+/demo/gh /demo/index.html 200
+/demo/gh/* /demo/index.html 200

@@ -39,6 +39,7 @@ Documented architectural decisions for Itemdeck.
 | [031](./ADR-031-logging-telemetry-strategy.md) | Local-first structured logging | Accepted | [R-019-logging-observability](../../research/R-019-logging-observability.md) |
 | [032](./ADR-032-plugin-api-versioning.md) | API adapter pattern with semver | Accepted | [R-022-plugin-versioning-breaking-changes](../../research/R-022-plugin-versioning-breaking-changes.md) |
 | [033](./ADR-033-cache-write-refetch.md) | Cache collection via query invalidation | Accepted | — |
+| [034](./ADR-034-landing-and-demo-hosting.md) | Landing at apex, app at /demo/, one Cloudflare Pages project | Accepted | — |
 
 ## ADR Template
 

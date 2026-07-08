@@ -32,7 +32,7 @@ itemdeck.app is a browser-based card display system that loads collections from 
 ## Features
 
 - **Card Display** - Responsive grid with smooth animations and flip effects
-- **Multiple Views** - Grid, Stack, Carousel, and Fit-to-Viewport layouts
+- **Multiple Views** - Grid, List, Compact, and Fit-to-Viewport layouts
 - **Discovery Tools** - Search, filter by category/platform/year, and grouping
 - **Gaming Mechanics** - Multiple game mechanics including Memory and Snap Ranking
 - **Remote Collections** - Load any GitHub-hosted collection via URL
@@ -50,7 +50,7 @@ npm install
 # Start development server
 npm run dev
 
-# Open http://localhost:5173 in your browser
+# Open http://localhost:5173/demo/ in your browser
 ```
 
 ### Load a Collection
@@ -59,13 +59,13 @@ Load remote collections using simplified URL formats:
 
 ```
 # Short query format
-http://localhost:5173/gh?u=REPPL&c=retro/games/
+http://localhost:5173/demo/gh?u=REPPL&c=retro/games/
 
 # Clean path format
-http://localhost:5173/gh/REPPL/c/retro/games/
+http://localhost:5173/demo/gh/REPPL/c/retro/games/
 
 # Nested folders supported
-http://localhost:5173/gh/REPPL/c/retro/games/my-collection
+http://localhost:5173/demo/gh/REPPL/c/retro/games/my-collection
 ```
 
 ## Documentation

@@ -58,12 +58,9 @@ class MechanicRegistry {
    * @throws Error if mechanic not found or activation fails
    */
   async activate(id: string): Promise<Mechanic> {
-    // Deactivate current mechanic if any
-    if (this.activeMechanicId && this.activeMechanicId !== id) {
-      this.deactivate();
-    }
-
-    // Get or load the mechanic
+    // Load and activate the new mechanic BEFORE deactivating the current
+    // one, so a failed load/activation leaves the current mechanic active
+    // and the registry consistent.
     let mechanic = this.instances.get(id);
 
     if (!mechanic) {
@@ -79,6 +76,12 @@ class MechanicRegistry {
     // Activate the mechanic
     if (mechanic.lifecycle.onActivate) {
       await mechanic.lifecycle.onActivate();
+    }
+
+    // Deactivate the previous mechanic only after successful activation
+    if (this.activeMechanicId && this.activeMechanicId !== id) {
+      const previous = this.instances.get(this.activeMechanicId);
+      previous?.lifecycle.onDeactivate?.();
     }
 
     this.activeMechanicId = id;

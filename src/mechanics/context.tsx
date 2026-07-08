@@ -94,6 +94,9 @@ export function MechanicProvider({ children, onOpenMechanicPanel }: MechanicProv
   // We don't auto-activate from persisted state to prevent stale game state
   useEffect(() => {
     if (!activeMechanicId && mechanic) {
+      // Restore display settings before deactivating
+      useSettingsStore.getState().restoreMechanicOverrides();
+
       // Deactivate mechanic
       mechanicRegistry.deactivate();
       setMechanic(null);

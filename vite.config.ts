@@ -126,7 +126,10 @@ if (process.env.ANALYZE) {
 
 export default defineConfig({
   // The app is served from /demo/; the marketing landing page owns "/".
-  base: "/demo/",
+  // ITEMDECK_BASE overrides this for subpath hosts (e.g. a staging mount at
+  // /some/prefix/demo/); the basePath helper reads the same value at runtime
+  // via import.meta.env.BASE_URL, so routing and asset URLs stay in step.
+  base: process.env.ITEMDECK_BASE || "/demo/",
   plugins,
   resolve: {
     alias: {

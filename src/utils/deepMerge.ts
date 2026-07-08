@@ -7,6 +7,12 @@
 
 type PlainObject = Record<string, unknown>;
 
+/**
+ * Keys that must never be merged from untrusted input (e.g. parsed JSON).
+ * Assigning them can mutate an object's prototype chain (prototype pollution).
+ */
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
 function isPlainObject(value: unknown): value is PlainObject {
   return (
     typeof value === "object" &&
@@ -28,6 +34,11 @@ export function deepMerge<T extends PlainObject>(
   const result = { ...target };
 
   for (const key of Object.keys(source) as (keyof T)[]) {
+    // Skip keys that could pollute the prototype chain
+    if (UNSAFE_KEYS.has(key as string)) {
+      continue;
+    }
+
     const sourceValue = source[key];
     const targetValue = target[key];
 

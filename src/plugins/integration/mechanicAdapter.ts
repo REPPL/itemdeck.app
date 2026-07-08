@@ -31,6 +31,34 @@ export interface RegisteredMechanic {
 
 
 // ============================================================================
+// Entrypoint Allowlist
+// ============================================================================
+
+/**
+ * Hardcoded allowlist of mechanic entrypoints that may be dynamically imported.
+ *
+ * Contribution entrypoints come from plugin manifests, which are data, not
+ * trusted code. Only the module paths registered by the builtin plugins
+ * (see src/plugins/builtin and registerBuiltinMechanics below) are allowed;
+ * anything else is rejected before it reaches import().
+ */
+const BUILTIN_MECHANIC_ENTRYPOINTS: ReadonlySet<string> = new Set([
+  "@/mechanics/memory",
+  "@/mechanics/snap-ranking",
+]);
+
+/**
+ * Throw if a manifest-supplied entrypoint is not a builtin module path.
+ */
+function assertAllowedMechanicEntrypoint(entrypoint: string): void {
+  if (!BUILTIN_MECHANIC_ENTRYPOINTS.has(entrypoint)) {
+    throw new Error(
+      `Mechanic entrypoint "${entrypoint}" is not on the builtin entrypoint allowlist; refusing to import it`
+    );
+  }
+}
+
+// ============================================================================
 // Mechanic Adapter Class
 // ============================================================================
 
@@ -60,6 +88,13 @@ class MechanicPluginAdapter {
     if (mechanicRegistry.has(fullId)) {
       console.warn(`Mechanic ${fullId} already registered, skipping`);
       return;
+    }
+
+    // Gate manifest-controlled entrypoints at registration time. The lazy
+    // factory below is the only path to import(), so rejecting here keeps
+    // non-builtin entrypoints from ever reaching it.
+    if (contribution.entrypoint) {
+      assertAllowedMechanicEntrypoint(contribution.entrypoint);
     }
 
     // Create factory function for lazy loading
@@ -155,6 +190,10 @@ class MechanicPluginAdapter {
   ): Promise<Mechanic> {
     // For built-in plugins, load the actual mechanic code
     if (contribution.entrypoint) {
+      // Defense in depth: re-check at the import site. Deliberately outside
+      // the try below so rejection propagates instead of falling back.
+      assertAllowedMechanicEntrypoint(contribution.entrypoint);
+
       try {
         // Dynamic import of the mechanic entry point
         const module = await import(/* @vite-ignore */ contribution.entrypoint) as Record<string, unknown>;

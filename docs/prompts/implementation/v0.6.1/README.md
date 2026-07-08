@@ -744,9 +744,9 @@ Identify functionality that should be configurable but isn't:
 
 ### Phase B: Release Process (MANDATORY)
 
-13. **Create devlog**: `docs/development/process/devlogs/v0.6.1/README.md`
-14. **Create retrospective**: `docs/development/process/retrospectives/v0.6.1/README.md`
-15. **Update time logs**: Record actual hours spent in `docs/development/process/time-logs/`
+13. **Create devlog**: `.abcd/development/process/devlogs/v0.6.1/README.md`
+14. **Create retrospective**: `.abcd/development/process/retrospectives/v0.6.1/README.md`
+15. **Update time logs**: Record actual hours spent in `.abcd/development/process/time-logs/`
 16. **Run PII scan**: `/pii-scan` on all staged changes
 17. **Commit**: With conventional commit message and AI attribution
 18. **Tag**: `git tag -a v0.6.1 -m "v0.6.1"`

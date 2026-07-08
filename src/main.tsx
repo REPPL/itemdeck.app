@@ -14,8 +14,14 @@ function setupEarlyKeyboardInterception(): void {
   window.addEventListener(
     "keydown",
     (event: KeyboardEvent) => {
-      // Intercept Cmd-R (Mac) or Ctrl-R (Windows/Linux)
-      if (event.code === "KeyR" && (event.metaKey || event.ctrlKey)) {
+      // Intercept plain Cmd-R (Mac) or Ctrl-R (Windows/Linux) only.
+      // Let modified chords through (e.g. Cmd/Ctrl-Shift-R hard reload).
+      if (
+        event.code === "KeyR" &&
+        (event.metaKey || event.ctrlKey) &&
+        !event.shiftKey &&
+        !event.altKey
+      ) {
         event.preventDefault();
         event.stopPropagation();
         // Dispatch custom event for React to handle

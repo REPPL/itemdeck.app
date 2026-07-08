@@ -20,10 +20,10 @@ This plan addresses:
 
 The following documentation is out of sync with implementation:
 
-**Milestones README** (`docs/development/roadmap/milestones/README.md`):
+**Milestones README** (`.abcd/development/roadmap/milestones/README.md`):
 - v0.9.0 shows "📋 Planned" but is complete → Change to "✅ Complete"
 
-**Planned Features README** (`docs/development/roadmap/features/planned/README.md`):
+**Planned Features README** (`.abcd/development/roadmap/features/planned/README.md`):
 - Still lists v0.9.0 features (F-045, F-046, F-047) as planned
 - Still lists v0.6.1 features (F-042, F-043, F-044) as planned
 - Remove these sections as features are now in completed/
@@ -485,7 +485,7 @@ Run `/pii-scan` on all staged files
 
 ### 7.4 Create Devlog
 
-**New file**: `docs/development/process/devlogs/v0.10.0/README.md`
+**New file**: `.abcd/development/process/devlogs/v0.10.0/README.md`
 
 Document:
 - Implementation narrative
@@ -495,7 +495,7 @@ Document:
 
 ### 7.5 Create Retrospective
 
-**New file**: `docs/development/process/retrospectives/v0.10.0/README.md`
+**New file**: `.abcd/development/process/retrospectives/v0.10.0/README.md`
 
 Document:
 - What went well
@@ -517,7 +517,7 @@ Tick all success criteria checkboxes.
 
 ### 7.7 Update Milestone
 
-**File**: `docs/development/roadmap/milestones/v0.10.0.md`
+**File**: `.abcd/development/roadmap/milestones/v0.10.0.md`
 
 - Tick all success criteria
 - Update status to Complete
@@ -525,8 +525,8 @@ Tick all success criteria checkboxes.
 
 ### 7.8 Update Index Files
 
-- `docs/development/process/devlogs/README.md` - Add v0.10.0
-- `docs/development/process/retrospectives/README.md` - Add v0.10.0
+- `.abcd/development/process/devlogs/README.md` - Add v0.10.0
+- `.abcd/development/process/retrospectives/README.md` - Add v0.10.0
 
 ---
 
@@ -623,8 +623,8 @@ git push origin main --tags
 | `src/components/Card/CardExpanded.tsx` | Add edit button |
 | `src/components/SettingsPanel/SettingsPanel.tsx` | Add edit mode section |
 | `src/App.tsx` | Add EditModeIndicator |
-| `docs/development/roadmap/milestones/README.md` | Fix v0.9.0 status |
-| `docs/development/roadmap/features/planned/README.md` | Remove completed features |
+| `.abcd/development/roadmap/milestones/README.md` | Fix v0.9.0 status |
+| `.abcd/development/roadmap/features/planned/README.md` | Remove completed features |
 
 ---
 

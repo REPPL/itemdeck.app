@@ -68,6 +68,33 @@ export interface LoadedCollection {
 }
 
 // ============================================================================
+// Entrypoint Allowlist
+// ============================================================================
+
+/**
+ * Hardcoded allowlist of source entrypoints that may be dynamically imported.
+ *
+ * Contribution entrypoints come from plugin manifests, which are data, not
+ * trusted code. Only the module paths registered by the builtin plugins
+ * (see src/plugins/builtin and registerBuiltinSources below) are allowed;
+ * anything else is rejected before it reaches import().
+ */
+const BUILTIN_SOURCE_ENTRYPOINTS: ReadonlySet<string> = new Set([
+  "@/loaders/githubDiscovery",
+]);
+
+/**
+ * Throw if a manifest-supplied entrypoint is not a builtin module path.
+ */
+function assertAllowedSourceEntrypoint(entrypoint: string): void {
+  if (!BUILTIN_SOURCE_ENTRYPOINTS.has(entrypoint)) {
+    throw new Error(
+      `Source entrypoint "${entrypoint}" is not on the builtin entrypoint allowlist; refusing to import it`
+    );
+  }
+}
+
+// ============================================================================
 // Source Adapter Class
 // ============================================================================
 
@@ -223,6 +250,11 @@ class SourcePluginAdapter {
   ): Promise<(config: unknown) => Promise<unknown>> {
     // For sources with custom entrypoints, load the module
     if (contribution.entrypoint) {
+      // Gate manifest-controlled entrypoints before they reach import().
+      // Deliberately outside the try below so rejection propagates instead
+      // of falling back to a default loader.
+      assertAllowedSourceEntrypoint(contribution.entrypoint);
+
       try {
         const module = await import(/* @vite-ignore */ contribution.entrypoint) as Record<string, unknown>;
         const loader = (module.default ?? module.loadCollection ?? module.load) as ((config: unknown) => Promise<unknown>) | undefined;

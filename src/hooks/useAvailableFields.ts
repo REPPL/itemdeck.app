@@ -12,6 +12,15 @@ import { useCollectionData } from "@/context/CollectionDataContext";
 import type { FieldOption } from "@/utils/fieldPathResolver";
 
 /**
+ * Fields that qualify for the top corner badge: a field qualifies when its
+ * values are short rank/verdict/score-like data that fits a small badge.
+ * Exact field names are matched against TOP_BADGE_FIELD_NAMES; any field
+ * whose name contains one of TOP_BADGE_FIELD_KEYWORDS also qualifies.
+ */
+const TOP_BADGE_FIELD_NAMES = new Set(["myRank", "myVerdict", "rank", "year"]);
+const TOP_BADGE_FIELD_KEYWORDS = ["verdict", "rating", "score"];
+
+/**
  * Convert camelCase to Title Case.
  */
 function camelToTitle(str: string): string {
@@ -194,13 +203,8 @@ export function useAvailableFields() {
     const topBadgeFields: FieldOption[] = [
       { value: "order", label: "Order/Rank" },
       ...allFields.filter((f) =>
-        f.value === "myRank" ||
-        f.value === "myVerdict" ||
-        f.value === "rank" ||
-        f.value === "year" ||
-        f.value.toLowerCase().includes("verdict") ||
-        f.value.toLowerCase().includes("rating") ||
-        f.value.toLowerCase().includes("score")
+        TOP_BADGE_FIELD_NAMES.has(f.value) ||
+        TOP_BADGE_FIELD_KEYWORDS.some((keyword) => f.value.toLowerCase().includes(keyword))
       ),
       { value: "none", label: "None" },
     ];

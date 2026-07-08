@@ -707,8 +707,8 @@ case "cache":
 
 **Create:**
 
-- `docs/development/process/devlogs/v0.8.1/README.md`
-- `docs/development/process/retrospectives/v0.8.1/README.md`
+- `.abcd/development/process/devlogs/v0.8.1/README.md`
+- `.abcd/development/process/retrospectives/v0.8.1/README.md`
 
 ---
 

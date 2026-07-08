@@ -434,6 +434,9 @@ interface SettingsState {
   /** Number of cards to randomly select (when enabled) */
   randomSelectionCount: number;
 
+  /** Whether the user explicitly chose a selection count (guards the smart default) */
+  hasUserSetRandomSelectionCount: boolean;
+
   /** Which face cards show by default (front or back) */
   defaultCardFace: DefaultCardFace;
 
@@ -529,7 +532,7 @@ interface SettingsState {
   // v0.15.5: Mechanic Display Preferences (F-102)
   // ============================================================================
 
-  /** Backup of settings before mechanic override (transient, not persisted) */
+  /** Backup of settings before mechanic override (persisted for crash recovery) */
   _mechanicOverridesBackup: Partial<{
     cardSizePreset: CardSizePreset;
     cardAspectRatio: CardAspectRatio;
@@ -568,6 +571,7 @@ interface SettingsState {
   applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
   setRandomSelectionEnabled: (enabled: boolean) => void;
   setRandomSelectionCount: (count: number) => void;
+  applySmartSelectionDefault: (totalCards: number) => void;
   setDefaultCardFace: (face: DefaultCardFace) => void;
   setShowStatisticsBar: (show: boolean) => void;
   setEditModeEnabled: (enabled: boolean) => void;
@@ -685,6 +689,7 @@ const DEFAULT_SETTINGS = {
   hasAppliedCollectionDefaults: false,
   randomSelectionEnabled: false,
   randomSelectionCount: 10,
+  hasUserSetRandomSelectionCount: false,
   defaultCardFace: "back" as DefaultCardFace,
   showStatisticsBar: true,
   editModeEnabled: false,
@@ -851,7 +856,16 @@ export const useSettingsStore = create<SettingsState>()(
       },
 
       setRandomSelectionCount: (randomSelectionCount) => {
-        set({ randomSelectionCount });
+        set({ randomSelectionCount, hasUserSetRandomSelectionCount: true });
+      },
+
+      applySmartSelectionDefault: (totalCards) => {
+        const state = get();
+        // Never override an explicit user choice
+        if (state.hasUserSetRandomSelectionCount || totalCards <= 0) {
+          return;
+        }
+        set({ randomSelectionCount: computeSmartSelectionDefault(totalCards) });
       },
 
       setDefaultCardFace: (defaultCardFace) => {
@@ -1251,6 +1265,14 @@ export const useSettingsStore = create<SettingsState>()(
           isDirty: false,
         };
 
+        // A committed change to the selection count is an explicit user choice
+        if (
+          state._draft.randomSelectionCount !== undefined &&
+          state._draft.randomSelectionCount !== state.randomSelectionCount
+        ) {
+          updates.hasUserSetRandomSelectionCount = true;
+        }
+
         set(updates);
       },
 
@@ -1313,12 +1335,30 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 26,
+      version: 27,
       storage: createJSONStorage(() => localStorage),
       // Force-clear activeMechanicId after rehydration - games should never auto-start
       onRehydrateStorage: () => (state) => {
         if (state?.activeMechanicId) {
           state.activeMechanicId = null;
+        }
+        // Restore settings from a mechanic override backup that survived a
+        // crash or tab-kill. No mechanic session is ever active after
+        // rehydration (activeMechanicId is never persisted), so a stored
+        // backup always means the overrides must be rolled back.
+        const backup = state?._mechanicOverridesBackup;
+        if (state && backup) {
+          if (backup.cardSizePreset !== undefined) {
+            state.cardSizePreset = backup.cardSizePreset;
+          }
+          if (backup.cardAspectRatio !== undefined) {
+            state.cardAspectRatio = backup.cardAspectRatio;
+          }
+          if (backup.maxVisibleCards !== undefined) {
+            state.maxVisibleCards = backup.maxVisibleCards;
+          }
+          state._mechanicOverridesBackup = null;
+          state.mechanicOverridesActive = false;
         }
       },
       partialize: (state) => ({
@@ -1347,6 +1387,7 @@ export const useSettingsStore = create<SettingsState>()(
         hasAppliedCollectionDefaults: state.hasAppliedCollectionDefaults,
         randomSelectionEnabled: state.randomSelectionEnabled,
         randomSelectionCount: state.randomSelectionCount,
+        hasUserSetRandomSelectionCount: state.hasUserSetRandomSelectionCount,
         defaultCardFace: state.defaultCardFace,
         showStatisticsBar: state.showStatisticsBar,
         editModeEnabled: state.editModeEnabled,
@@ -1372,8 +1413,11 @@ export const useSettingsStore = create<SettingsState>()(
         appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
         // v0.14.0: Draft state is intentionally NOT persisted
         // _draft and isDirty are excluded - editing session is transient
-        // v0.15.5: Mechanic override backup is intentionally NOT persisted
-        // _mechanicOverridesBackup and mechanicOverridesActive are excluded - transient state
+        // v0.15.5: Mechanic override backup IS persisted so that a crash or
+        // tab-kill mid-mechanic cannot permanently destroy user settings;
+        // onRehydrateStorage restores from it (mechanicOverridesActive stays
+        // transient - a rehydrated session never has an active mechanic)
+        _mechanicOverridesBackup: state._mechanicOverridesBackup,
       }),
       migrate: (persistedState: unknown, version: number) => {
         let state = persistedState as Record<string, unknown>;
@@ -1641,6 +1685,17 @@ export const useSettingsStore = create<SettingsState>()(
             usePlaceholderImages: true,
             // collectionForcedSettings is not persisted
             appliedCollectionDefaultsSourceId: null,
+          };
+        }
+
+        // Handle migration from version 26 to 27 (add hasUserSetRandomSelectionCount)
+        // For existing users, treat the persisted count as a deliberate choice
+        // so the smart default does not overwrite it (mirrors the version 13
+        // approach for hasAppliedCollectionDefaults)
+        if (version < 27) {
+          state = {
+            ...state,
+            hasUserSetRandomSelectionCount: true,
           };
         }
 

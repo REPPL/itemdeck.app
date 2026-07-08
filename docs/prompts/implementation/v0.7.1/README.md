@@ -146,8 +146,8 @@ useEffect(() => {
 
 ## Post-Implementation
 
-1. Devlog created: `docs/development/process/devlogs/v0.7.1/README.md`
-2. Retrospective created: `docs/development/process/retrospectives/v0.7.1/README.md`
+1. Devlog created: `.abcd/development/process/devlogs/v0.7.1/README.md`
+2. Retrospective created: `.abcd/development/process/retrospectives/v0.7.1/README.md`
 3. Git tag created: `v0.7.1`
 
 ---

@@ -4,6 +4,8 @@
  * Supports structured detail URLs with source metadata.
  */
 
+import { safeExternalUrl } from "@/utils/safeUrl";
+
 /**
  * Structured detail link with source metadata.
  *
@@ -42,8 +44,12 @@ export function isDetailLink(value: unknown): value is DetailLink {
 /**
  * Normalise detail URLs to an array of DetailLink objects.
  *
+ * Links whose URL fails safeExternalUrl validation (e.g. javascript:
+ * or data: schemes) are dropped, so collection-supplied links are
+ * sanitised at this choke point.
+ *
  * @param urls - String URL, single DetailLink, or array
- * @returns Array of DetailLink objects
+ * @returns Array of DetailLink objects with safe URLs
  */
 export function normaliseDetailUrls(
   urls: DetailUrls | undefined | null
@@ -52,15 +58,14 @@ export function normaliseDetailUrls(
     return [];
   }
 
-  if (typeof urls === "string") {
-    return [{ url: urls }];
-  }
+  const links: DetailLink[] =
+    typeof urls === "string"
+      ? [{ url: urls }]
+      : Array.isArray(urls)
+        ? urls
+        : [urls];
 
-  if (Array.isArray(urls)) {
-    return urls;
-  }
-
-  return [urls];
+  return links.filter((link) => safeExternalUrl(link.url) !== null);
 }
 
 /**

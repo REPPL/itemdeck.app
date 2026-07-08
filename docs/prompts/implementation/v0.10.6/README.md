@@ -31,7 +31,7 @@ This release addresses documentation drift discovered during a comprehensive cod
 
 ### 2.1 Create v0.10.6 Milestone Document
 
-**New file**: `docs/development/roadmap/milestones/v0.10.6.md`
+**New file**: `.abcd/development/roadmap/milestones/v0.10.6.md`
 
 Content:
 - Theme: Documentation Sync & Forgotten Features
@@ -125,7 +125,7 @@ Each moved feature file needs:
 
 ### 5.1 Create Devlog
 
-**New file**: `docs/development/process/devlogs/v0.10.6/README.md`
+**New file**: `.abcd/development/process/devlogs/v0.10.6/README.md`
 
 Document:
 - Discovery of documentation drift
@@ -135,7 +135,7 @@ Document:
 
 ### 5.2 Create Retrospective
 
-**New file**: `docs/development/process/retrospectives/v0.10.6/README.md`
+**New file**: `.abcd/development/process/retrospectives/v0.10.6/README.md`
 
 Document:
 - What went well: Comprehensive audit found all gaps
@@ -202,9 +202,9 @@ No code changes - documentation only."
 
 | File | Purpose |
 |------|---------|
-| `docs/development/roadmap/milestones/v0.10.6.md` | Milestone document |
-| `docs/development/process/devlogs/v0.10.6/README.md` | Development narrative |
-| `docs/development/process/retrospectives/v0.10.6/README.md` | Post-release reflection |
+| `.abcd/development/roadmap/milestones/v0.10.6.md` | Milestone document |
+| `.abcd/development/process/devlogs/v0.10.6/README.md` | Development narrative |
+| `.abcd/development/process/retrospectives/v0.10.6/README.md` | Post-release reflection |
 | `docs/prompts/implementation/v0.10.6/README.md` | This implementation prompt |
 
 ### Moved Files (6)
@@ -223,11 +223,11 @@ No code changes - documentation only."
 | File | Changes |
 |------|---------|
 | `package.json` | Version 0.10.1 → 0.10.6 |
-| `docs/development/roadmap/README.md` | Add milestones, update features |
-| `docs/development/roadmap/milestones/README.md` | Add v0.10.6 |
-| `docs/development/roadmap/features/README.md` | Add v0.10.6 section |
-| `docs/development/process/devlogs/README.md` | Add v0.10.6 link |
-| `docs/development/process/retrospectives/README.md` | Add v0.10.6 link |
+| `.abcd/development/roadmap/README.md` | Add milestones, update features |
+| `.abcd/development/roadmap/milestones/README.md` | Add v0.10.6 |
+| `.abcd/development/roadmap/features/README.md` | Add v0.10.6 section |
+| `.abcd/development/process/devlogs/README.md` | Add v0.10.6 link |
+| `.abcd/development/process/retrospectives/README.md` | Add v0.10.6 link |
 
 ---
 

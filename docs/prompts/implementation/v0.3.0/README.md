@@ -15,7 +15,7 @@ Implement the v0.3.0 Customisation milestone for itemdeck autonomously.
 - 211 tests currently passing
 
 ## Milestone Documentation
-Read the milestone document at: docs/development/roadmap/milestones/v0.3.0.md
+Read the milestone document at: .abcd/development/roadmap/milestones/v0.3.0.md
 
 ## Features to Implement (14 features)
 
@@ -63,7 +63,7 @@ Read the milestone document at: docs/development/roadmap/milestones/v0.3.0.md
 8. Commit and prepare for merge
 
 ## Key Files to Reference
-- Feature specs in docs/development/roadmap/features/planned/
+- Feature specs in .abcd/development/roadmap/features/planned/
 - Existing components in src/components/
 - Config schema in src/schemas/config.schema.ts
 - Research in docs/research/card-ui-design-patterns.md

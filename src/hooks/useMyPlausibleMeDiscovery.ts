@@ -10,6 +10,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { isCollectionCached } from "@/lib/cardCache";
+import { useSourceStore } from "@/stores/sourceStore";
 
 /**
  * Collection entry discovered from repository.
@@ -216,10 +217,27 @@ export function useMyPlausibleMeDiscovery(
           const metadata = await fetchCollectionMetadata(trimmedUsername, collectionPath);
 
           if (metadata !== null) {
-            // Build source ID to check cache status
-            // Use the full path (e.g., "retro/games") as the folder identifier
-            const sourceId = `myplausibleme:${trimmedUsername}:${collectionPath}`;
-            const cached = await isCollectionCached(sourceId);
+            // Cache entries are keyed by the sourceStore source.id (the
+            // canonical convention). Look up the registered source for this
+            // collection; an unregistered collection cannot have been cached.
+            const collectionUrl = buildCdnUrl(
+              trimmedUsername,
+              `data/collections/${collectionPath}`
+            );
+            const registeredSource = useSourceStore
+              .getState()
+              .sources.find(
+                (s) =>
+                  (s.sourceType === "myplausibleme" &&
+                    s.mpmUsername?.toLowerCase() ===
+                      trimmedUsername.toLowerCase() &&
+                    s.mpmFolder?.toLowerCase() ===
+                      collectionPath.toLowerCase()) ||
+                  s.url === collectionUrl
+              );
+            const cached = registeredSource
+              ? await isCollectionCached(registeredSource.id)
+              : false;
 
             // Use the last segment of the path as display name fallback
             const pathSegments = collectionPath.split("/");

@@ -174,8 +174,8 @@ export function SourceIcon({ url, source }: { url: string; source?: string }) {
 
 ## Post-Implementation
 
-1. Create devlog: `docs/development/process/devlogs/v0.7.2/README.md`
-2. Create retrospective: `docs/development/process/retrospectives/v0.7.2/README.md`
+1. Create devlog: `.abcd/development/process/devlogs/v0.7.2/README.md`
+2. Create retrospective: `.abcd/development/process/retrospectives/v0.7.2/README.md`
 3. Run verification: `/verify-docs`, `/sync-docs`, `/pii-scan`
 4. Create git tag: `v0.7.2`
 

@@ -27,6 +27,7 @@
 
 import { useMemo } from "react";
 import { parseProviderUrl, buildCollectionUrl } from "@/providers";
+import { isAllowedCollectionSource } from "@/config/allowedSources";
 
 /**
  * Parsed URL collection info.
@@ -44,6 +45,19 @@ export interface UrlCollectionInfo {
   collectionUrl: string | null;
   /** Provider ID if using provider URL format */
   providerId: string | null;
+  /** User-visible error when the URL was rejected (e.g. blocked source) */
+  error: string | null;
+}
+
+/**
+ * Parse a value as an absolute URL, or return null if it is not one.
+ */
+function parseAbsoluteUrl(value: string): URL | null {
+  try {
+    return new URL(value);
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -69,7 +83,23 @@ export function parseUrlPath(
 
   // 1. Check for legacy full URL format: ?collection=https://...
   const legacyCollectionUrl = params.get("collection");
-  if (legacyCollectionUrl?.startsWith("http")) {
+  const legacyUrl = legacyCollectionUrl
+    ? parseAbsoluteUrl(legacyCollectionUrl)
+    : null;
+  if (legacyCollectionUrl && legacyUrl) {
+    // Absolute URL: enforce the source allowlist before accepting it.
+    if (!isAllowedCollectionSource(legacyCollectionUrl)) {
+      return {
+        hasGitHubPath: false,
+        username: null,
+        folder: null,
+        directLoad: false,
+        collectionUrl: null,
+        providerId: null,
+        error: `Collection URL blocked: "${legacyUrl.hostname || legacyCollectionUrl}" is not an allowed source.`,
+      };
+    }
+
     return {
       hasGitHubPath: false,
       username: null,
@@ -77,6 +107,7 @@ export function parseUrlPath(
       directLoad: true,
       collectionUrl: legacyCollectionUrl,
       providerId: null,
+      error: null,
     };
   }
 
@@ -101,6 +132,7 @@ export function parseUrlPath(
         directLoad: true,
         collectionUrl,
         providerId,
+        error: null,
       };
     }
   }
@@ -116,6 +148,7 @@ export function parseUrlPath(
       directLoad: false,
       collectionUrl: null,
       providerId: null,
+      error: null,
     };
   }
 
@@ -137,6 +170,7 @@ export function parseUrlPath(
       directLoad: true,
       collectionUrl,
       providerId: "gh",
+      error: null,
     };
   }
 
@@ -155,6 +189,7 @@ export function parseUrlPath(
       directLoad: true,
       collectionUrl,
       providerId: "gh",
+      error: null,
     };
   }
 
@@ -166,6 +201,7 @@ export function parseUrlPath(
     directLoad: false,
     collectionUrl: null,
     providerId: null,
+    error: null,
   };
 }
 
@@ -184,6 +220,7 @@ export function useUrlCollection(): UrlCollectionInfo {
         directLoad: false,
         collectionUrl: null,
         providerId: null,
+        error: null,
       };
     }
 

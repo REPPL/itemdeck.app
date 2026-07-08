@@ -58,3 +58,40 @@ export function isAllowedInputSource(url: string): boolean {
 export function isAllowedProvider(provider: string): provider is Provider {
   return ALLOWED_PROVIDERS.includes(provider as Provider);
 }
+
+/**
+ * Sentinel base origin used to detect same-origin relative paths.
+ * Relative paths resolve against it; absolute URLs keep their own origin.
+ */
+const SAME_ORIGIN_SENTINEL = "https://itemdeck-same-origin.invalid";
+
+/**
+ * Check whether a collection source path may be fetched.
+ *
+ * Same-origin relative paths are always allowed. Absolute URLs must use
+ * https and point at a host on the CDN or input allowlist. Everything
+ * else (unknown hosts, http, exotic schemes, unparseable input) is refused.
+ */
+export function isAllowedCollectionSource(path: string): boolean {
+  let url: URL;
+  try {
+    url = new URL(path, SAME_ORIGIN_SENTINEL);
+  } catch {
+    return false;
+  }
+
+  // Relative paths resolve against the sentinel: same-origin, allowed.
+  if (url.origin === SAME_ORIGIN_SENTINEL) {
+    return true;
+  }
+
+  if (url.protocol !== "https:") {
+    return false;
+  }
+
+  const { hostname } = url;
+  return (
+    ALLOWED_CDN_DOMAINS.some((domain) => hostname === domain) ||
+    ALLOWED_INPUT_DOMAINS.some((domain) => hostname === domain)
+  );
+}

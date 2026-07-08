@@ -43,6 +43,21 @@ export function hasProvider(id: string): boolean {
 }
 
 /**
+ * Encode a user-supplied parameter value for use in a CDN URL path.
+ *
+ * Collection folders legitimately contain "/" (nested folders), so each
+ * segment is encoded while the slashes are kept. Every other parameter
+ * (username, repo, branch) is encoded in full so characters like "/" or
+ * "@" cannot reshape the URL.
+ */
+function encodeParamValue(placeholder: string, value: string): string {
+  if (placeholder === "collection") {
+    return value.split("/").map(encodeURIComponent).join("/");
+  }
+  return encodeURIComponent(value);
+}
+
+/**
  * Build a collection URL from provider and parameters.
  *
  * @param providerId - Provider ID (e.g., "gh")
@@ -75,7 +90,7 @@ export function buildCollectionUrl(
   for (const [urlParam, placeholder] of Object.entries(provider.params.mapping)) {
     const value = params[urlParam] ?? provider.defaults[placeholder];
     if (value) {
-      url = url.replace(`{${placeholder}}`, value);
+      url = url.replace(`{${placeholder}}`, encodeParamValue(placeholder, value));
     }
   }
 

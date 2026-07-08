@@ -455,8 +455,8 @@ function App() {
 
 ## Post-Implementation
 
-1. Create devlog: `docs/development/process/devlogs/v0.9.0/README.md`
-2. Create retrospective: `docs/development/process/retrospectives/v0.9.0/README.md`
+1. Create devlog: `.abcd/development/process/devlogs/v0.9.0/README.md`
+2. Create retrospective: `.abcd/development/process/retrospectives/v0.9.0/README.md`
 3. Update time logs with actual hours
 4. Run verification: `/verify-docs`, `/sync-docs`, `/pii-scan`
 5. Create git tag: `v0.9.0`

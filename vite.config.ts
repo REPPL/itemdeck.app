@@ -45,6 +45,21 @@ const plugins: PluginOption[] = [
             },
           },
         },
+        // jsDelivr CDN content (collection data) - stale while revalidate
+        {
+          urlPattern: /^https:\/\/cdn\.jsdelivr\.net\/.*/i,
+          handler: "StaleWhileRevalidate",
+          options: {
+            cacheName: "jsdelivr-cache",
+            expiration: {
+              maxEntries: 100,
+              maxAgeSeconds: 60 * 60 * 24, // 24 hours
+            },
+            cacheableResponse: {
+              statuses: [0, 200],
+            },
+          },
+        },
         // External images - cache first
         {
           urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/i,

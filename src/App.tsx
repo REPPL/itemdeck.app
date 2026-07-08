@@ -334,6 +334,7 @@ function AppContentWithMechanicPanel({ mechanicPanelOpen, setMechanicPanelOpen }
         <CollectionPicker
           onSelect={handleCollectionSelect}
           initialUsername={urlCollection.username ?? undefined}
+          notice={urlCollection.error}
         />
       )}
 

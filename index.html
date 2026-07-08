@@ -2,6 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <!--
+      Content Security Policy.
+      - img-src allows any https host: remote card images are the app's purpose.
+      - style-src needs 'unsafe-inline' for Vite-injected styles (dev) and
+        React inline style attributes; scripts stay locked to 'self'.
+      - connect-src is limited to the data hosts the app actually fetches
+        (see src/config/allowedSources.ts); fetch-based image caching and
+        validation degrade gracefully for other hosts.
+      - frame-src allows YouTube embeds (see src/components/ImageGallery).
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; base-uri 'self'; object-src 'none'; form-action 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' https: data: blob:; media-src 'self' https: blob:; connect-src 'self' https://cdn.jsdelivr.net https://cdn.statically.io https://raw.githubusercontent.com https://api.github.com; frame-src https://www.youtube.com https://www.youtube-nocookie.com; worker-src 'self' blob:"
+    />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>itemdeck.app</title>

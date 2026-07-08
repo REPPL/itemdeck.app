@@ -2,13 +2,13 @@
 
 ## Overview
 
-Version 0.15.7 is a documentation-focused release that significantly expands the research and architectural decision documentation for itemdeck. This release adds comprehensive research covering error handling, observability, plugin systems, and collection comparison algorithms, along with three new Architecture Decision Records.
+Version 0.15.7 significantly expands the research and architectural decision documentation for itemdeck, and fixes Top Trumps and Snap Ranking initialisation bugs. This release adds comprehensive research covering error handling, observability, plugin systems, and collection comparison algorithms, along with three new Architecture Decision Records. It also corrects URL examples in the README.
 
 ## Implementation Narrative
 
 ### Research Document Creation
 
-The primary work in this release involved creating six new numbered research documents:
+The primary work in this release is six new numbered research documents:
 
 1. **R-018: Error Handling Strategies** - Comprehensive research on React error boundary patterns, TanStack Query error handling, user-friendly error messages, and recovery strategies. This document establishes the foundation for the layered error boundary architecture.
 
@@ -24,7 +24,7 @@ The primary work in this release involved creating six new numbered research doc
 
 ### State-of-the-Art Documents
 
-Two new state-of-the-art analysis documents were created:
+The release includes two new state-of-the-art analysis documents:
 
 - **state-of-the-art-error-handling.md** - Surveys current best practices (2024-2025) for error handling in React applications, including react-error-boundary library, TanStack Query integration, and accessibility considerations.
 
@@ -32,7 +32,7 @@ Two new state-of-the-art analysis documents were created:
 
 ### Architecture Decision Records
 
-Three new ADRs were created to document architectural decisions informed by the research:
+Three new ADRs document architectural decisions informed by the research:
 
 - **ADR-030: Error Boundary Architecture** - Adopts a four-layer error boundary architecture (Application, Route, Feature, Component) with specific recovery strategies at each level.
 
@@ -42,22 +42,36 @@ Three new ADRs were created to document architectural decisions informed by the 
 
 ### Documentation Sync Fixes
 
-During the documentation audit, two sync issues were identified and fixed:
+The release fixes three sync issues identified in the documentation audit:
 
-1. **ADR Index** - Added missing entries for ADR-030, ADR-031, and ADR-032 with links to their research references.
+1. **ADR Index** - Adds missing entries for ADR-030, ADR-031, and ADR-032 with links to their research references.
 
-2. **Features README** - Fixed F-067 (Statistics Dashboard) which was incorrectly listed under v1.0.0 Planned with a broken link. Moved to v0.15.5 Complete section with correct path.
+2. **Features README** - Moves F-067 (Statistics Dashboard) from the v1.0.0 Planned section, where a broken link listed it incorrectly, to the v0.15.5 Complete section with the correct path.
+
+3. **Milestones v0.11.0–v0.13.0** - Repairs stale feature links so they point to current feature file locations.
 
 ### Feature Enhancement
 
-**F-064: Collection Comparison** was enhanced with:
+**F-064: Collection Comparison** gains:
 - Matching algorithm summary table referencing R-023
 - Performance considerations section referencing R-020
 - Additional cross-references to supporting research
 
+### Mechanics Bug Fixes
+
+Two game mechanics initialisation bugs receive fixes:
+
+- **Top Trumps (Competing)** - CardGrid skips its generic initGame call for the competing mechanic, letting CompetingGridOverlay handle its own initialisation with proper config. This resolves a "config.cards.length" error when loading collections.
+
+- **Snap Ranking** - The topBadgeFields dropdown shows only fields that exist in the collection, with automatic fallback to "order" when the configured field is not found. This resolves a "No cards have values for myRank" error on collection switch.
+
+### README URL Fixes
+
+The README's nested folder URL example is corrected, and URL examples use the retro/games/ collection.
+
 ## Files Created/Modified
 
-### New Files (13)
+### New Files (14)
 
 ```
 docs/development/research/
@@ -78,15 +92,31 @@ docs/development/decisions/adrs/
 docs/development/process/
 ├── devlogs/v0.15.7/README.md
 └── retrospectives/v0.15.7/README.md
+
+docs/development/roadmap/milestones/
+└── v0.15.7.md
 ```
 
-### Modified Files (4)
+### Modified Files (17)
 
 ```
-docs/development/research/README.md                    # Added 8 new entries
-docs/development/decisions/adrs/README.md              # Added 3 new ADR entries
-docs/development/roadmap/features/README.md            # Fixed F-067 location
-docs/development/roadmap/features/planned/F-064-*.md   # Enhanced with algorithm refs
+README.md                                              # URL example fixes
+docs/development/research/README.md                    # 8 new entries
+docs/development/decisions/adrs/README.md              # 3 new ADR entries
+docs/development/process/devlogs/README.md             # v0.15.7 entry
+docs/development/process/retrospectives/README.md      # v0.15.7 entry
+docs/development/roadmap/README.md                     # v0.15.7 entry
+docs/development/roadmap/features/README.md            # F-067 location fix
+docs/development/roadmap/features/completed/README.md  # Index updates
+docs/development/roadmap/features/planned/README.md    # Index updates
+docs/development/roadmap/features/planned/F-064-*.md   # Algorithm refs
+docs/development/roadmap/milestones/v0.11.0.md         # Stale link fixes
+docs/development/roadmap/milestones/v0.11.5.md         # Stale link fixes
+docs/development/roadmap/milestones/v0.12.0.md         # Stale link fixes
+docs/development/roadmap/milestones/v0.12.5.md         # Stale link fixes
+docs/development/roadmap/milestones/v0.13.0.md         # Stale link fixes
+src/components/CardGrid/CardGrid.tsx                   # Top Trumps init fix
+src/hooks/useAvailableFields.ts                        # Snap Ranking fields fix
 ```
 
 ## Code Highlights
@@ -121,11 +151,11 @@ All new documents use correct British English spelling:
 
 ### Documentation Audit Findings
 
-The documentation audit revealed 43 historical files with git-inferable metadata (Last Updated, Created, Author fields). These were noted but not fixed in this release to keep scope focused. A separate housekeeping task is recommended.
+The documentation audit reveals 43 historical files with git-inferable metadata (Last Updated, Created, Author fields). These remain out of scope for this release to keep it focused. A separate housekeeping task is recommended.
 
 ### F-067 Misplacement
 
-F-067 (Statistics Dashboard) was found listed under v1.0.0 Planned despite being completed in v0.15.5. This was a documentation sync issue where the feature was completed but the features README was not updated to reflect the move from `planned/` to `completed/`.
+The audit finds F-067 (Statistics Dashboard) listed under v1.0.0 Planned despite being complete since v0.15.5 — a documentation sync issue where the features README does not reflect the move from `planned/` to `completed/`. This release corrects the listing.
 
 ---
 

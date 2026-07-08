@@ -459,7 +459,7 @@ export function CardGrid() {
       // If still no values (shouldn't happen with "order"), show error
       if (cardsWithValues.length === 0) {
         snapState.initGame({
-          guessField: topBadgeField,
+          guessField: effectiveField,
           cards: [],
           valueType: "categorical",
           uniqueValues: [],

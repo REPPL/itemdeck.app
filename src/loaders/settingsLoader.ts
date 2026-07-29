@@ -5,8 +5,13 @@
  * Settings are optional - missing or invalid settings are gracefully ignored.
  */
 
-import type { CollectionSettings, ForcedSettings, DefaultSettings } from "@/types/collectionSettings";
+import type {
+  CollectionSettings,
+  ForcedSettings,
+  DefaultSettings,
+} from "@/types/collectionSettings";
 import { COLLECTION_SETTINGS_VERSION } from "@/types/collectionSettings";
+import { isAllowedCollectionSource } from "@/config/allowedSources";
 
 /**
  * Load collection settings from a collection directory.
@@ -18,7 +23,19 @@ export async function loadCollectionSettings(
   basePath: string
 ): Promise<CollectionSettings | null> {
   try {
-    const response = await fetch(`${basePath}/settings.json`);
+    const settingsUrl = `${basePath}/settings.json`;
+
+    // Defence in depth: never issue an outbound request to an origin outside
+    // the allowlist, matching the collection loader. The active basePath can
+    // be an arbitrary user-added source, so an un-gated fetch here would leak
+    // the visitor's presence to a non-allowlisted origin even when the
+    // collection fetch itself is refused. Settings are optional, so a
+    // non-allowlisted source is treated the same as a missing file.
+    if (!isAllowedCollectionSource(settingsUrl)) {
+      return null;
+    }
+
+    const response = await fetch(settingsUrl);
 
     // Settings file is optional - don't fail if missing
     if (!response.ok) {
@@ -27,7 +44,9 @@ export async function loadCollectionSettings(
 
     const contentType = response.headers.get("content-type");
     if (!contentType?.includes("application/json")) {
-      console.warn(`Invalid content type for settings.json: ${contentType ?? "unknown"}`);
+      console.warn(
+        `Invalid content type for settings.json: ${contentType ?? "unknown"}`
+      );
       return null;
     }
 
@@ -56,7 +75,9 @@ function validateCollectionSettings(data: unknown): CollectionSettings | null {
   // Check version
   const version = typeof raw.version === "number" ? raw.version : 1;
   if (version > COLLECTION_SETTINGS_VERSION) {
-    console.warn(`Unsupported settings version: ${String(version)} (expected <= ${String(COLLECTION_SETTINGS_VERSION)})`);
+    console.warn(
+      `Unsupported settings version: ${String(version)} (expected <= ${String(COLLECTION_SETTINGS_VERSION)})`
+    );
     return null;
   }
 
@@ -66,12 +87,16 @@ function validateCollectionSettings(data: unknown): CollectionSettings | null {
 
   // Validate forced settings
   if (raw.forced && typeof raw.forced === "object") {
-    settings.forced = validateForcedSettings(raw.forced as Record<string, unknown>);
+    settings.forced = validateForcedSettings(
+      raw.forced as Record<string, unknown>
+    );
   }
 
   // Validate default settings
   if (raw.defaults && typeof raw.defaults === "object") {
-    settings.defaults = validateDefaultSettings(raw.defaults as Record<string, unknown>);
+    settings.defaults = validateDefaultSettings(
+      raw.defaults as Record<string, unknown>
+    );
   }
 
   return settings;
@@ -84,23 +109,37 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
   const forced: ForcedSettings = {};
 
   // defaultCardFace
-  if (typeof raw.defaultCardFace === "string" && ["front", "back"].includes(raw.defaultCardFace)) {
+  if (
+    typeof raw.defaultCardFace === "string" &&
+    ["front", "back"].includes(raw.defaultCardFace)
+  ) {
     forced.defaultCardFace = raw.defaultCardFace as "front" | "back";
   }
 
   // cardBackDisplay
-  if (typeof raw.cardBackDisplay === "string" && ["year", "logo", "both", "none"].includes(raw.cardBackDisplay)) {
-    forced.cardBackDisplay = raw.cardBackDisplay as ForcedSettings["cardBackDisplay"];
+  if (
+    typeof raw.cardBackDisplay === "string" &&
+    ["year", "logo", "both", "none"].includes(raw.cardBackDisplay)
+  ) {
+    forced.cardBackDisplay =
+      raw.cardBackDisplay as ForcedSettings["cardBackDisplay"];
   }
 
   // cardBackStyle
-  if (typeof raw.cardBackStyle === "string" && ["plain", "pattern", "gradient"].includes(raw.cardBackStyle)) {
+  if (
+    typeof raw.cardBackStyle === "string" &&
+    ["plain", "pattern", "gradient"].includes(raw.cardBackStyle)
+  ) {
     forced.cardBackStyle = raw.cardBackStyle as ForcedSettings["cardBackStyle"];
   }
 
   // titleDisplayMode
-  if (typeof raw.titleDisplayMode === "string" && ["always", "hover", "never"].includes(raw.titleDisplayMode)) {
-    forced.titleDisplayMode = raw.titleDisplayMode as ForcedSettings["titleDisplayMode"];
+  if (
+    typeof raw.titleDisplayMode === "string" &&
+    ["always", "hover", "never"].includes(raw.titleDisplayMode)
+  ) {
+    forced.titleDisplayMode =
+      raw.titleDisplayMode as ForcedSettings["titleDisplayMode"];
   }
 
   // Boolean fields
@@ -127,22 +166,35 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
 /**
  * Validate default settings.
  */
-function validateDefaultSettings(raw: Record<string, unknown>): DefaultSettings {
+function validateDefaultSettings(
+  raw: Record<string, unknown>
+): DefaultSettings {
   const defaults: DefaultSettings = {};
 
   // visualTheme
-  if (typeof raw.visualTheme === "string" && ["retro", "modern", "minimal"].includes(raw.visualTheme)) {
+  if (
+    typeof raw.visualTheme === "string" &&
+    ["retro", "modern", "minimal"].includes(raw.visualTheme)
+  ) {
     defaults.visualTheme = raw.visualTheme as DefaultSettings["visualTheme"];
   }
 
   // cardSizePreset
-  if (typeof raw.cardSizePreset === "string" && ["small", "medium", "large"].includes(raw.cardSizePreset)) {
-    defaults.cardSizePreset = raw.cardSizePreset as DefaultSettings["cardSizePreset"];
+  if (
+    typeof raw.cardSizePreset === "string" &&
+    ["small", "medium", "large"].includes(raw.cardSizePreset)
+  ) {
+    defaults.cardSizePreset =
+      raw.cardSizePreset as DefaultSettings["cardSizePreset"];
   }
 
   // cardAspectRatio
-  if (typeof raw.cardAspectRatio === "string" && ["3:4", "5:7", "1:1"].includes(raw.cardAspectRatio)) {
-    defaults.cardAspectRatio = raw.cardAspectRatio as DefaultSettings["cardAspectRatio"];
+  if (
+    typeof raw.cardAspectRatio === "string" &&
+    ["3:4", "5:7", "1:1"].includes(raw.cardAspectRatio)
+  ) {
+    defaults.cardAspectRatio =
+      raw.cardAspectRatio as DefaultSettings["cardAspectRatio"];
   }
 
   // maxVisibleCards
@@ -162,7 +214,9 @@ function validateDefaultSettings(raw: Record<string, unknown>): DefaultSettings 
 
   // searchFields
   if (Array.isArray(raw.searchFields)) {
-    defaults.searchFields = raw.searchFields.filter((f): f is string => typeof f === "string");
+    defaults.searchFields = raw.searchFields.filter(
+      (f): f is string => typeof f === "string"
+    );
   }
 
   return defaults;

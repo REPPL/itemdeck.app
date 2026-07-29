@@ -172,14 +172,16 @@ const FIELD_DEFINITIONS: Record<string, FieldDefinition> = {
  * @example "some_field" -> "Some Field"
  */
 export function toTitleCase(fieldName: string): string {
-  return fieldName
-    // Insert space before uppercase letters
-    .replace(/([A-Z])/g, " $1")
-    // Replace underscores with spaces
-    .replace(/_/g, " ")
-    // Capitalize first letter of each word
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-    .trim();
+  return (
+    fieldName
+      // Insert space before uppercase letters
+      .replace(/([A-Z])/g, " $1")
+      // Replace underscores with spaces
+      .replace(/_/g, " ")
+      // Capitalize first letter of each word
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      .trim()
+  );
 }
 
 /**
@@ -199,6 +201,29 @@ export function getFieldDescription(fieldName: string): string | undefined {
 }
 
 /**
+ * Upper bound on how many stars a rating may render. Rating scales in the wild
+ * are 5- or 10-point; this ceiling caps the total glyph count so an attacker
+ * cannot drive String.prototype.repeat into a huge allocation via a large
+ * `max` on an untrusted rating object.
+ */
+const MAX_RATING_STARS = 10;
+
+/**
+ * Clamp a star count to a whole number within [0, max].
+ *
+ * Rating values come from untrusted collection data. Without clamping, an
+ * out-of-range or non-finite value produces a negative or huge argument to
+ * String.prototype.repeat, which throws a RangeError (crashing the render) or
+ * allocates a multi-megabyte string (hanging the tab).
+ */
+function clampStars(count: number, max: number): number {
+  if (!Number.isFinite(count)) {
+    return 0;
+  }
+  return Math.max(0, Math.min(max, Math.trunc(count)));
+}
+
+/**
  * Format a field value for display.
  * Handles different value types: strings, numbers, arrays, objects.
  */
@@ -212,24 +237,32 @@ export function formatFieldValue(
 
   // Check for star rating format (5-star scale)
   if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars") {
-    const valueStr = typeof value === "number" ? String(value) : (typeof value === "string" ? value : "");
+    const valueStr =
+      typeof value === "number"
+        ? String(value)
+        : typeof value === "string"
+          ? value
+          : "";
     const num = parseFloat(valueStr);
     if (!isNaN(num)) {
-      const fullStars = Math.floor(num);
-      const emptyStars = 5 - fullStars;
-      return "★".repeat(fullStars) + "☆".repeat(emptyStars);
+      const fullStars = clampStars(Math.floor(num), 5);
+      return "★".repeat(fullStars) + "☆".repeat(5 - fullStars);
     }
   }
 
   // Check for 10-star rating format (for review scores)
   if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars10") {
-    const valueStr = typeof value === "number" ? String(value) : (typeof value === "string" ? value : "");
+    const valueStr =
+      typeof value === "number"
+        ? String(value)
+        : typeof value === "string"
+          ? value
+          : "";
     const num = parseFloat(valueStr);
     if (!isNaN(num)) {
       // Round to nearest whole star for clean display
-      const fullStars = Math.round(num);
-      const emptyStars = 10 - fullStars;
-      return "★".repeat(fullStars) + "☆".repeat(emptyStars);
+      const fullStars = clampStars(Math.round(num), 10);
+      return "★".repeat(fullStars) + "☆".repeat(10 - fullStars);
     }
   }
 
@@ -259,22 +292,28 @@ export function formatFieldValue(
       // Default max is 5 (most review scores are out of 5)
       // For 10-point scales, data should explicitly set max: 10
       const max = typeof obj.max === "number" ? obj.max : 5;
-      const sourceCount = typeof obj.sourceCount === "number" ? obj.sourceCount : undefined;
+      const sourceCount =
+        typeof obj.sourceCount === "number" ? obj.sourceCount : undefined;
 
       // For stars10 format, display as 10-star scale
       // Normalise score to 10-point scale regardless of original max
       if (fieldName && FIELD_DEFINITIONS[fieldName]?.format === "stars10") {
-        const normalisedScore = (score / max) * 10;
+        // Guard against max <= 0, which would make the ratio Infinity/NaN.
+        const normalisedScore = max > 0 ? (score / max) * 10 : 0;
         // Round to nearest whole star for clean display
-        const fullStars = Math.round(normalisedScore);
-        const emptyStars = 10 - fullStars;
-        const stars = "★".repeat(fullStars) + "☆".repeat(emptyStars);
+        const fullStars = clampStars(Math.round(normalisedScore), 10);
+        const stars = "★".repeat(fullStars) + "☆".repeat(10 - fullStars);
         return sourceCount ? `${stars} (${String(sourceCount)})` : stars;
       }
 
       // Default 5-star display
       const source = typeof obj.source === "string" ? obj.source : undefined;
-      const stars = "★".repeat(Math.floor(score)) + "☆".repeat(max - Math.floor(score));
+      const scale =
+        Number.isFinite(max) && max > 0
+          ? Math.min(MAX_RATING_STARS, Math.floor(max))
+          : 5;
+      const fullStars = clampStars(Math.floor(score), scale);
+      const stars = "★".repeat(fullStars) + "☆".repeat(scale - fullStars);
       return source ? `${stars} (${source})` : stars;
     }
 
@@ -282,7 +321,10 @@ export function formatFieldValue(
     if (typeof obj.title === "string" || typeof obj.title === "number") {
       return String(obj.title);
     }
-    if (typeof obj.shortTitle === "string" || typeof obj.shortTitle === "number") {
+    if (
+      typeof obj.shortTitle === "string" ||
+      typeof obj.shortTitle === "number"
+    ) {
       return String(obj.shortTitle);
     }
     // Otherwise skip complex objects

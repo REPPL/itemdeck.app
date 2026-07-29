@@ -81,16 +81,19 @@ npm run lint
 
 ## AI Transparency
 
-This project uses **full** AI transparency:
+This project uses **full** AI transparency.
 
 ### Commit Attribution
 
-All AI-assisted commits include:
-```
-🤖 Generated with [Claude Code](https://claude.ai/claude-code)
+Every AI-assisted commit ends with a kernel-style trailer naming the model that
+assisted:
 
-Co-Authored-By: Claude <noreply@anthropic.com>
 ```
+Assisted-by: Claude:<model-id>
+```
+
+For example: `Assisted-by: Claude:claude-fable-5`. Never use `Co-Authored-By` for
+AI, and never add "Generated with" lines.
 
 ---
 

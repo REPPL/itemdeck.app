@@ -127,9 +127,10 @@ const baseFieldDef = z.object({
 });
 
 // Extend with recursive items field
-export const fieldDefinitionSchema: z.ZodType<FieldDefinitionSchema> = baseFieldDef.extend({
-  items: z.lazy(() => fieldDefinitionSchema).optional(),
-});
+export const fieldDefinitionSchema: z.ZodType<FieldDefinitionSchema> =
+  baseFieldDef.extend({
+    items: z.lazy(() => fieldDefinitionSchema).optional(),
+  });
 
 export type FieldDefinitionSchema = z.infer<typeof baseFieldDef> & {
   items?: FieldDefinitionSchema;
@@ -267,7 +268,9 @@ export const collectionCardsConfigSchema = z.object({
   cardBackDisplay: z.enum(["year", "logo", "both", "none"]).optional(),
 });
 
-export type CollectionCardsConfigSchema = z.infer<typeof collectionCardsConfigSchema>;
+export type CollectionCardsConfigSchema = z.infer<
+  typeof collectionCardsConfigSchema
+>;
 
 /**
  * Field mapping configuration for the collection.
@@ -287,7 +290,9 @@ export const collectionFieldMappingSchema = z.object({
   sortDirection: z.enum(["asc", "desc"]).optional(),
 });
 
-export type CollectionFieldMappingSchema = z.infer<typeof collectionFieldMappingSchema>;
+export type CollectionFieldMappingSchema = z.infer<
+  typeof collectionFieldMappingSchema
+>;
 
 /**
  * Complete collection configuration.
@@ -359,6 +364,46 @@ export type EntitySchema = z.infer<typeof entitySchema>;
 // ============================================================================
 
 /**
+ * Keys that must never be carried over from untrusted parsed JSON: assigning
+ * them can re-point an object's prototype (prototype pollution).
+ */
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+/**
+ * Return a copy of parsed JSON with prototype-polluting keys removed.
+ *
+ * `JSON.parse` turns a `"__proto__"` key into a genuine own property, and the
+ * entity schema's `.loose()` pass-through would assign it via `[[Set]]`,
+ * re-pointing the validated object's prototype to attacker-controlled data.
+ * That smuggles values past the schema (e.g. an unvalidated `images` array
+ * readable through the prototype chain). Stripping these keys before
+ * validation forces every field to be validated as an own property.
+ */
+function stripUnsafeKeys(data: unknown, seen = new WeakSet()): unknown {
+  if (Array.isArray(data)) {
+    if (seen.has(data)) return data;
+    seen.add(data);
+    return data.map((item) => stripUnsafeKeys(item, seen));
+  }
+  if (data !== null && typeof data === "object") {
+    if (seen.has(data)) return data;
+    seen.add(data);
+    const clean: Record<string, unknown> = {};
+    for (const key of Object.keys(data)) {
+      if (UNSAFE_KEYS.has(key)) {
+        continue;
+      }
+      clean[key] = stripUnsafeKeys(
+        (data as Record<string, unknown>)[key],
+        seen
+      );
+    }
+    return clean;
+  }
+  return data;
+}
+
+/**
  * Validate a collection definition.
  *
  * @param data - Raw collection data to validate
@@ -367,7 +412,7 @@ export type EntitySchema = z.infer<typeof entitySchema>;
 export function validateCollectionDefinition(
   data: unknown
 ): CollectionDefinitionSchema {
-  return collectionDefinitionSchema.parse(data);
+  return collectionDefinitionSchema.parse(stripUnsafeKeys(data));
 }
 
 /**
@@ -377,7 +422,7 @@ export function validateCollectionDefinition(
  * @returns Result with success flag and data/error
  */
 export function safeValidateCollectionDefinition(data: unknown) {
-  return collectionDefinitionSchema.safeParse(data);
+  return collectionDefinitionSchema.safeParse(stripUnsafeKeys(data));
 }
 
 /**
@@ -387,7 +432,7 @@ export function safeValidateCollectionDefinition(data: unknown) {
  * @returns Validated entity or throws ZodError
  */
 export function validateEntity(data: unknown): EntitySchema {
-  return entitySchema.parse(data);
+  return entitySchema.parse(stripUnsafeKeys(data));
 }
 
 /**
@@ -397,7 +442,7 @@ export function validateEntity(data: unknown): EntitySchema {
  * @returns Result with success flag and data/error
  */
 export function safeValidateEntity(data: unknown) {
-  return entitySchema.safeParse(data);
+  return entitySchema.safeParse(stripUnsafeKeys(data));
 }
 
 /**

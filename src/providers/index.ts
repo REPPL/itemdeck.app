@@ -20,7 +20,10 @@ const providers: Record<string, Provider> = {
  * @returns Provider configuration or undefined
  */
 export function getProvider(id: string): Provider | undefined {
-  return providers[id];
+  // Own-property lookup only: a bare `providers[id]` would resolve inherited
+  // Object.prototype members ("constructor", "toString", …) to truthy values,
+  // letting a crafted URL path reach buildCollectionUrl and crash the render.
+  return Object.hasOwn(providers, id) ? providers[id] : undefined;
 }
 
 /**
@@ -39,7 +42,9 @@ export function getAllProviders(): Provider[] {
  * @returns True if provider exists
  */
 export function hasProvider(id: string): boolean {
-  return id in providers;
+  // Own-property check only — `in` would walk the prototype chain and accept
+  // inherited names such as "constructor" or "__proto__" as valid providers.
+  return Object.hasOwn(providers, id);
 }
 
 /**
@@ -78,7 +83,9 @@ export function buildCollectionUrl(
   // Validate required params
   for (const required of provider.params.required) {
     if (!params[required]) {
-      console.warn(`Missing required parameter "${required}" for provider "${providerId}"`);
+      console.warn(
+        `Missing required parameter "${required}" for provider "${providerId}"`
+      );
       return null;
     }
   }
@@ -87,10 +94,15 @@ export function buildCollectionUrl(
   let url = `${provider.cdn.baseUrl}/${provider.cdn.pattern}`;
 
   // Replace all placeholders
-  for (const [urlParam, placeholder] of Object.entries(provider.params.mapping)) {
+  for (const [urlParam, placeholder] of Object.entries(
+    provider.params.mapping
+  )) {
     const value = params[urlParam] ?? provider.defaults[placeholder];
     if (value) {
-      url = url.replace(`{${placeholder}}`, encodeParamValue(placeholder, value));
+      url = url.replace(
+        `{${placeholder}}`,
+        encodeParamValue(placeholder, value)
+      );
     }
   }
 

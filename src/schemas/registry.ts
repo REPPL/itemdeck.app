@@ -109,7 +109,9 @@ export type SchemaId = keyof typeof schemaRegistry;
  * @returns True if the schema is supported
  */
 export function isValidSchema(id: string): id is SchemaId {
-  return id in schemaRegistry;
+  // Own-property check only — `in` would walk the prototype chain and accept
+  // inherited names such as "constructor" or "__proto__" as valid schemas.
+  return Object.hasOwn(schemaRegistry, id);
 }
 
 /**

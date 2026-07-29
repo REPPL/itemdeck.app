@@ -134,6 +134,19 @@ export const imageCache = {
         height: metadata.height,
       };
 
+      // Refuse blobs that cannot fit within the budget on their own. Storing
+      // one would blow past maxSize no matter how much is evicted, and asking
+      // evictLRU to free more than maxSize makes its target negative, wiping
+      // every other cached image. A single oversized (or attacker-supplied)
+      // image must not be able to evict the whole cache or exceed the budget.
+      if (blob.size > maxSize) {
+        console.warn(
+          "[imageCache] Skipping image larger than cache budget:",
+          url
+        );
+        return;
+      }
+
       // Check if we need to evict old images
       const stats = await this.getStats();
       if (stats.totalSize + blob.size > maxSize) {
@@ -200,7 +213,9 @@ export const imageCache = {
    * @param maxSize - Maximum cache size for percentage calculation
    * @returns Cache statistics
    */
-  async getStats(maxSize: number = DEFAULT_MAX_CACHE_SIZE): Promise<CacheStats> {
+  async getStats(
+    maxSize: number = DEFAULT_MAX_CACHE_SIZE
+  ): Promise<CacheStats> {
     try {
       const db = await getDB();
       const metadata = await db.get("metadata", IMAGE_CACHE_METADATA_KEY);
@@ -285,8 +300,11 @@ export const imageCache = {
       const db = await getDB();
       const stats = await this.getStats(maxSize);
 
-      // Calculate how much we need to free
-      const targetSize = maxSize - requiredSpace;
+      // Calculate how much we need to free. Floor at zero: a requiredSpace
+      // larger than maxSize would otherwise make the target negative, so the
+      // break condition below could never be met and the loop would delete
+      // every cached entry.
+      const targetSize = Math.max(0, maxSize - requiredSpace);
       let currentSize = stats.totalSize;
 
       if (currentSize <= targetSize) {

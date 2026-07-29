@@ -89,7 +89,9 @@ describe("imageCache", () => {
     });
 
     it("returns null for non-existent image", async () => {
-      const result = await imageCache.get("https://example.com/nonexistent.jpg");
+      const result = await imageCache.get(
+        "https://example.com/nonexistent.jpg"
+      );
       expect(result).toBeNull();
     });
 
@@ -105,7 +107,9 @@ describe("imageCache", () => {
 
       const second = await imageCache.get(url);
 
-      expect(second?.lastAccessedAt).toBeGreaterThanOrEqual(first?.lastAccessedAt ?? 0);
+      expect(second?.lastAccessedAt).toBeGreaterThanOrEqual(
+        first?.lastAccessedAt ?? 0
+      );
     });
   });
 
@@ -121,7 +125,9 @@ describe("imageCache", () => {
     });
 
     it("returns false for non-existent image", async () => {
-      const result = await imageCache.has("https://example.com/nonexistent.jpg");
+      const result = await imageCache.has(
+        "https://example.com/nonexistent.jpg"
+      );
       expect(result).toBe(false);
     });
   });
@@ -147,8 +153,12 @@ describe("imageCache", () => {
 
       await imageCache.clear();
 
-      expect(await imageCache.has("https://example.com/image1.jpg")).toBe(false);
-      expect(await imageCache.has("https://example.com/image2.jpg")).toBe(false);
+      expect(await imageCache.has("https://example.com/image1.jpg")).toBe(
+        false
+      );
+      expect(await imageCache.has("https://example.com/image2.jpg")).toBe(
+        false
+      );
     });
   });
 
@@ -192,11 +202,59 @@ describe("imageCache", () => {
 
   describe("getAsObjectURL", () => {
     it("returns null for non-existent image", async () => {
-      const objectURL = await imageCache.getAsObjectURL("https://example.com/nonexistent.jpg");
+      const objectURL = await imageCache.getAsObjectURL(
+        "https://example.com/nonexistent.jpg"
+      );
       expect(objectURL).toBeNull();
     });
 
     // Note: getAsObjectURL test with actual blob is skipped because
     // fake-indexeddb returns plain objects, not proper Blob instances
+  });
+
+  describe("eviction with oversized blobs", () => {
+    it("does not evict the whole cache when a blob exceeds the budget", async () => {
+      const maxSize = 1000;
+
+      // Seed the cache with a small, valid image.
+      const small = new Blob(["a".repeat(100)], { type: "image/png" });
+      await imageCache.set(
+        "https://example.com/keep.png",
+        small,
+        {},
+        { maxSize }
+      );
+      expect(await imageCache.has("https://example.com/keep.png")).toBe(true);
+
+      // A single blob larger than the entire budget must be refused outright,
+      // and must not wipe the previously cached image.
+      const huge = new Blob(["b".repeat(5000)], { type: "image/png" });
+      await imageCache.set(
+        "https://example.com/huge.png",
+        huge,
+        {},
+        { maxSize }
+      );
+
+      expect(await imageCache.has("https://example.com/huge.png")).toBe(false);
+      expect(await imageCache.has("https://example.com/keep.png")).toBe(true);
+    });
+
+    it("keeps the cache within budget after an oversized blob", async () => {
+      const maxSize = 1000;
+      const small = new Blob(["a".repeat(200)], { type: "image/png" });
+      await imageCache.set("https://example.com/a.png", small, {}, { maxSize });
+
+      const huge = new Blob(["b".repeat(9000)], { type: "image/png" });
+      await imageCache.set(
+        "https://example.com/huge.png",
+        huge,
+        {},
+        { maxSize }
+      );
+
+      const stats = await imageCache.getStats(maxSize);
+      expect(stats.totalSize).toBeLessThanOrEqual(maxSize);
+    });
   });
 });

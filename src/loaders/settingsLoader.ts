@@ -155,9 +155,37 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
     forced.rankPlaceholderText = raw.rankPlaceholderText;
   }
 
-  // Field mapping
+  // Field mapping — validate each value, not just the container. Field paths
+  // are later split (e.g. on "??" / ".") during card rendering, so a non-string
+  // value from an untrusted settings.json would throw at render time. Because
+  // fieldMapping is persisted, a poisoned value would brick the grid across
+  // reloads until a manual reset.
   if (raw.fieldMapping && typeof raw.fieldMapping === "object") {
-    forced.fieldMapping = raw.fieldMapping as ForcedSettings["fieldMapping"];
+    const rawMapping = raw.fieldMapping as Record<string, unknown>;
+    const mapping: NonNullable<ForcedSettings["fieldMapping"]> = {};
+
+    for (const key of [
+      "titleField",
+      "subtitleField",
+      "footerBadgeField",
+      "logoField",
+      "sortField",
+    ] as const) {
+      if (typeof rawMapping[key] === "string") {
+        mapping[key] = rawMapping[key];
+      }
+    }
+
+    if (
+      typeof rawMapping.sortDirection === "string" &&
+      ["asc", "desc"].includes(rawMapping.sortDirection)
+    ) {
+      mapping.sortDirection = rawMapping.sortDirection as "asc" | "desc";
+    }
+
+    if (Object.keys(mapping).length > 0) {
+      forced.fieldMapping = mapping;
+    }
   }
 
   return forced;

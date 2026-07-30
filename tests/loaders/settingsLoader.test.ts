@@ -69,4 +69,27 @@ describe("loadCollectionSettings allowlist", () => {
       "/data/collections/demo/settings.json"
     );
   });
+
+  it("drops non-string forced fieldMapping values from untrusted settings", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        version: 1,
+        forced: {
+          fieldMapping: {
+            titleField: 123,
+            subtitleField: "year",
+            sortDirection: "sideways",
+          },
+        },
+      }),
+    });
+
+    const result = await loadCollectionSettings("/data/collections/demo");
+
+    // A non-string path would later throw in the render-time split; only the
+    // valid string value survives.
+    expect(result?.forced?.fieldMapping).toEqual({ subtitleField: "year" });
+  });
 });

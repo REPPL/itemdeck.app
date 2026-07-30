@@ -58,21 +58,31 @@ describe("settingsExport schema", () => {
         expect(result.success).toBe(true);
       }
 
-      const result = exportableSettingsSchema.safeParse({ visualTheme: "dark" });
+      const result = exportableSettingsSchema.safeParse({
+        visualTheme: "dark",
+      });
       expect(result.success).toBe(false);
     });
 
     it("validates maxVisibleCards range", () => {
-      const result1 = exportableSettingsSchema.safeParse({ maxVisibleCards: 1 });
+      const result1 = exportableSettingsSchema.safeParse({
+        maxVisibleCards: 1,
+      });
       expect(result1.success).toBe(true);
 
-      const result10 = exportableSettingsSchema.safeParse({ maxVisibleCards: 10 });
+      const result10 = exportableSettingsSchema.safeParse({
+        maxVisibleCards: 10,
+      });
       expect(result10.success).toBe(true);
 
-      const resultZero = exportableSettingsSchema.safeParse({ maxVisibleCards: 0 });
+      const resultZero = exportableSettingsSchema.safeParse({
+        maxVisibleCards: 0,
+      });
       expect(resultZero.success).toBe(false);
 
-      const resultTooHigh = exportableSettingsSchema.safeParse({ maxVisibleCards: 11 });
+      const resultTooHigh = exportableSettingsSchema.safeParse({
+        maxVisibleCards: 11,
+      });
       expect(resultTooHigh.success).toBe(false);
     });
 
@@ -115,6 +125,38 @@ describe("settingsExport schema", () => {
 
       const result = exportableSettingsSchema.safeParse(validData);
       expect(result.success).toBe(true);
+    });
+
+    it("accepts hex colours in themeCustomisations", () => {
+      const result = exportableSettingsSchema.safeParse({
+        themeCustomisations: {
+          retro: {
+            accentColour: "#ff6b6b",
+            hoverColour: "#3b82f6ff",
+            cardBackgroundColour: "#1a1a2e",
+            borderColour: "#000000",
+            textColour: "#ffffff",
+          },
+        },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it("rejects a non-hex colour that would resolve to a CSS url() in a background sink", () => {
+      for (const field of [
+        "accentColour",
+        "hoverColour",
+        "cardBackgroundColour",
+        "borderColour",
+        "textColour",
+      ]) {
+        const result = exportableSettingsSchema.safeParse({
+          themeCustomisations: {
+            retro: { [field]: "url(https://attacker.example/beacon)" },
+          },
+        });
+        expect(result.success).toBe(false);
+      }
     });
 
     it("validates nested fieldMapping", () => {
@@ -170,7 +212,9 @@ describe("settingsExport schema", () => {
         exportedAt: "2025-12-29T10:30:00.000Z",
         settings: {},
       };
-      expect(settingsExportSchema.safeParse(invalidVersion).success).toBe(false);
+      expect(settingsExportSchema.safeParse(invalidVersion).success).toBe(
+        false
+      );
 
       const stringVersion = {
         version: "1",

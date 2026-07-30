@@ -104,8 +104,22 @@ function escapeCsvValue(value: unknown): string {
     str = JSON.stringify(value);
   }
 
+  // Neutralise spreadsheet formula injection: a cell whose first character
+  // is = + - @ (or a leading TAB/CR that the spreadsheet strips) is evaluated
+  // as a formula by Excel/LibreOffice/Sheets, even inside a quoted field.
+  // Prefix such values with a single quote so they are treated as literal
+  // text. Card fields come from untrusted remote collections.
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`;
+  }
+
   // Escape quotes and wrap in quotes if contains special characters
-  if (str.includes(",") || str.includes('"') || str.includes("\n") || str.includes("\r")) {
+  if (
+    str.includes(",") ||
+    str.includes('"') ||
+    str.includes("\n") ||
+    str.includes("\r")
+  ) {
     return `"${str.replace(/"/g, '""')}"`;
   }
 
@@ -274,7 +288,11 @@ export function exportCollectionWithFormat(
           }
           return filtered;
         });
-        content = JSON.stringify({ ...collection, items: filteredItems }, null, 2);
+        content = JSON.stringify(
+          { ...collection, items: filteredItems },
+          null,
+          2
+        );
       } else {
         content = JSON.stringify(collection, null, 2);
       }

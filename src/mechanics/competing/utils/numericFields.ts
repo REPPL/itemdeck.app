@@ -53,16 +53,18 @@ const MAX_FIELDS_TO_DISPLAY = 5;
  * Convert a camelCase or snake_case field key to a human-readable label.
  */
 export function humaniseFieldName(key: string): string {
-  return key
-    // Insert space before capitals in camelCase
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    // Replace underscores and hyphens with spaces
-    .replace(/[_-]/g, " ")
-    // Capitalise first letter of each word
-    .replace(/\b\w/g, (char) => char.toUpperCase())
-    // Clean up multiple spaces
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    key
+      // Insert space before capitals in camelCase
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      // Replace underscores and hyphens with spaces
+      .replace(/[_-]/g, " ")
+      // Capitalise first letter of each word
+      .replace(/\b\w/g, (char) => char.toUpperCase())
+      // Clean up multiple spaces
+      .replace(/\s+/g, " ")
+      .trim()
+  );
 }
 
 /**
@@ -88,7 +90,11 @@ function parseNumericValue(value: unknown): number | null {
     return null;
   }
 
-  if (typeof value === "number" && !Number.isNaN(value) && Number.isFinite(value)) {
+  if (
+    typeof value === "number" &&
+    !Number.isNaN(value) &&
+    Number.isFinite(value)
+  ) {
     return value;
   }
 
@@ -168,9 +174,18 @@ export function detectNumericFields(cards: CardData[]): NumericFieldInfo[] {
       continue;
     }
 
-    // Calculate min, max, and variance
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    // Calculate min and max with a single pass. Spreading `values` into
+    // Math.min/Math.max would throw a RangeError once the array (one entry per
+    // card, sized by the untrusted collection) exceeds the engine's argument
+    // limit, crashing the mechanic for a large collection.
+    // `values` is non-empty here (the percentage and variance checks above
+    // guarantee at least two entries).
+    let min = Infinity;
+    let max = -Infinity;
+    for (const value of values) {
+      if (value < min) min = value;
+      if (value > max) max = value;
+    }
 
     // Determine if higher or lower is better for this field
     const higherIsBetter = !isLowerBetterField(key);

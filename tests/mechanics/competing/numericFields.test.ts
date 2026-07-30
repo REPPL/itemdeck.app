@@ -154,6 +154,21 @@ describe("numericFields", () => {
       expect(attackField?.max).toBe(100);
     });
 
+    it("should not crash on a very large collection", () => {
+      // One value per card is fed to the min/max computation; spreading an
+      // array this size into Math.min/Math.max throws a RangeError, so a large
+      // (untrusted) collection would crash the mechanic on init.
+      const cards = Array.from({ length: 200_000 }, (_, i) => ({
+        attack: i % 1000,
+      }));
+
+      const fields = detectNumericFields(cards);
+      const attackField = fields.find((f) => f.key === "attack");
+
+      expect(attackField?.min).toBe(0);
+      expect(attackField?.max).toBe(999);
+    });
+
     it("should sort fields by variance (range)", () => {
       const cards = [
         { attack: 50, defence: 90, speed: 80 },
@@ -168,11 +183,7 @@ describe("numericFields", () => {
     });
 
     it("should handle string numbers mixed with numbers", () => {
-      const cards = [
-        { attack: 80 },
-        { attack: "90" },
-        { attack: 70 },
-      ];
+      const cards = [{ attack: 80 }, { attack: "90" }, { attack: 70 }];
 
       const fields = detectNumericFields(cards);
       expect(fields.map((f) => f.key)).toContain("attack");

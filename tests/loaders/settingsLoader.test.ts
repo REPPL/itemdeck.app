@@ -80,6 +80,7 @@ describe("loadCollectionSettings allowlist", () => {
           fieldMapping: {
             titleField: 123,
             subtitleField: "year",
+            topBadgeField: "myRank",
             sortDirection: "sideways",
           },
         },
@@ -88,8 +89,12 @@ describe("loadCollectionSettings allowlist", () => {
 
     const result = await loadCollectionSettings("/data/collections/demo");
 
-    // A non-string path would later throw in the render-time split; only the
-    // valid string value survives.
-    expect(result?.forced?.fieldMapping).toEqual({ subtitleField: "year" });
+    // A non-string path would later throw in the render-time split; the valid
+    // string values (including topBadgeField) survive while the number and the
+    // invalid enum are dropped.
+    expect(result?.forced?.fieldMapping).toEqual({
+      subtitleField: "year",
+      topBadgeField: "myRank",
+    });
   });
 });

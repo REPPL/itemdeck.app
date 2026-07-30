@@ -170,6 +170,7 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
       "footerBadgeField",
       "logoField",
       "sortField",
+      "topBadgeField",
     ] as const) {
       if (typeof rawMapping[key] === "string") {
         mapping[key] = rawMapping[key];

@@ -44,11 +44,13 @@ describe("useEditsStore", () => {
     it("should update editedAt timestamp", () => {
       const store = useEditsStore.getState();
       store.setField("entity-1", "title", "First");
-      const firstTimestamp = useEditsStore.getState().edits["entity-1"]?.editedAt;
+      const firstTimestamp =
+        useEditsStore.getState().edits["entity-1"]?.editedAt;
 
       // Wait a tiny bit to ensure different timestamp
       store.setField("entity-1", "year", 2024);
-      const secondTimestamp = useEditsStore.getState().edits["entity-1"]?.editedAt;
+      const secondTimestamp =
+        useEditsStore.getState().edits["entity-1"]?.editedAt;
 
       expect(secondTimestamp).toBeGreaterThanOrEqual(firstTimestamp!);
     });
@@ -151,6 +153,16 @@ describe("useEditsStore", () => {
       const store = useEditsStore.getState();
       expect(store.getEdit("non-existent")).toBeUndefined();
     });
+
+    it("should return undefined for an inherited-property id from untrusted data", () => {
+      const store = useEditsStore.getState();
+      // A card whose id collides with an Object.prototype member must not
+      // resolve to the inherited function (which crashes callers reading
+      // `.fields`).
+      expect(store.getEdit("toString")).toBeUndefined();
+      expect(store.getEdit("constructor")).toBeUndefined();
+      expect(store.getEdit("hasOwnProperty")).toBeUndefined();
+    });
   });
 
   describe("hasEdits", () => {
@@ -164,6 +176,12 @@ describe("useEditsStore", () => {
     it("should return false for entity without edits", () => {
       const store = useEditsStore.getState();
       expect(store.hasEdits("non-existent")).toBe(false);
+    });
+
+    it("should return false for an inherited-property id from untrusted data", () => {
+      const store = useEditsStore.getState();
+      expect(store.hasEdits("toString")).toBe(false);
+      expect(store.hasEdits("constructor")).toBe(false);
     });
   });
 
@@ -230,7 +248,12 @@ describe("useEditsStore", () => {
   });
 
   describe("importEdits", () => {
-    const createExportedEdits = (edits: Record<string, { fields: Record<string, unknown>; editedAt: number }>) => ({
+    const createExportedEdits = (
+      edits: Record<
+        string,
+        { fields: Record<string, unknown>; editedAt: number }
+      >
+    ) => ({
       version: 1 as const,
       exportedAt: new Date().toISOString(),
       collectionId: "test-collection",
@@ -250,7 +273,9 @@ describe("useEditsStore", () => {
         store.importEdits(imported, "replace");
 
         expect(useEditsStore.getState().edits["entity-1"]).toBeUndefined();
-        expect(useEditsStore.getState().edits["entity-2"]?.fields.title).toBe("Imported");
+        expect(useEditsStore.getState().edits["entity-2"]?.fields.title).toBe(
+          "Imported"
+        );
       });
     });
 
@@ -265,8 +290,12 @@ describe("useEditsStore", () => {
 
         store.importEdits(imported, "merge");
 
-        expect(useEditsStore.getState().edits["entity-1"]?.fields.title).toBe("Existing");
-        expect(useEditsStore.getState().edits["entity-2"]?.fields.title).toBe("Imported");
+        expect(useEditsStore.getState().edits["entity-1"]?.fields.title).toBe(
+          "Existing"
+        );
+        expect(useEditsStore.getState().edits["entity-2"]?.fields.title).toBe(
+          "Imported"
+        );
       });
 
       it("should keep existing values for conflicting fields", () => {
@@ -274,7 +303,10 @@ describe("useEditsStore", () => {
         store.setFields("entity-1", { title: "Existing", year: 2024 });
 
         const imported = createExportedEdits({
-          "entity-1": { fields: { title: "Imported", summary: "New" }, editedAt: 1000 },
+          "entity-1": {
+            fields: { title: "Imported", summary: "New" },
+            editedAt: 1000,
+          },
         });
 
         store.importEdits(imported, "merge");
@@ -289,7 +321,8 @@ describe("useEditsStore", () => {
         const store = useEditsStore.getState();
         store.setField("entity-1", "title", "Existing");
 
-        const existingTimestamp = useEditsStore.getState().edits["entity-1"]?.editedAt ?? 0;
+        const existingTimestamp =
+          useEditsStore.getState().edits["entity-1"]?.editedAt ?? 0;
         const laterTimestamp = existingTimestamp + 1000;
 
         const imported = createExportedEdits({
@@ -298,7 +331,9 @@ describe("useEditsStore", () => {
 
         store.importEdits(imported, "merge");
 
-        expect(useEditsStore.getState().edits["entity-1"]?.editedAt).toBe(laterTimestamp);
+        expect(useEditsStore.getState().edits["entity-1"]?.editedAt).toBe(
+          laterTimestamp
+        );
       });
     });
   });

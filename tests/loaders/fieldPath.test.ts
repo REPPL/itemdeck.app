@@ -175,22 +175,26 @@ describe("fieldPath", () => {
 
     it("should use first available value in fallback chain", () => {
       // verdict exists, so use it
-      expect(resolveFieldPath(entityWithFullData, "verdict ?? summary ?? title")).toBe(
-        "A classic"
-      );
+      expect(
+        resolveFieldPath(entityWithFullData, "verdict ?? summary ?? title")
+      ).toBe("A classic");
 
       // verdict missing, fall through to title
-      expect(resolveFieldPath(entityWithPartialData, "verdict ?? summary ?? title")).toBe(
-        "The Legend of Zelda"
-      );
+      expect(
+        resolveFieldPath(entityWithPartialData, "verdict ?? summary ?? title")
+      ).toBe("The Legend of Zelda");
     });
 
     it("should handle two-value fallback", () => {
       // playedSince exists
-      expect(resolveFieldPath(entityWithFullData, "playedSince ?? year")).toBe("1988");
+      expect(resolveFieldPath(entityWithFullData, "playedSince ?? year")).toBe(
+        "1988"
+      );
 
       // playedSince missing, use year
-      expect(resolveFieldPath(entityWithPartialData, "playedSince ?? year")).toBe(1986);
+      expect(
+        resolveFieldPath(entityWithPartialData, "playedSince ?? year")
+      ).toBe(1986);
     });
 
     it("should return undefined when all fallbacks fail", () => {
@@ -211,8 +215,20 @@ describe("fieldPath", () => {
     });
 
     it("should handle whitespace around ?? operator", () => {
-      expect(resolveFieldPath(entityWithFullData, "verdict??title")).toBe("A classic");
-      expect(resolveFieldPath(entityWithFullData, "verdict  ??  title")).toBe("A classic");
+      expect(resolveFieldPath(entityWithFullData, "verdict??title")).toBe(
+        "A classic"
+      );
+      expect(resolveFieldPath(entityWithFullData, "verdict  ??  title")).toBe(
+        "A classic"
+      );
+    });
+
+    it("should return undefined for a non-string expression instead of throwing", () => {
+      // A malformed forced fieldMapping could supply a non-string path; the
+      // resolver must not throw during render.
+      expect(
+        resolveFieldPath(entityWithFullData, 123 as unknown as string)
+      ).toBeUndefined();
     });
   });
 
@@ -226,15 +242,21 @@ describe("fieldPath", () => {
     };
 
     it("should return string from first matching path", () => {
-      expect(resolveFieldPathAsString(entity, "verdict ?? title")).toBe("Great game");
+      expect(resolveFieldPathAsString(entity, "verdict ?? title")).toBe(
+        "Great game"
+      );
     });
 
     it("should convert number to string", () => {
-      expect(resolveFieldPathAsString(entity, "playedSince ?? year")).toBe("1990");
+      expect(resolveFieldPathAsString(entity, "playedSince ?? year")).toBe(
+        "1990"
+      );
     });
 
     it("should return fallback when no path matches", () => {
-      expect(resolveFieldPathAsString(entity, "rating ?? status", "N/A")).toBe("N/A");
+      expect(resolveFieldPathAsString(entity, "rating ?? status", "N/A")).toBe(
+        "N/A"
+      );
     });
 
     it("should return empty string by default", () => {

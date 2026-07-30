@@ -11,6 +11,24 @@ import { z } from "zod";
 export const SETTINGS_EXPORT_VERSION = 26;
 
 // ============================================================================
+// Colour Validation
+// ============================================================================
+
+/**
+ * Valid hex colour string (6 or 8 digits with # prefix).
+ *
+ * Imported colours are written verbatim into CSS custom properties that live
+ * `background:` shorthands consume, so a free-form string such as
+ * `url(https://attacker.example/beacon)` would resolve to a background image
+ * and fire an outbound request governed by the permissive `img-src`, bypassing
+ * the `connect-src` allowlist. Restrict to hex, matching the theme export
+ * schema.
+ */
+const hexColourSchema = z
+  .string()
+  .regex(/^#([0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/, "Invalid hex colour format");
+
+// ============================================================================
 // Type Enums (matching settingsStore types)
 // ============================================================================
 
@@ -43,11 +61,11 @@ const themeCustomisationSchema = z.object({
   borderWidth: borderWidthPresetSchema.optional(),
   shadowIntensity: shadowIntensitySchema.optional(),
   animationStyle: animationStyleSchema.optional(),
-  accentColour: z.string().optional(),
-  hoverColour: z.string().optional(),
-  cardBackgroundColour: z.string().optional(),
-  borderColour: z.string().optional(),
-  textColour: z.string().optional(),
+  accentColour: hexColourSchema.optional(),
+  hoverColour: hexColourSchema.optional(),
+  cardBackgroundColour: hexColourSchema.optional(),
+  borderColour: hexColourSchema.optional(),
+  textColour: hexColourSchema.optional(),
   detailTransparency: detailTransparencySchema.optional(),
   overlayStyle: overlayStyleSchema.optional(),
   moreButtonLabel: z.string().optional(),
@@ -108,11 +126,14 @@ export const exportableSettingsSchema = z.object({
 
   // Visual theme settings
   visualTheme: visualThemeSchema.optional(),
-  themeCustomisations: z.object({
-    retro: themeCustomisationSchema.optional(),
-    modern: themeCustomisationSchema.optional(),
-    minimal: themeCustomisationSchema.optional(),
-  }).partial().optional(),
+  themeCustomisations: z
+    .object({
+      retro: themeCustomisationSchema.optional(),
+      modern: themeCustomisationSchema.optional(),
+      minimal: themeCustomisationSchema.optional(),
+    })
+    .partial()
+    .optional(),
 
   // Accessibility settings
   reduceMotion: reduceMotionSchema.optional(),

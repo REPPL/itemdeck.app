@@ -308,6 +308,12 @@ export function resolveFieldPath(
   entity: Entity | ResolvedEntity,
   expression: string
 ): unknown {
+  // Defence in depth: a non-string expression (e.g. from a malformed forced
+  // fieldMapping) would throw in the split below, crashing every card render.
+  if (typeof expression !== "string") {
+    return undefined;
+  }
+
   const paths = parseFallbackExpression(expression);
 
   for (const path of paths) {

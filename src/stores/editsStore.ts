@@ -153,11 +153,16 @@ export const useEditsStore = create<EditsState>()(
       },
 
       getEdit: (entityId) => {
-        return get().edits[entityId];
+        const edits = get().edits;
+        // Own-property guard: entity ids come from untrusted collection data,
+        // so an id such as "toString" must not resolve to an inherited
+        // Object.prototype member (a truthy function crashes callers that
+        // dereference `.fields`).
+        return Object.hasOwn(edits, entityId) ? edits[entityId] : undefined;
       },
 
       hasEdits: (entityId) => {
-        return entityId in get().edits;
+        return Object.hasOwn(get().edits, entityId);
       },
 
       getEditedEntityIds: () => {
@@ -197,7 +202,10 @@ export const useEditsStore = create<EditsState>()(
                   ...importedEdit.fields,
                   ...existingEdit.fields,
                 },
-                editedAt: Math.max(existingEdit.editedAt, importedEdit.editedAt),
+                editedAt: Math.max(
+                  existingEdit.editedAt,
+                  importedEdit.editedAt
+                ),
               };
             } else {
               merged[entityId] = existingEdit;

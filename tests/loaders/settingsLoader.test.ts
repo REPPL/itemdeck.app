@@ -69,4 +69,32 @@ describe("loadCollectionSettings allowlist", () => {
       "/data/collections/demo/settings.json"
     );
   });
+
+  it("drops non-string forced fieldMapping values from untrusted settings", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        version: 1,
+        forced: {
+          fieldMapping: {
+            titleField: 123,
+            subtitleField: "year",
+            topBadgeField: "myRank",
+            sortDirection: "sideways",
+          },
+        },
+      }),
+    });
+
+    const result = await loadCollectionSettings("/data/collections/demo");
+
+    // A non-string path would later throw in the render-time split; the valid
+    // string values (including topBadgeField) survive while the number and the
+    // invalid enum are dropped.
+    expect(result?.forced?.fieldMapping).toEqual({
+      subtitleField: "year",
+      topBadgeField: "myRank",
+    });
+  });
 });

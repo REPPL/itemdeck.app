@@ -4,10 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import {
-  loadCollection,
-  loadEntities,
-} from "@/loaders/collectionLoader";
+import { loadCollection, loadEntities } from "@/loaders/collectionLoader";
 
 /** Minimal valid v2 collection definition. */
 const collectionDefinition = {
@@ -127,6 +124,86 @@ describe("loadCollection allowlist enforcement", () => {
     const collection = await loadCollection(base);
 
     expect(collection.entities["advert"]).toEqual([{ id: "a1" }]);
+  });
+});
+
+describe("entity fetch fan-out is bounded", () => {
+  const base =
+    "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/demo";
+
+  it("keeps concurrent entity fetches within the pool size", async () => {
+    const ids = Array.from({ length: 50 }, (_, i) => `e${String(i)}`);
+    let inFlight = 0;
+    let maxInFlight = 0;
+
+    const mock = vi.fn((input: string) => {
+      if (input.endsWith("/adverts/index.json")) {
+        return Promise.resolve(jsonResponse(ids));
+      }
+      // Entity files resolve on a later tick so overlap is observable.
+      inFlight += 1;
+      maxInFlight = Math.max(maxInFlight, inFlight);
+      return new Promise<StubResponse>((resolve) => {
+        setTimeout(() => {
+          inFlight -= 1;
+          const id = input.split("/").pop()?.replace(".json", "");
+          resolve(jsonResponse({ id }));
+        }, 2);
+      });
+    });
+    vi.stubGlobal("fetch", mock);
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities).toHaveLength(50);
+    // A concurrency pool caps in-flight fetches; the old Promise.all over the
+    // whole list would drive this to 50.
+    expect(maxInFlight).toBeLessThanOrEqual(8);
+    expect(maxInFlight).toBeGreaterThan(1);
+  });
+
+  it("preserves index order despite out-of-order settling", async () => {
+    const ids = ["first", "second", "third"];
+    const delays: Record<string, number> = {
+      first: 6,
+      second: 2,
+      third: 0,
+    };
+    const mock = vi.fn((input: string) => {
+      if (input.endsWith("/adverts/index.json")) {
+        return Promise.resolve(jsonResponse(ids));
+      }
+      const id = input.split("/").pop()?.replace(".json", "") ?? "";
+      return new Promise<StubResponse>((resolve) => {
+        setTimeout(() => resolve(jsonResponse({ id })), delays[id] ?? 0);
+      });
+    });
+    vi.stubGlobal("fetch", mock);
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities.map((e) => (e as { id: string }).id)).toEqual([
+      "first",
+      "second",
+      "third",
+    ]);
+  });
+
+  it("caps a hostile index that lists more than the maximum ids", async () => {
+    const ids = Array.from({ length: 10001 }, (_, i) => `e${String(i)}`);
+    const mock = vi.fn((input: string) => {
+      if (input.endsWith("/adverts/index.json")) {
+        return Promise.resolve(jsonResponse(ids));
+      }
+      const id = input.split("/").pop()?.replace(".json", "");
+      return Promise.resolve(jsonResponse({ id }));
+    });
+    vi.stubGlobal("fetch", mock);
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities).toHaveLength(10000);
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("10001"));
   });
 });
 

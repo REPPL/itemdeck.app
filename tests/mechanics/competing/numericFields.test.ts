@@ -280,4 +280,43 @@ describe("numericFields", () => {
       expect(compareValues(80, 60, lowField)).toBe(-1); // Higher loses
     });
   });
+
+  describe("detectNumericFields — untrusted collection resilience", () => {
+    it("detects a shared numeric field even amid many per-card-unique fields", () => {
+      const cards = Array.from({ length: 20 }, (_, i) => ({
+        id: `c${String(i)}`,
+        power: i, // shared across every card, with variance
+        [`unique${String(i)}`]: i, // present in only one card
+      }));
+
+      const fields = detectNumericFields(cards);
+      const keys = fields.map((f) => f.key);
+      expect(keys).toContain("power");
+      // Per-card-unique fields appear in <80% of cards and are excluded.
+      expect(keys).not.toContain("unique0");
+    });
+
+    it("does not exhibit quadratic blow-up on many uniquely-named fields", () => {
+      // Each card carries several uniquely-named numeric fields, so the set of
+      // distinct keys scales with the card count. The previous
+      // keys x cards nested scan made this quadratic (seconds of main-thread
+      // work); the single-pass implementation stays well under a generous
+      // bound. Each unique field is present in only one card, so none qualify.
+      const cardCount = 3000;
+      const cards = Array.from({ length: cardCount }, (_, i) => {
+        const card: Record<string, number | string> = { id: `c${String(i)}` };
+        for (let f = 0; f < 15; f++) {
+          card[`field_${String(i)}_${String(f)}`] = i + f;
+        }
+        return card;
+      });
+
+      const start = performance.now();
+      const fields = detectNumericFields(cards);
+      const elapsed = performance.now() - start;
+
+      expect(fields).toEqual([]);
+      expect(elapsed).toBeLessThan(3000);
+    });
+  });
 });

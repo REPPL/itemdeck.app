@@ -132,70 +132,81 @@ export function getCardValue(card: CardData, fieldKey: string): number | null {
  * @param cards - Array of card data objects
  * @returns Array of detected numeric field information, sorted by variance
  */
+/**
+ * Per-field running statistics accumulated during detection.
+ */
+interface FieldStats {
+  count: number;
+  min: number;
+  max: number;
+  firstValue: number;
+  hasVariance: boolean;
+}
+
 export function detectNumericFields(cards: CardData[]): NumericFieldInfo[] {
   if (cards.length === 0) {
     return [];
   }
 
-  // Collect all unique field keys from all cards
-  const allKeys = new Set<string>();
+  // Single pass over each card's own fields, accumulating per-field stats.
+  // The previous implementation unioned every field key, then re-scanned every
+  // card for each key: with an untrusted collection supplying many uniquely
+  // named fields the key set grows with the card count, making that O(keys x
+  // cards) — effectively quadratic — and freezing the main thread for seconds
+  // on a large hostile collection. Iterating each card's own keys once keeps
+  // the work linear in the total number of fields present.
+  const stats = new Map<string, FieldStats>();
+
   for (const card of cards) {
     for (const key of Object.keys(card)) {
-      allKeys.add(key);
+      if (shouldExcludeField(key)) {
+        continue;
+      }
+
+      const value = getCardValue(card, key);
+      if (value === null) {
+        continue;
+      }
+
+      const existing = stats.get(key);
+      if (existing === undefined) {
+        stats.set(key, {
+          count: 1,
+          min: value,
+          max: value,
+          firstValue: value,
+          hasVariance: false,
+        });
+      } else {
+        existing.count += 1;
+        if (value < existing.min) existing.min = value;
+        if (value > existing.max) existing.max = value;
+        if (value !== existing.firstValue) existing.hasVariance = true;
+      }
     }
   }
 
   const numericFields: NumericFieldInfo[] = [];
 
-  for (const key of allKeys) {
-    // Skip excluded fields
-    if (shouldExcludeField(key)) {
-      continue;
-    }
-
-    // Collect numeric values for this field
-    const values: number[] = [];
-    for (const card of cards) {
-      const value = getCardValue(card, key);
-      if (value !== null) {
-        values.push(value);
-      }
-    }
-
+  for (const [key, field] of stats) {
     // Check if enough cards have valid values
-    const validPercentage = values.length / cards.length;
+    const validPercentage = field.count / cards.length;
     if (validPercentage < MIN_VALID_PERCENTAGE) {
       continue;
     }
 
-    // Check if values have any variance (not all the same)
-    const uniqueValues = new Set(values);
-    if (uniqueValues.size <= 1) {
+    // Skip fields whose values are all identical (not an interesting stat)
+    if (!field.hasVariance) {
       continue;
     }
-
-    // Calculate min and max with a single pass. Spreading `values` into
-    // Math.min/Math.max would throw a RangeError once the array (one entry per
-    // card, sized by the untrusted collection) exceeds the engine's argument
-    // limit, crashing the mechanic for a large collection.
-    // `values` is non-empty here (the percentage and variance checks above
-    // guarantee at least two entries).
-    let min = Infinity;
-    let max = -Infinity;
-    for (const value of values) {
-      if (value < min) min = value;
-      if (value > max) max = value;
-    }
-
-    // Determine if higher or lower is better for this field
-    const higherIsBetter = !isLowerBetterField(key);
 
     numericFields.push({
       key,
       label: humaniseFieldName(key),
-      min,
-      max,
-      higherIsBetter,
+      min: field.min,
+      max: field.max,
+      // Determine if higher or lower is better for this field
+      higherIsBetter: !isLowerBetterField(key),
     });
   }
 

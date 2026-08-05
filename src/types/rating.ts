@@ -33,9 +33,19 @@ export type Rating = number | RatingValue;
 
 /**
  * Type guard to check if a rating is a structured RatingValue.
+ *
+ * Accepts `unknown` because rating values originate from untrusted collection
+ * data: a `null`, a wrong-typed value, or an object with a non-numeric `score`
+ * must be rejected here rather than crashing a downstream `"score" in null`
+ * check or a `.toFixed()` call.
  */
-export function isStructuredRating(rating: Rating): rating is RatingValue {
-  return typeof rating === "object" && "score" in rating;
+export function isStructuredRating(rating: unknown): rating is RatingValue {
+  return (
+    typeof rating === "object" &&
+    rating !== null &&
+    "score" in rating &&
+    typeof (rating as { score: unknown }).score === "number"
+  );
 }
 
 /**
@@ -45,18 +55,20 @@ export function isStructuredRating(rating: Rating): rating is RatingValue {
  * @param defaultMax - Default max value for simple numbers (default: 5)
  * @returns Normalised RatingValue
  */
-export function normaliseRating(
-  rating: Rating,
-  defaultMax = 5
-): RatingValue {
+export function normaliseRating(rating: Rating, defaultMax = 5): RatingValue {
   if (isStructuredRating(rating)) {
     return {
       ...rating,
       max: rating.max ?? defaultMax,
     };
   }
+  // Simple numeric rating for valid data, but an untrusted collection can put
+  // any JSON value here, so coerce defensively: a non-finite or non-numeric
+  // value yields a usable RatingValue instead of a NaN/crash downstream.
+  const raw: unknown = rating;
+  const score = typeof raw === "number" && Number.isFinite(raw) ? raw : 0;
   return {
-    score: rating,
+    score,
     max: defaultMax,
   };
 }

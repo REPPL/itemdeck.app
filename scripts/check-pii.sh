@@ -15,14 +15,9 @@ ALLOWED_EMAILS="noreply@anthropic.com|noreply@github.com|users.noreply.github.co
 
 found_issues=0
 
-# Get staged files
-staged_files=$(list_staged_files)
-
-if [ -z "$staged_files" ]; then
-    exit 0
-fi
-
-while IFS= read -r file; do
+# Read staged paths NUL-terminated (see lib/staged-files.sh): filenames with
+# non-ASCII/backslash/quote/newline characters must not be split or skipped.
+while IFS= read -r -d '' file; do
     # Skip binary files and specific directories
     if [[ "$file" == *.png ]] || [[ "$file" == *.jpg ]] || [[ "$file" == *.gif ]] || \
        [[ "$file" == *.ico ]] || [[ "$file" == *.pdf ]] || [[ "$file" == *.zip ]] || \
@@ -41,7 +36,13 @@ while IFS= read -r file; do
 
     # Check the STAGED content (index blob), not the worktree copy: what
     # gets committed is the index, which may differ from the file on disk.
-    staged_content=$(git show ":$file" 2>/dev/null) || continue
+    # Fail closed (loud warning, non-zero result) rather than silently skip if
+    # the blob cannot be read, so an unreadable path can never bypass the gate.
+    if ! staged_content=$(git show ":$file" 2>/dev/null); then
+        echo "WARNING: could not read staged content for '$file'; failing the PII check"
+        found_issues=1
+        continue
+    fi
 
     # Check for hardcoded home paths
     if printf '%s\n' "$staged_content" | grep -qE "$HOME_PATH_PATTERN"; then
@@ -60,7 +61,7 @@ while IFS= read -r file; do
             found_issues=1
         fi
     fi
-done <<< "$staged_files"
+done < <(list_staged_files)
 
 if [ $found_issues -eq 1 ]; then
     echo ""

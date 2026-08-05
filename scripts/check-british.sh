@@ -66,19 +66,23 @@ AMERICAN_WORDS=$(IFS='|'; echo "${AMERICAN_SPELLINGS[*]}")
 
 found_issues=0
 
-# Get staged markdown files
-staged_files=$(list_staged_files '\.md$')
-
-if [ -z "$staged_files" ]; then
-    exit 0
-fi
-
-while IFS= read -r file; do
+# Read staged markdown paths NUL-terminated (see lib/staged-files.sh):
+# filenames with non-ASCII/backslash/quote/newline characters must not be
+# split or skipped.
+while IFS= read -r -d '' file; do
     # Check the STAGED content (index blob), not the worktree copy: what
     # gets committed is the index, which may differ from the file on disk.
+    # Fail closed (loud warning, non-zero result) if the blob cannot be read,
+    # so an unreadable path can never bypass the gate.
+    if ! staged_content=$(git show ":$file" 2>/dev/null); then
+        echo "WARNING: could not read staged content for '$file'; failing the British English check"
+        found_issues=1
+        continue
+    fi
+
     # Strip fenced code block content (toggling on ``` delimiter lines),
     # then check for American English (case insensitive, word boundaries)
-    matches=$(git show ":$file" 2>/dev/null \
+    matches=$(printf '%s\n' "$staged_content" \
         | awk '/^[[:space:]]*```/ { in_fence = !in_fence; next } !in_fence { printf "%d:%s\n", NR, $0 }' \
         | grep -iE "\b($AMERICAN_WORDS)\b" || true)
 
@@ -92,7 +96,7 @@ while IFS= read -r file; do
             found_issues=1
         fi
     fi
-done <<< "$staged_files"
+done < <(list_staged_files '\.md$')
 
 if [ $found_issues -eq 1 ]; then
     echo ""

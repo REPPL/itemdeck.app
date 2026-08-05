@@ -14,7 +14,7 @@
 import { useState, useCallback } from "react";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { deleteDB } from "@/db";
+import { clearAllPersistedData } from "@/lib";
 import {
   useSettingsStore,
   type ReduceMotionPreference,
@@ -30,11 +30,12 @@ const subTabs: { id: SystemSubTab; label: string }[] = [
   { id: "developer", label: "Developer" },
 ];
 
-const reduceMotionOptions: { value: ReduceMotionPreference; label: string }[] = [
-  { value: "system", label: "System" },
-  { value: "on", label: "On" },
-  { value: "off", label: "Off" },
-];
+const reduceMotionOptions: { value: ReduceMotionPreference; label: string }[] =
+  [
+    { value: "system", label: "System" },
+    { value: "on", label: "On" },
+    { value: "off", label: "Off" },
+  ];
 
 interface SystemSettingsProps {
   /** Whether TanStack devtools are enabled */
@@ -50,26 +51,14 @@ export function SystemSettings({
   devtoolsEnabled = false,
   onDevtoolsToggle,
 }: SystemSettingsProps) {
-  const [activeSubTab, setActiveSubTab] = useState<SystemSubTab>("accessibility");
+  const [activeSubTab, setActiveSubTab] =
+    useState<SystemSubTab>("accessibility");
   const [showHardResetDialog, setShowHardResetDialog] = useState(false);
 
   // Hard reset handler - clears all persisted data
   const handleHardReset = useCallback(async () => {
     try {
-      // Clear all localStorage keys used by itemdeck
-      const localStorageKeys = [
-        "itemdeck-settings",
-        "itemdeck-sources",
-        "itemdeck-edits",
-        "itemdeck-theme",
-        "itemdeck-plugins",
-      ];
-      for (const key of localStorageKeys) {
-        localStorage.removeItem(key);
-      }
-
-      // Delete IndexedDB database
-      await deleteDB();
+      await clearAllPersistedData();
 
       // Reload the page to apply fresh state
       window.location.reload();
@@ -122,7 +111,11 @@ export function SystemSettings({
           <>
             <div className={styles.row}>
               <span className={styles.label}>Reduce Motion</span>
-              <div className={styles.segmentedControl} role="radiogroup" aria-label="Reduce motion">
+              <div
+                className={styles.segmentedControl}
+                role="radiogroup"
+                aria-label="Reduce motion"
+              >
                 {reduceMotionOptions.map(({ value, label }) => (
                   <button
                     key={value}
@@ -130,8 +123,12 @@ export function SystemSettings({
                     className={[
                       styles.segmentButton,
                       reduceMotion === value ? styles.segmentButtonActive : "",
-                    ].filter(Boolean).join(" ")}
-                    onClick={() => { handleReduceMotionChange(value); }}
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                    onClick={() => {
+                      handleReduceMotionChange(value);
+                    }}
                     role="radio"
                     aria-checked={reduceMotion === value}
                   >
@@ -142,8 +139,8 @@ export function SystemSettings({
             </div>
 
             <div className={styles.helpText}>
-              Controls animation and motion effects. &quot;System&quot; respects your OS preference.
-              Changes apply immediately for accessibility.
+              Controls animation and motion effects. &quot;System&quot; respects
+              your OS preference. Changes apply immediately for accessibility.
             </div>
 
             <div className={styles.divider} />
@@ -154,15 +151,17 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={highContrast}
-                  onChange={(e) => { handleHighContrastChange(e.target.checked); }}
+                  onChange={(e) => {
+                    handleHighContrastChange(e.target.checked);
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
             </div>
 
             <div className={styles.helpText}>
-              Increases contrast for better visibility.
-              Changes apply immediately for accessibility.
+              Increases contrast for better visibility. Changes apply
+              immediately for accessibility.
             </div>
           </>
         );
@@ -176,7 +175,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showHelpButton}
-                  onChange={(e) => { updateDraft({ showHelpButton: e.target.checked }); }}
+                  onChange={(e) => {
+                    updateDraft({ showHelpButton: e.target.checked });
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -188,7 +189,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showSettingsButton}
-                  onChange={(e) => { updateDraft({ showSettingsButton: e.target.checked }); }}
+                  onChange={(e) => {
+                    updateDraft({ showSettingsButton: e.target.checked });
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -200,7 +203,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showSearchBar}
-                  onChange={(e) => { updateDraft({ showSearchBar: e.target.checked }); }}
+                  onChange={(e) => {
+                    updateDraft({ showSearchBar: e.target.checked });
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -212,7 +217,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showViewButton}
-                  onChange={(e) => { updateDraft({ showViewButton: e.target.checked }); }}
+                  onChange={(e) => {
+                    updateDraft({ showViewButton: e.target.checked });
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -224,7 +231,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={showStatisticsBar}
-                  onChange={(e) => { updateDraft({ showStatisticsBar: e.target.checked }); }}
+                  onChange={(e) => {
+                    updateDraft({ showStatisticsBar: e.target.checked });
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -241,7 +250,9 @@ export function SystemSettings({
                 <input
                   type="checkbox"
                   checked={editModeEnabled}
-                  onChange={(e) => { setEditModeEnabled(e.target.checked); }}
+                  onChange={(e) => {
+                    setEditModeEnabled(e.target.checked);
+                  }}
                 />
                 <span className={styles.toggleSlider} />
               </label>
@@ -278,8 +289,8 @@ export function SystemSettings({
             <h3 className={styles.sectionHeader}>Reset URL</h3>
 
             <div className={styles.helpText}>
-              Add <code>?reset=1</code> to the URL to reset all settings to defaults.
-              This clears localStorage and reloads the page.
+              Add <code>?reset=1</code> to the URL to reset all settings to
+              defaults. This clears localStorage and reloads the page.
             </div>
 
             <div className={styles.divider} />
@@ -295,7 +306,9 @@ export function SystemSettings({
             <button
               type="button"
               className={styles.dangerButton}
-              onClick={() => { setShowHardResetDialog(true); }}
+              onClick={() => {
+                setShowHardResetDialog(true);
+              }}
             >
               Hard Reset
             </button>
@@ -307,8 +320,12 @@ export function SystemSettings({
               confirmLabel="Reset Everything"
               cancelLabel="Cancel"
               variant="danger"
-              onConfirm={() => { void handleHardReset(); }}
-              onCancel={() => { setShowHardResetDialog(false); }}
+              onConfirm={() => {
+                void handleHardReset();
+              }}
+              onCancel={() => {
+                setShowHardResetDialog(false);
+              }}
             />
           </>
         );
@@ -326,7 +343,11 @@ export function SystemSettings({
       <div className={styles.divider} />
 
       {/* Sub-tab navigation */}
-      <div className={tabStyles.subTabs} role="tablist" aria-label="System settings sections">
+      <div
+        className={tabStyles.subTabs}
+        role="tablist"
+        aria-label="System settings sections"
+      >
         {subTabs.map(({ id, label }) => (
           <button
             key={id}
@@ -337,8 +358,12 @@ export function SystemSettings({
             className={[
               tabStyles.subTab,
               activeSubTab === id ? tabStyles.subTabActive : "",
-            ].filter(Boolean).join(" ")}
-            onClick={() => { setActiveSubTab(id); }}
+            ]
+              .filter(Boolean)
+              .join(" ")}
+            onClick={() => {
+              setActiveSubTab(id);
+            }}
           >
             {label}
           </button>

@@ -65,7 +65,9 @@ export function normaliseDetailUrls(
         ? urls
         : [urls];
 
-  return links.filter((link) => safeExternalUrl(link.url) !== null);
+  return links.filter(
+    (link) => isDetailLink(link) && safeExternalUrl(link.url) !== null
+  );
 }
 
 /**

@@ -15,11 +15,7 @@ import type {
   SnapRankingState,
   SnapRankingSettings,
 } from "./types";
-import {
-  DEFAULT_SETTINGS,
-  NUMERIC_SCORING,
-  calculateScore,
-} from "./types";
+import { DEFAULT_SETTINGS, NUMERIC_SCORING, calculateScore } from "./types";
 
 /**
  * Extended store state with actions.
@@ -49,6 +45,16 @@ interface SnapRankingStore extends SnapRankingState, SnapRankingSettings {
   setShowTimer: (value: boolean) => void;
   setCardCount: (value: number) => void;
 }
+
+/**
+ * Maximum distinct values for which a game will start.
+ *
+ * The UI renders one guess button per distinct value. With the default
+ * per-card `order` badge field a large (untrusted) collection would render
+ * tens of thousands of buttons and freeze the tab, so refuse above this cap.
+ * It sits well above any realistic categorical or year field.
+ */
+export const MAX_UNIQUE_VALUES = 200;
 
 /**
  * Initial state.
@@ -119,6 +125,18 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
         isActive: state.isActive, // Preserve current active state
         guessField: config.guessField,
         errorMessage: config.errorMessage ?? "No cards available to play.",
+      });
+      return;
+    }
+
+    // Refuse attacker-scaled value sets: one guess button is rendered per
+    // distinct value, so an unbounded set would freeze the tab.
+    if (config.uniqueValues.length > MAX_UNIQUE_VALUES) {
+      set({
+        ...INITIAL_STATE,
+        isActive: state.isActive, // Preserve current active state
+        guessField: config.guessField,
+        errorMessage: `Too many distinct values for "${config.guessField}" to play. Pick a Top Badge field with fewer values.`,
       });
       return;
     }

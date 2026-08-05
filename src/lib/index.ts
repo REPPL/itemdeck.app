@@ -12,3 +12,5 @@ export {
   getCacheAge,
   isCollectionCached,
 } from "./cardCache";
+
+export { clearAllPersistedData } from "./clearPersistedData";

@@ -278,7 +278,29 @@ export async function loadEntities(
 }
 
 /**
+ * Maximum number of entity fetches in flight at once.
+ *
+ * An untrusted index.json can list an unbounded number of ids. Firing every
+ * fetch synchronously (Promise.all over the whole list) stalls the main
+ * thread and floods the CDN, so keep a fixed number in flight instead,
+ * mirroring the batching in services/imageCache.ts.
+ */
+const ENTITY_FETCH_CONCURRENCY = 8;
+
+/**
+ * Upper bound on the number of entity ids loaded from a single directory.
+ *
+ * A generous safety valve: a hostile index.json listing millions of ids would
+ * otherwise amplify one collection load into that many CDN requests. Real
+ * collections stay far below this.
+ */
+const MAX_ENTITY_IDS = 10000;
+
+/**
  * Load individual entity files from a directory.
+ *
+ * Fetches run through a fixed-size concurrency pool so an untrusted index
+ * listing a huge number of ids cannot stall the tab or flood the CDN.
  *
  * @param directoryPath - Path to the entity directory
  * @param entityIds - Array of entity IDs to load
@@ -288,7 +310,18 @@ async function loadEntitiesFromDirectory(
   directoryPath: string,
   entityIds: string[]
 ): Promise<Entity[]> {
-  const entityPromises = entityIds.map(async (id) => {
+  let ids = entityIds;
+  if (ids.length > MAX_ENTITY_IDS) {
+    console.warn(
+      `Entity index lists ${String(ids.length)} ids; loading the first ${String(MAX_ENTITY_IDS)}.`
+    );
+    ids = ids.slice(0, MAX_ENTITY_IDS);
+  }
+
+  // Preserve input order regardless of the order fetches settle in.
+  const results = new Array<Entity | null>(ids.length).fill(null);
+
+  const loadOne = async (index: number, id: string): Promise<void> => {
     const entityUrl = `${directoryPath}/${id}.json`;
 
     try {
@@ -298,17 +331,30 @@ async function loadEntitiesFromDirectory(
         const contentType = response.headers.get("content-type");
         if (contentType?.includes("application/json")) {
           const data = (await response.json()) as unknown;
-          return parseEntityTolerant(data, entityUrl);
+          results[index] = parseEntityTolerant(data, entityUrl);
         }
       }
     } catch {
       console.warn(`Failed to load entity: ${entityUrl}`);
     }
+  };
 
-    return null;
-  });
+  // Fixed-size concurrency pool: keep ENTITY_FETCH_CONCURRENCY fetches in
+  // flight rather than initiating every fetch at once.
+  let cursor = 0;
+  const worker = async (): Promise<void> => {
+    while (cursor < ids.length) {
+      const index = cursor;
+      cursor += 1;
+      const id = ids[index];
+      if (id === undefined) continue;
+      await loadOne(index, id);
+    }
+  };
 
-  const results = await Promise.all(entityPromises);
+  const workerCount = Math.min(ENTITY_FETCH_CONCURRENCY, ids.length);
+  await Promise.all(Array.from({ length: workerCount }, () => worker()));
+
   return results.filter((entity): entity is Entity => entity !== null);
 }
 
@@ -381,7 +427,9 @@ function validateCollectionDefinition(data: unknown): CollectionDefinition {
  * @param definition - Collection definition
  * @returns Schema version (v1 or v2)
  */
-export function getSchemaVersion(definition: CollectionDefinition): SchemaVersion {
+export function getSchemaVersion(
+  definition: CollectionDefinition
+): SchemaVersion {
   return detectSchemaVersion(definition);
 }
 

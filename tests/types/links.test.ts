@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { normaliseDetailUrls } from "@/types/links";
+import { normaliseDetailUrls, type DetailUrls } from "@/types/links";
 
 describe("normaliseDetailUrls", () => {
   it("returns empty array for null/undefined", () => {
@@ -38,6 +38,30 @@ describe("normaliseDetailUrls", () => {
 
   it("drops a single DetailLink with a javascript: URL", () => {
     expect(normaliseDetailUrls({ url: "javascript:alert(1)" })).toEqual([]);
+  });
+
+  it("does not throw on null array elements from untrusted collection data", () => {
+    // A .loose() entity schema lets `detailUrls` pass through unvalidated, so a
+    // collection can supply `"detailUrls": [null]`. The choke point must not
+    // dereference `.url` on a null element (that throw would reject the whole
+    // collection load, not just drop one link).
+    expect(() =>
+      normaliseDetailUrls([null] as unknown as DetailUrls)
+    ).not.toThrow();
+    expect(normaliseDetailUrls([null] as unknown as DetailUrls)).toEqual([]);
+  });
+
+  it("drops null/malformed array elements while keeping valid links", () => {
+    expect(
+      normaliseDetailUrls([
+        { url: "https://ok.example.com" },
+        null,
+        undefined,
+        5,
+        "https://bare-string.example.com",
+        { url: "javascript:alert(1)" },
+      ] as unknown as DetailUrls)
+    ).toEqual([{ url: "https://ok.example.com" }]);
   });
 
   it("filters unsafe URLs out of an array while keeping safe ones", () => {

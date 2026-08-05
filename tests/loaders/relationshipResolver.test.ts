@@ -46,9 +46,27 @@ describe("relationshipResolver", () => {
 
   const testEntities: Record<string, Entity[]> = {
     game: [
-      { id: "metroid", title: "Super Metroid", year: 1994, platform: "snes", rank: 0 },
-      { id: "zelda", title: "Link to the Past", year: 1991, platform: "snes", rank: 1 },
-      { id: "mario", title: "Super Mario World", year: 1990, platform: "snes", rank: 2 },
+      {
+        id: "metroid",
+        title: "Super Metroid",
+        year: 1994,
+        platform: "snes",
+        rank: 0,
+      },
+      {
+        id: "zelda",
+        title: "Link to the Past",
+        year: 1991,
+        platform: "snes",
+        rank: 1,
+      },
+      {
+        id: "mario",
+        title: "Super Mario World",
+        year: 1990,
+        platform: "snes",
+        rank: 2,
+      },
     ],
     platform: [
       { id: "snes", title: "SNES", year: 1992 },
@@ -62,7 +80,9 @@ describe("relationshipResolver", () => {
 
       expect(context.entityMaps.game.size).toBe(3);
       expect(context.entityMaps.platform.size).toBe(2);
-      expect(context.entityMaps.game.get("metroid")?.title).toBe("Super Metroid");
+      expect(context.entityMaps.game.get("metroid")?.title).toBe(
+        "Super Metroid"
+      );
     });
   });
 
@@ -154,6 +174,56 @@ describe("relationshipResolver", () => {
       const result = getEntityRank(gameWithoutRank, "game", context);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe("prototype-chain safety", () => {
+    it("resolveReference returns undefined for an Object.prototype target type", () => {
+      const context = createResolverContext(testDefinition, testEntities);
+      // `entityMaps` is a plain object; before the fix this returned
+      // Object.prototype.toString and then threw `map.get is not a function`.
+      expect(() => resolveReference("snes", "toString", context)).not.toThrow();
+      expect(resolveReference("snes", "toString", context)).toBeUndefined();
+    });
+
+    it("does not crash when a relationship target names an Object.prototype member", () => {
+      const definition: CollectionDefinition = {
+        id: "c",
+        name: "C",
+        entityTypes: {
+          game: { primary: true, fields: { title: { type: "string" } } },
+          platform: { fields: { title: { type: "string" } } },
+        },
+        relationships: {
+          // Untrusted target pointing at a prototype member. The field name
+          // ("maker") is not itself an entity type, so only the explicit
+          // target path runs — which is the path that crashed before the fix.
+          "game.maker": { target: "toString", cardinality: "many-to-one" },
+        },
+      };
+      const context = createResolverContext(definition, testEntities);
+      const game: Entity = { id: "g1", title: "G", maker: "snes" };
+
+      expect(() =>
+        resolveEntityRelationships(game, "game", context)
+      ).not.toThrow();
+      // The bogus relationship simply does not resolve.
+      const resolved = resolveEntityRelationships(game, "game", context);
+      expect(resolved._resolved).toBeUndefined();
+    });
+
+    it("does not crash when an entity field is named after a prototype member", () => {
+      const context = createResolverContext(testDefinition, testEntities);
+      const game: Entity = {
+        id: "g1",
+        title: "G",
+        platform: "snes",
+        toString: "snes",
+      };
+
+      expect(() =>
+        resolveEntityRelationships(game, "game", context)
+      ).not.toThrow();
     });
   });
 });

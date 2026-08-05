@@ -59,7 +59,10 @@ interface LocalSourceConfig {
  * - Uses generic terms (category, order) instead of game-specific (platform, rank)
  * - Legacy aliases maintained for backward compatibility
  */
-export interface DisplayCard extends Omit<CardWithCategory, "imageUrl" | "imageUrls"> {
+export interface DisplayCard extends Omit<
+  CardWithCategory,
+  "imageUrl" | "imageUrls"
+> {
   /** Primary image URL (always present - placeholder used if not in source) */
   imageUrl: string;
 
@@ -215,7 +218,8 @@ function resolveSourceId(basePath: string): string | null {
 function buildResultFromCache(collection: Collection): CollectionResult {
   const cards: DisplayCard[] = collection.items.map((item) => {
     const orderValue = item.metadata?.order ?? item.metadata?.rank;
-    const parsedOrder = orderValue !== undefined ? Number(orderValue) : Number.NaN;
+    const parsedOrder =
+      orderValue !== undefined ? Number(orderValue) : Number.NaN;
     const order = Number.isFinite(parsedOrder) ? parsedOrder : null;
     const imageUrl = item.imageUrl ?? placeholderImage(item.id);
 
@@ -223,7 +227,9 @@ function buildResultFromCache(collection: Collection): CollectionResult {
       ...item,
       imageUrl,
       imageUrls:
-        item.imageUrls && item.imageUrls.length > 0 ? item.imageUrls : [imageUrl],
+        item.imageUrls && item.imageUrls.length > 0
+          ? item.imageUrls
+          : [imageUrl],
       order,
       // Legacy alias
       rank: order,
@@ -243,7 +249,9 @@ function buildResultFromCache(collection: Collection): CollectionResult {
  * @param basePath - Base path for the collection
  * @returns Collection result with display cards
  */
-async function loadFreshCollection(basePath: string): Promise<CollectionResult> {
+async function loadFreshCollection(
+  basePath: string
+): Promise<CollectionResult> {
   // Load collection and settings in parallel
   const [loaded, settings] = await Promise.all([
     loadCollection(basePath),
@@ -253,199 +261,255 @@ async function loadFreshCollection(basePath: string): Promise<CollectionResult> 
   const context = createResolverContext(loaded.definition, loaded.entities);
 
   // Resolve relationships for primary entities
-  const resolvedEntities = resolveAllRelationships(
-    loaded.primaryType,
-    context
-  );
+  const resolvedEntities = resolveAllRelationships(loaded.primaryType, context);
 
   // Convert to DisplayCard format
   const placeholder = placeholderImage;
 
-  const cards: DisplayCard[] = resolvedEntities.map((entity: ResolvedEntity) => {
-    const images = entity.images;
-    const imageUrls = getImageUrls(images);
-    const primaryImage = getPrimaryImage(images);
-    const primaryImageUrl = primaryImage?.url ?? placeholder(entity.id);
+  const cards: DisplayCard[] = resolvedEntities.map(
+    (entity: ResolvedEntity) => {
+      const images = entity.images;
+      const imageUrls = getImageUrls(images);
+      const primaryImage = getPrimaryImage(images);
+      const primaryImageUrl = primaryImage?.url ?? placeholder(entity.id);
 
-    // Include video URLs in the gallery (support for YouTube videos)
-    // Check for 'video' field (single URL or object) or 'videos' field (array)
-    // Handle both string URLs, objects with url property, and bare video IDs
-    const extractVideoUrl = (v: unknown): string | undefined => {
-      let url: string | undefined;
+      // Include video URLs in the gallery (support for YouTube videos)
+      // Check for 'video' field (single URL or object) or 'videos' field (array)
+      // Handle both string URLs, objects with url property, and bare video IDs
+      const extractVideoUrl = (v: unknown): string | undefined => {
+        let url: string | undefined;
 
-      if (typeof v === "string") {
-        url = v;
-      } else if (v && typeof v === "object" && "url" in v) {
-        const urlValue = (v as { url: unknown }).url;
-        if (typeof urlValue === "string") {
-          url = urlValue;
-        }
-      }
-
-      if (!url) return undefined;
-
-      // Already a valid absolute URL
-      if (url.startsWith("http://") || url.startsWith("https://")) {
-        return url;
-      }
-
-      // Check if it looks like a YouTube video ID (11 chars, alphanumeric with - and _)
-      if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
-        return `https://www.youtube.com/watch?v=${url}`;
-      }
-
-      // Skip other relative or invalid URLs
-      return undefined;
-    };
-
-    const videoUrl = extractVideoUrl(entity.video);
-    const rawVideosArray = entity.videos as unknown[] | undefined;
-    const videoUrls: string[] = [
-      ...(videoUrl ? [videoUrl] : []),
-      ...(rawVideosArray?.map(extractVideoUrl).filter((u): u is string => u !== undefined) ?? []),
-    ];
-
-    // Combine image URLs with video URLs for the gallery
-    const allMediaUrls = [...imageUrls, ...videoUrls];
-
-    // Get resolved platform
-    const platform = entity._resolved?.platform as ResolvedEntity | undefined;
-
-    // Get rank
-    const rank = getEntityRank(entity, loaded.primaryType, context);
-
-    // Get title - entity.title should be a string, but we handle edge cases
-    const entityTitle = entity.title;
-    const title = typeof entityTitle === "string"
-      ? entityTitle
-      : typeof entityTitle === "number" ? String(entityTitle) : "";
-
-    // Get year - convert to string if present, handle various types safely
-    const entityYear = entity.year;
-    let year: string | undefined;
-    if (entityYear === undefined) {
-      year = undefined;
-    } else if (typeof entityYear === "string") {
-      year = entityYear;
-    } else if (typeof entityYear === "number") {
-      year = String(entityYear);
-    } else {
-      year = undefined;
-    }
-
-    // v2: Normalise rating if present
-    const entityRating = entity.rating ?? entity.averageRating;
-    const rating = entityRating !== undefined
-      ? normaliseRating(entityRating as number | { score: number })
-      : undefined;
-
-    // v2: Normalise detailUrls if present
-    const detailUrls = normaliseDetailUrls(
-      entity.detailUrls as string | { url: string } | { url: string }[] | undefined
-    );
-
-    // v2: Use generic terminology
-    const categoryShort = (platform?.shortTitle ?? platform?.title) as string | undefined;
-    const order = rank;
-
-    // Build DisplayCard with all entity fields for field path resolution
-    const displayCard: DisplayCard = {
-      // Core required fields
-      id: entity.id,
-      title,
-      year,
-      summary: entity.summary as string | undefined,
-      detailUrl: entity.detailUrl as string | undefined,
-      imageUrl: primaryImageUrl,
-      imageUrls: allMediaUrls.length > 0 ? allMediaUrls : [placeholder(entity.id)],
-      // v2 terminology
-      categoryTitle: platform?.title as string | undefined,
-      categoryShort,
-      order,
-      imageAttribution: formatAttribution(images),
-      logoUrl: getLogoUrl(platform?.images),
-      // Legacy aliases for backward compatibility
-      device: categoryShort,
-      platformTitle: platform?.title as string | undefined,
-      rank: order,
-      metadata: Object.fromEntries(
-        Object.entries({
-          category: entity.platform as string | undefined,
-          order: order !== null ? String(order) : undefined,
-          // Legacy alias
-          rank: order !== null ? String(order) : undefined,
-        }).filter((entry): entry is [string, string] => entry[1] !== undefined)
-      ),
-      // Include resolved relationships for field path resolution
-      _resolved: entity._resolved,
-      // v2 additions
-      rating,
-      // Include video URL as a YouTube link in detailUrls
-      detailUrls: (() => {
-        const urls: DetailLink[] = [...detailUrls];
-        // Add video URL as a YouTube link if present
-        if (videoUrl) {
-          urls.push({ url: videoUrl, source: "YouTube" });
-        }
-        // Add all video URLs from videos array
-        for (const url of videoUrls) {
-          if (url !== videoUrl) {
-            urls.push({ url, source: "YouTube" });
-          }
-        }
-        return urls.length > 0 ? urls : undefined;
-      })(),
-      primaryImage,
-      // Category/platform info for expanded view
-      categoryInfo: platform ? (() => {
-        // Extract additional fields (exclude internal/display fields)
-        const skipFields = new Set([
-          "id", "title", "shortTitle", "year", "summary", "images",
-          "detailUrl", "detailUrls", "_resolved", "logoUrl",
-        ]);
-        const additionalFields: Record<string, unknown> = {};
-        for (const [key, value] of Object.entries(platform)) {
-          if (!skipFields.has(key) && value !== undefined && value !== null) {
-            additionalFields[key] = value;
+        if (typeof v === "string") {
+          url = v;
+        } else if (v && typeof v === "object" && "url" in v) {
+          const urlValue = (v as { url: unknown }).url;
+          if (typeof urlValue === "string") {
+            url = urlValue;
           }
         }
 
-        // Get explicit detailUrls or auto-generate Wikipedia link from title
-        const platformTitle = platform.title as string;
-        let platformDetailUrls = normaliseDetailUrls(
-          platform.detailUrls as string | { url: string } | { url: string }[] | undefined
-        );
+        if (!url) return undefined;
 
-        // Auto-generate Wikipedia URL if no detailUrls specified
-        if (platformDetailUrls.length === 0 && platformTitle) {
-          const wikipediaTitle = platformTitle.replace(/ /g, "_");
-          platformDetailUrls = [{
-            url: `https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`,
-            source: "Wikipedia",
-          }];
+        // Already a valid absolute URL
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          return url;
         }
 
-        return {
-          id: platform.id,
-          title: platformTitle,
-          year: typeof platform.year === "number" ? String(platform.year) : platform.year as string | undefined,
-          summary: platform.summary as string | undefined,
-          detailUrls: platformDetailUrls.length > 0 ? platformDetailUrls : undefined,
-          additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined,
-        };
-      })() : undefined,
-    };
+        // Check if it looks like a YouTube video ID (11 chars, alphanumeric with - and _)
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+          return `https://www.youtube.com/watch?v=${url}`;
+        }
 
-    // Copy all additional entity fields for field path resolution
-    // This includes personal fields like verdict, rating, playedSince, status
-    for (const [key, value] of Object.entries(entity)) {
-      if (!(key in displayCard) && key !== "_resolved") {
-        displayCard[key] = value;
+        // Skip other relative or invalid URLs
+        return undefined;
+      };
+
+      const videoUrl = extractVideoUrl(entity.video);
+      // `videos` is untrusted: only treat it as a list when it actually is one,
+      // otherwise `.map()` throws on a string/object and fails the whole load.
+      const rawVideosArray = Array.isArray(entity.videos)
+        ? (entity.videos as unknown[])
+        : undefined;
+      const videoUrls: string[] = [
+        ...(videoUrl ? [videoUrl] : []),
+        ...(rawVideosArray
+          ?.map(extractVideoUrl)
+          .filter((u): u is string => u !== undefined) ?? []),
+      ];
+
+      // Combine image URLs with video URLs for the gallery
+      const allMediaUrls = [...imageUrls, ...videoUrls];
+
+      // Get resolved platform
+      const platform = entity._resolved?.platform as ResolvedEntity | undefined;
+
+      // Get rank
+      const rank = getEntityRank(entity, loaded.primaryType, context);
+
+      // Get title - entity.title should be a string, but we handle edge cases
+      const entityTitle = entity.title;
+      const title =
+        typeof entityTitle === "string"
+          ? entityTitle
+          : typeof entityTitle === "number"
+            ? String(entityTitle)
+            : "";
+
+      // Get year - convert to string if present, handle various types safely
+      const entityYear = entity.year;
+      let year: string | undefined;
+      if (entityYear === undefined) {
+        year = undefined;
+      } else if (typeof entityYear === "string") {
+        year = entityYear;
+      } else if (typeof entityYear === "number") {
+        year = String(entityYear);
+      } else {
+        year = undefined;
       }
-    }
 
-    return displayCard;
-  });
+      // v2: Normalise rating if present. `null` (a common serialiser output for
+      // an absent value) means "no rating", not a rating to normalise.
+      const entityRating = entity.rating ?? entity.averageRating;
+      const rating =
+        entityRating !== undefined && entityRating !== null
+          ? normaliseRating(entityRating as number | { score: number })
+          : undefined;
+
+      // v2: Normalise detailUrls if present
+      const detailUrls = normaliseDetailUrls(
+        entity.detailUrls as
+          | string
+          | { url: string }
+          | { url: string }[]
+          | undefined
+      );
+
+      // v2: Use generic terminology
+      const categoryShort = (platform?.shortTitle ?? platform?.title) as
+        | string
+        | undefined;
+      const order = rank;
+
+      // Build DisplayCard with all entity fields for field path resolution
+      const displayCard: DisplayCard = {
+        // Core required fields
+        id: entity.id,
+        title,
+        year,
+        summary: entity.summary as string | undefined,
+        detailUrl: entity.detailUrl as string | undefined,
+        imageUrl: primaryImageUrl,
+        imageUrls:
+          allMediaUrls.length > 0 ? allMediaUrls : [placeholder(entity.id)],
+        // v2 terminology
+        categoryTitle: platform?.title as string | undefined,
+        categoryShort,
+        order,
+        imageAttribution: formatAttribution(images),
+        logoUrl: getLogoUrl(platform?.images),
+        // Legacy aliases for backward compatibility
+        device: categoryShort,
+        platformTitle: platform?.title as string | undefined,
+        rank: order,
+        metadata: Object.fromEntries(
+          Object.entries({
+            category: entity.platform as string | undefined,
+            order: order !== null ? String(order) : undefined,
+            // Legacy alias
+            rank: order !== null ? String(order) : undefined,
+          }).filter(
+            (entry): entry is [string, string] => entry[1] !== undefined
+          )
+        ),
+        // Include resolved relationships for field path resolution
+        _resolved: entity._resolved,
+        // v2 additions
+        rating,
+        // Include video URL as a YouTube link in detailUrls
+        detailUrls: (() => {
+          const urls: DetailLink[] = [...detailUrls];
+          // Add video URL as a YouTube link if present
+          if (videoUrl) {
+            urls.push({ url: videoUrl, source: "YouTube" });
+          }
+          // Add all video URLs from videos array
+          for (const url of videoUrls) {
+            if (url !== videoUrl) {
+              urls.push({ url, source: "YouTube" });
+            }
+          }
+          return urls.length > 0 ? urls : undefined;
+        })(),
+        primaryImage,
+        // Category/platform info for expanded view
+        categoryInfo: platform
+          ? (() => {
+              // Extract additional fields (exclude internal/display fields)
+              const skipFields = new Set([
+                "id",
+                "title",
+                "shortTitle",
+                "year",
+                "summary",
+                "images",
+                "detailUrl",
+                "detailUrls",
+                "_resolved",
+                "logoUrl",
+              ]);
+              const additionalFields: Record<string, unknown> = {};
+              for (const [key, value] of Object.entries(platform)) {
+                if (
+                  !skipFields.has(key) &&
+                  value !== undefined &&
+                  value !== null
+                ) {
+                  additionalFields[key] = value;
+                }
+              }
+
+              // Get explicit detailUrls or auto-generate Wikipedia link from title.
+              // `platform.title` is untrusted (loose v2 schema), so coerce as the
+              // primary entity does above; a non-string value must not reach the
+              // `.replace()` below, which would fail the whole load.
+              const platformTitle =
+                typeof platform.title === "string"
+                  ? platform.title
+                  : typeof platform.title === "number"
+                    ? String(platform.title)
+                    : "";
+              let platformDetailUrls = normaliseDetailUrls(
+                platform.detailUrls as
+                  | string
+                  | { url: string }
+                  | { url: string }[]
+                  | undefined
+              );
+
+              // Auto-generate Wikipedia URL if no detailUrls specified
+              if (platformDetailUrls.length === 0 && platformTitle) {
+                const wikipediaTitle = platformTitle.replace(/ /g, "_");
+                platformDetailUrls = [
+                  {
+                    url: `https://en.wikipedia.org/wiki/${encodeURIComponent(wikipediaTitle)}`,
+                    source: "Wikipedia",
+                  },
+                ];
+              }
+
+              return {
+                id: platform.id,
+                title: platformTitle,
+                year:
+                  typeof platform.year === "number"
+                    ? String(platform.year)
+                    : (platform.year as string | undefined),
+                summary: platform.summary as string | undefined,
+                detailUrls:
+                  platformDetailUrls.length > 0
+                    ? platformDetailUrls
+                    : undefined,
+                additionalFields:
+                  Object.keys(additionalFields).length > 0
+                    ? additionalFields
+                    : undefined,
+              };
+            })()
+          : undefined,
+      };
+
+      // Copy all additional entity fields for field path resolution
+      // This includes personal fields like verdict, rating, playedSince, status
+      for (const [key, value] of Object.entries(entity)) {
+        if (!(key in displayCard) && key !== "_resolved") {
+          displayCard[key] = value;
+        }
+      }
+
+      return displayCard;
+    }
+  );
 
   // Create minimal legacy Collection for backward compatibility
   const legacyCollection: Collection = {
@@ -463,9 +527,12 @@ async function loadFreshCollection(basePath: string): Promise<CollectionResult> 
       const pTitle = p.title;
       return {
         id: p.id,
-        title: typeof pTitle === "string"
-          ? pTitle
-          : typeof pTitle === "number" ? String(pTitle) : "",
+        title:
+          typeof pTitle === "string"
+            ? pTitle
+            : typeof pTitle === "number"
+              ? String(pTitle)
+              : "",
       };
     }),
   };
@@ -544,10 +611,7 @@ async function fetchCollection(basePath: string): Promise<CollectionResult> {
  */
 export function useLocalCollection(
   config: LocalSourceConfig,
-  options?: Omit<
-    UseQueryOptions<CollectionResult>,
-    "queryKey" | "queryFn"
-  >
+  options?: Omit<UseQueryOptions<CollectionResult>, "queryKey" | "queryFn">
 ) {
   return useQuery({
     queryKey: collectionKeys.local(config.basePath),
@@ -581,10 +645,7 @@ const DEFAULT_LOCAL_PATH = withBase("/data/retro-games");
  * ```
  */
 export function useDefaultCollection(
-  options?: Omit<
-    UseQueryOptions<CollectionResult>,
-    "queryKey" | "queryFn"
-  >
+  options?: Omit<UseQueryOptions<CollectionResult>, "queryKey" | "queryFn">
 ) {
   return useLocalCollection({ basePath: DEFAULT_LOCAL_PATH }, options);
 }

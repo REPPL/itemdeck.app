@@ -67,6 +67,15 @@ export function resolveReference(
   targetType: string,
   context: ResolverContext
 ): Entity | undefined {
+  // `targetType` comes from untrusted relationship data (`relDef.target`) or an
+  // entity field name, so a value like "toString" would otherwise resolve to an
+  // inherited Object.prototype member and throw `map.get is not a function`,
+  // failing the whole collection load. Only follow own map entries.
+  if (!Object.hasOwn(context.entityMaps, targetType)) {
+    return undefined;
+  }
+  // An own entry is always a real Map (see createResolverContext); the optional
+  // chain only satisfies noUncheckedIndexedAccess and never fires at runtime.
   const map = context.entityMaps[targetType];
   return map?.get(entityId);
 }
@@ -112,11 +121,7 @@ export function resolveEntityRelationships(
 
     if (typeof fieldValue === "string") {
       // Single reference
-      const resolvedEntity = resolveReference(
-        fieldValue,
-        targetType,
-        context
-      );
+      const resolvedEntity = resolveReference(fieldValue, targetType, context);
       if (resolvedEntity) {
         resolved[fieldName] = resolvedEntity;
       }
@@ -136,18 +141,16 @@ export function resolveEntityRelationships(
       continue;
     }
 
-    // Check if this field references another entity type
+    // Check if this field references another entity type. Use an own-property
+    // check so an entity field literally named after an Object.prototype member
+    // (e.g. "toString") is not mistaken for a real entity map.
     const targetType = fieldName;
-    if (!context.entityMaps[targetType]) {
+    if (!Object.hasOwn(context.entityMaps, targetType)) {
       continue;
     }
 
     if (typeof fieldValue === "string" && !resolved[fieldName]) {
-      const resolvedEntity = resolveReference(
-        fieldValue,
-        targetType,
-        context
-      );
+      const resolvedEntity = resolveReference(fieldValue, targetType, context);
       if (resolvedEntity) {
         resolved[fieldName] = resolvedEntity;
       }

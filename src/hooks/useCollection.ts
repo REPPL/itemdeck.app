@@ -151,6 +151,32 @@ interface CollectionResult {
 }
 
 /**
+ * Upper bound on media items (images + videos) kept per card.
+ *
+ * The v2 `images`/`videos` arrays are untrusted and uncapped in the schema.
+ * `card.imageUrls` feeds the gallery (one dot button each) and the load-time
+ * preloader (one cache probe + fetch each), so an entity listing a huge array
+ * would freeze the tab / flood the CDN. Real cards carry a few media items.
+ */
+const MAX_MEDIA_PER_CARD = 100;
+
+/**
+ * Coerce an untrusted entity field to a display string.
+ *
+ * The v2 entity schema is `.loose()`, so text fields (summary, platform
+ * title/shortTitle/summary/year, …) may hold arbitrary JSON. An object left
+ * as-is is truthy and reaches JSX as a child, where React throws "Objects are
+ * not valid as a React child" during render — a single such field can deny the
+ * whole collection view. Mirror the inline coercion already used for
+ * `title`/`year`: keep strings, stringify numbers, drop everything else.
+ */
+function toDisplayString(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return undefined;
+}
+
+/**
  * Format attribution from structured Image objects.
  * Collects all unique attributions from all images.
  */
@@ -317,8 +343,15 @@ async function loadFreshCollection(
           .filter((u): u is string => u !== undefined) ?? []),
       ];
 
-      // Combine image URLs with video URLs for the gallery
-      const allMediaUrls = [...imageUrls, ...videoUrls];
+      // Combine image URLs with video URLs for the gallery. The images/videos
+      // arrays are untrusted and uncapped in the schema, and this list feeds
+      // both the gallery (one dot button per entry) and the load-time image
+      // preloader (one cache probe + fetch per entry), so a hostile entity
+      // could otherwise mount tens of thousands of nodes or requests. Cap it.
+      const allMediaUrls = [...imageUrls, ...videoUrls].slice(
+        0,
+        MAX_MEDIA_PER_CARD
+      );
 
       // Get resolved platform
       const platform = entity._resolved?.platform as ResolvedEntity | undefined;
@@ -365,10 +398,10 @@ async function loadFreshCollection(
           | undefined
       );
 
-      // v2: Use generic terminology
-      const categoryShort = (platform?.shortTitle ?? platform?.title) as
-        | string
-        | undefined;
+      // v2: Use generic terminology. `shortTitle`/`title` are untrusted (loose
+      // schema) and this feeds the device badge, rendered as a JSX child.
+      const categoryShort =
+        toDisplayString(platform?.shortTitle) ?? toDisplayString(platform?.title);
       const order = rank;
 
       // Build DisplayCard with all entity fields for field path resolution
@@ -377,13 +410,13 @@ async function loadFreshCollection(
         id: entity.id,
         title,
         year,
-        summary: entity.summary as string | undefined,
+        summary: toDisplayString(entity.summary),
         detailUrl: entity.detailUrl as string | undefined,
         imageUrl: primaryImageUrl,
         imageUrls:
           allMediaUrls.length > 0 ? allMediaUrls : [placeholder(entity.id)],
         // v2 terminology
-        categoryTitle: platform?.title as string | undefined,
+        categoryTitle: toDisplayString(platform?.title),
         categoryShort,
         order,
         imageAttribution: formatAttribution(images),
@@ -481,11 +514,8 @@ async function loadFreshCollection(
               return {
                 id: platform.id,
                 title: platformTitle,
-                year:
-                  typeof platform.year === "number"
-                    ? String(platform.year)
-                    : (platform.year as string | undefined),
-                summary: platform.summary as string | undefined,
+                year: toDisplayString(platform.year),
+                summary: toDisplayString(platform.summary),
                 detailUrls:
                   platformDetailUrls.length > 0
                     ? platformDetailUrls

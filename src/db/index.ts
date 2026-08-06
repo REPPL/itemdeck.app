@@ -185,6 +185,13 @@ export function deleteDB(): Promise<void> {
     const request = indexedDB.deleteDatabase(DB_NAME);
     request.onsuccess = () => { resolve(); };
     request.onerror = () => { reject(new Error(request.error?.message ?? "Failed to delete database")); };
+    // Without this, a delete blocked by another open connection never settles,
+    // hanging any caller that awaits it (e.g. the hard reset). Resolve so the
+    // reset proceeds; the delete completes once the blocking connection closes.
+    request.onblocked = () => {
+      console.warn("[itemdeck] Database deletion blocked by another connection");
+      resolve();
+    };
   });
 }
 

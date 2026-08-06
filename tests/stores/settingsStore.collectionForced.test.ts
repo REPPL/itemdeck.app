@@ -88,6 +88,52 @@ describe("settingsStore - collection forced-settings backup/restore", () => {
     });
   });
 
+  it("backs up a key a later refetch of the SAME source begins forcing", () => {
+    // User's own values.
+    useSettingsStore.setState({
+      cardBackDisplay: "logo",
+      showRankBadge: true,
+    });
+
+    // v1 of the same source forces only cardBackDisplay.
+    useSettingsStore.getState().applyCollectionSettings(SOURCE_A, {
+      forced: { cardBackDisplay: "none" },
+    });
+    // v2 (a refetch of the SAME source — settings.json is not pinned) now forces
+    // an ADDITIONAL key. Its original user value must still be captured.
+    useSettingsStore.getState().applyCollectionSettings(SOURCE_A, {
+      forced: { cardBackDisplay: "none", showRankBadge: false },
+    });
+
+    expect(useSettingsStore.getState()._collectionForcedBackup).toEqual({
+      cardBackDisplay: "logo",
+      showRankBadge: true,
+    });
+
+    // Restoring returns BOTH keys to the user's originals.
+    useSettingsStore.getState().restoreCollectionForcedSettings();
+    expect(useSettingsStore.getState().cardBackDisplay).toBe("logo");
+    expect(useSettingsStore.getState().showRankBadge).toBe(true);
+  });
+
+  it("backs up keys forced only after an initial empty forced set (same source)", () => {
+    useSettingsStore.setState({ showRankBadge: true });
+
+    // The source first serves an empty forced set (claims the source id), then
+    // a real forced set on refetch. The later-forced key must be backed up.
+    useSettingsStore.getState().applyCollectionSettings(SOURCE_A, {
+      forced: {},
+    });
+    useSettingsStore.getState().applyCollectionSettings(SOURCE_A, {
+      forced: { showRankBadge: false },
+    });
+
+    expect(useSettingsStore.getState().showRankBadge).toBe(false);
+
+    useSettingsStore.getState().restoreCollectionForcedSettings();
+    expect(useSettingsStore.getState().showRankBadge).toBe(true);
+  });
+
   it("restores the user's own values and clears backup state on restore", () => {
     useSettingsStore.setState({
       cardBackDisplay: "logo",

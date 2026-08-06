@@ -1095,42 +1095,38 @@ export const useSettingsStore = create<SettingsState>()(
                 ? { ...state, ...state._collectionForcedBackup }
                 : state;
 
+            // Snapshot per forced KEY, not per source: start a fresh backup on
+            // a genuine source change, but on a same-source refetch extend the
+            // existing backup so a key a later settings.json revision begins
+            // forcing is still captured. Back up only keys not already held, so
+            // an already-forced value never clobbers the user's own original.
+            // (Guarding solely on the source id would permanently lose the
+            // user's value for any key a refetch newly forces.)
+            const backup: CollectionForcedBackup = isNewSource
+              ? {}
+              : { ...(state._collectionForcedBackup ?? {}) };
+            const snapshot = <K extends CollectionForcedKey>(key: K): void => {
+              if (!(key in backup)) backup[key] = base[key];
+            };
+            if (forced.fieldMapping) snapshot("fieldMapping");
+            if (forced.defaultCardFace !== undefined) snapshot("defaultCardFace");
+            if (forced.cardBackDisplay !== undefined) snapshot("cardBackDisplay");
+            if (forced.cardBackStyle !== undefined) snapshot("cardBackStyle");
+            if (forced.titleDisplayMode !== undefined) snapshot("titleDisplayMode");
+            if (forced.showRankBadge !== undefined) snapshot("showRankBadge");
+            if (forced.showDeviceBadge !== undefined) snapshot("showDeviceBadge");
+            if (forced.rankPlaceholderText !== undefined) {
+              snapshot("rankPlaceholderText");
+            }
+
+            updates._collectionForcedBackup =
+              Object.keys(backup).length > 0 ? backup : null;
+            updates.collectionForcedSourceId = sourceId;
+
+            // On a genuine source change, carry the previous source's restored
+            // values through for keys the new source does NOT force (the forced
+            // assignments below win for keys it does force).
             if (isNewSource) {
-              // Snapshot the user's own value for each key THIS source forces,
-              // so unrelated user settings are never rolled back. Snapshot once
-              // per source (guarded by isNewSource) so a refetch of the same
-              // source cannot clobber the backup with already-forced values.
-              const backup: CollectionForcedBackup = {};
-              if (forced.fieldMapping) backup.fieldMapping = base.fieldMapping;
-              if (forced.defaultCardFace !== undefined) {
-                backup.defaultCardFace = base.defaultCardFace;
-              }
-              if (forced.cardBackDisplay !== undefined) {
-                backup.cardBackDisplay = base.cardBackDisplay;
-              }
-              if (forced.cardBackStyle !== undefined) {
-                backup.cardBackStyle = base.cardBackStyle;
-              }
-              if (forced.titleDisplayMode !== undefined) {
-                backup.titleDisplayMode = base.titleDisplayMode;
-              }
-              if (forced.showRankBadge !== undefined) {
-                backup.showRankBadge = base.showRankBadge;
-              }
-              if (forced.showDeviceBadge !== undefined) {
-                backup.showDeviceBadge = base.showDeviceBadge;
-              }
-              if (forced.rankPlaceholderText !== undefined) {
-                backup.rankPlaceholderText = base.rankPlaceholderText;
-              }
-
-              updates._collectionForcedBackup =
-                Object.keys(backup).length > 0 ? backup : null;
-              updates.collectionForcedSourceId = sourceId;
-
-              // Carry the previous source's restored values through for keys the
-              // new source does NOT force (the forced assignments below win for
-              // keys it does force).
               Object.assign(updates, state._collectionForcedBackup ?? {});
             }
 

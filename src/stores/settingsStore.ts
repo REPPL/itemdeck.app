@@ -1098,25 +1098,59 @@ export const useSettingsStore = create<SettingsState>()(
             // Snapshot per forced KEY, not per source: start a fresh backup on
             // a genuine source change, but on a same-source refetch extend the
             // existing backup so a key a later settings.json revision begins
-            // forcing is still captured. Back up only keys not already held, so
-            // an already-forced value never clobbers the user's own original.
-            // (Guarding solely on the source id would permanently lose the
-            // user's value for any key a refetch newly forces.)
+            // forcing is still captured. Each key is backed up only if not
+            // already held, so an already-forced value never clobbers the
+            // user's own original. (Guarding solely on the source id would
+            // permanently lose the user's value for any key a refetch newly
+            // forces.) Assignments are per-key literals so each backup value
+            // type stays correlated with its key.
             const backup: CollectionForcedBackup = isNewSource
               ? {}
               : { ...(state._collectionForcedBackup ?? {}) };
-            const snapshot = <K extends CollectionForcedKey>(key: K): void => {
-              if (!(key in backup)) backup[key] = base[key];
-            };
-            if (forced.fieldMapping) snapshot("fieldMapping");
-            if (forced.defaultCardFace !== undefined) snapshot("defaultCardFace");
-            if (forced.cardBackDisplay !== undefined) snapshot("cardBackDisplay");
-            if (forced.cardBackStyle !== undefined) snapshot("cardBackStyle");
-            if (forced.titleDisplayMode !== undefined) snapshot("titleDisplayMode");
-            if (forced.showRankBadge !== undefined) snapshot("showRankBadge");
-            if (forced.showDeviceBadge !== undefined) snapshot("showDeviceBadge");
-            if (forced.rankPlaceholderText !== undefined) {
-              snapshot("rankPlaceholderText");
+            if (forced.fieldMapping && !("fieldMapping" in backup)) {
+              backup.fieldMapping = base.fieldMapping;
+            }
+            if (
+              forced.defaultCardFace !== undefined &&
+              !("defaultCardFace" in backup)
+            ) {
+              backup.defaultCardFace = base.defaultCardFace;
+            }
+            if (
+              forced.cardBackDisplay !== undefined &&
+              !("cardBackDisplay" in backup)
+            ) {
+              backup.cardBackDisplay = base.cardBackDisplay;
+            }
+            if (
+              forced.cardBackStyle !== undefined &&
+              !("cardBackStyle" in backup)
+            ) {
+              backup.cardBackStyle = base.cardBackStyle;
+            }
+            if (
+              forced.titleDisplayMode !== undefined &&
+              !("titleDisplayMode" in backup)
+            ) {
+              backup.titleDisplayMode = base.titleDisplayMode;
+            }
+            if (
+              forced.showRankBadge !== undefined &&
+              !("showRankBadge" in backup)
+            ) {
+              backup.showRankBadge = base.showRankBadge;
+            }
+            if (
+              forced.showDeviceBadge !== undefined &&
+              !("showDeviceBadge" in backup)
+            ) {
+              backup.showDeviceBadge = base.showDeviceBadge;
+            }
+            if (
+              forced.rankPlaceholderText !== undefined &&
+              !("rankPlaceholderText" in backup)
+            ) {
+              backup.rankPlaceholderText = base.rankPlaceholderText;
             }
 
             updates._collectionForcedBackup =

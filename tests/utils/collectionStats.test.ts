@@ -216,6 +216,30 @@ describe("computeCollectionStats", () => {
       expect(stats.numericFields.get("year")).toBeUndefined();
     });
   });
+
+  describe("large untrusted collections", () => {
+    // A hostile collection can carry one numeric value per card. Computing
+    // min/max via Math.min(...values) throws RangeError past the engine's
+    // argument limit; because these stats render outside the collection error
+    // boundary, that blanks the whole app. The computation must not spread.
+    it("computes min/max without throwing on a very large value set", () => {
+      const count = 200_000;
+      const items: DisplayCard[] = new Array<DisplayCard>(count);
+      for (let i = 0; i < count; i += 1) {
+        // Deterministic values with a known min (1900) and max (1900 + count - 1)
+        items[i] = createMockCard({ year: 1900 + i });
+      }
+
+      const stats = computeCollectionStats(items);
+      const yearStats = stats.numericFields.get("year");
+
+      expect(yearStats).toBeDefined();
+      expect(yearStats?.min).toBe(1900);
+      expect(yearStats?.max).toBe(1900 + count - 1);
+      expect(yearStats?.count).toBe(count);
+      expect(stats.yearRange).toEqual({ min: 1900, max: 1900 + count - 1 });
+    });
+  });
 });
 
 describe("formatStatsSummary", () => {
@@ -311,6 +335,8 @@ describe("formatStatsSummary", () => {
 
     const summary = formatStatsSummary(stats);
 
-    expect(summary).toBe("100 items | Years: 1990-2020 | Platforms: 15 | Avg Rating: 8.2");
+    expect(summary).toBe(
+      "100 items | Years: 1990-2020 | Platforms: 15 | Avg Rating: 8.2"
+    );
   });
 });

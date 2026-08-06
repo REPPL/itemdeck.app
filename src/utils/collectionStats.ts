@@ -130,9 +130,19 @@ export function computeCollectionStats(
   for (const [field, acc] of numericAccumulators) {
     if (acc.values.length > 0) {
       const values = acc.values;
-      const sum = values.reduce((a, b) => a + b, 0);
-      const min = Math.min(...values);
-      const max = Math.max(...values);
+      // Single-pass min/max/sum. `values` holds one entry per card, so its
+      // length scales with the untrusted card count; spreading it into
+      // Math.min(...values)/Math.max(...values) throws RangeError past the
+      // engine's argument limit (~125k on V8, far lower on JSC), and these
+      // stats render outside the collection error boundary, blanking the app.
+      let sum = 0;
+      let min = values[0] ?? 0;
+      let max = values[0] ?? 0;
+      for (const value of values) {
+        sum += value;
+        if (value < min) min = value;
+        if (value > max) max = value;
+      }
       const avg = sum / values.length;
 
       stats.numericFields.set(field, {

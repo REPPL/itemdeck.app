@@ -70,6 +70,10 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
   );
   const applyCollectionDefaults = useSettingsStore((s) => s.applyCollectionDefaults);
   const applyCollectionSettings = useSettingsStore((s) => s.applyCollectionSettings);
+  const restoreCollectionForcedSettings = useSettingsStore(
+    (s) => s.restoreCollectionForcedSettings
+  );
+  const forcedSourceId = useSettingsStore((s) => s.collectionForcedSourceId);
   const applySmartSelectionDefault = useSettingsStore((s) => s.applySmartSelectionDefault);
   const hasAppliedDefaults = useSettingsStore((s) => s.hasAppliedCollectionDefaults);
   const edits = useEditsStore((s) => s.edits);
@@ -80,6 +84,16 @@ export function CollectionDataProvider({ children }: CollectionDataProviderProps
       applyCollectionDefaults(data.config);
     }
   }, [data?.config, hasAppliedDefaults, applyCollectionDefaults]);
+
+  // Revert a previous collection's forced settings as soon as the active
+  // source changes. This must run before the apply effect below and cannot be
+  // folded into it: a source with no settings.json never reaches
+  // applyCollectionSettings, so nothing else would restore the user's settings.
+  useEffect(() => {
+    if (forcedSourceId && forcedSourceId !== sourceUrl) {
+      restoreCollectionForcedSettings();
+    }
+  }, [sourceUrl, forcedSourceId, restoreCollectionForcedSettings]);
 
   // Apply collection-specific settings from settings.json (every load)
   // Uses sourceUrl as the sourceId for tracking which collection's defaults have been applied

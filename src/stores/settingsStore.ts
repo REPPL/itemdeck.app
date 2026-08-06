@@ -353,6 +353,23 @@ type DraftSettings = {
 };
 
 /**
+ * The settings keys a collection's `forced` settings can displace. The backup
+ * snapshots the user's own value for each key a source forces, so it can be
+ * restored when the source changes.
+ */
+type CollectionForcedKey =
+  | "fieldMapping"
+  | "defaultCardFace"
+  | "cardBackDisplay"
+  | "cardBackStyle"
+  | "titleDisplayMode"
+  | "showRankBadge"
+  | "showDeviceBadge"
+  | "rankPlaceholderText";
+
+type CollectionForcedBackup = Partial<Pick<SettingsState, CollectionForcedKey>>;
+
+/**
  * Settings store state.
  */
 interface SettingsState {
@@ -515,6 +532,16 @@ interface SettingsState {
   /** Collection forced settings (applied on every load, user cannot override) */
   collectionForcedSettings: ForcedSettings | null;
 
+  /**
+   * Backup of the user's own settings displaced by a collection's `forced`
+   * settings, so they can be restored when the source changes. Persisted for
+   * crash recovery (mirrors _mechanicOverridesBackup).
+   */
+  _collectionForcedBackup: CollectionForcedBackup | null;
+
+  /** Source ID whose forced settings are currently applied (null = none) */
+  collectionForcedSourceId: string | null;
+
   /** Source ID of the collection whose defaults were applied (prevents re-applying) */
   appliedCollectionDefaultsSourceId: string | null;
 
@@ -610,7 +637,12 @@ interface SettingsState {
   setShowViewButton: (show: boolean) => void;
   setUsePlaceholderImages: (use: boolean) => void;
   applyCollectionSettings: (sourceId: string, settings: CollectionSettings) => void;
-  clearCollectionForcedSettings: () => void;
+  /**
+   * Restore the user's own settings displaced by a collection's forced
+   * settings. Called when the active source changes away from the one whose
+   * forced settings are applied.
+   */
+  restoreCollectionForcedSettings: () => void;
 
   // v0.14.0: Draft State Actions (F-090)
   /** Start editing - creates draft from current committed state */
@@ -718,6 +750,8 @@ const DEFAULT_SETTINGS = {
   showViewButton: true,
   usePlaceholderImages: true,
   collectionForcedSettings: null as ForcedSettings | null,
+  _collectionForcedBackup: null as CollectionForcedBackup | null,
+  collectionForcedSourceId: null as string | null,
   appliedCollectionDefaultsSourceId: null as string | null,
   // v0.14.0: Draft State defaults (F-090)
   _draft: null as DraftSettings | null,
@@ -1050,37 +1084,87 @@ export const useSettingsStore = create<SettingsState>()(
 
           // Always apply forced settings (user cannot override)
           if (settings.forced) {
-            updates.collectionForcedSettings = settings.forced;
+            const forced = settings.forced;
+            const isNewSource = state.collectionForcedSourceId !== sourceId;
 
-            // Apply forced field mapping
-            if (settings.forced.fieldMapping) {
+            // When switching to a different forced source, restore the previous
+            // source's displaced values first so the new backup captures the
+            // user's own settings, never the previous source's forced ones.
+            const base: SettingsState =
+              isNewSource && state._collectionForcedBackup
+                ? { ...state, ...state._collectionForcedBackup }
+                : state;
+
+            if (isNewSource) {
+              // Snapshot the user's own value for each key THIS source forces,
+              // so unrelated user settings are never rolled back. Snapshot once
+              // per source (guarded by isNewSource) so a refetch of the same
+              // source cannot clobber the backup with already-forced values.
+              const backup: CollectionForcedBackup = {};
+              if (forced.fieldMapping) backup.fieldMapping = base.fieldMapping;
+              if (forced.defaultCardFace !== undefined) {
+                backup.defaultCardFace = base.defaultCardFace;
+              }
+              if (forced.cardBackDisplay !== undefined) {
+                backup.cardBackDisplay = base.cardBackDisplay;
+              }
+              if (forced.cardBackStyle !== undefined) {
+                backup.cardBackStyle = base.cardBackStyle;
+              }
+              if (forced.titleDisplayMode !== undefined) {
+                backup.titleDisplayMode = base.titleDisplayMode;
+              }
+              if (forced.showRankBadge !== undefined) {
+                backup.showRankBadge = base.showRankBadge;
+              }
+              if (forced.showDeviceBadge !== undefined) {
+                backup.showDeviceBadge = base.showDeviceBadge;
+              }
+              if (forced.rankPlaceholderText !== undefined) {
+                backup.rankPlaceholderText = base.rankPlaceholderText;
+              }
+
+              updates._collectionForcedBackup =
+                Object.keys(backup).length > 0 ? backup : null;
+              updates.collectionForcedSourceId = sourceId;
+
+              // Carry the previous source's restored values through for keys the
+              // new source does NOT force (the forced assignments below win for
+              // keys it does force).
+              Object.assign(updates, state._collectionForcedBackup ?? {});
+            }
+
+            updates.collectionForcedSettings = forced;
+
+            // Apply forced field mapping (merged onto the user's own mapping)
+            if (forced.fieldMapping) {
               updates.fieldMapping = {
-                ...state.fieldMapping,
-                ...settings.forced.fieldMapping,
+                ...base.fieldMapping,
+                ...forced.fieldMapping,
               } as FieldMappingConfig;
             }
 
             // Apply forced card settings
-            if (settings.forced.defaultCardFace !== undefined) {
-              updates.defaultCardFace = settings.forced.defaultCardFace;
+            if (forced.defaultCardFace !== undefined) {
+              updates.defaultCardFace = forced.defaultCardFace;
             }
-            if (settings.forced.cardBackDisplay !== undefined) {
-              updates.cardBackDisplay = settings.forced.cardBackDisplay;
+            if (forced.cardBackDisplay !== undefined) {
+              updates.cardBackDisplay = forced.cardBackDisplay;
             }
-            if (settings.forced.cardBackStyle !== undefined) {
-              updates.cardBackStyle = settings.forced.cardBackStyle;
+            if (forced.cardBackStyle !== undefined) {
+              updates.cardBackStyle = forced.cardBackStyle;
             }
-            if (settings.forced.titleDisplayMode !== undefined) {
-              updates.titleDisplayMode = settings.forced.titleDisplayMode;
+            if (forced.titleDisplayMode !== undefined) {
+              updates.titleDisplayMode = forced.titleDisplayMode;
             }
-            if (settings.forced.showRankBadge !== undefined) {
-              updates.showRankBadge = settings.forced.showRankBadge;
+            if (forced.showRankBadge !== undefined) {
+              updates.showRankBadge = forced.showRankBadge;
             }
-            if (settings.forced.showDeviceBadge !== undefined) {
-              updates.showDeviceBadge = settings.forced.showDeviceBadge;
+            if (forced.showDeviceBadge !== undefined) {
+              updates.showDeviceBadge = forced.showDeviceBadge;
             }
-            if (settings.forced.rankPlaceholderText !== undefined) {
-              updates.rankPlaceholderText = settings.forced.rankPlaceholderText;
+            if (forced.rankPlaceholderText !== undefined) {
+              updates.rankPlaceholderText = forced.rankPlaceholderText;
             }
           }
 
@@ -1131,10 +1215,23 @@ export const useSettingsStore = create<SettingsState>()(
         });
       },
 
-      clearCollectionForcedSettings: () => {
-        set({
-          collectionForcedSettings: null,
-          appliedCollectionDefaultsSourceId: null,
+      restoreCollectionForcedSettings: () => {
+        set((state) => {
+          if (
+            !state.collectionForcedSourceId &&
+            !state._collectionForcedBackup
+          ) {
+            return state;
+          }
+          return {
+            ...(state._collectionForcedBackup ?? {}),
+            collectionForcedSettings: null,
+            _collectionForcedBackup: null,
+            collectionForcedSourceId: null,
+            // appliedCollectionDefaultsSourceId is intentionally untouched:
+            // clearing it would let the same source re-apply its one-shot
+            // `defaults` over the user's later choices.
+          };
         });
       },
 
@@ -1360,6 +1457,18 @@ export const useSettingsStore = create<SettingsState>()(
           state._mechanicOverridesBackup = null;
           state.mechanicOverridesActive = false;
         }
+
+        // A persisted forced-settings backup means the previous session applied
+        // a collection's forced settings and never reverted them (crash or
+        // tab-kill). Roll them back; if the same source is still active, the
+        // load effect re-applies and re-snapshots from this clean baseline.
+        const forcedBackup = state?._collectionForcedBackup;
+        if (state && forcedBackup) {
+          Object.assign(state, forcedBackup);
+          state._collectionForcedBackup = null;
+          state.collectionForcedSourceId = null;
+          state.collectionForcedSettings = null;
+        }
       },
       partialize: (state) => ({
         layout: state.layout,
@@ -1408,8 +1517,13 @@ export const useSettingsStore = create<SettingsState>()(
         cacheConsentDenied: state.cacheConsentDenied,
         // v0.11.5: Collection Settings
         showViewButton: state.showViewButton,
-        // Note: collectionForcedSettings is intentionally NOT persisted
-        // Forced settings are applied fresh from collection on each load
+        // Note: collectionForcedSettings (the transient marker) is intentionally
+        // NOT persisted. The backup and source id ARE persisted so a crash or
+        // tab-kill while a collection's forced settings are applied cannot
+        // permanently overwrite the user's own settings; onRehydrateStorage
+        // rolls them back from the backup.
+        _collectionForcedBackup: state._collectionForcedBackup,
+        collectionForcedSourceId: state.collectionForcedSourceId,
         appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
         // v0.14.0: Draft state is intentionally NOT persisted
         // _draft and isDirty are excluded - editing session is transient

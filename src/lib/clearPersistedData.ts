@@ -55,9 +55,13 @@ export async function clearAllPersistedData(): Promise<void> {
     }
   }
 
-  await deleteDB(); // the app database ("itemdeck")
-  await clearAllCollectionCaches(); // cached collections (idb-keyval store)
-  for (const name of SATELLITE_DATABASES) {
-    await deleteIndexedDb(name);
-  }
+  // The three IndexedDB cleanups are independent. Run them so a failure or
+  // block in one never aborts the others — previously a rejected/blocked app-DB
+  // delete (the first awaited step) silently left the cached-collection store
+  // and the plugin cache on disk while the UI reported a complete reset.
+  await Promise.allSettled([
+    deleteDB(), // the app database ("itemdeck")
+    clearAllCollectionCaches(), // cached collections (idb-keyval store)
+    ...SATELLITE_DATABASES.map((name) => deleteIndexedDb(name)),
+  ]);
 }

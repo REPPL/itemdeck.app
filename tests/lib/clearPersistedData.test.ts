@@ -126,4 +126,17 @@ describe("clearAllPersistedData", () => {
 
     await expect(clearAllPersistedData()).resolves.toBeUndefined();
   });
+
+  it("still clears the cache and satellite DBs when the app-DB delete rejects", async () => {
+    vi.stubGlobal("localStorage", makeLocalStorage({}));
+    // The app DB delete rejects (e.g. an IndexedDB error). The remaining
+    // cleanups must still run — a partial reset presented as complete would
+    // leave the user's cached collections on disk.
+    deleteDBMock.mockRejectedValueOnce(new Error("delete failed"));
+
+    await expect(clearAllPersistedData()).resolves.toBeUndefined();
+
+    expect(clearAllCollectionCachesMock).toHaveBeenCalledTimes(1);
+    expect(deletedDatabases).toContain("itemdeck-plugins");
+  });
 });

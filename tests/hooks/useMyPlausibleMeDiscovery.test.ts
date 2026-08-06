@@ -129,3 +129,70 @@ describe("useMyPlausibleMeDiscovery cache status", () => {
     expect(unregistered?.isCached).toBe(false);
   });
 });
+
+describe("useMyPlausibleMeDiscovery fan-out is bounded", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useSourceStore.setState({
+      sources: [],
+      activeSourceId: null,
+      defaultSourceId: null,
+    });
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    vi.mocked(isCollectionCached).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("caps metadata fetches for a hostile repository listing thousands of collections", async () => {
+    const hostileTree = {
+      sha: "abc",
+      truncated: false,
+      tree: Array.from({ length: 5000 }, (_, i) => ({
+        path: `data/collections/c${String(i)}/collection.json`,
+        type: "blob" as const,
+        sha: `sha${String(i)}`,
+      })),
+    };
+
+    let metadataFetches = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("api.github.com")) {
+          return Promise.resolve(
+            new Response(JSON.stringify(hostileTree), { status: 200 })
+          );
+        }
+        if (url.endsWith("/collection.json")) {
+          metadataFetches += 1;
+          return Promise.resolve(
+            new Response(JSON.stringify({ name: "C" }), { status: 200 })
+          );
+        }
+        return Promise.resolve(new Response("not found", { status: 404 }));
+      })
+    );
+
+    const { result } = renderHook(() => useMyPlausibleMeDiscovery("EVIL"));
+
+    // Wait until discovery finishes populating (isLoading starts false before
+    // the debounce fires, so wait on the collections instead).
+    await waitFor(
+      () => {
+        expect(result.current.collections.length).toBeGreaterThan(0);
+      },
+      { timeout: 5000 }
+    );
+
+    // Only the first MAX_DISCOVERED_COLLECTIONS (200) metadata files are
+    // fetched, not all 5000.
+    expect(metadataFetches).toBeLessThanOrEqual(200);
+    expect(result.current.collections.length).toBeLessThanOrEqual(200);
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("5000"));
+  });
+});

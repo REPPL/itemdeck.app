@@ -84,6 +84,22 @@ function buildCdnUrl(username: string, path: string, branch = "main"): string {
 }
 
 /**
+ * Upper bound on the number of collections discovered from one repository.
+ *
+ * The username is attacker-controlled (it comes from the `/gh/<user>/` URL and
+ * auto-runs on the picker with no click), and the GitHub tree can list tens of
+ * thousands of `collection.json` files. Firing a metadata fetch for each would
+ * amplify one page load into a CDN request flood. Cap the count; a real user
+ * repository holds a handful of collections.
+ */
+const MAX_DISCOVERED_COLLECTIONS = 200;
+
+/**
+ * Number of metadata fetches kept in flight at once.
+ */
+const METADATA_FETCH_CONCURRENCY = 8;
+
+/**
  * Fetch collection metadata from collection.json.
  *
  * @param username - GitHub username
@@ -189,29 +205,48 @@ export function useMyPlausibleMeDiscovery(
 
       // Step 2: Find all collection.json files under data/collections/
       // Pattern: data/collections/{path}/collection.json
-      const collectionJsonFiles = tree.filter(
+      const allCollectionJsonFiles = tree.filter(
         (entry) =>
           entry.type === "blob" &&
           entry.path.startsWith("data/collections/") &&
           entry.path.endsWith("/collection.json")
       );
 
-      if (collectionJsonFiles.length === 0) {
+      if (allCollectionJsonFiles.length === 0) {
         setError("No collections found in repository");
         setCollections([]);
         setIsLoading(false);
         return;
       }
 
+      // The username is untrusted, so a hostile repository can list a huge
+      // number of collection.json files. Cap before fanning out a metadata
+      // fetch per file.
+      const collectionJsonFiles = allCollectionJsonFiles.slice(
+        0,
+        MAX_DISCOVERED_COLLECTIONS
+      );
+      if (allCollectionJsonFiles.length > MAX_DISCOVERED_COLLECTIONS) {
+        console.warn(
+          `Repository lists ${String(allCollectionJsonFiles.length)} collections; showing the first ${String(MAX_DISCOVERED_COLLECTIONS)}.`
+        );
+      }
+
       // Step 3: Extract collection paths and fetch metadata
       // e.g., "data/collections/retro/games/collection.json" -> "retro/games"
       const validCollections: CollectionEntry[] = [];
 
-      await Promise.all(
-        collectionJsonFiles.map(async (file) => {
+      // Fetch metadata through a fixed-size pool rather than all at once.
+      let fileCursor = 0;
+      const metadataWorker = async (): Promise<void> => {
+        while (fileCursor < collectionJsonFiles.length) {
+          const index = fileCursor;
+          fileCursor += 1;
+          const file = collectionJsonFiles[index];
+          if (!file) continue;
           // Extract the collection path (everything between data/collections/ and /collection.json)
           const match = /^data\/collections\/(.+)\/collection\.json$/.exec(file.path);
-          if (!match?.[1]) return;
+          if (!match?.[1]) continue;
 
           const collectionPath = match[1];
           const metadata = await fetchCollectionMetadata(trimmedUsername, collectionPath);
@@ -251,7 +286,15 @@ export function useMyPlausibleMeDiscovery(
               isCached: cached,
             });
           }
-        })
+        }
+      };
+
+      const metadataWorkerCount = Math.min(
+        METADATA_FETCH_CONCURRENCY,
+        collectionJsonFiles.length
+      );
+      await Promise.all(
+        Array.from({ length: metadataWorkerCount }, () => metadataWorker())
       );
 
       // Sort: cached collections first, then alphabetically by name

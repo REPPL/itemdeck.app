@@ -297,6 +297,25 @@ const ENTITY_FETCH_CONCURRENCY = 8;
 const MAX_ENTITY_IDS = 10000;
 
 /**
+ * Upper bound on the number of entity types loaded from one collection.
+ *
+ * `collection.json` is untrusted and its `entityTypes` record is unbounded.
+ * Each type triggers several fetches (index probes, GitHub discovery, single-
+ * file fallbacks) before resolving, so an entity-type count scaled by an
+ * attacker multiplies one collection load into a request flood against the
+ * CDN and the visitor's GitHub API quota. Cap the count and load the types
+ * through the same fixed-size pool used for entity ids. Real collections use
+ * a handful of types.
+ */
+const MAX_ENTITY_TYPES = 50;
+
+/**
+ * Number of entity types loaded concurrently. Bounds the per-type fetch
+ * fan-out (each type issues its own probes) to a fixed width.
+ */
+const ENTITY_TYPE_CONCURRENCY = 4;
+
+/**
  * Load individual entity files from a directory.
  *
  * Fetches run through a fixed-size concurrency pool so an untrusted index
@@ -377,20 +396,40 @@ export async function loadCollection(
     throw new Error("Collection has no entity types defined");
   }
 
-  // Load all entity types in parallel
-  const entityTypes = Object.keys(definition.entityTypes);
-  const entityPromises = entityTypes.map(async (type) => {
-    const entities = await loadEntities(basePath, type);
-    return { type, entities };
-  });
-
-  const entityResults = await Promise.all(entityPromises);
-
-  // Build entities map
-  const entities: Record<string, Entity[]> = {};
-  for (const { type, entities: typeEntities } of entityResults) {
-    entities[type] = typeEntities;
+  // Load entity types through a fixed-size pool. Each type fans out into
+  // several fetches, and the type list comes from untrusted collection.json,
+  // so cap the count and bound concurrency rather than firing every type at
+  // once (mirrors loadEntitiesFromDirectory's pool for entity ids).
+  let entityTypes = Object.keys(definition.entityTypes);
+  if (entityTypes.length > MAX_ENTITY_TYPES) {
+    console.warn(
+      `Collection defines ${String(entityTypes.length)} entity types; loading the first ${String(MAX_ENTITY_TYPES)}.`
+    );
+    // Always keep the primary type even if it sorts past the cap.
+    const capped = entityTypes.slice(0, MAX_ENTITY_TYPES);
+    if (!capped.includes(primaryType)) {
+      capped[capped.length - 1] = primaryType;
+    }
+    entityTypes = capped;
   }
+
+  const entities: Record<string, Entity[]> = {};
+
+  let typeCursor = 0;
+  const typeWorker = async (): Promise<void> => {
+    while (typeCursor < entityTypes.length) {
+      const index = typeCursor;
+      typeCursor += 1;
+      const type = entityTypes[index];
+      if (type === undefined) continue;
+      entities[type] = await loadEntities(basePath, type);
+    }
+  };
+
+  const typeWorkerCount = Math.min(ENTITY_TYPE_CONCURRENCY, entityTypes.length);
+  await Promise.all(
+    Array.from({ length: typeWorkerCount }, () => typeWorker())
+  );
 
   return {
     definition,

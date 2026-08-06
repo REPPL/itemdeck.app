@@ -207,6 +207,44 @@ describe("entity fetch fan-out is bounded", () => {
   });
 });
 
+describe("entity-type fan-out is bounded", () => {
+  const base =
+    "https://cdn.jsdelivr.net/gh/REPPL/MyPlausibleMe@main/data/collections/demo";
+
+  it("caps a hostile collection that defines too many entity types", async () => {
+    // A collection.json with a huge entityTypes record: each type would fan
+    // out into several probe fetches. The loader must cap the type count.
+    const entityTypes: Record<string, unknown> = {
+      advert: { primary: true, fields: {} },
+    };
+    for (let i = 0; i < 500; i += 1) {
+      entityTypes[`type${String(i)}`] = { fields: {} };
+    }
+    const hostileDefinition = { id: "demo", name: "Demo", entityTypes };
+
+    const probedTypeDirs = new Set<string>();
+    const mock = vi.fn((input: string) => {
+      if (input.endsWith("/collection.json")) {
+        return Promise.resolve(jsonResponse(hostileDefinition));
+      }
+      // Record which entity-type directory each probe targets.
+      const match = /\/data\/collections\/demo\/([^/]+)\//.exec(input);
+      if (match?.[1]) probedTypeDirs.add(match[1]);
+      return Promise.resolve(notFound());
+    });
+    vi.stubGlobal("fetch", mock);
+
+    const collection = await loadCollection(base);
+
+    // The primary type is always loaded even though it would otherwise be
+    // among 500 keys; the total probed directories stay bounded.
+    expect(collection.primaryType).toBe("advert");
+    expect(probedTypeDirs.size).toBeLessThanOrEqual(50);
+    expect(probedTypeDirs.has("adverts")).toBe(true);
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("501"));
+  });
+});
+
 describe("tolerant entity validation", () => {
   it("skips an invalid entity from a plural file and keeps the valid one", async () => {
     const base =

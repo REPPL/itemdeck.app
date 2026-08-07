@@ -15,6 +15,7 @@ import { collectionKeys } from "@/hooks/queryKeys";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { useImagePreloader } from "@/hooks/useImageCache";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { mayCacheCollection } from "@/utils/cacheConsent";
 import { useSourceStore } from "@/stores/sourceStore";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { isCollectionCached, listCachedCollections, type CacheInfo } from "@/lib/cardCache";
@@ -152,6 +153,21 @@ export function LoadingScreen({
     return !hasCacheConsent(activeSourceId);
   }, [activeSourceId, activeSource?.isBuiltIn, cacheConsentPreference, hasCacheConsent]);
 
+  // Whether caching is actually permitted, which is a different question from
+  // whether to ask. A stored "never" answers the prompt permanently but must
+  // still forbid caching: preloading writes every image to IndexedDB, so
+  // gating only the prompt made "Never cache" weaker than declining once.
+  const mayCacheImages = useMemo(
+    () =>
+      mayCacheCollection({
+        hasActiveSource: Boolean(activeSourceId),
+        isBuiltIn: Boolean(activeSource?.isBuiltIn),
+        preference: cacheConsentPreference,
+        hasSourceConsent: activeSourceId ? hasCacheConsent(activeSourceId) : false,
+      }),
+    [activeSourceId, activeSource?.isBuiltIn, cacheConsentPreference, hasCacheConsent]
+  );
+
   // Start image preloading; a failed preload must not strand the
   // loading screen, so advance to complete on rejection
   const startImagePreload = useCallback(() => {
@@ -197,13 +213,13 @@ export function LoadingScreen({
       if (needsCacheConsent) {
         setPhase("consent");
         setConsentDialogOpen(true);
-      } else if (shouldPreloadImages && imageUrls.length > 0) {
+      } else if (mayCacheImages && shouldPreloadImages && imageUrls.length > 0) {
         startImagePreload();
       } else {
         setPhase("complete");
       }
     }
-  }, [isLoadingCollection, error, activeSourceId, phase, shouldPreloadImages, imageUrls, startImagePreload, needsCacheConsent]);
+  }, [isLoadingCollection, error, activeSourceId, phase, shouldPreloadImages, imageUrls, startImagePreload, needsCacheConsent, mayCacheImages]);
 
   // Handle image preloading complete
   useEffect(() => {

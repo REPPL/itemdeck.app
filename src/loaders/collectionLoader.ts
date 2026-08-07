@@ -90,6 +90,40 @@ export async function loadCollectionDefinition(
 }
 
 /**
+ * Remove repeated ids, keeping the first occurrence and the listed order.
+ *
+ * Entity ids come from an untrusted index and are used as React keys and as
+ * the identity CardGrid's random selection is validated against. That guard
+ * proves "every selected id still exists" by comparing counts, so a
+ * duplicate lets the count match while an id is absent and the render
+ * throws. Duplicates also make one flip toggle several cards and cost a
+ * redundant fetch each.
+ */
+function dedupeIds(ids: string[]): string[] {
+  return ids.length > 1 ? Array.from(new Set(ids)) : ids;
+}
+
+/**
+ * Remove entities repeating an id already seen, keeping the first.
+ *
+ * The single-file array formats bypass the index path, so they need the same
+ * uniqueness guarantee as dedupeIds gives the index.
+ */
+function dedupeEntitiesById(entities: Entity[]): Entity[] {
+  if (entities.length < 2) {
+    return entities;
+  }
+  const seen = new Set<string>();
+  return entities.filter((entity) => {
+    if (seen.has(entity.id)) {
+      return false;
+    }
+    seen.add(entity.id);
+    return true;
+  });
+}
+
+/**
  * Extract entity IDs from index file data.
  *
  * Supports two formats:
@@ -103,7 +137,7 @@ export async function loadCollectionDefinition(
 function extractEntityIds(data: unknown, pluralType: string): string[] {
   // Format 1: Direct array
   if (Array.isArray(data)) {
-    return data.filter((id): id is string => typeof id === "string");
+    return dedupeIds(data.filter((id): id is string => typeof id === "string"));
   }
 
   // Format 2: Object with entity type key
@@ -112,24 +146,30 @@ function extractEntityIds(data: unknown, pluralType: string): string[] {
 
     // Try plural form key (e.g., "adverts")
     if (pluralType in record && Array.isArray(record[pluralType])) {
-      return (record[pluralType] as unknown[]).filter(
-        (id): id is string => typeof id === "string"
+      return dedupeIds(
+        (record[pluralType] as unknown[]).filter(
+          (id): id is string => typeof id === "string"
+        )
       );
     }
 
     // Try singular form key (e.g., "advert") - just in case
     const singularType = pluralType.replace(/s$/, "");
     if (singularType in record && Array.isArray(record[singularType])) {
-      return (record[singularType] as unknown[]).filter(
-        (id): id is string => typeof id === "string"
+      return dedupeIds(
+        (record[singularType] as unknown[]).filter(
+          (id): id is string => typeof id === "string"
+        )
       );
     }
 
     // Try common keys like "items", "entities", "ids"
     for (const key of ["items", "entities", "ids"]) {
       if (key in record && Array.isArray(record[key])) {
-        return (record[key] as unknown[]).filter(
-          (id): id is string => typeof id === "string"
+        return dedupeIds(
+          (record[key] as unknown[]).filter(
+            (id): id is string => typeof id === "string"
+          )
         );
       }
     }
@@ -230,11 +270,13 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return data
-            .map((item, index) =>
-              parseEntityTolerant(item, `${pluralFileUrl}[${String(index)}]`)
-            )
-            .filter((entity): entity is Entity => entity !== null);
+          return dedupeEntitiesById(
+            data
+              .map((item, index) =>
+                parseEntityTolerant(item, `${pluralFileUrl}[${String(index)}]`)
+              )
+              .filter((entity): entity is Entity => entity !== null)
+          );
         }
 
         const single = parseEntityTolerant(data, pluralFileUrl);
@@ -257,11 +299,13 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return data
-            .map((item, index) =>
-              parseEntityTolerant(item, `${singleFileUrl}[${String(index)}]`)
-            )
-            .filter((entity): entity is Entity => entity !== null);
+          return dedupeEntitiesById(
+            data
+              .map((item, index) =>
+                parseEntityTolerant(item, `${singleFileUrl}[${String(index)}]`)
+              )
+              .filter((entity): entity is Entity => entity !== null)
+          );
         }
 
         // Single entity in file

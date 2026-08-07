@@ -141,8 +141,13 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
       return;
     }
 
-    // Build card values map
-    const cardValues: Record<string, GuessValue> = {};
+    // Build card values map.
+    //
+    // Card ids come from untrusted collection data, so a null-prototype
+    // object is used: assigning a primitive to "__proto__" on a plain object
+    // literal is a silent no-op, which left the card dealt but unscoreable
+    // because the read below returned Object.prototype rather than undefined.
+    const cardValues = Object.create(null) as Record<string, GuessValue>;
     for (const card of config.cards) {
       cardValues[card.id] = card.value;
     }
@@ -198,6 +203,7 @@ export const useSnapRankingStore = create<SnapRankingStore>((set, get) => ({
     const cardId = state.cardIds[state.currentIndex];
     if (!cardId) return;
 
+    if (!Object.hasOwn(state.cardValues, cardId)) return;
     const actualValue = state.cardValues[cardId];
     if (actualValue === undefined) return;
 

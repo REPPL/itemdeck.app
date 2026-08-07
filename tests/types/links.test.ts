@@ -78,3 +78,49 @@ describe("normaliseDetailUrls", () => {
     ]);
   });
 });
+
+describe("normaliseDetailUrls untrusted metadata", () => {
+  // The v2 entity schema is loose, so detailUrls entries reach the render
+  // with arbitrary shapes. Round 5 hardened the URL; source and label were
+  // still passed through untyped, and SourcesOverlay lowercases source
+  // during render while CardExpanded renders both as JSX children — so a
+  // non-string value crashed the whole card grid up to the query boundary.
+  it("drops a non-string source", () => {
+    expect(
+      normaliseDetailUrls({
+        url: "https://example.com",
+        source: 5,
+      } as unknown as DetailUrls)
+    ).toEqual([{ url: "https://example.com" }]);
+  });
+
+  it("drops an object source", () => {
+    expect(
+      normaliseDetailUrls({
+        url: "https://example.com",
+        source: { en: "Wikipedia" },
+      } as unknown as DetailUrls)
+    ).toEqual([{ url: "https://example.com" }]);
+  });
+
+  it("drops a non-string label", () => {
+    expect(
+      normaliseDetailUrls({
+        url: "https://example.com",
+        label: { en: "Read more" },
+      } as unknown as DetailUrls)
+    ).toEqual([{ url: "https://example.com" }]);
+  });
+
+  it("keeps valid string source and label", () => {
+    expect(
+      normaliseDetailUrls({
+        url: "https://example.com",
+        source: "Wikipedia",
+        label: "Read more",
+      })
+    ).toEqual([
+      { url: "https://example.com", source: "Wikipedia", label: "Read more" },
+    ]);
+  });
+});

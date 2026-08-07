@@ -16,6 +16,7 @@ import { useSettingsStore, CARD_ASPECT_RATIOS } from "@/stores/settingsStore";
 import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
 import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
+import { capFilterOptions } from "@/utils/filterOptions";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { springPresets, getItemDelay } from "@/config/animationPresets";
 import type { CardDisplayConfig } from "@/types/display";
@@ -616,10 +617,16 @@ export function CardGrid() {
       }
     }
 
+    // The filter dropdown mounts one checkbox per option for every field and
+    // re-reconciles the whole list on each toggle. `genres` is an uncapped
+    // per-entity array, and the card-derived fields are only bounded by the
+    // loader's entity cap, so all three need a ceiling. Cap the assembled
+    // lists rather than the per-entity arrays: many entities contributing a
+    // few values each reach the same total.
     return {
-      platforms: Array.from(platforms).sort(),
-      years: Array.from(years).sort((a, b) => b - a),
-      genres: Array.from(genres).sort(),
+      platforms: capFilterOptions(Array.from(platforms).sort(), "platform"),
+      years: capFilterOptions(Array.from(years).sort((a, b) => b - a), "year"),
+      genres: capFilterOptions(Array.from(genres).sort(), "genres"),
     };
   }, [sourceCards]);
 

@@ -7,7 +7,12 @@
 
 import { shuffle } from "@/utils/shuffle";
 import type { Question, Answer } from "../types";
-import type { QuestionGenerator, GeneratorCardData, GeneratorOptions, GeneratorCheckResult } from "./types";
+import type {
+  QuestionGenerator,
+  GeneratorCardData,
+  GeneratorOptions,
+  GeneratorCheckResult,
+} from "./types";
 import {
   generateQuestionId,
   generateAnswerId,
@@ -83,7 +88,9 @@ function getResolvedNames(card: GeneratorCardData, field: string): string[] {
 /**
  * Find relationships that can be used for questions.
  */
-function findUsableRelationships(cards: GeneratorCardData[]): RelationshipInfo[] {
+function findUsableRelationships(
+  cards: GeneratorCardData[]
+): RelationshipInfo[] {
   const relationships: RelationshipInfo[] = [];
   const fieldCounts = new Map<string, Set<string>>();
   const fieldCards = new Map<string, GeneratorCardData[]>();
@@ -120,7 +127,10 @@ function findUsableRelationships(cards: GeneratorCardData[]): RelationshipInfo[]
     const cardsWithField = fieldCards.get(field) ?? [];
 
     // Need at least 4 unique values for wrong answers
-    if (uniqueNames.size >= MIN_CARDS_FOR_QUIZ && cardsWithField.length >= MIN_CARDS_FOR_QUIZ) {
+    if (
+      uniqueNames.size >= MIN_CARDS_FOR_QUIZ &&
+      cardsWithField.length >= MIN_CARDS_FOR_QUIZ
+    ) {
       // Generate human-readable label
       // Convert camelCase or snake_case to Title Case
       const label = field
@@ -169,7 +179,11 @@ function generatePrompt(cardTitle: string, relationshipLabel: string): string {
   if (lowerLabel.includes("series") || lowerLabel.includes("franchise")) {
     return `What series is "${cardTitle}" part of?`;
   }
-  if (lowerLabel.includes("location") || lowerLabel.includes("region") || lowerLabel.includes("country")) {
+  if (
+    lowerLabel.includes("location") ||
+    lowerLabel.includes("region") ||
+    lowerLabel.includes("country")
+  ) {
     return `Where is "${cardTitle}" from?`;
   }
 
@@ -235,27 +249,41 @@ function generateQuestion(
 
   // Create alternative correct answers (other valid values for same title)
   // These will be included as selectable options and tracked for correct-answer checking
-  const alternativeNames = allCorrectNames.filter((name) => name !== correctName);
+  // Both the alternatives and the unique-value pool are sized by the
+  // collection, so cap the alternatives offered (each is a rendered option)
+  // and match against a Set — a linear scan per candidate value multiplies
+  // the two untrusted dimensions and freezes the main thread.
+  const correctNameSet = new Set(allCorrectNames);
+  const alternativeNames = allCorrectNames
+    .filter((name) => name !== correctName)
+    .slice(0, WRONG_ANSWER_COUNT);
   const alternativeAnswers: Answer[] = alternativeNames.map((name) => ({
     id: generateAnswerId(),
     label: name,
   }));
 
   // Select wrong answers from other unique values (excluding ALL correct values)
-  const otherValues = relationship.uniqueValues.filter((v) => !allCorrectNames.includes(v));
+  const otherValues = relationship.uniqueValues.filter(
+    (v) => !correctNameSet.has(v)
+  );
 
   // Need enough wrong answers after accounting for alternative correct answers
   // (alternatives take up slots that would otherwise be wrong answers)
-  const wrongAnswersNeeded = Math.max(0, WRONG_ANSWER_COUNT - alternativeAnswers.length);
+  const wrongAnswersNeeded = Math.max(
+    0,
+    WRONG_ANSWER_COUNT - alternativeAnswers.length
+  );
   if (otherValues.length < wrongAnswersNeeded) {
     return null;
   }
 
   const shuffledOthers = shuffle(otherValues);
-  const wrongAnswers: Answer[] = shuffledOthers.slice(0, wrongAnswersNeeded).map((value) => ({
-    id: generateAnswerId(),
-    label: value,
-  }));
+  const wrongAnswers: Answer[] = shuffledOthers
+    .slice(0, wrongAnswersNeeded)
+    .map((value) => ({
+      id: generateAnswerId(),
+      label: value,
+    }));
 
   // Add alternative correct answers to wrong answers array
   // (they display as options but are tracked as correct via alternativeCorrectIds)
@@ -272,9 +300,10 @@ function generateQuestion(
     wrongAnswers: allWrongAnswers,
     relatedCardId: card.id,
     // Include alternative correct IDs if there are any
-    alternativeCorrectIds: alternativeAnswers.length > 0
-      ? alternativeAnswers.map((a) => a.id)
-      : undefined,
+    alternativeCorrectIds:
+      alternativeAnswers.length > 0
+        ? alternativeAnswers.map((a) => a.id)
+        : undefined,
     metadata: {
       field: relationship.field,
     },
@@ -322,7 +351,9 @@ export const relationshipToNameGenerator: QuestionGenerator = {
     const usedTitles = new Set<string>(); // Track titles to avoid duplicate questions
 
     // Distribute questions across available relationships
-    const questionsPerRelationship = Math.ceil(options.count / relationships.length);
+    const questionsPerRelationship = Math.ceil(
+      options.count / relationships.length
+    );
 
     for (const relationship of relationships) {
       if (questions.length >= options.count) {
@@ -330,7 +361,10 @@ export const relationshipToNameGenerator: QuestionGenerator = {
       }
 
       // Build title-to-values map for this relationship
-      const titleToValuesMap = buildTitleToValuesMap(relationship.cards, relationship.field);
+      const titleToValuesMap = buildTitleToValuesMap(
+        relationship.cards,
+        relationship.field
+      );
 
       // Filter to unused cards (and unused titles to avoid duplicate questions)
       let candidateCards = relationship.cards.filter(
@@ -345,7 +379,11 @@ export const relationshipToNameGenerator: QuestionGenerator = {
       // Shuffle candidates
       candidateCards = shuffle(candidateCards);
 
-      for (let i = 0; i < questionsToGenerate && candidateCards.length > 0; i++) {
+      for (
+        let i = 0;
+        i < questionsToGenerate && candidateCards.length > 0;
+        i++
+      ) {
         const card = candidateCards[i];
         if (!card) continue;
 

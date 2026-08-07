@@ -62,7 +62,11 @@ vi.mock("@/db", async () => {
   };
 });
 
-import { imageCache, DEFAULT_MAX_CACHE_SIZE } from "@/services/imageCache";
+import {
+  imageCache,
+  DEFAULT_MAX_CACHE_SIZE,
+  preloadImages,
+} from "@/services/imageCache";
 import { deleteDB } from "@/db";
 
 describe("imageCache", () => {
@@ -256,5 +260,220 @@ describe("imageCache", () => {
       const stats = await imageCache.getStats(maxSize);
       expect(stats.totalSize).toBeLessThanOrEqual(maxSize);
     });
+  });
+});
+
+describe("imageCache metadata maintenance", () => {
+  beforeEach(async () => {
+    await imageCache.clear();
+  });
+
+  afterEach(async () => {
+    await deleteDB();
+  });
+
+  it("keeps metadata accurate across many stores", async () => {
+    for (let i = 0; i < 50; i++) {
+      await imageCache.set(
+        `https://example.com/${String(i)}.jpg`,
+        new Blob([`payload-${String(i)}`], { type: "image/jpeg" })
+      );
+    }
+
+    const stats = await imageCache.getStats();
+    const urls = await imageCache.getAllURLs();
+
+    expect(stats.imageCount).toBe(50);
+    expect(urls).toHaveLength(50);
+
+    let actualSize = 0;
+    for (const url of urls) {
+      const image = await imageCache.get(url);
+      actualSize += image?.size ?? 0;
+    }
+    expect(stats.totalSize).toBe(actualSize);
+  });
+
+  it("does not double-count when the same url is stored twice", async () => {
+    const url = "https://example.com/same.jpg";
+
+    await imageCache.set(url, new Blob(["first"], { type: "image/jpeg" }));
+    await imageCache.set(
+      url,
+      new Blob(["second-and-longer"], { type: "image/jpeg" })
+    );
+
+    const stats = await imageCache.getStats();
+    const stored = await imageCache.get(url);
+
+    expect(stats.imageCount).toBe(1);
+    expect(stats.totalSize).toBe(stored?.size);
+  });
+
+  it("keeps metadata accurate after eviction", async () => {
+    // Budget fits a couple of entries, so storing more forces eviction.
+    const blob = new Blob([new Uint8Array(1000)], { type: "image/jpeg" });
+    const maxSize = blob.size * 3;
+
+    for (let i = 0; i < 8; i++) {
+      await imageCache.set(
+        `https://example.com/evict-${String(i)}.jpg`,
+        new Blob([new Uint8Array(1000)], { type: "image/jpeg" }),
+        {},
+        { maxSize }
+      );
+    }
+
+    const stats = await imageCache.getStats();
+    const urls = await imageCache.getAllURLs();
+
+    expect(stats.imageCount).toBe(urls.length);
+    expect(stats.totalSize).toBeLessThanOrEqual(maxSize);
+  });
+
+  it("stores many images without rescanning the whole store each time", async () => {
+    const started = Date.now();
+    for (let i = 0; i < 800; i++) {
+      await imageCache.set(
+        `https://example.com/perf-${String(i)}.jpg`,
+        new Blob([new Uint8Array(64)], { type: "image/jpeg" })
+      );
+    }
+    const elapsed = Date.now() - started;
+
+    // Pre-fix each store walked every existing record to recompute totals,
+    // so this grew with the square of the image count.
+    expect(elapsed).toBeLessThan(3000);
+  });
+});
+
+describe("imageCache under concurrent writes", () => {
+  beforeEach(async () => {
+    await imageCache.clear();
+  });
+
+  afterEach(async () => {
+    await deleteDB();
+  });
+
+  /** Store `count` images of `bytes` each, concurrently, as the preloader does. */
+  async function storeConcurrently(
+    prefix: string,
+    count: number,
+    bytes: number,
+    maxSize: number
+  ) {
+    await Promise.all(
+      Array.from({ length: count }, (_, i) =>
+        imageCache.set(
+          `https://example.com/${prefix}-${String(i)}.jpg`,
+          new Blob([new Uint8Array(bytes)], { type: "image/jpeg" }),
+          {},
+          { maxSize }
+        )
+      )
+    );
+  }
+
+  it("never exceeds the budget when writes overlap", async () => {
+    // The preloader issues writes five at a time. Deciding whether to evict
+    // from a snapshot read before the write transaction let every concurrent
+    // caller conclude independently that it still fitted, overshooting the
+    // budget.
+    const bytes = 400;
+    const maxSize = bytes * 10;
+
+    await storeConcurrently("seed", 9, bytes, maxSize);
+    for (let round = 0; round < 4; round++) {
+      await storeConcurrently(`burst-${String(round)}`, 5, bytes, maxSize);
+
+      const stats = await imageCache.getStats(maxSize);
+      expect(stats.totalSize).toBeLessThanOrEqual(maxSize);
+    }
+  });
+
+  it("does not over-evict when writes overlap", async () => {
+    // Concurrent evictions sharing one stale baseline each kept deleting
+    // until their own target was met, long after a sibling had brought the
+    // cache back under budget.
+    const bytes = 400;
+    const maxSize = bytes * 10;
+
+    await storeConcurrently("seed", 9, bytes, maxSize);
+    await storeConcurrently("burst", 5, bytes, maxSize);
+
+    const urls = await imageCache.getAllURLs();
+    // Evicting only what is needed leaves the cache near its budget, not
+    // emptied down to the handful just written.
+    expect(urls.length).toBeGreaterThanOrEqual(8);
+  });
+
+  it("keeps the counters consistent with the store after overlapping writes", async () => {
+    const bytes = 400;
+    const maxSize = bytes * 10;
+
+    await storeConcurrently("seed", 9, bytes, maxSize);
+    await storeConcurrently("burst", 5, bytes, maxSize);
+
+    const stats = await imageCache.getStats(maxSize);
+    const urls = await imageCache.getAllURLs();
+
+    let actualSize = 0;
+    for (const url of urls) {
+      const image = await imageCache.get(url);
+      actualSize += image?.size ?? 0;
+    }
+
+    expect(stats.imageCount).toBe(urls.length);
+    expect(stats.totalSize).toBe(actualSize);
+  });
+});
+
+describe("preloadImages bound", () => {
+  beforeEach(async () => {
+    await imageCache.clear();
+  });
+
+  afterEach(async () => {
+    await deleteDB();
+    vi.unstubAllGlobals();
+  });
+
+  it("preloads no more than the cap from an oversized list", async () => {
+    // The url list is the flattened imageUrls of every card in an untrusted
+    // collection, and the loading overlay only clears at 100% progress with
+    // no skip, so an unbounded list is a lockout rather than a slow load.
+    vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const fetchMock = vi.fn(() => Promise.reject(new Error("blocked")));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const urls = Array.from(
+      { length: 2500 },
+      (_, i) => `https://example.com/preload-${String(i)}.jpg`
+    );
+
+    const totals: number[] = [];
+    await preloadImages(urls, {}, (_completed, total) => {
+      totals.push(total);
+    });
+
+    // Progress is reported against the capped list, so the loading screen
+    // can still reach 100%.
+    expect(totals.every((t) => t === 2000)).toBe(true);
+    expect(fetchMock.mock.calls.length).toBe(2000);
+  });
+
+  it("leaves a normal list untouched", async () => {
+    const fetchMock = vi.fn(() => Promise.reject(new Error("blocked")));
+    vi.stubGlobal("fetch", fetchMock);
+
+    const urls = Array.from(
+      { length: 30 },
+      (_, i) => `https://example.com/small-${String(i)}.jpg`
+    );
+
+    await preloadImages(urls);
+
+    expect(fetchMock.mock.calls.length).toBe(30);
   });
 });

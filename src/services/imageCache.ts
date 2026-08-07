@@ -5,12 +5,36 @@
  * Implements LRU eviction when storage limits are reached.
  */
 
-import { getDB, type CachedImage, type CacheMetadata } from "@/db";
+import {
+  getDB,
+  type CachedImage,
+  type CacheMetadata,
+  type ItemdeckDB,
+} from "@/db";
+import type { IDBPTransaction } from "idb";
+
+/** A readwrite transaction spanning both cache stores. */
+type CacheTransaction = IDBPTransaction<
+  ItemdeckDB,
+  ["images", "metadata"],
+  "readwrite"
+>;
 
 /**
  * Default maximum cache size in bytes (50MB).
  */
 const DEFAULT_MAX_CACHE_SIZE = 50 * 1024 * 1024;
+
+/**
+ * Upper bound on the images preloaded in one pass.
+ *
+ * The preload list is the flattened `imageUrls` of every card, and both the
+ * entity count and the per-card media list come from untrusted collection
+ * data. The loading overlay only clears at 100% progress and offers no skip,
+ * so an unbounded list is a lockout rather than a slow load. Generous enough
+ * that real collections never reach it.
+ */
+const MAX_PRELOAD_URLS = 2000;
 
 /**
  * Metadata key for image cache stats.
@@ -46,6 +70,77 @@ export interface CacheStats {
 
   /** Percentage of cache used */
   usagePercent: number;
+}
+
+/**
+ * Read the cache totals inside an open transaction.
+ *
+ * Falls back to a full scan when the metadata record is missing or has
+ * drifted into an impossible state, so a single bad record cannot make the
+ * cache stop evicting (totals reading low) or evict everything (reading
+ * high) forever. The incremental path is what keeps writes off the
+ * quadratic rescan; this is the bounded safety net for it.
+ */
+async function readTotals(
+  tx: CacheTransaction
+): Promise<{ imageCount: number; totalSize: number }> {
+  const stored = await tx.objectStore("metadata").get(IMAGE_CACHE_METADATA_KEY);
+
+  if (stored && stored.imageCount >= 0 && stored.totalSize >= 0) {
+    return { imageCount: stored.imageCount, totalSize: stored.totalSize };
+  }
+
+  let totalSize = 0;
+  let imageCount = 0;
+  for await (const cursor of tx.objectStore("images")) {
+    totalSize += cursor.value.size;
+    imageCount++;
+  }
+  return { imageCount, totalSize };
+}
+
+/**
+ * Evict least recently used images inside an open transaction.
+ *
+ * Keys are collected during the index walk and deleted afterwards, within
+ * the same transaction, rather than deleting through the live cursor.
+ *
+ * @param tx - Open readwrite transaction over both cache stores
+ * @param currentSize - Cache size before eviction
+ * @param targetSize - Size to get at or below
+ * @param protectUrl - Url that must not be evicted (it is being written)
+ * @returns Bytes and record count actually freed
+ */
+async function evictWithin(
+  tx: CacheTransaction,
+  currentSize: number,
+  targetSize: number,
+  protectUrl?: string
+): Promise<{ size: number; count: number }> {
+  const floor = Math.max(0, targetSize);
+  let remaining = currentSize;
+  let size = 0;
+  const keys: string[] = [];
+
+  const index = tx.objectStore("images").index("by-last-accessed");
+  for await (const cursor of index) {
+    if (remaining <= floor) {
+      break;
+    }
+    if (cursor.value.url === protectUrl) {
+      continue;
+    }
+    keys.push(cursor.value.url);
+    remaining -= cursor.value.size;
+    size += cursor.value.size;
+  }
+
+  const images = tx.objectStore("images");
+  for (const key of keys) {
+    await images.delete(key);
+  }
+
+  return { size, count: keys.length };
 }
 
 /**
@@ -147,17 +242,53 @@ export const imageCache = {
         return;
       }
 
-      // Check if we need to evict old images
-      const stats = await this.getStats();
-      if (stats.totalSize + blob.size > maxSize) {
-        await this.evictLRU(blob.size, maxSize);
+      // Admission, eviction and the write all happen in one transaction.
+      // Reading the totals beforehand and evicting separately let the five
+      // concurrent writes the preloader issues each decide from the same
+      // stale snapshot, so the budget could be overshot or the cache evicted
+      // far below its target. IndexedDB serialises overlapping readwrite
+      // transactions on these stores, so each caller now sees the previous
+      // one's committed state.
+      const tx = db.transaction(["images", "metadata"], "readwrite");
+      const images = tx.objectStore("images");
+      const metadataStore = tx.objectStore("metadata");
+
+      let totals = await readTotals(tx);
+      const previous = await images.get(url);
+
+      // Re-storing a url replaces the existing record rather than adding
+      // one, so only its size difference counts towards the budget.
+      const displaced = previous?.size ?? 0;
+      const projectedSize = totals.totalSize - displaced + blob.size;
+
+      if (projectedSize > maxSize) {
+        // Free enough for this image, protecting the record being written so
+        // eviction cannot delete the entry we are about to replace.
+        const freed = await evictWithin(
+          tx,
+          totals.totalSize - displaced,
+          maxSize - blob.size,
+          url
+        );
+        totals = {
+          imageCount: totals.imageCount - freed.count,
+          totalSize: totals.totalSize - freed.size,
+        };
       }
 
-      // Store the image
-      await db.put("images", cachedImage);
+      await images.put(cachedImage);
 
-      // Update metadata
-      await this.updateMetadata();
+      await metadataStore.put({
+        key: IMAGE_CACHE_METADATA_KEY,
+        imageCount: Math.max(
+          0,
+          previous ? totals.imageCount : totals.imageCount + 1
+        ),
+        totalSize: Math.max(0, totals.totalSize - displaced + blob.size),
+        updatedAt: now,
+      });
+
+      await tx.done;
     } catch (error) {
       console.warn("[imageCache] Failed to cache image:", url, error);
     }
@@ -298,43 +429,29 @@ export const imageCache = {
   async evictLRU(requiredSpace: number, maxSize: number): Promise<void> {
     try {
       const db = await getDB();
-      const stats = await this.getStats(maxSize);
+      const tx = db.transaction(["images", "metadata"], "readwrite");
+      const totals = await readTotals(tx);
 
-      // Calculate how much we need to free. Floor at zero: a requiredSpace
-      // larger than maxSize would otherwise make the target negative, so the
-      // break condition below could never be met and the loop would delete
-      // every cached entry.
-      const targetSize = Math.max(0, maxSize - requiredSpace);
-      let currentSize = stats.totalSize;
+      const freed = await evictWithin(
+        tx,
+        totals.totalSize,
+        Math.max(0, maxSize - requiredSpace)
+      );
 
-      if (currentSize <= targetSize) {
-        return; // Already have enough space
+      if (freed.count > 0) {
+        await tx.objectStore("metadata").put({
+          key: IMAGE_CACHE_METADATA_KEY,
+          imageCount: Math.max(0, totals.imageCount - freed.count),
+          totalSize: Math.max(0, totals.totalSize - freed.size),
+          updatedAt: Date.now(),
+        });
       }
 
-      // Get images sorted by last accessed time (oldest first)
-      const tx = db.transaction("images", "readwrite");
-      const index = tx.objectStore("images").index("by-last-accessed");
-      const imagesToDelete: string[] = [];
+      await tx.done;
 
-      for await (const cursor of index) {
-        if (currentSize <= targetSize) {
-          break;
-        }
-
-        imagesToDelete.push(cursor.value.url);
-        currentSize -= cursor.value.size;
-      }
-
-      // Delete the images
-      for (const url of imagesToDelete) {
-        await db.delete("images", url);
-      }
-
-      await this.updateMetadata();
-
-      if (imagesToDelete.length > 0) {
+      if (freed.count > 0) {
         console.info(
-          `[imageCache] Evicted ${String(imagesToDelete.length)} images to free space`
+          `[imageCache] Evicted ${String(freed.count)} images to free space`
         );
       }
     } catch (error) {
@@ -415,11 +532,27 @@ export async function preloadImages(
   let completed = 0;
   let successful = 0;
 
+  // Bound the work. The url list is assembled from every card in an
+  // untrusted collection with no aggregate cap, and the loading screen only
+  // clears once progress reaches 100%, so an unbounded list leaves the app
+  // permanently stuck behind the overlay.
+  let targets = urls;
+  if (targets.length > MAX_PRELOAD_URLS) {
+    console.warn(
+      `[imageCache] Collection lists ${String(targets.length)} images; preloading the first ${String(MAX_PRELOAD_URLS)}.`
+    );
+    targets = targets.slice(0, MAX_PRELOAD_URLS);
+  }
+
+  // Read the cached url set once rather than probing the store per url: the
+  // probe loop ran to completion before the first progress tick, so a long
+  // list froze the loading screen with no feedback at all.
+  const alreadyCached = new Set(await imageCache.getAllURLs());
+
   // Filter out already cached URLs
   const uncachedUrls: string[] = [];
-  for (const url of urls) {
-    const isCached = await imageCache.has(url);
-    if (!isCached) {
+  for (const url of targets) {
+    if (!alreadyCached.has(url)) {
       uncachedUrls.push(url);
     } else {
       completed++;
@@ -429,7 +562,7 @@ export async function preloadImages(
 
   // Report initial progress (already cached)
   if (onProgress) {
-    onProgress(completed, urls.length);
+    onProgress(completed, targets.length);
   }
 
   // Fetch remaining images in batches
@@ -449,7 +582,7 @@ export async function preloadImages(
     }
 
     if (onProgress) {
-      onProgress(completed, urls.length);
+      onProgress(completed, targets.length);
     }
   }
 

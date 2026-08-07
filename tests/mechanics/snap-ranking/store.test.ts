@@ -61,3 +61,46 @@ describe("snap-ranking initGame value cap", () => {
     expect(state.cardIds).toHaveLength(MAX_UNIQUE_VALUES);
   });
 });
+
+describe("snap-ranking with prototype-named card ids", () => {
+  beforeEach(() => {
+    useSnapRankingStore.setState(useSnapRankingStore.getInitialState());
+  });
+
+  it("scores a card whose id is __proto__", () => {
+    // Entity ids come from untrusted collection data and are only validated
+    // as non-empty strings. Assigning a primitive through the inherited
+    // __proto__ setter is a silent no-op, so the card was dealt but its
+    // value never stored, and the undefined guard in submitGuess read back
+    // Object.prototype instead — the card could never be scored.
+    const config: GameConfig = {
+      guessField: "order",
+      cards: [
+        { id: "a", value: 1 },
+        { id: "__proto__", value: 2 },
+      ],
+      valueType: "numeric",
+      uniqueValues: [1, 2],
+    };
+
+    const store = useSnapRankingStore.getState();
+    store.initGame(config);
+    useSnapRankingStore.setState({ isActive: true });
+
+    expect(useSnapRankingStore.getState().cardValues["__proto__"]).toBe(2);
+
+    // Play to the __proto__ card and guess its true value.
+    const cardIds = useSnapRankingStore.getState().cardIds;
+    const target = cardIds.indexOf("__proto__");
+    useSnapRankingStore.setState({
+      currentIndex: target,
+      isCurrentCardFlipped: true,
+    });
+    useSnapRankingStore.getState().submitGuess(2);
+
+    const guesses = useSnapRankingStore.getState().guesses;
+    expect(guesses).toHaveLength(1);
+    expect(guesses[0]?.actualValue).toBe(2);
+    expect(guesses[0]?.score).toBeGreaterThan(0);
+  });
+});

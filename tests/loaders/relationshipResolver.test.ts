@@ -227,3 +227,61 @@ describe("relationshipResolver", () => {
     });
   });
 });
+
+describe("relationshipResolver with an attacker-scaled definition", () => {
+  /**
+   * Both the relationship count and the entity count come from untrusted
+   * collection JSON, and neither is capped. Rebuilding the relationship
+   * entries per entity multiplies the two, so the cost grows with the square
+   * of the payload rather than with its size.
+   */
+  function hostileDefinition(relationshipCount: number): CollectionDefinition {
+    const relationships: CollectionDefinition["relationships"] = {};
+    for (let i = 0; i < relationshipCount; i++) {
+      // Keys naming a type that does not exist: every entry is scanned and
+      // discarded for each entity.
+      relationships[`ghost${String(i)}.field${String(i)}`] = {};
+    }
+    return {
+      id: "hostile",
+      name: "Hostile",
+      entityTypes: { game: { primary: true, fields: {} } },
+      relationships,
+    };
+  }
+
+  it("resolves a large collection without super-linear cost", () => {
+    const definition = hostileDefinition(10000);
+    const entities: Entity[] = Array.from({ length: 1000 }, (_, i) => ({
+      id: `g${String(i)}`,
+      title: `Game ${String(i)}`,
+    }));
+    const context = createResolverContext(definition, { game: entities });
+
+    const started = Date.now();
+    const resolved = resolveAllRelationships("game", context);
+    const elapsed = Date.now() - started;
+
+    expect(resolved).toHaveLength(1000);
+    // Pre-fix this rebuilt all 10000 relationship entries for each of the
+    // 1000 entities and took several seconds.
+    expect(elapsed).toBeLessThan(1500);
+  });
+
+  it("ranks entities without rescanning the relationship record", () => {
+    const definition = hostileDefinition(10000);
+    const entities: Entity[] = Array.from({ length: 1000 }, (_, i) => ({
+      id: `g${String(i)}`,
+      title: `Game ${String(i)}`,
+    }));
+    const context = createResolverContext(definition, { game: entities });
+
+    const started = Date.now();
+    for (const entity of entities) {
+      getEntityRank(entity, "game", context);
+    }
+    const elapsed = Date.now() - started;
+
+    expect(elapsed).toBeLessThan(1500);
+  });
+});

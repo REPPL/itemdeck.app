@@ -7,7 +7,12 @@
 
 import { shuffle } from "@/utils/shuffle";
 import type { Question, Answer } from "../types";
-import type { QuestionGenerator, GeneratorCardData, GeneratorOptions, GeneratorCheckResult } from "./types";
+import type {
+  QuestionGenerator,
+  GeneratorCardData,
+  GeneratorOptions,
+  GeneratorCheckResult,
+} from "./types";
 import {
   generateQuestionId,
   generateAnswerId,
@@ -23,7 +28,10 @@ import {
  */
 const FILL_BLANK_FIELDS = [
   { field: "year", promptTemplate: '"{title}" was released in ____.' },
-  { field: "categoryShort", promptTemplate: '"{title}" belongs to the ____ category.' },
+  {
+    field: "categoryShort",
+    promptTemplate: '"{title}" belongs to the ____ category.',
+  },
   { field: "categoryTitle", promptTemplate: '"{title}" is from ____.' },
 ] as const;
 
@@ -32,13 +40,21 @@ const FILL_BLANK_FIELDS = [
  */
 function findBestField(
   cards: GeneratorCardData[]
-): { field: string; promptTemplate: string; uniqueValues: string[]; cards: GeneratorCardData[] } | null {
+): {
+  field: string;
+  promptTemplate: string;
+  uniqueValues: string[];
+  cards: GeneratorCardData[];
+} | null {
   for (const config of FILL_BLANK_FIELDS) {
     const cardsWithField = filterCardsWithField(cards, config.field);
     const uniqueValues = getUniqueFieldValues(cardsWithField, config.field);
 
     // Need at least 4 unique values for multiple choice
-    if (cardsWithField.length >= MIN_CARDS_FOR_QUIZ && uniqueValues.length >= MIN_CARDS_FOR_QUIZ) {
+    if (
+      cardsWithField.length >= MIN_CARDS_FOR_QUIZ &&
+      uniqueValues.length >= MIN_CARDS_FOR_QUIZ
+    ) {
       return {
         field: config.field,
         promptTemplate: config.promptTemplate,
@@ -62,11 +78,17 @@ function buildTitleToValuesMap(
 
   for (const card of cards) {
     const value = card[field];
-    if (value === undefined || value === null || value === "" || typeof value === "object") {
+    if (
+      value === undefined ||
+      value === null ||
+      value === "" ||
+      typeof value === "object"
+    ) {
       continue;
     }
 
-    const valueStr = typeof value === "string" ? value : String(value as number | boolean);
+    const valueStr =
+      typeof value === "string" ? value : String(value as number | boolean);
     const existingValues = titleToValues.get(card.title) ?? new Set();
     existingValues.add(valueStr);
     titleToValues.set(card.title, existingValues);
@@ -86,7 +108,11 @@ function generateQuestion(
   titleToValuesMap: Map<string, Set<string>>
 ): Question | null {
   const correctValue = card[field];
-  if (correctValue === undefined || correctValue === null || correctValue === "") {
+  if (
+    correctValue === undefined ||
+    correctValue === null ||
+    correctValue === ""
+  ) {
     return null;
   }
 
@@ -95,7 +121,10 @@ function generateQuestion(
     return null;
   }
 
-  const correctLabel = typeof correctValue === "string" ? correctValue : String(correctValue as number | boolean);
+  const correctLabel =
+    typeof correctValue === "string"
+      ? correctValue
+      : String(correctValue as number | boolean);
 
   // Get all correct values for this title (handles duplicate titles)
   const allCorrectForTitle = titleToValuesMap.get(card.title);
@@ -110,26 +139,36 @@ function generateQuestion(
   };
 
   // Create alternative correct answers (other valid values for same title)
-  const alternativeLabels = allCorrectLabels.filter((label) => label !== correctLabel);
+  // Same shape as relationshipToName: cap the rendered alternatives and
+  // match against a Set rather than scanning the correct list per value.
+  const correctLabelSet = new Set(allCorrectLabels);
+  const alternativeLabels = allCorrectLabels
+    .filter((label) => label !== correctLabel)
+    .slice(0, WRONG_ANSWER_COUNT);
   const alternativeAnswers: Answer[] = alternativeLabels.map((label) => ({
     id: generateAnswerId(),
     label,
   }));
 
   // Select wrong answers from unique values (excluding ALL correct values)
-  const otherValues = allUniqueValues.filter((v) => !allCorrectLabels.includes(v));
+  const otherValues = allUniqueValues.filter((v) => !correctLabelSet.has(v));
 
   // Need enough wrong answers after accounting for alternative correct answers
-  const wrongAnswersNeeded = Math.max(0, WRONG_ANSWER_COUNT - alternativeAnswers.length);
+  const wrongAnswersNeeded = Math.max(
+    0,
+    WRONG_ANSWER_COUNT - alternativeAnswers.length
+  );
   if (otherValues.length < wrongAnswersNeeded) {
     return null;
   }
 
   const shuffledOthers = shuffle(otherValues);
-  const wrongAnswers: Answer[] = shuffledOthers.slice(0, wrongAnswersNeeded).map((value) => ({
-    id: generateAnswerId(),
-    label: value,
-  }));
+  const wrongAnswers: Answer[] = shuffledOthers
+    .slice(0, wrongAnswersNeeded)
+    .map((value) => ({
+      id: generateAnswerId(),
+      label: value,
+    }));
 
   // Add alternative correct answers to wrong answers array
   const allWrongAnswers = [...wrongAnswers, ...alternativeAnswers];
@@ -144,9 +183,10 @@ function generateQuestion(
     correctAnswer,
     wrongAnswers: allWrongAnswers,
     relatedCardId: card.id,
-    alternativeCorrectIds: alternativeAnswers.length > 0
-      ? alternativeAnswers.map((a) => a.id)
-      : undefined,
+    alternativeCorrectIds:
+      alternativeAnswers.length > 0
+        ? alternativeAnswers.map((a) => a.id)
+        : undefined,
     metadata: {
       field,
     },
@@ -165,7 +205,8 @@ export const fillTheBlankGenerator: QuestionGenerator = {
     if (!fieldConfig) {
       return {
         canGenerate: false,
-        reason: "No suitable field found with enough unique values for Fill the Blank questions.",
+        reason:
+          "No suitable field found with enough unique values for Fill the Blank questions.",
       };
     }
 
@@ -184,7 +225,10 @@ export const fillTheBlankGenerator: QuestionGenerator = {
     }
 
     // Build title-to-values map for handling duplicate titles
-    const titleToValuesMap = buildTitleToValuesMap(fieldConfig.cards, fieldConfig.field);
+    const titleToValuesMap = buildTitleToValuesMap(
+      fieldConfig.cards,
+      fieldConfig.field
+    );
 
     const questions: Question[] = [];
     const usedCardIds = new Set<string>(options.excludeCardIds);

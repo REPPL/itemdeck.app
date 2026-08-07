@@ -48,8 +48,14 @@ export function isDetailLink(value: unknown): value is DetailLink {
  * or data: schemes) are dropped, so collection-supplied links are
  * sanitised at this choke point.
  *
+ * The entity schema is loose, so source and label arrive with arbitrary
+ * shapes. Both are rendered directly — source is also lowercased while
+ * categorising the sources overlay — so a non-string value throws during
+ * render and takes the whole card grid down to the query error boundary.
+ * Drop anything that is not a string here rather than at each sink.
+ *
  * @param urls - String URL, single DetailLink, or array
- * @returns Array of DetailLink objects with safe URLs
+ * @returns Array of DetailLink objects with safe URLs and string metadata
  */
 export function normaliseDetailUrls(
   urls: DetailUrls | undefined | null
@@ -65,9 +71,21 @@ export function normaliseDetailUrls(
         ? urls
         : [urls];
 
-  return links.filter(
-    (link) => isDetailLink(link) && safeExternalUrl(link.url) !== null
-  );
+  return links
+    .filter((link) => isDetailLink(link) && safeExternalUrl(link.url) !== null)
+    .map((link) => {
+      const safe: DetailLink = { url: link.url };
+      if (typeof link.source === "string") {
+        safe.source = link.source;
+      }
+      if (typeof link.label === "string") {
+        safe.label = link.label;
+      }
+      if (typeof link.isPrimary === "boolean") {
+        safe.isPrimary = link.isPrimary;
+      }
+      return safe;
+    });
 }
 
 /**

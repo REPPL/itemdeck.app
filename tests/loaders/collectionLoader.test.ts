@@ -295,3 +295,54 @@ describe("tolerant entity validation", () => {
     expect(console.warn).toHaveBeenCalled();
   });
 });
+
+describe("loadEntities duplicate id handling", () => {
+  // Duplicate ids from an untrusted index defeat CardGrid's random-selection
+  // guard, which proves "all selected ids still exist" by comparing counts —
+  // a duplicate makes the count match while an id is missing, throwing during
+  // render. They also produce duplicate React keys in every view and make one
+  // flip toggle several cards.
+  it("keeps one entity per id when an index lists a duplicate", async () => {
+    const base = "/data/collections/demo";
+    stubFetch({
+      [`${base}/adverts/index.json`]: ["a", "a", "b"],
+      [`${base}/adverts/a.json`]: { id: "a", title: "First" },
+      [`${base}/adverts/b.json`]: { id: "b", title: "Second" },
+    });
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities.map((e) => e.id)).toEqual(["a", "b"]);
+  });
+
+  it("does not refetch an id an index lists twice", async () => {
+    const base = "/data/collections/demo";
+    stubFetch({
+      [`${base}/adverts/index.json`]: ["a", "a", "a"],
+      [`${base}/adverts/a.json`]: { id: "a", title: "First" },
+    });
+
+    await loadEntities(base, "advert");
+
+    const entityFetches = fetchMock.mock.calls.filter(
+      (call) => call[0] === `${base}/adverts/a.json`
+    );
+    expect(entityFetches).toHaveLength(1);
+  });
+
+  it("keeps one entity per id when a single array file repeats one", async () => {
+    const base = "/data/collections/demo";
+    stubFetch({
+      [`${base}/adverts.json`]: [
+        { id: "a", title: "First" },
+        { id: "a", title: "Impostor" },
+        { id: "b", title: "Second" },
+      ],
+    });
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities.map((e) => e.id)).toEqual(["a", "b"]);
+    expect(entities[0]?.title).toBe("First");
+  });
+});

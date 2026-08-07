@@ -15,9 +15,14 @@ import { collectionKeys } from "@/hooks/queryKeys";
 import { useCollectionData } from "@/context/CollectionDataContext";
 import { useImagePreloader } from "@/hooks/useImageCache";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { mayCacheCollection } from "@/utils/cacheConsent";
 import { useSourceStore } from "@/stores/sourceStore";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
-import { isCollectionCached, listCachedCollections, type CacheInfo } from "@/lib/cardCache";
+import {
+  isCollectionCached,
+  listCachedCollections,
+  type CacheInfo,
+} from "@/lib/cardCache";
 import { CacheConsentDialog } from "@/components/CacheConsentDialog";
 import logo from "@/assets/img/logo.png";
 import styles from "./LoadingScreen.module.css";
@@ -72,7 +77,9 @@ export function LoadingScreen({
   const queryClient = useQueryClient();
 
   // Cache consent state (F-080)
-  const cacheConsentPreference = useSettingsStore((s) => s.cacheConsentPreference);
+  const cacheConsentPreference = useSettingsStore(
+    (s) => s.cacheConsentPreference
+  );
   const hasCacheConsent = useSettingsStore((s) => s.hasCacheConsent);
 
   // Get active source for GitHub context
@@ -85,7 +92,10 @@ export function LoadingScreen({
     if (!activeSource) return null;
 
     // Direct MyPlausibleMe source with stored username
-    if (activeSource.sourceType === "myplausibleme" && activeSource.mpmUsername) {
+    if (
+      activeSource.sourceType === "myplausibleme" &&
+      activeSource.mpmUsername
+    ) {
       return activeSource.mpmUsername;
     }
 
@@ -98,7 +108,8 @@ export function LoadingScreen({
     }
 
     // Match raw GitHub format: /{username}/MyPlausibleMe/...
-    const rawMatch = /raw\.githubusercontent\.com\/([^/]+)\/MyPlausibleMe\//.exec(url);
+    const rawMatch =
+      /raw\.githubusercontent\.com\/([^/]+)\/MyPlausibleMe\//.exec(url);
     if (rawMatch?.[1]) {
       return rawMatch[1];
     }
@@ -150,14 +161,44 @@ export function LoadingScreen({
     if (cacheConsentPreference === "never") return false;
     // "ask" mode: check if we already have consent for this source
     return !hasCacheConsent(activeSourceId);
-  }, [activeSourceId, activeSource?.isBuiltIn, cacheConsentPreference, hasCacheConsent]);
+  }, [
+    activeSourceId,
+    activeSource?.isBuiltIn,
+    cacheConsentPreference,
+    hasCacheConsent,
+  ]);
+
+  // Whether caching is actually permitted, which is a different question
+  // from whether to ask. A stored "never" answers the dialog permanently but
+  // must still forbid caching: preloading writes every image to IndexedDB,
+  // so gating only the dialog made "Never cache" weaker than declining once.
+  const mayCacheImages = useMemo(
+    () =>
+      mayCacheCollection({
+        hasActiveSource: Boolean(activeSourceId),
+        isBuiltIn: Boolean(activeSource?.isBuiltIn),
+        preference: cacheConsentPreference,
+        hasSourceConsent: activeSourceId
+          ? hasCacheConsent(activeSourceId)
+          : false,
+      }),
+    [
+      activeSourceId,
+      activeSource?.isBuiltIn,
+      cacheConsentPreference,
+      hasCacheConsent,
+    ]
+  );
 
   // Start image preloading; a failed preload must not strand the
   // loading screen, so advance to complete on rejection
   const startImagePreload = useCallback(() => {
     setPhase("images");
     preload(imageUrls).catch((err: unknown) => {
-      console.error("Image preloading failed; continuing without cached images:", err);
+      console.error(
+        "Image preloading failed; continuing without cached images:",
+        err
+      );
       setPhase("complete");
     });
   }, [imageUrls, preload]);
@@ -190,20 +231,39 @@ export function LoadingScreen({
   // empty state. Requires an active source so the gated query (no
   // source yet) does not complete the screen prematurely.
   useEffect(() => {
-    if (!isLoadingCollection && !error && activeSourceId && phase === "collection") {
+    if (
+      !isLoadingCollection &&
+      !error &&
+      activeSourceId &&
+      phase === "collection"
+    ) {
       // Ask for consent before caching anything. This must not depend on
       // the collection having images: an image-less external collection
       // still needs consent to cache its JSON for offline use.
       if (needsCacheConsent) {
         setPhase("consent");
         setConsentDialogOpen(true);
-      } else if (shouldPreloadImages && imageUrls.length > 0) {
+      } else if (
+        mayCacheImages &&
+        shouldPreloadImages &&
+        imageUrls.length > 0
+      ) {
         startImagePreload();
       } else {
         setPhase("complete");
       }
     }
-  }, [isLoadingCollection, error, activeSourceId, phase, shouldPreloadImages, imageUrls, startImagePreload, needsCacheConsent]);
+  }, [
+    isLoadingCollection,
+    error,
+    activeSourceId,
+    phase,
+    shouldPreloadImages,
+    imageUrls,
+    startImagePreload,
+    needsCacheConsent,
+    mayCacheImages,
+  ]);
 
   // Handle image preloading complete
   useEffect(() => {
@@ -228,17 +288,20 @@ export function LoadingScreen({
       }
     }, remaining);
 
-    return () => { clearTimeout(timer); };
+    return () => {
+      clearTimeout(timer);
+    };
   }, [phase, startTime, minDisplayTime, onComplete]);
 
   // Calculate overall progress (must be before early returns to maintain hook order)
-  const overallProgress = phase === "collection"
-    ? 0
-    : phase === "consent"
-    ? 10 // Show some progress during consent
-    : phase === "images"
-    ? 10 + progressPercent * 0.8 // Images are 80% of perceived loading after consent
-    : 100;
+  const overallProgress =
+    phase === "collection"
+      ? 0
+      : phase === "consent"
+        ? 10 // Show some progress during consent
+        : phase === "images"
+          ? 10 + progressPercent * 0.8 // Images are 80% of perceived loading after consent
+          : 100;
 
   // Build contextual status text (must be before early returns to maintain hook order)
   const statusText = useMemo(() => {
@@ -262,11 +325,21 @@ export function LoadingScreen({
     return "Ready!";
   }, [phase, progressPercent, githubUsername, collectionName]);
 
-  const mainContainerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
+  const mainContainerClass = [
+    styles.container,
+    styles[visualTheme as keyof typeof styles],
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   // Handle offline state with error
   if (!isOnline && (error || isLoadingCollection)) {
-    const containerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
+    const containerClass = [
+      styles.container,
+      styles[visualTheme as keyof typeof styles],
+    ]
+      .filter(Boolean)
+      .join(" ");
 
     // Show cached option if available
     if (hasCachedData === true) {
@@ -278,7 +351,12 @@ export function LoadingScreen({
         <div className={containerClass}>
           <div className={styles.content}>
             <div className={styles.offlineIcon}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
                 <line x1="1" y1="1" x2="23" y2="23" />
                 <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55" />
                 <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39" />
@@ -290,16 +368,21 @@ export function LoadingScreen({
             </div>
             <h2 className={styles.offlineTitle}>You appear to be offline</h2>
             <p className={styles.offlineMessage}>
-              Cannot reach the collection source. Check your internet connection and try again.
+              Cannot reach the collection source. Check your internet connection
+              and try again.
             </p>
 
             {cachedCollections.length > 0 && (
               <div className={styles.cachedCollections}>
-                <p className={styles.cachedLabel}>Previously viewed collections:</p>
+                <p className={styles.cachedLabel}>
+                  Previously viewed collections:
+                </p>
                 <ul className={styles.cachedList}>
                   {cachedCollections.slice(0, 5).map((cache) => (
                     <li key={cache.sourceId} className={styles.cachedItem}>
-                      <span className={styles.cachedName}>{cache.sourceId}</span>
+                      <span className={styles.cachedName}>
+                        {cache.sourceId}
+                      </span>
                       <span className={styles.cachedAge}>
                         {formatCacheAge(cache.ageMs)}
                       </span>
@@ -311,7 +394,9 @@ export function LoadingScreen({
 
             <button
               className={styles.retryButton}
-              onClick={() => { window.location.reload(); }}
+              onClick={() => {
+                window.location.reload();
+              }}
             >
               Retry
             </button>
@@ -323,14 +408,25 @@ export function LoadingScreen({
 
   // Handle error (when online)
   if (error) {
-    const containerClass = [styles.container, styles[visualTheme as keyof typeof styles]].filter(Boolean).join(" ");
+    const containerClass = [
+      styles.container,
+      styles[visualTheme as keyof typeof styles],
+    ]
+      .filter(Boolean)
+      .join(" ");
     return (
       <div className={containerClass}>
         <div className={styles.content}>
           <div className={styles.error}>
             <h2>Failed to load collection</h2>
             <p>{error.message}</p>
-            <button onClick={() => { window.location.reload(); }}>Retry</button>
+            <button
+              onClick={() => {
+                window.location.reload();
+              }}
+            >
+              Retry
+            </button>
           </div>
         </div>
       </div>
@@ -354,7 +450,9 @@ export function LoadingScreen({
               loading="eager"
               draggable="false"
             />
-            <span className={styles.githubUsername}>{githubUsername ?? ""}</span>
+            <span className={styles.githubUsername}>
+              {githubUsername ?? ""}
+            </span>
             {collectionName && (
               <span className={styles.collectionName}>{collectionName}</span>
             )}

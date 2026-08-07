@@ -13,6 +13,17 @@ import { getDB, type CachedImage, type CacheMetadata } from "@/db";
 const DEFAULT_MAX_CACHE_SIZE = 50 * 1024 * 1024;
 
 /**
+ * Upper bound on the images preloaded in one pass.
+ *
+ * The preload list is the flattened `imageUrls` of every card, and both the
+ * entity count and the per-card media list come from untrusted collection
+ * data. The loading overlay only clears at 100% progress and offers no skip,
+ * so an unbounded list is a lockout rather than a slow load. Generous enough
+ * that real collections never reach it.
+ */
+const MAX_PRELOAD_URLS = 2000;
+
+/**
  * Metadata key for image cache stats.
  */
 const IMAGE_CACHE_METADATA_KEY = "image-cache-stats";
@@ -153,11 +164,48 @@ export const imageCache = {
         await this.evictLRU(blob.size, maxSize);
       }
 
-      // Store the image
-      await db.put("images", cachedImage);
+      // Store the image and adjust the running totals in the same
+      // transaction. Recomputing the totals with a full store scan per write
+      // made caching cost grow with the square of the image count; doing the
+      // read-modify-write inside the transaction that stores the image keeps
+      // the counters correct under the concurrent writes the preloader
+      // issues, which a bare increment outside it would not.
+      const tx = db.transaction(["images", "metadata"], "readwrite");
+      const images = tx.objectStore("images");
+      const metadataStore = tx.objectStore("metadata");
 
-      // Update metadata
-      await this.updateMetadata();
+      const previous = await images.get(url);
+      await images.put(cachedImage);
+
+      const current = await metadataStore.get(IMAGE_CACHE_METADATA_KEY);
+
+      if (current) {
+        await metadataStore.put({
+          key: IMAGE_CACHE_METADATA_KEY,
+          // Re-storing a url replaces the existing record rather than
+          // adding one, so only its size difference counts.
+          imageCount: previous ? current.imageCount : current.imageCount + 1,
+          totalSize: current.totalSize - (previous?.size ?? 0) + blob.size,
+          updatedAt: now,
+        });
+      } else {
+        // No metadata record yet (first write, or a store populated before
+        // one existed): reconcile from the store this once.
+        let totalSize = 0;
+        let imageCount = 0;
+        for await (const cursor of images) {
+          totalSize += cursor.value.size;
+          imageCount++;
+        }
+        await metadataStore.put({
+          key: IMAGE_CACHE_METADATA_KEY,
+          imageCount,
+          totalSize,
+          updatedAt: now,
+        });
+      }
+
+      await tx.done;
     } catch (error) {
       console.warn("[imageCache] Failed to cache image:", url, error);
     }
@@ -311,10 +359,13 @@ export const imageCache = {
         return; // Already have enough space
       }
 
-      // Get images sorted by last accessed time (oldest first)
-      const tx = db.transaction("images", "readwrite");
+      // Delete the least recently used images and adjust the running totals
+      // in one transaction, so eviction does not reintroduce the full store
+      // scan that made every write quadratic once the cache filled up.
+      const tx = db.transaction(["images", "metadata"], "readwrite");
       const index = tx.objectStore("images").index("by-last-accessed");
       const imagesToDelete: string[] = [];
+      let freedSize = 0;
 
       for await (const cursor of index) {
         if (currentSize <= targetSize) {
@@ -323,14 +374,23 @@ export const imageCache = {
 
         imagesToDelete.push(cursor.value.url);
         currentSize -= cursor.value.size;
+        freedSize += cursor.value.size;
+        await cursor.delete();
       }
 
-      // Delete the images
-      for (const url of imagesToDelete) {
-        await db.delete("images", url);
+      const metadataStore = tx.objectStore("metadata");
+      const current = await metadataStore.get(IMAGE_CACHE_METADATA_KEY);
+
+      if (current) {
+        await metadataStore.put({
+          key: IMAGE_CACHE_METADATA_KEY,
+          imageCount: Math.max(0, current.imageCount - imagesToDelete.length),
+          totalSize: Math.max(0, current.totalSize - freedSize),
+          updatedAt: Date.now(),
+        });
       }
 
-      await this.updateMetadata();
+      await tx.done;
 
       if (imagesToDelete.length > 0) {
         console.info(
@@ -415,11 +475,27 @@ export async function preloadImages(
   let completed = 0;
   let successful = 0;
 
+  // Bound the work. The url list is assembled from every card in an
+  // untrusted collection with no aggregate cap, and the loading screen only
+  // clears once progress reaches 100%, so an unbounded list leaves the app
+  // permanently stuck behind the overlay.
+  let targets = urls;
+  if (targets.length > MAX_PRELOAD_URLS) {
+    console.warn(
+      `[imageCache] Collection lists ${String(targets.length)} images; preloading the first ${String(MAX_PRELOAD_URLS)}.`
+    );
+    targets = targets.slice(0, MAX_PRELOAD_URLS);
+  }
+
+  // Read the cached url set once rather than probing the store per url: the
+  // probe loop ran to completion before the first progress tick, so a long
+  // list froze the loading screen with no feedback at all.
+  const alreadyCached = new Set(await imageCache.getAllURLs());
+
   // Filter out already cached URLs
   const uncachedUrls: string[] = [];
-  for (const url of urls) {
-    const isCached = await imageCache.has(url);
-    if (!isCached) {
+  for (const url of targets) {
+    if (!alreadyCached.has(url)) {
       uncachedUrls.push(url);
     } else {
       completed++;
@@ -429,7 +505,7 @@ export async function preloadImages(
 
   // Report initial progress (already cached)
   if (onProgress) {
-    onProgress(completed, urls.length);
+    onProgress(completed, targets.length);
   }
 
   // Fetch remaining images in batches
@@ -449,7 +525,7 @@ export async function preloadImages(
     }
 
     if (onProgress) {
-      onProgress(completed, urls.length);
+      onProgress(completed, targets.length);
     }
   }
 

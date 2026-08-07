@@ -258,3 +258,87 @@ describe("imageCache", () => {
     });
   });
 });
+
+describe("imageCache metadata maintenance", () => {
+  beforeEach(async () => {
+    await imageCache.clear();
+  });
+
+  afterEach(async () => {
+    await deleteDB();
+  });
+
+  it("keeps metadata accurate across many stores", async () => {
+    for (let i = 0; i < 50; i++) {
+      await imageCache.set(
+        `https://example.com/${String(i)}.jpg`,
+        new Blob([`payload-${String(i)}`], { type: "image/jpeg" })
+      );
+    }
+
+    const stats = await imageCache.getStats();
+    const urls = await imageCache.getAllURLs();
+
+    expect(stats.imageCount).toBe(50);
+    expect(urls).toHaveLength(50);
+
+    let actualSize = 0;
+    for (const url of urls) {
+      const image = await imageCache.get(url);
+      actualSize += image?.size ?? 0;
+    }
+    expect(stats.totalSize).toBe(actualSize);
+  });
+
+  it("does not double-count when the same url is stored twice", async () => {
+    const url = "https://example.com/same.jpg";
+
+    await imageCache.set(url, new Blob(["first"], { type: "image/jpeg" }));
+    await imageCache.set(
+      url,
+      new Blob(["second-and-longer"], { type: "image/jpeg" })
+    );
+
+    const stats = await imageCache.getStats();
+    const stored = await imageCache.get(url);
+
+    expect(stats.imageCount).toBe(1);
+    expect(stats.totalSize).toBe(stored?.size);
+  });
+
+  it("keeps metadata accurate after eviction", async () => {
+    // Budget fits a couple of entries, so storing more forces eviction.
+    const blob = new Blob([new Uint8Array(1000)], { type: "image/jpeg" });
+    const maxSize = blob.size * 3;
+
+    for (let i = 0; i < 8; i++) {
+      await imageCache.set(
+        `https://example.com/evict-${String(i)}.jpg`,
+        new Blob([new Uint8Array(1000)], { type: "image/jpeg" }),
+        {},
+        { maxSize }
+      );
+    }
+
+    const stats = await imageCache.getStats();
+    const urls = await imageCache.getAllURLs();
+
+    expect(stats.imageCount).toBe(urls.length);
+    expect(stats.totalSize).toBeLessThanOrEqual(maxSize);
+  });
+
+  it("stores many images without rescanning the whole store each time", async () => {
+    const started = Date.now();
+    for (let i = 0; i < 800; i++) {
+      await imageCache.set(
+        `https://example.com/perf-${String(i)}.jpg`,
+        new Blob([new Uint8Array(64)], { type: "image/jpeg" })
+      );
+    }
+    const elapsed = Date.now() - started;
+
+    // Pre-fix each store walked every existing record to recompute totals,
+    // so this grew with the square of the image count.
+    expect(elapsed).toBeLessThan(3000);
+  });
+});

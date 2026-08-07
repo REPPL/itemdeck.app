@@ -23,6 +23,16 @@ export interface ResolverContext {
 
   /** Entity lookup maps for fast access */
   entityMaps: Record<string, Map<string, Entity>>;
+
+  /**
+   * Relationship definitions grouped by the entity type they apply to.
+   *
+   * Both the relationship record and the entity list come from untrusted
+   * collection JSON and neither is capped, so rebuilding the entries for
+   * every entity multiplies the two dimensions and makes the load cost grow
+   * with the square of the payload. Grouping once keeps it linear.
+   */
+  relationshipsByType: Map<string, [string, RelationshipDefinition][]>;
 }
 
 /**
@@ -47,10 +57,34 @@ export function createResolverContext(
     entityMaps[type] = map;
   }
 
+  // Group relationships by the entity type in their "type.field" key once,
+  // so neither the resolve nor the rank loop rescans the whole record per
+  // entity.
+  const relationshipsByType = new Map<
+    string,
+    [string, RelationshipDefinition][]
+  >();
+
+  for (const [relKey, relDef] of Object.entries(
+    definition.relationships ?? {}
+  )) {
+    const [relType, fieldName] = relKey.split(".");
+    if (!relType || !fieldName) {
+      continue;
+    }
+    const forType = relationshipsByType.get(relType);
+    if (forType) {
+      forType.push([fieldName, relDef]);
+    } else {
+      relationshipsByType.set(relType, [[fieldName, relDef]]);
+    }
+  }
+
   return {
     definition,
     entities,
     entityMaps,
+    relationshipsByType,
   };
 }
 
@@ -94,17 +128,12 @@ export function resolveEntityRelationships(
   context: ResolverContext
 ): ResolvedEntity {
   const resolved: Record<string, Entity | Entity[]> = {};
-  const relationships = context.definition.relationships ?? {};
 
-  // Find relationships that apply to this entity type
-  for (const [relKey, relDef] of Object.entries(relationships)) {
-    // Relationship keys are in format "entityType.fieldName"
-    const [relType, fieldName] = relKey.split(".");
-
-    if (relType !== entityType || !fieldName) {
-      continue;
-    }
-
+  // Relationships are pre-grouped by entity type, so only the entries that
+  // apply to this type are visited.
+  for (const [fieldName, relDef] of context.relationshipsByType.get(
+    entityType
+  ) ?? []) {
     const fieldValue = entity[fieldName];
 
     if (fieldValue === undefined) {
@@ -198,17 +227,11 @@ export function getEntityRank(
   entityType: string,
   context: ResolverContext
 ): number | null {
-  const relationships = context.definition.relationships ?? {};
-
-  // Look for ordinal relationship
-  for (const [relKey, relDef] of Object.entries(relationships)) {
+  // Look for ordinal relationship among this type's relationships only
+  for (const [fieldName, relDef] of context.relationshipsByType.get(
+    entityType
+  ) ?? []) {
     if (relDef.type !== "ordinal") {
-      continue;
-    }
-
-    const [relType, fieldName] = relKey.split(".");
-
-    if (relType !== entityType || !fieldName) {
       continue;
     }
 

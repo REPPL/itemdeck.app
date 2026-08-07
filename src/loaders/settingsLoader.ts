@@ -14,6 +14,30 @@ import { COLLECTION_SETTINGS_VERSION } from "@/types/collectionSettings";
 import { isAllowedCollectionSource } from "@/config/allowedSources";
 
 /**
+ * Upper bound on a collection's suggested `maxVisibleCards`.
+ *
+ * `settings.json` is untrusted and this loader is the only ingress for the
+ * key that lacks the positive-integer bound every sibling schema enforces
+ * (config, settings export, collection v2). An out-of-range value is written
+ * straight into the persisted global settings, so it outlives the collection
+ * that supplied it: a value below 1 makes CardGrid discard every card on
+ * flip, and a non-finite one serialises to null and does the same after the
+ * next reload. Matches the settings-panel stepper's maximum.
+ */
+const MAX_VISIBLE_CARDS = 10;
+
+/**
+ * Upper bound on the number of searchable field paths a collection may set.
+ *
+ * Search resolves every field on every card for each settled query, so an
+ * unbounded list scales that product with attacker-chosen input and freezes
+ * the tab. Like `maxVisibleCards`, the value persists globally and is not
+ * covered by the forced-settings restore, so it would follow the visitor to
+ * every later collection. The built-in default uses three fields.
+ */
+const MAX_SEARCH_FIELDS = 32;
+
+/**
  * Load collection settings from a collection directory.
  *
  * @param basePath - Base path to the collection directory
@@ -227,8 +251,11 @@ function validateDefaultSettings(
   }
 
   // maxVisibleCards
-  if (typeof raw.maxVisibleCards === "number" && raw.maxVisibleCards > 0) {
-    defaults.maxVisibleCards = Math.floor(raw.maxVisibleCards);
+  if (typeof raw.maxVisibleCards === "number") {
+    const requested = Math.floor(raw.maxVisibleCards);
+    if (Number.isFinite(requested) && requested >= 1) {
+      defaults.maxVisibleCards = Math.min(requested, MAX_VISIBLE_CARDS);
+    }
   }
 
   // shuffleOnLoad
@@ -243,9 +270,9 @@ function validateDefaultSettings(
 
   // searchFields
   if (Array.isArray(raw.searchFields)) {
-    defaults.searchFields = raw.searchFields.filter(
-      (f): f is string => typeof f === "string"
-    );
+    defaults.searchFields = raw.searchFields
+      .filter((f): f is string => typeof f === "string")
+      .slice(0, MAX_SEARCH_FIELDS);
   }
 
   return defaults;

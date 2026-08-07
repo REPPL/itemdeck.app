@@ -98,3 +98,78 @@ describe("loadCollectionSettings allowlist", () => {
     });
   });
 });
+
+describe("loadCollectionSettings default bounds", () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  function mockSettings(defaults: Record<string, unknown>) {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({ version: 1, defaults }),
+    });
+    return loadCollectionSettings("/data/collections/demo");
+  }
+
+  it("rejects a fractional maxVisibleCards that would floor to zero", async () => {
+    // The bound is tested before the floor, so 0.5 would otherwise be stored
+    // as 0 — CardGrid then discards every card on flip, disabling the app's
+    // core interaction for every later collection because the value persists.
+    const result = await mockSettings({ maxVisibleCards: 0.5 });
+
+    expect(result?.defaults?.maxVisibleCards).toBeUndefined();
+  });
+
+  it("rejects a non-finite maxVisibleCards", async () => {
+    // JSON.parse("1e400") yields Infinity, which survives `> 0` and later
+    // serialises to null in localStorage — the same brick after one reload.
+    const result = await mockSettings({ maxVisibleCards: Infinity });
+
+    expect(result?.defaults?.maxVisibleCards).toBeUndefined();
+  });
+
+  it("clamps an oversized maxVisibleCards to the settings-panel maximum", async () => {
+    const result = await mockSettings({ maxVisibleCards: 5000 });
+
+    expect(result?.defaults?.maxVisibleCards).toBe(10);
+  });
+
+  it("keeps an in-range maxVisibleCards", async () => {
+    const result = await mockSettings({ maxVisibleCards: 3 });
+
+    expect(result?.defaults?.maxVisibleCards).toBe(3);
+  });
+
+  it("caps an oversized searchFields list", async () => {
+    // Search cost is cards x fields on every settled query, so an unbounded
+    // field list from an untrusted collection freezes the tab — and the value
+    // persists globally, following the visitor to every later collection.
+    const result = await mockSettings({
+      searchFields: Array.from({ length: 5000 }, (_, i) => `f${String(i)}`),
+    });
+
+    expect(result?.defaults?.searchFields).toHaveLength(32);
+    expect(result?.defaults?.searchFields?.[0]).toBe("f0");
+  });
+
+  it("keeps a normal searchFields list unchanged", async () => {
+    const result = await mockSettings({
+      searchFields: ["title", "summary", 7, "verdict"],
+    });
+
+    expect(result?.defaults?.searchFields).toEqual([
+      "title",
+      "summary",
+      "verdict",
+    ]);
+  });
+});

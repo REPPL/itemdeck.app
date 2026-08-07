@@ -47,8 +47,8 @@ describe("relationshipToName with untrusted relationship values", () => {
     });
 
     for (const question of questions) {
-      // Every wrong answer is rendered as its own button.
-      expect(question.wrongAnswers.length).toBeLessThanOrEqual(16);
+      // At most the three wrong answers plus the three capped alternatives.
+      expect(question.wrongAnswers.length).toBeLessThanOrEqual(6);
     }
   });
 

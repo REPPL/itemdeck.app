@@ -8,12 +8,12 @@
 /**
  * Upper bound on the options offered for one filter field.
  *
- * Card-derived options (platform, year) are one value per card and so are
- * already bounded by the collection loader's entity cap, but a per-entity
- * array such as `genres` is uncapped, leaving the option list with no
- * ceiling. The dropdown mounts every option and re-reconciles the whole list
- * whenever a filter is toggled, so an unbounded list freezes the tab two
- * clicks after load. Real collections use tens of values per field.
+ * The dropdown mounts every option and re-reconciles the whole list whenever
+ * a filter is toggled, so an unbounded list freezes the tab two clicks after
+ * load. A per-entity array such as `genres` has no ceiling at all, and the
+ * card-derived fields are bounded only by the loader's entity cap, which is
+ * an order of magnitude beyond anything usable as a filter — so every field
+ * gets the same bound. Real collections use tens of values per field.
  */
 export const MAX_FILTER_OPTIONS = 1000;
 
@@ -28,7 +28,7 @@ export const MAX_FILTER_OPTIONS = 1000;
  * @param field - Field name, used in the truncation warning
  * @returns The options, truncated to MAX_FILTER_OPTIONS
  */
-export function capFilterOptions(options: string[], field: string): string[] {
+export function capFilterOptions<T>(options: T[], field: string): T[] {
   if (options.length <= MAX_FILTER_OPTIONS) {
     return options;
   }

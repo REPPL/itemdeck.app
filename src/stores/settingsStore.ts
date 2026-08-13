@@ -595,6 +595,7 @@ interface SettingsState {
   setShowDragIcon: (show: boolean) => void;
   setCustomThemeUrl: (url: string | null) => void;
   setHasAppliedCollectionDefaults: (applied: boolean) => void;
+  setAppliedCollectionDefaultsSourceId: (sourceId: string | null) => void;
   applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
   setRandomSelectionEnabled: (enabled: boolean) => void;
   setRandomSelectionCount: (count: number) => void;
@@ -883,6 +884,10 @@ export const useSettingsStore = create<SettingsState>()(
 
       setHasAppliedCollectionDefaults: (hasAppliedCollectionDefaults) => {
         set({ hasAppliedCollectionDefaults });
+      },
+
+      setAppliedCollectionDefaultsSourceId: (appliedCollectionDefaultsSourceId) => {
+        set({ appliedCollectionDefaultsSourceId });
       },
 
       setRandomSelectionEnabled: (randomSelectionEnabled) => {

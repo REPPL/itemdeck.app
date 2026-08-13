@@ -196,13 +196,19 @@ function migrateSettings(
 function applySettings(settings: ExportableSettings, mode: ImportMode): void {
   const store = useSettingsStore.getState();
 
-  // Preserve the one-time "collection defaults applied" marker across a replace
-  // reset. resetToDefaults() clears it to false, which makes the
-  // CollectionDataContext effect re-fire and re-apply the active collection's
+  // Preserve BOTH one-time "collection defaults applied" markers across a
+  // replace reset. resetToDefaults() clears them, which makes the
+  // CollectionDataContext effects re-fire and re-apply the active collection's
   // defaults over the values being imported (silently discarding the user's
-  // backup for those fields). The marker is internal state, not a user-facing
-  // setting, so importing settings must not disturb it.
+  // backup for those fields). `hasAppliedCollectionDefaults` gates the config
+  // defaults; `appliedCollectionDefaultsSourceId` (compared against the active
+  // source in applyCollectionSettings) gates the settings.json defaults —
+  // restoring only the former still let the active collection's settings.json
+  // clobber the import on the next load. Both are internal state, not
+  // user-facing settings, so importing settings must not disturb them.
   const hadAppliedCollectionDefaults = store.hasAppliedCollectionDefaults;
+  const hadAppliedCollectionDefaultsSourceId =
+    store.appliedCollectionDefaultsSourceId;
 
   // Reset to defaults first if replace mode
   if (mode === "replace") {
@@ -290,10 +296,14 @@ function applySettings(settings: ExportableSettings, mode: ImportMode): void {
     }
   }
 
-  // Restore the collection-defaults marker cleared by resetToDefaults, so the
-  // just-imported values are not overwritten by the active collection.
+  // Restore the collection-defaults markers cleared by resetToDefaults, so the
+  // just-imported values are not overwritten by the active collection (either
+  // via its config defaults or its settings.json defaults).
   if (mode === "replace") {
     store.setHasAppliedCollectionDefaults(hadAppliedCollectionDefaults);
+    store.setAppliedCollectionDefaultsSourceId(
+      hadAppliedCollectionDefaultsSourceId
+    );
   }
 }
 

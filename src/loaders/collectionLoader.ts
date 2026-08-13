@@ -198,6 +198,32 @@ function extractEntityIds(data: unknown, pluralType: string): string[] {
  * @param entityType - Type of entities to load (singular form, e.g., "advert")
  * @returns Array of entities
  */
+/**
+ * Parse a single-file entity array into deduplicated entities.
+ *
+ * The index-driven path caps its id list at MAX_ENTITY_IDS, but a collection
+ * can skip index.json and serve `{type}s.json` as one array. Apply the same
+ * ceiling here so an untrusted single file cannot exceed the entity count the
+ * rest of the pipeline (relationship resolution, per-card rendering) is sized
+ * for.
+ */
+function parseEntityArray(data: unknown[], urlLabel: string): Entity[] {
+  let rows = data;
+  if (rows.length > MAX_ENTITY_IDS) {
+    console.warn(
+      `Entity file lists ${String(rows.length)} entities; loading the first ${String(MAX_ENTITY_IDS)}.`
+    );
+    rows = rows.slice(0, MAX_ENTITY_IDS);
+  }
+  return dedupeEntitiesById(
+    rows
+      .map((item, index) =>
+        parseEntityTolerant(item, `${urlLabel}[${String(index)}]`)
+      )
+      .filter((entity): entity is Entity => entity !== null)
+  );
+}
+
 export async function loadEntities(
   basePath: string,
   entityType: string
@@ -270,13 +296,7 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return dedupeEntitiesById(
-            data
-              .map((item, index) =>
-                parseEntityTolerant(item, `${pluralFileUrl}[${String(index)}]`)
-              )
-              .filter((entity): entity is Entity => entity !== null)
-          );
+          return parseEntityArray(data, pluralFileUrl);
         }
 
         const single = parseEntityTolerant(data, pluralFileUrl);
@@ -299,13 +319,7 @@ export async function loadEntities(
         const data = (await response.json()) as unknown;
 
         if (Array.isArray(data)) {
-          return dedupeEntitiesById(
-            data
-              .map((item, index) =>
-                parseEntityTolerant(item, `${singleFileUrl}[${String(index)}]`)
-              )
-              .filter((entity): entity is Entity => entity !== null)
-          );
+          return parseEntityArray(data, singleFileUrl);
         }
 
         // Single entity in file

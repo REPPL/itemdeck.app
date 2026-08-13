@@ -12,6 +12,21 @@ import type {
 } from "@/types/schema";
 
 /**
+ * Upper bound on the number of relationship definitions honoured from an
+ * untrusted collection.json.
+ *
+ * The relationship record is `type.field` keyed and unbounded in the schema.
+ * Grouping keeps the per-entity work proportional to the entries for one type,
+ * but a record where every key shares the primary type's prefix collapses into
+ * a single bucket, so both the resolve pass and the per-card rank pass become
+ * O(relationships x entities) — a synchronous multi-minute main-thread freeze
+ * on a crafted payload. Cap the record the way entity types and ids are
+ * already capped (MAX_ENTITY_TYPES, MAX_ENTITY_IDS). Real collections declare
+ * a handful of relationships, so the ceiling is far above any honest use.
+ */
+export const MAX_RELATIONSHIPS = 200;
+
+/**
  * Context for resolving relationships.
  */
 export interface ResolverContext {
@@ -65,9 +80,15 @@ export function createResolverContext(
     [string, RelationshipDefinition][]
   >();
 
-  for (const [relKey, relDef] of Object.entries(
-    definition.relationships ?? {}
-  )) {
+  const relationshipEntries = Object.entries(definition.relationships ?? {});
+  if (relationshipEntries.length > MAX_RELATIONSHIPS) {
+    console.warn(
+      `Collection declares ${String(relationshipEntries.length)} relationships; ` +
+        `only the first ${String(MAX_RELATIONSHIPS)} are resolved.`
+    );
+  }
+
+  for (const [relKey, relDef] of relationshipEntries.slice(0, MAX_RELATIONSHIPS)) {
     const [relType, fieldName] = relKey.split(".");
     if (!relType || !fieldName) {
       continue;

@@ -9,6 +9,7 @@ import {
   resolveEntityRelationships,
   resolveAllRelationships,
   getEntityRank,
+  MAX_RELATIONSHIPS,
 } from "@/loaders/relationshipResolver";
 import type { CollectionDefinition, Entity } from "@/types/schema";
 
@@ -282,6 +283,53 @@ describe("relationshipResolver with an attacker-scaled definition", () => {
     }
     const elapsed = Date.now() - started;
 
+    expect(elapsed).toBeLessThan(1500);
+  });
+
+  /**
+   * Grouping keeps the per-entity work proportional to one type's bucket, but a
+   * record whose keys all share the primary type's prefix collapses into a
+   * single bucket. Without a cap that bucket is |relationships| entries, so the
+   * resolve and rank passes become O(relationships x entities) again.
+   */
+  function samePrefixDefinition(relationshipCount: number): CollectionDefinition {
+    const relationships: CollectionDefinition["relationships"] = {};
+    for (let i = 0; i < relationshipCount; i++) {
+      relationships[`game.field${String(i)}`] = {};
+    }
+    return {
+      id: "hostile",
+      name: "Hostile",
+      entityTypes: { game: { primary: true, fields: {} } },
+      relationships,
+    };
+  }
+
+  it("caps the relationships honoured for a single entity type", () => {
+    const definition = samePrefixDefinition(MAX_RELATIONSHIPS + 500);
+    const context = createResolverContext(definition, { game: [] });
+
+    const bucket = context.relationshipsByType.get("game") ?? [];
+    expect(bucket.length).toBeLessThanOrEqual(MAX_RELATIONSHIPS);
+  });
+
+  it("resolves a same-prefix relationship flood without super-linear cost", () => {
+    const definition = samePrefixDefinition(20000);
+    const entities: Entity[] = Array.from({ length: 1000 }, (_, i) => ({
+      id: `g${String(i)}`,
+      title: `Game ${String(i)}`,
+    }));
+    const context = createResolverContext(definition, { game: entities });
+
+    const started = Date.now();
+    resolveAllRelationships("game", context);
+    for (const entity of entities) {
+      getEntityRank(entity, "game", context);
+    }
+    const elapsed = Date.now() - started;
+
+    // Pre-fix the "game" bucket held all 20000 entries, so this was
+    // 20000 x 1000 iterations twice over — a multi-second freeze.
     expect(elapsed).toBeLessThan(1500);
   });
 });

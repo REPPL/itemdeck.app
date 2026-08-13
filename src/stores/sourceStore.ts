@@ -328,8 +328,16 @@ export const useSourceStore = create<SourceState>()(
         activeSourceId: state.activeSourceId,
         defaultSourceId: state.defaultSourceId,
       }),
+      // Without a migrate, a persisted `version` older than STORE_VERSION makes
+      // zustand hand `undefined` to `merge`, which then threw dereferencing
+      // `.sources` — the throw was swallowed and the user's configured sources
+      // silently vanished on every store-version bump. Carry the persisted
+      // state forward so `merge` can normalise it (the dedup/legacy-cleanup
+      // logic below is exactly the cross-version migration this enables).
+      migrate: (persisted) => persisted as SourceState,
       merge: (persisted, current) => {
-        const persistedState = persisted as Partial<SourceState>;
+        // `merge` is also called with `undefined` on a fresh load, so guard it.
+        const persistedState = (persisted ?? {}) as Partial<SourceState>;
 
         // Start with persisted sources
         let sources = persistedState.sources ?? current.sources;

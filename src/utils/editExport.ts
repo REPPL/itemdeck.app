@@ -9,9 +9,24 @@ import type { EntityEdit, ExportedEdits } from "@/stores/editsStore";
 
 /**
  * Schema for validating imported edits.
+ *
+ * Field values are restricted to JSON primitives. Edits are text overlays
+ * produced by the edit form (string / null values only), but the imported file
+ * is untrusted: the merged edit is spread over the source card and rendered
+ * directly as a React child, so a non-primitive value (object/array) would
+ * throw "Objects are not valid as a React child" on every render and, because
+ * edits persist, brick the collection view until localStorage is cleared.
+ * Primitives all render safely; objects and arrays are rejected here.
  */
+const editFieldValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+]);
+
 const entityEditSchema = z.object({
-  fields: z.record(z.string(), z.unknown()),
+  fields: z.record(z.string(), editFieldValueSchema),
   editedAt: z.number(),
 });
 

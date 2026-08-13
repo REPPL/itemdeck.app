@@ -110,12 +110,31 @@ async function fetchCollectionMetadata(
   collectionPath: string
 ): Promise<CollectionMetadata | null> {
   try {
-    const url = buildCdnUrl(username, `data/collections/${collectionPath}/collection.json`);
+    const url = buildCdnUrl(
+      username,
+      `data/collections/${collectionPath}/collection.json`
+    );
     const response = await fetch(url);
     if (!response.ok) return null;
     const data: unknown = await response.json();
     if (!data || typeof data !== "object") return null;
-    return data as CollectionMetadata;
+    // collection.json is untrusted third-party content. Its metadata is
+    // rendered directly as React children in the startup picker (which sits
+    // outside any error boundary), so a non-primitive name/description/
+    // itemCount would throw "Objects are not valid as a React child" and blank
+    // the whole app. Coerce to primitives at this trust boundary; the same
+    // sanitised value is what persists into the source store on select.
+    const record = data as Record<string, unknown>;
+    return {
+      name: typeof record.name === "string" ? record.name : undefined,
+      description:
+        typeof record.description === "string" ? record.description : undefined,
+      itemCount:
+        typeof record.itemCount === "number" &&
+        Number.isFinite(record.itemCount)
+          ? record.itemCount
+          : undefined,
+    };
   } catch {
     return null;
   }
@@ -185,7 +204,9 @@ export function useMyPlausibleMeDiscovery(
         } else if (response.status === 403) {
           setError("GitHub API rate limit exceeded. Try again later.");
         } else {
-          setError(`Failed to scan repository (HTTP ${String(response.status)})`);
+          setError(
+            `Failed to scan repository (HTTP ${String(response.status)})`
+          );
         }
         setCollections([]);
         setIsLoading(false);
@@ -245,11 +266,16 @@ export function useMyPlausibleMeDiscovery(
           const file = collectionJsonFiles[index];
           if (!file) continue;
           // Extract the collection path (everything between data/collections/ and /collection.json)
-          const match = /^data\/collections\/(.+)\/collection\.json$/.exec(file.path);
+          const match = /^data\/collections\/(.+)\/collection\.json$/.exec(
+            file.path
+          );
           if (!match?.[1]) continue;
 
           const collectionPath = match[1];
-          const metadata = await fetchCollectionMetadata(trimmedUsername, collectionPath);
+          const metadata = await fetchCollectionMetadata(
+            trimmedUsername,
+            collectionPath
+          );
 
           if (metadata !== null) {
             // Cache entries are keyed by the sourceStore source.id (the
@@ -276,7 +302,8 @@ export function useMyPlausibleMeDiscovery(
 
             // Use the last segment of the path as display name fallback
             const pathSegments = collectionPath.split("/");
-            const folderName = pathSegments[pathSegments.length - 1] ?? collectionPath;
+            const folderName =
+              pathSegments[pathSegments.length - 1] ?? collectionPath;
 
             validCollections.push({
               folder: collectionPath,

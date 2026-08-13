@@ -6,6 +6,7 @@ import { describe, it, expect } from "vitest";
 import {
   imageSchema,
   entitySchema,
+  uiLabelsSchema,
 } from "@/schemas/v2/collection.schema";
 import { getPrimaryImage, type Image } from "@/types/image";
 
@@ -57,6 +58,25 @@ describe("entitySchema", () => {
       ],
     });
     expect(result.success).toBe(true);
+  });
+});
+
+describe("uiLabelsSchema", () => {
+  it("truncates an over-long label instead of rejecting the collection", () => {
+    // rankPlaceholder is rendered once per unranked card, so an unbounded value
+    // is amplified by the card count. Truncating (rather than failing) keeps an
+    // honest author's over-long label from denying the whole collection load.
+    const result = uiLabelsSchema.safeParse({
+      rankPlaceholder: "Z".repeat(50000),
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.rankPlaceholder?.length).toBeLessThanOrEqual(120);
+  });
+
+  it("passes an ordinary label through unchanged", () => {
+    const result = uiLabelsSchema.safeParse({ moreButton: "Show more" });
+    expect(result.success).toBe(true);
+    expect(result.data?.moreButton).toBe("Show more");
   });
 });
 

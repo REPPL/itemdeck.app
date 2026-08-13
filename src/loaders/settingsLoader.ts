@@ -38,6 +38,18 @@ const MAX_VISIBLE_CARDS = 10;
 const MAX_SEARCH_FIELDS = 32;
 
 /**
+ * Upper bound on the length of a forced free-text label such as
+ * `rankPlaceholderText`.
+ *
+ * The value is written into persisted global settings and rendered once per
+ * card (every unranked card shows the rank placeholder), with no virtualisation
+ * — so an unbounded string is amplified by the entity count into a huge layout
+ * pass that freezes or OOMs the tab, and it reproduces on reload before the
+ * user can reach the settings panel. A short bound covers every real label.
+ */
+const MAX_LABEL_LENGTH = 120;
+
+/**
  * Load collection settings from a collection directory.
  *
  * @param basePath - Base path to the collection directory
@@ -179,9 +191,13 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
     forced.showDeviceBadge = raw.showDeviceBadge;
   }
 
-  // String fields
+  // String fields. `rankPlaceholderText` is rendered once per unranked card,
+  // so an unbounded value is amplified by the card count; cap the length.
   if (typeof raw.rankPlaceholderText === "string") {
-    forced.rankPlaceholderText = raw.rankPlaceholderText;
+    forced.rankPlaceholderText = raw.rankPlaceholderText.slice(
+      0,
+      MAX_LABEL_LENGTH
+    );
   }
 
   // Field mapping — validate each value, not just the container. Field paths

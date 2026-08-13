@@ -98,6 +98,25 @@ describe("loadCollectionSettings allowlist", () => {
     });
   });
 
+  it("caps the length of a forced rankPlaceholderText", async () => {
+    // Rendered once per unranked card, so an unbounded value is amplified by
+    // the card count into a tab-freezing layout pass, and it persists globally.
+    const hostile = "A".repeat(50000);
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        version: 1,
+        forced: { rankPlaceholderText: hostile },
+      }),
+    });
+
+    const result = await loadCollectionSettings("/data/collections/demo");
+
+    expect(result?.forced?.rankPlaceholderText).toBeDefined();
+    expect(result?.forced?.rankPlaceholderText?.length).toBeLessThanOrEqual(120);
+  });
+
   it("accepts valid forced cardBackStyle and titleDisplayMode enum values", async () => {
     // These allowlists were previously inverted: they admitted only out-of-enum
     // values and silently dropped every legitimate one, so an honest author's

@@ -21,6 +21,20 @@ const TOP_BADGE_FIELD_NAMES = new Set(["myRank", "myVerdict", "rank", "year"]);
 const TOP_BADGE_FIELD_KEYWORDS = ["verdict", "rating", "score"];
 
 /**
+ * Upper bound on the number of distinct fields discovered for the settings
+ * dropdowns.
+ *
+ * Entity schemas are `.loose()`, so an untrusted collection can carry an
+ * unbounded number of keys, all of which are copied onto the display card.
+ * Every discovered field becomes an `<option>` in the settings panel (sort,
+ * badge and group-by selectors), which renders outside the collection error
+ * boundary — so an entity with tens of thousands of matching keys freezes or
+ * OOMs the tab on a single synchronous commit. Cap discovery the way
+ * MAX_DISPLAYABLE_FIELDS (entityFields.ts) caps the card-detail rows.
+ */
+const MAX_AVAILABLE_FIELDS = 100;
+
+/**
  * Convert camelCase to Title Case.
  */
 function camelToTitle(str: string): string {
@@ -63,13 +77,17 @@ function extractFields(
   obj: Record<string, unknown>,
   prefix = "",
   maxDepth = 2,
-  currentDepth = 0
+  currentDepth = 0,
+  limit = Number.POSITIVE_INFINITY,
+  fields: string[] = []
 ): string[] {
-  if (currentDepth >= maxDepth) return [];
-
-  const fields: string[] = [];
+  if (currentDepth >= maxDepth) return fields;
 
   for (const [key, value] of Object.entries(obj)) {
+    // Stop once the caller's ceiling is reached so a hostile entity with a huge
+    // key space cannot make discovery walk (and allocate) without bound.
+    if (fields.length >= limit) break;
+
     // Skip internal/private fields
     if (key.startsWith("_")) continue;
 
@@ -79,7 +97,7 @@ function extractFields(
       fields.push(fieldPath);
     } else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
       // Recurse into nested objects
-      fields.push(...extractFields(value as Record<string, unknown>, fieldPath, maxDepth, currentDepth + 1));
+      extractFields(value as Record<string, unknown>, fieldPath, maxDepth, currentDepth + 1, limit, fields);
     } else if (Array.isArray(value) && value.length > 0) {
       // Check first element of arrays
       const first: unknown = value[0];
@@ -106,15 +124,24 @@ export function useAvailableFields() {
     const fieldSet = new Set<string>();
 
     for (const card of sampleCards) {
-      const fields = extractFields(card as Record<string, unknown>);
+      if (fieldSet.size >= MAX_AVAILABLE_FIELDS) break;
+      const fields = extractFields(
+        card as Record<string, unknown>,
+        "",
+        2,
+        0,
+        MAX_AVAILABLE_FIELDS
+      );
       for (const field of fields) {
         fieldSet.add(field);
+        if (fieldSet.size >= MAX_AVAILABLE_FIELDS) break;
       }
     }
 
     // Convert to sorted array and create FieldOption objects
     const allFields: FieldOption[] = Array.from(fieldSet)
       .sort()
+      .slice(0, MAX_AVAILABLE_FIELDS)
       .map((value) => ({
         value,
         label: generateLabel(value),

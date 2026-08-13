@@ -28,18 +28,23 @@ describe("settingsExport", () => {
       global.URL.revokeObjectURL = mockRevokeObjectURL;
 
       const originalCreateElement = document.createElement.bind(document);
-      vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-        const element = originalCreateElement(tagName);
-        if (tagName === "a") {
-          element.click = mockClick;
-          const originalClick = element.click;
-          element.click = function () {
-            capturedAnchor = { href: element.href, download: element.download };
-            return originalClick.call(this);
-          };
+      vi.spyOn(document, "createElement").mockImplementation(
+        (tagName: string) => {
+          const element = originalCreateElement(tagName);
+          if (tagName === "a") {
+            element.click = mockClick;
+            const originalClick = element.click;
+            element.click = function () {
+              capturedAnchor = {
+                href: element.href,
+                download: element.download,
+              };
+              return originalClick.call(this);
+            };
+          }
+          return element;
         }
-        return element;
-      });
+      );
 
       // Reset store to defaults
       useSettingsStore.getState().resetToDefaults();
@@ -62,7 +67,9 @@ describe("settingsExport", () => {
       exportSettingsToFile();
 
       expect(capturedAnchor).not.toBeNull();
-      expect(capturedAnchor!.download).toMatch(/^itemdeck-settings-\d{4}-\d{2}-\d{2}\.json$/);
+      expect(capturedAnchor!.download).toMatch(
+        /^itemdeck-settings-\d{4}-\d{2}-\d{2}\.json$/
+      );
     });
 
     it("includes version and exportedAt in blob", () => {
@@ -81,7 +88,9 @@ describe("settingsExport", () => {
 
   describe("importSettingsFromFile", () => {
     const createMockFile = (content: string): File => {
-      const file = new File([content], "test.json", { type: "application/json" });
+      const file = new File([content], "test.json", {
+        type: "application/json",
+      });
       file.text = vi.fn().mockResolvedValue(content);
       return file;
     };
@@ -161,7 +170,9 @@ describe("settingsExport", () => {
     it("throws error for invalid JSON", async () => {
       const file = createMockFile("not valid json {");
 
-      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow("Invalid JSON file");
+      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow(
+        "Invalid JSON file"
+      );
     });
 
     it("throws error for invalid structure", async () => {
@@ -173,7 +184,9 @@ describe("settingsExport", () => {
 
       const file = createMockFile(JSON.stringify(invalidData));
 
-      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow("Invalid settings file");
+      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow(
+        "Invalid settings file"
+      );
     });
 
     it("throws error for missing settings", async () => {
@@ -185,7 +198,9 @@ describe("settingsExport", () => {
 
       const file = createMockFile(JSON.stringify(invalidData));
 
-      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow("Invalid settings file");
+      await expect(importSettingsFromFile(file, "merge")).rejects.toThrow(
+        "Invalid settings file"
+      );
     });
 
     it("handles older version imports with migration", async () => {
@@ -357,6 +372,40 @@ describe("settingsExport", () => {
       expect("activeMechanicId" in extracted).toBe(false);
       expect("_draft" in extracted).toBe(false);
       expect("isDirty" in extracted).toBe(false);
+    });
+  });
+
+  describe("applySettings preserves the collection-defaults marker", () => {
+    const { applySettings } = _testExports;
+
+    beforeEach(() => {
+      useSettingsStore.getState().resetToDefaults();
+    });
+
+    it("keeps hasAppliedCollectionDefaults true across a replace import", () => {
+      // Simulate a collection having been loaded (its defaults were applied).
+      useSettingsStore.getState().setHasAppliedCollectionDefaults(true);
+
+      applySettings({ layout: "list" }, "replace");
+
+      // The marker must survive the replace reset. Otherwise the
+      // CollectionDataContext effect re-fires and the active collection's
+      // defaults silently overwrite the just-imported settings.
+      const state = useSettingsStore.getState();
+      expect(state.hasAppliedCollectionDefaults).toBe(true);
+      expect(state.layout).toBe("list");
+    });
+
+    it("keeps hasAppliedCollectionDefaults false when none were applied", () => {
+      useSettingsStore.getState().setHasAppliedCollectionDefaults(false);
+
+      applySettings({ layout: "list" }, "replace");
+
+      // No collection loaded yet: the first collection should still get to
+      // apply its defaults, so the marker stays false (unchanged behaviour).
+      expect(useSettingsStore.getState().hasAppliedCollectionDefaults).toBe(
+        false
+      );
     });
   });
 });

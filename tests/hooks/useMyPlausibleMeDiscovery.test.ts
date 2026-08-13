@@ -196,3 +196,80 @@ describe("useMyPlausibleMeDiscovery fan-out is bounded", () => {
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("5000"));
   });
 });
+
+describe("useMyPlausibleMeDiscovery sanitises untrusted metadata", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    useSourceStore.setState({
+      sources: [],
+      activeSourceId: null,
+      defaultSourceId: null,
+    });
+    vi.mocked(isCollectionCached).mockResolvedValue(false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("coerces non-primitive name/description/itemCount to safe values", async () => {
+    // collection.json is untrusted; its metadata renders directly as a React
+    // child in the startup picker (which has no error boundary above it), so a
+    // non-primitive value would throw "Objects are not valid as a React child"
+    // and blank the whole app. The discovery boundary must coerce to primitives.
+    const tree = {
+      sha: "abc",
+      truncated: false,
+      tree: [
+        {
+          path: "data/collections/books/collection.json",
+          type: "blob" as const,
+          sha: "def",
+        },
+      ],
+    };
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url.includes("api.github.com")) {
+          return Promise.resolve(
+            new Response(JSON.stringify(tree), { status: 200 })
+          );
+        }
+        if (url.endsWith("/collection.json")) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify({
+                name: { evil: "object" },
+                description: ["array", "value"],
+                itemCount: { not: "a number" },
+              }),
+              { status: 200 }
+            )
+          );
+        }
+        return Promise.resolve(new Response("not found", { status: 404 }));
+      })
+    );
+
+    const { result } = renderHook(() => useMyPlausibleMeDiscovery("EVIL"));
+
+    await waitFor(
+      () => {
+        expect(result.current.collections).toHaveLength(1);
+      },
+      { timeout: 5000 }
+    );
+
+    const entry = result.current.collections[0];
+    // Object name is dropped, falling back to the folder name (a string).
+    expect(typeof entry?.name).toBe("string");
+    expect(entry?.name).toBe("books");
+    // Non-primitive description and itemCount are dropped entirely.
+    expect(entry?.description).toBeUndefined();
+    expect(entry?.itemCount).toBeUndefined();
+  });
+});

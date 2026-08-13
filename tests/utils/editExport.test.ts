@@ -3,7 +3,11 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { exportEditsToFile, importEditsFromFile, exportedEditsSchema } from "@/utils/editExport";
+import {
+  exportEditsToFile,
+  importEditsFromFile,
+  exportedEditsSchema,
+} from "@/utils/editExport";
 import type { EntityEdit, ExportedEdits } from "@/stores/editsStore";
 
 describe("editExport", () => {
@@ -24,19 +28,24 @@ describe("editExport", () => {
 
       // Mock createElement to capture anchor properties
       const originalCreateElement = document.createElement.bind(document);
-      vi.spyOn(document, "createElement").mockImplementation((tagName: string) => {
-        const element = originalCreateElement(tagName);
-        if (tagName === "a") {
-          element.click = mockClick;
-          // Capture the anchor when click is called
-          const originalClick = element.click;
-          element.click = function() {
-            capturedAnchor = { href: element.href, download: element.download };
-            return originalClick.call(this);
-          };
+      vi.spyOn(document, "createElement").mockImplementation(
+        (tagName: string) => {
+          const element = originalCreateElement(tagName);
+          if (tagName === "a") {
+            element.click = mockClick;
+            // Capture the anchor when click is called
+            const originalClick = element.click;
+            element.click = function () {
+              capturedAnchor = {
+                href: element.href,
+                download: element.download,
+              };
+              return originalClick.call(this);
+            };
+          }
+          return element;
         }
-        return element;
-      });
+      );
     });
 
     afterEach(() => {
@@ -80,7 +89,9 @@ describe("editExport", () => {
       exportEditsToFile(edits, "game-collection");
 
       expect(capturedAnchor).not.toBeNull();
-      expect(capturedAnchor!.download).toMatch(/^game-collection-edits-\d{4}-\d{2}-\d{2}\.json$/);
+      expect(capturedAnchor!.download).toMatch(
+        /^game-collection-edits-\d{4}-\d{2}-\d{2}\.json$/
+      );
     });
 
     it("handles empty edits", () => {
@@ -94,7 +105,9 @@ describe("editExport", () => {
   describe("importEditsFromFile", () => {
     // Create a proper mock File with text() method
     const createMockFile = (content: string): File => {
-      const file = new File([content], "test.json", { type: "application/json" });
+      const file = new File([content], "test.json", {
+        type: "application/json",
+      });
       // JSDOM File doesn't implement text(), so we mock it
       file.text = vi.fn().mockResolvedValue(content);
       return file;
@@ -124,7 +137,9 @@ describe("editExport", () => {
     it("throws error for invalid JSON", async () => {
       const file = createMockFile("not valid json {");
 
-      await expect(importEditsFromFile(file)).rejects.toThrow("Invalid JSON file");
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid JSON file"
+      );
     });
 
     it("throws error for invalid format", async () => {
@@ -135,7 +150,9 @@ describe("editExport", () => {
 
       const file = createMockFile(JSON.stringify(invalidData));
 
-      await expect(importEditsFromFile(file)).rejects.toThrow("Invalid edits file format");
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid edits file format"
+      );
     });
 
     it("throws error for unsupported version", async () => {
@@ -149,7 +166,9 @@ describe("editExport", () => {
 
       const file = createMockFile(JSON.stringify(futureVersionData));
 
-      await expect(importEditsFromFile(file)).rejects.toThrow("Invalid edits file format");
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid edits file format"
+      );
     });
 
     it("validates entity edit structure", async () => {
@@ -165,11 +184,13 @@ describe("editExport", () => {
 
       const file = createMockFile(JSON.stringify(invalidEntityData));
 
-      await expect(importEditsFromFile(file)).rejects.toThrow("Invalid edits file format");
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid edits file format"
+      );
     });
 
-    it("allows complex field values", async () => {
-      const complexData: ExportedEdits = {
+    it("allows primitive field values", async () => {
+      const primitiveData: ExportedEdits = {
         version: 1,
         exportedAt: "2024-01-15T10:30:00.000Z",
         collectionId: "test",
@@ -179,20 +200,67 @@ describe("editExport", () => {
             fields: {
               title: "Text value",
               year: 2024,
-              tags: ["tag1", "tag2"],
-              metadata: { nested: true },
+              published: true,
+              summary: null,
             },
             editedAt: 1000,
           },
         },
       };
 
-      const file = createMockFile(JSON.stringify(complexData));
+      const file = createMockFile(JSON.stringify(primitiveData));
       const result = await importEditsFromFile(file);
 
       expect(result.edits["entity-1"].fields.title).toBe("Text value");
       expect(result.edits["entity-1"].fields.year).toBe(2024);
-      expect(result.edits["entity-1"].fields.tags).toEqual(["tag1", "tag2"]);
+      expect(result.edits["entity-1"].fields.published).toBe(true);
+      expect(result.edits["entity-1"].fields.summary).toBeNull();
+    });
+
+    it("rejects an object-valued edit field (React-child render-crash guard)", async () => {
+      // Edits are text overlays spread over the source card and rendered as a
+      // React child. An object/array value would throw "Objects are not valid
+      // as a React child" on every render and, because edits persist, brick the
+      // collection view. The import boundary must reject non-primitive values.
+      const objectData = {
+        version: 1,
+        exportedAt: "2024-01-15T10:30:00.000Z",
+        collectionId: "test",
+        editCount: 1,
+        edits: {
+          "entity-1": {
+            fields: { title: { malicious: "object" } },
+            editedAt: 1000,
+          },
+        },
+      };
+
+      const file = createMockFile(JSON.stringify(objectData));
+
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid edits file format"
+      );
+    });
+
+    it("rejects an array-valued edit field", async () => {
+      const arrayData = {
+        version: 1,
+        exportedAt: "2024-01-15T10:30:00.000Z",
+        collectionId: "test",
+        editCount: 1,
+        edits: {
+          "entity-1": {
+            fields: { summary: ["a", "b"] },
+            editedAt: 1000,
+          },
+        },
+      };
+
+      const file = createMockFile(JSON.stringify(arrayData));
+
+      await expect(importEditsFromFile(file)).rejects.toThrow(
+        "Invalid edits file format"
+      );
     });
   });
 

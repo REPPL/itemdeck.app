@@ -97,6 +97,51 @@ describe("loadCollectionSettings allowlist", () => {
       topBadgeField: "myRank",
     });
   });
+
+  it("accepts valid forced cardBackStyle and titleDisplayMode enum values", async () => {
+    // These allowlists were previously inverted: they admitted only out-of-enum
+    // values and silently dropped every legitimate one, so an honest author's
+    // forced value never took effect and an out-of-enum value persisted into
+    // global settings (bricking the user's own settings export on reimport).
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        version: 1,
+        forced: {
+          cardBackStyle: "colour",
+          titleDisplayMode: "truncate",
+        },
+      }),
+    });
+
+    const result = await loadCollectionSettings("/data/collections/demo");
+
+    expect(result?.forced?.cardBackStyle).toBe("colour");
+    expect(result?.forced?.titleDisplayMode).toBe("truncate");
+  });
+
+  it("drops out-of-enum forced cardBackStyle and titleDisplayMode values", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      headers: { get: () => "application/json" },
+      json: async () => ({
+        version: 1,
+        forced: {
+          // The stale allowlist admitted exactly these; they are not valid
+          // members of the CardBackStyle / TitleDisplayMode enums and the
+          // settings-export schema rejects them, so they must be dropped here.
+          cardBackStyle: "plain",
+          titleDisplayMode: "always",
+        },
+      }),
+    });
+
+    const result = await loadCollectionSettings("/data/collections/demo");
+
+    expect(result?.forced?.cardBackStyle).toBeUndefined();
+    expect(result?.forced?.titleDisplayMode).toBeUndefined();
+  });
 });
 
 describe("loadCollectionSettings default bounds", () => {

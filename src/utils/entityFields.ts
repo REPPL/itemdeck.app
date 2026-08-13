@@ -6,6 +6,18 @@
  */
 
 /**
+ * Upper bound on the number of auto-discovered fields rendered per entity.
+ *
+ * The entity schema is `.loose()`, so an untrusted collection can attach an
+ * unbounded number of unknown keys to a single entity. Each becomes a DOM row
+ * in the expanded card's "More" overlay, and the render is a single synchronous
+ * commit — a pathological entity would freeze or OOM the tab. Cap the count,
+ * matching the per-card media cap (`MAX_MEDIA_PER_CARD = 100`). A real entity
+ * displays a handful of fields.
+ */
+const MAX_DISPLAYABLE_FIELDS = 100;
+
+/**
  * Fields to skip when auto-discovering entity fields.
  * These are internal/display fields that shouldn't be shown to users.
  */
@@ -416,11 +428,14 @@ export function getDisplayableFields(
       }
     }
 
-    return orderedFields;
+    return orderedFields.slice(0, MAX_DISPLAYABLE_FIELDS);
   }
 
-  // Default: sort alphabetically by label
-  return fields.sort((a, b) => a.label.localeCompare(b.label));
+  // Default: sort alphabetically by label, then cap the count so an untrusted
+  // entity with an unbounded key set cannot mount an unbounded DOM subtree.
+  return fields
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(0, MAX_DISPLAYABLE_FIELDS);
 }
 
 /**

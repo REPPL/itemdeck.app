@@ -149,18 +149,23 @@ function validateForcedSettings(raw: Record<string, unknown>): ForcedSettings {
       raw.cardBackDisplay as ForcedSettings["cardBackDisplay"];
   }
 
-  // cardBackStyle
+  // cardBackStyle — must match the CardBackStyle enum. The previous allowlist
+  // ("plain"/"pattern"/"gradient") was stale: it silently dropped every valid
+  // forced value and admitted only out-of-enum ones, which then persisted into
+  // global settings and made the user's own settings export non-reimportable
+  // (the export schema rejects them).
   if (
     typeof raw.cardBackStyle === "string" &&
-    ["plain", "pattern", "gradient"].includes(raw.cardBackStyle)
+    ["bitmap", "svg", "colour"].includes(raw.cardBackStyle)
   ) {
     forced.cardBackStyle = raw.cardBackStyle as ForcedSettings["cardBackStyle"];
   }
 
-  // titleDisplayMode
+  // titleDisplayMode — must match the TitleDisplayMode enum (same stale-allowlist
+  // bug as cardBackStyle above).
   if (
     typeof raw.titleDisplayMode === "string" &&
-    ["always", "hover", "never"].includes(raw.titleDisplayMode)
+    ["truncate", "wrap"].includes(raw.titleDisplayMode)
   ) {
     forced.titleDisplayMode =
       raw.titleDisplayMode as ForcedSettings["titleDisplayMode"];

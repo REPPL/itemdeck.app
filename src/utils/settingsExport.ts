@@ -155,7 +155,11 @@ function migrateSettings(
 
   // v19 added searchFields, groupByField
   if (fromVersion < 19) {
-    migrated.searchFields = migrated.searchFields ?? ["title", "summary", "verdict"];
+    migrated.searchFields = migrated.searchFields ?? [
+      "title",
+      "summary",
+      "verdict",
+    ];
     migrated.groupByField = migrated.groupByField ?? null;
   }
 
@@ -192,6 +196,14 @@ function migrateSettings(
 function applySettings(settings: ExportableSettings, mode: ImportMode): void {
   const store = useSettingsStore.getState();
 
+  // Preserve the one-time "collection defaults applied" marker across a replace
+  // reset. resetToDefaults() clears it to false, which makes the
+  // CollectionDataContext effect re-fire and re-apply the active collection's
+  // defaults over the values being imported (silently discarding the user's
+  // backup for those fields). The marker is internal state, not a user-facing
+  // setting, so importing settings must not disturb it.
+  const hadAppliedCollectionDefaults = store.hasAppliedCollectionDefaults;
+
   // Reset to defaults first if replace mode
   if (mode === "replace") {
     store.resetToDefaults();
@@ -199,37 +211,67 @@ function applySettings(settings: ExportableSettings, mode: ImportMode): void {
 
   // Apply each setting if it exists in the import
   if (settings.layout !== undefined) store.setLayout(settings.layout);
-  if (settings.cardSizePreset !== undefined) store.setCardSizePreset(settings.cardSizePreset);
-  if (settings.cardAspectRatio !== undefined) store.setCardAspectRatio(settings.cardAspectRatio);
-  if (settings.maxVisibleCards !== undefined) store.setMaxVisibleCards(settings.maxVisibleCards);
-  if (settings.cardBackDisplay !== undefined) store.setCardBackDisplay(settings.cardBackDisplay);
-  if (settings.cardBackStyle !== undefined) store.setCardBackStyle(settings.cardBackStyle);
-  if (settings.cardBackBackground !== undefined) store.setCardBackBackground(settings.cardBackBackground);
-  if (settings.showRankBadge !== undefined) store.setShowRankBadge(settings.showRankBadge);
-  if (settings.showDeviceBadge !== undefined) store.setShowDeviceBadge(settings.showDeviceBadge);
-  if (settings.rankPlaceholderText !== undefined) store.setRankPlaceholderText(settings.rankPlaceholderText);
-  if (settings.defaultCardFace !== undefined) store.setDefaultCardFace(settings.defaultCardFace);
-  if (settings.shuffleOnLoad !== undefined) store.setShuffleOnLoad(settings.shuffleOnLoad);
-  if (settings.dragModeEnabled !== undefined) store.setDragModeEnabled(settings.dragModeEnabled);
+  if (settings.cardSizePreset !== undefined)
+    store.setCardSizePreset(settings.cardSizePreset);
+  if (settings.cardAspectRatio !== undefined)
+    store.setCardAspectRatio(settings.cardAspectRatio);
+  if (settings.maxVisibleCards !== undefined)
+    store.setMaxVisibleCards(settings.maxVisibleCards);
+  if (settings.cardBackDisplay !== undefined)
+    store.setCardBackDisplay(settings.cardBackDisplay);
+  if (settings.cardBackStyle !== undefined)
+    store.setCardBackStyle(settings.cardBackStyle);
+  if (settings.cardBackBackground !== undefined)
+    store.setCardBackBackground(settings.cardBackBackground);
+  if (settings.showRankBadge !== undefined)
+    store.setShowRankBadge(settings.showRankBadge);
+  if (settings.showDeviceBadge !== undefined)
+    store.setShowDeviceBadge(settings.showDeviceBadge);
+  if (settings.rankPlaceholderText !== undefined)
+    store.setRankPlaceholderText(settings.rankPlaceholderText);
+  if (settings.defaultCardFace !== undefined)
+    store.setDefaultCardFace(settings.defaultCardFace);
+  if (settings.shuffleOnLoad !== undefined)
+    store.setShuffleOnLoad(settings.shuffleOnLoad);
+  if (settings.dragModeEnabled !== undefined)
+    store.setDragModeEnabled(settings.dragModeEnabled);
   if (settings.dragFace !== undefined) store.setDragFace(settings.dragFace);
-  if (settings.randomSelectionEnabled !== undefined) store.setRandomSelectionEnabled(settings.randomSelectionEnabled);
-  if (settings.randomSelectionCount !== undefined) store.setRandomSelectionCount(settings.randomSelectionCount);
-  if (settings.visualTheme !== undefined) store.setVisualTheme(settings.visualTheme);
-  if (settings.reduceMotion !== undefined) store.setReduceMotion(settings.reduceMotion);
-  if (settings.highContrast !== undefined) store.setHighContrast(settings.highContrast);
-  if (settings.titleDisplayMode !== undefined) store.setTitleDisplayMode(settings.titleDisplayMode);
-  if (settings.showHelpButton !== undefined) store.setShowHelpButton(settings.showHelpButton);
-  if (settings.showSettingsButton !== undefined) store.setShowSettingsButton(settings.showSettingsButton);
-  if (settings.showDragIcon !== undefined) store.setShowDragIcon(settings.showDragIcon);
-  if (settings.showStatisticsBar !== undefined) store.setShowStatisticsBar(settings.showStatisticsBar);
-  if (settings.showSearchBar !== undefined) store.setShowSearchBar(settings.showSearchBar);
-  if (settings.searchBarMinimised !== undefined) store.setSearchBarMinimised(settings.searchBarMinimised);
-  if (settings.showViewButton !== undefined) store.setShowViewButton(settings.showViewButton);
-  if (settings.usePlaceholderImages !== undefined) store.setUsePlaceholderImages(settings.usePlaceholderImages);
-  if (settings.searchFields !== undefined) store.setSearchFields(settings.searchFields);
-  if (settings.searchScope !== undefined) store.setSearchScope(settings.searchScope);
-  if (settings.groupByField !== undefined) store.setGroupByField(settings.groupByField);
-  if (settings.editModeEnabled !== undefined) store.setEditModeEnabled(settings.editModeEnabled);
+  if (settings.randomSelectionEnabled !== undefined)
+    store.setRandomSelectionEnabled(settings.randomSelectionEnabled);
+  if (settings.randomSelectionCount !== undefined)
+    store.setRandomSelectionCount(settings.randomSelectionCount);
+  if (settings.visualTheme !== undefined)
+    store.setVisualTheme(settings.visualTheme);
+  if (settings.reduceMotion !== undefined)
+    store.setReduceMotion(settings.reduceMotion);
+  if (settings.highContrast !== undefined)
+    store.setHighContrast(settings.highContrast);
+  if (settings.titleDisplayMode !== undefined)
+    store.setTitleDisplayMode(settings.titleDisplayMode);
+  if (settings.showHelpButton !== undefined)
+    store.setShowHelpButton(settings.showHelpButton);
+  if (settings.showSettingsButton !== undefined)
+    store.setShowSettingsButton(settings.showSettingsButton);
+  if (settings.showDragIcon !== undefined)
+    store.setShowDragIcon(settings.showDragIcon);
+  if (settings.showStatisticsBar !== undefined)
+    store.setShowStatisticsBar(settings.showStatisticsBar);
+  if (settings.showSearchBar !== undefined)
+    store.setShowSearchBar(settings.showSearchBar);
+  if (settings.searchBarMinimised !== undefined)
+    store.setSearchBarMinimised(settings.searchBarMinimised);
+  if (settings.showViewButton !== undefined)
+    store.setShowViewButton(settings.showViewButton);
+  if (settings.usePlaceholderImages !== undefined)
+    store.setUsePlaceholderImages(settings.usePlaceholderImages);
+  if (settings.searchFields !== undefined)
+    store.setSearchFields(settings.searchFields);
+  if (settings.searchScope !== undefined)
+    store.setSearchScope(settings.searchScope);
+  if (settings.groupByField !== undefined)
+    store.setGroupByField(settings.groupByField);
+  if (settings.editModeEnabled !== undefined)
+    store.setEditModeEnabled(settings.editModeEnabled);
 
   // Handle nested objects
   if (settings.fieldMapping !== undefined) {
@@ -238,12 +280,20 @@ function applySettings(settings: ExportableSettings, mode: ImportMode): void {
 
   // Handle theme customisations per theme
   if (settings.themeCustomisations !== undefined) {
-    for (const theme of Object.keys(settings.themeCustomisations) as (keyof typeof settings.themeCustomisations)[]) {
+    for (const theme of Object.keys(
+      settings.themeCustomisations
+    ) as (keyof typeof settings.themeCustomisations)[]) {
       const customisation = settings.themeCustomisations[theme];
       if (customisation !== undefined) {
         store.setThemeCustomisation(theme, customisation);
       }
     }
+  }
+
+  // Restore the collection-defaults marker cleared by resetToDefaults, so the
+  // just-imported values are not overwritten by the active collection.
+  if (mode === "replace") {
+    store.setHasAppliedCollectionDefaults(hadAppliedCollectionDefaults);
   }
 }
 
@@ -259,10 +309,18 @@ function countSettings(settings: ExportableSettings): number {
   for (const key of Object.keys(settings) as (keyof ExportableSettings)[]) {
     const value = settings[key];
     if (value !== undefined && value !== null) {
-      if (key === "themeCustomisations" && typeof value === "object" && !Array.isArray(value)) {
+      if (
+        key === "themeCustomisations" &&
+        typeof value === "object" &&
+        !Array.isArray(value)
+      ) {
         // Count each theme customisation separately
         count += Object.keys(value as object).length;
-      } else if (key === "fieldMapping" && typeof value === "object" && !Array.isArray(value)) {
+      } else if (
+        key === "fieldMapping" &&
+        typeof value === "object" &&
+        !Array.isArray(value)
+      ) {
         // Count each field mapping separately
         count += Object.keys(value as object).length;
       } else {
@@ -297,7 +355,9 @@ export async function importSettingsFromFile(
 
   const result = settingsExportSchema.safeParse(parsed);
   if (!result.success) {
-    throw new Error(`Invalid settings file:\n${formatSettingsValidationError(result.error)}`);
+    throw new Error(
+      `Invalid settings file:\n${formatSettingsValidationError(result.error)}`
+    );
   }
 
   const { version, settings } = result.data;

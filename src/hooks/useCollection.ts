@@ -401,7 +401,8 @@ async function loadFreshCollection(
       // v2: Use generic terminology. `shortTitle`/`title` are untrusted (loose
       // schema) and this feeds the device badge, rendered as a JSX child.
       const categoryShort =
-        toDisplayString(platform?.shortTitle) ?? toDisplayString(platform?.title);
+        toDisplayString(platform?.shortTitle) ??
+        toDisplayString(platform?.title);
       const order = rank;
 
       // Build DisplayCard with all entity fields for field path resolution
@@ -471,6 +472,11 @@ async function loadFreshCollection(
                 "_resolved",
                 "logoUrl",
               ]);
+              // `platform` is an untrusted loose-schema entity, so cap the
+              // copied keys: the platform overlay renders one DOM row per entry
+              // and an unbounded key set would freeze the tab. Matches the
+              // per-entity displayable-fields cap.
+              const MAX_PLATFORM_FIELDS = 100;
               const additionalFields: Record<string, unknown> = {};
               for (const [key, value] of Object.entries(platform)) {
                 if (
@@ -479,6 +485,11 @@ async function loadFreshCollection(
                   value !== null
                 ) {
                   additionalFields[key] = value;
+                  if (
+                    Object.keys(additionalFields).length >= MAX_PLATFORM_FIELDS
+                  ) {
+                    break;
+                  }
                 }
               }
 

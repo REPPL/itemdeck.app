@@ -202,7 +202,7 @@ function AddFilterDropdown({
             // Field selection
             <div className={styles.dropdownSection}>
               <div className={styles.dropdownHeader}>Filter by</div>
-              {filterFields.map(({ field, label }) => (
+              {filterFields.map(({ field, label, options }) => (
                 <button
                   key={field}
                   type="button"
@@ -211,7 +211,7 @@ function AddFilterDropdown({
                 >
                   {label}
                   <span className={styles.dropdownCount}>
-                    {filterOptions[field === "categoryTitle" ? "platforms" : field === "year" ? "years" : "genres"].length}
+                    {options.length}
                   </span>
                 </button>
               ))}

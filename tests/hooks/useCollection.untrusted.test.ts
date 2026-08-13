@@ -211,6 +211,29 @@ describe("useCollection — malformed untrusted entities do not crash the load",
     expect(card?.imageUrls.length).toBeLessThanOrEqual(100);
   });
 
+  it("caps card.detailUrls for an entity listing a huge number of videos", async () => {
+    const hugeVideoList = Array.from(
+      { length: 5000 },
+      (_, i) => `https://www.youtube.com/watch?v=vid${String(i)}`
+    );
+    setResolvedEntities([
+      { id: "g1", title: "Game One", videos: hugeVideoList },
+    ]);
+
+    const { result } = renderHook(
+      () => useLocalCollection({ basePath: SOURCE_URL }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+    const card = result.current.data?.cards[0];
+    // The sources overlay renders one anchor (and several URL parses) per link
+    // with no windowing, so detailUrls must be bounded well below 5000.
+    expect(card?.detailUrls?.length ?? 0).toBeLessThanOrEqual(100);
+  });
+
   it("coerces object-typed platform summary/year in categoryInfo", async () => {
     setResolvedEntities([
       {

@@ -161,6 +161,18 @@ interface CollectionResult {
 const MAX_MEDIA_PER_CARD = 100;
 
 /**
+ * Upper bound on detail links kept per card.
+ *
+ * `card.detailUrls` is assembled from the untrusted, uncapped `detailUrls`
+ * array plus one link per entry of the uncapped `videos` array. It feeds the
+ * sources overlay, which renders one anchor (plus several URL parses) per
+ * entry with no windowing, so a hostile entity carrying a huge `videos`/
+ * `detailUrls` array would freeze the tab when the card's Sources button is
+ * opened. Cap it at the same choke point as the media list.
+ */
+const MAX_DETAIL_LINKS_PER_CARD = 100;
+
+/**
  * Coerce an untrusted entity field to a display string.
  *
  * The v2 entity schema is `.loose()`, so text fields (summary, platform
@@ -453,7 +465,10 @@ async function loadFreshCollection(
               urls.push({ url, source: "YouTube" });
             }
           }
-          return urls.length > 0 ? urls : undefined;
+          if (urls.length === 0) {
+            return undefined;
+          }
+          return urls.slice(0, MAX_DETAIL_LINKS_PER_CARD);
         })(),
         primaryImage,
         // Category/platform info for expanded view

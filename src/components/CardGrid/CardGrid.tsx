@@ -17,6 +17,7 @@ import { useMechanicContext, useMechanicCardActions } from "@/mechanics";
 import { createFieldSortComparator, resolveFieldPath } from "@/utils/fieldPathResolver";
 import { shuffle } from "@/utils/shuffle";
 import { capFilterOptions } from "@/utils/filterOptions";
+import { cardMatchesFilter } from "@/utils/filterMatch";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { springPresets, getItemDelay } from "@/config/animationPresets";
 import type { CardDisplayConfig } from "@/types/display";
@@ -281,12 +282,12 @@ export function CardGrid() {
     // Apply active filters
     for (const filter of activeFilters) {
       if (filter.values.length === 0) continue;
-      result = result.filter((card) => {
-        const value = resolveFieldPath(card as unknown as Record<string, unknown>, filter.field);
-        if (value === null || value === undefined) return false;
-        const strValue = typeof value === "object" ? JSON.stringify(value) : String(value as string | number | boolean);
-        return filter.values.includes(strValue);
-      });
+      result = result.filter((card) =>
+        cardMatchesFilter(
+          card as unknown as Record<string, unknown>,
+          filter
+        )
+      );
     }
 
     return result;
@@ -605,7 +606,9 @@ export function CardGrid() {
     const genres = new Set<string>();
 
     for (const card of sourceCards) {
-      const platformValue = resolveFieldPath(card as unknown as Record<string, unknown>, "platform.shortTitle");
+      // Collect from the same field the Platform filter matches on
+      // (FILTER_FIELD_DEFS), so offered options cannot fail to match.
+      const platformValue = resolveFieldPath(card as unknown as Record<string, unknown>, "categoryShort");
       if (platformValue && typeof platformValue === "string") platforms.add(platformValue);
 
       const yearValue = resolveFieldPath(card as unknown as Record<string, unknown>, "year");

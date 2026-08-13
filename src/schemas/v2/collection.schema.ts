@@ -225,15 +225,30 @@ export type DisplayConfigSchema = z.infer<typeof displayConfigSchema>;
 // UI Labels Schema
 // ============================================================================
 
+/**
+ * Upper bound on an untrusted UI label. `rankPlaceholder` is rendered once per
+ * unranked card with no virtualisation, so an unbounded value is amplified by
+ * the card count into a tab-freezing layout pass; the sibling labels are all
+ * untrusted free text too. Real labels are a few words.
+ *
+ * Truncate rather than reject: a length rejection would throw out of
+ * validateCollectionDefinition and deny the whole collection load, punishing an
+ * honest author for one long label.
+ */
+const MAX_LABEL_LENGTH = 120;
+const labelText = z
+  .string()
+  .transform((value) => value.slice(0, MAX_LABEL_LENGTH));
+
 export const uiLabelsSchema = z.object({
-  moreButton: z.string().optional(),
-  platformLabel: z.string().optional(),
-  acknowledgementButton: z.string().optional(),
-  imageSourceLabel: z.string().optional(),
-  sourceButtonDefault: z.string().optional(),
-  rankPlaceholder: z.string().optional(),
-  wikipediaLabel: z.string().optional(),
-  closeLabel: z.string().optional(),
+  moreButton: labelText.optional(),
+  platformLabel: labelText.optional(),
+  acknowledgementButton: labelText.optional(),
+  imageSourceLabel: labelText.optional(),
+  sourceButtonDefault: labelText.optional(),
+  rankPlaceholder: labelText.optional(),
+  wikipediaLabel: labelText.optional(),
+  closeLabel: labelText.optional(),
 });
 
 export type UILabelsSchema = z.infer<typeof uiLabelsSchema>;

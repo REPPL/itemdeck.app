@@ -7,6 +7,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useSettingsStore } from "@/stores/settingsStore";
+import { FILTER_FIELD_DEFS } from "@/utils/filterMatch";
 import styles from "./FilterChips.module.css";
 
 interface FilterChipsProps {
@@ -80,12 +81,10 @@ function FilterChip({
   values: string[];
   onRemove: () => void;
 }) {
-  // Map field names to display labels
-  const fieldLabels: Record<string, string> = {
-    categoryTitle: "Platform",
-    year: "Year",
-    "genres[0]": "Genre",
-  };
+  // Map field names to display labels (single source of truth: FILTER_FIELD_DEFS)
+  const fieldLabels: Record<string, string> = Object.fromEntries(
+    FILTER_FIELD_DEFS.map((d) => [d.field, d.label])
+  );
 
   const label = fieldLabels[field] ?? field;
   const valueText = values.length > 1 ? `${String(values.length)} selected` : values[0];
@@ -165,11 +164,16 @@ function AddFilterDropdown({
 
   if (!filterOptions) return null;
 
-  const filterFields = [
-    { field: "categoryTitle", label: "Platform", options: filterOptions.platforms },
-    { field: "year", label: "Year", options: filterOptions.years.map(String) },
-    { field: "genres[0]", label: "Genre", options: filterOptions.genres },
-  ].filter((f) => f.options.length > 0);
+  const optionsByKey = {
+    platforms: filterOptions.platforms,
+    years: filterOptions.years.map(String),
+    genres: filterOptions.genres,
+  };
+  const filterFields = FILTER_FIELD_DEFS.map((d) => ({
+    field: d.field,
+    label: d.label,
+    options: optionsByKey[d.optionsKey],
+  })).filter((f) => f.options.length > 0);
 
   if (filterFields.length === 0) return null;
 
@@ -198,7 +202,7 @@ function AddFilterDropdown({
             // Field selection
             <div className={styles.dropdownSection}>
               <div className={styles.dropdownHeader}>Filter by</div>
-              {filterFields.map(({ field, label }) => (
+              {filterFields.map(({ field, label, options }) => (
                 <button
                   key={field}
                   type="button"
@@ -207,7 +211,7 @@ function AddFilterDropdown({
                 >
                   {label}
                   <span className={styles.dropdownCount}>
-                    {filterOptions[field === "categoryTitle" ? "platforms" : field === "year" ? "years" : "genres"].length}
+                    {options.length}
                   </span>
                 </button>
               ))}

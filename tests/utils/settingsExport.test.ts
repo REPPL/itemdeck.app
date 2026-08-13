@@ -145,6 +145,30 @@ describe("settingsExport", () => {
       expect(state.maxVisibleCards).toBe(2); // Default value
     });
 
+    it("preserves both collection-defaults markers across a replace import", async () => {
+      // Simulate a collection whose config and settings.json defaults have
+      // already been applied for the active source.
+      const store = useSettingsStore.getState();
+      store.setHasAppliedCollectionDefaults(true);
+      store.setAppliedCollectionDefaultsSourceId("src_active");
+
+      const importData = {
+        version: SETTINGS_EXPORT_VERSION,
+        exportedAt: "2025-12-29T10:30:00.000Z",
+        settings: { layout: "list" },
+      };
+
+      const file = createMockFile(JSON.stringify(importData));
+      await importSettingsFromFile(file, "replace");
+
+      const state = useSettingsStore.getState();
+      // Both markers must survive the replace reset; clearing the source-id
+      // marker to null would re-arm the active collection's settings.json
+      // defaults to clobber the just-imported values on the next load.
+      expect(state.hasAppliedCollectionDefaults).toBe(true);
+      expect(state.appliedCollectionDefaultsSourceId).toBe("src_active");
+    });
+
     it("preserves unspecified settings in merge mode", async () => {
       // Set a custom value
       const store = useSettingsStore.getState();

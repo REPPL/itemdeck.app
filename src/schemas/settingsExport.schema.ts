@@ -10,6 +10,23 @@ import { z } from "zod";
 // Current settings store version (matches settingsStore)
 export const SETTINGS_EXPORT_VERSION = 26;
 
+/**
+ * Upper bound on `searchFields` on the settings-import path. Search resolves
+ * every field on every card for each settled query, so an unbounded list
+ * scales that product with attacker-chosen input and freezes the tab. The
+ * value persists globally and follows the visitor to later collections. Mirrors
+ * MAX_SEARCH_FIELDS in settingsLoader, which caps the same setting on the
+ * collection auto-load path.
+ */
+const MAX_SEARCH_FIELDS = 32;
+
+/**
+ * Upper bound on an imported free-text label such as `rankPlaceholderText`,
+ * which is rendered once per unranked card. Mirrors MAX_LABEL_LENGTH in
+ * settingsLoader.
+ */
+const MAX_LABEL_LENGTH = 120;
+
 // ============================================================================
 // Colour Validation
 // ============================================================================
@@ -114,7 +131,7 @@ export const exportableSettingsSchema = z.object({
   cardBackBackground: z.string().optional(),
   showRankBadge: z.boolean().optional(),
   showDeviceBadge: z.boolean().optional(),
-  rankPlaceholderText: z.string().optional(),
+  rankPlaceholderText: z.string().max(MAX_LABEL_LENGTH).optional(),
   defaultCardFace: defaultCardFaceSchema.optional(),
 
   // Behaviour settings
@@ -151,7 +168,7 @@ export const exportableSettingsSchema = z.object({
   usePlaceholderImages: z.boolean().optional(),
 
   // Search & filter settings
-  searchFields: z.array(z.string()).optional(),
+  searchFields: z.array(z.string()).max(MAX_SEARCH_FIELDS).optional(),
   searchScope: searchScopeSchema.optional(),
   groupByField: z.string().nullable().optional(),
 

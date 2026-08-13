@@ -86,6 +86,28 @@ describe("settingsExport schema", () => {
       expect(resultTooHigh.success).toBe(false);
     });
 
+    it("bounds searchFields to the same cap as the collection loader", () => {
+      const withinCap = exportableSettingsSchema.safeParse({
+        searchFields: Array.from({ length: 32 }, (_, i) => `f${String(i)}`),
+      });
+      expect(withinCap.success).toBe(true);
+
+      // An unbounded searchFields list makes every search resolve the whole
+      // list per card and persists globally; the import path must reject it
+      // like the collection loader caps it.
+      const overCap = exportableSettingsSchema.safeParse({
+        searchFields: Array.from({ length: 5000 }, (_, i) => `f${String(i)}`),
+      });
+      expect(overCap.success).toBe(false);
+    });
+
+    it("bounds an imported rankPlaceholderText", () => {
+      const overLong = exportableSettingsSchema.safeParse({
+        rankPlaceholderText: "A".repeat(50000),
+      });
+      expect(overLong.success).toBe(false);
+    });
+
     it("validates boolean fields", () => {
       const result = exportableSettingsSchema.safeParse({
         shuffleOnLoad: true,

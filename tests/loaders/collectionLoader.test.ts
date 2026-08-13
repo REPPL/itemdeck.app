@@ -205,6 +205,20 @@ describe("entity fetch fan-out is bounded", () => {
     expect(entities).toHaveLength(10000);
     expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("10001"));
   });
+
+  it("caps a single-file entity array that exceeds the maximum", async () => {
+    // Skipping index.json and serving one big array must not bypass the id cap
+    // the index-driven path enforces.
+    const rows = Array.from({ length: 10001 }, (_, i) => ({
+      id: `e${String(i)}`,
+    }));
+    stubFetch({ [`${base}/adverts.json`]: rows });
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities).toHaveLength(10000);
+    expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("10001"));
+  });
 });
 
 describe("entity-type fan-out is bounded", () => {

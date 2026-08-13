@@ -234,6 +234,36 @@ describe("useCollection — malformed untrusted entities do not crash the load",
     expect(card?.detailUrls?.length ?? 0).toBeLessThanOrEqual(100);
   });
 
+  it("caps categoryInfo.detailUrls for a platform listing a huge number of links", async () => {
+    const hugeLinks = Array.from({ length: 5000 }, (_, i) => ({
+      url: `https://en.wikipedia.org/wiki/p${String(i)}`,
+      // Distinct source strings so dedup-by-source cannot collapse them.
+      source: `source-${String(i)}`,
+    }));
+    setResolvedEntities([
+      {
+        id: "g1",
+        title: "Game One",
+        _resolved: {
+          platform: { id: "p1", title: "Platform", detailUrls: hugeLinks },
+        },
+      },
+    ]);
+
+    const { result } = renderHook(
+      () => useLocalCollection({ basePath: SOURCE_URL }),
+      { wrapper: createWrapper() }
+    );
+
+    await waitFor(() => {
+      expect(result.current.isSuccess).toBe(true);
+    });
+    const categoryInfo = result.current.data?.cards[0]?.categoryInfo;
+    // The platform overlay renders one anchor (and several URL parses) per link
+    // with no windowing, so the list must be bounded like the card's own.
+    expect(categoryInfo?.detailUrls?.length ?? 0).toBeLessThanOrEqual(100);
+  });
+
   it("coerces object-typed platform summary/year in categoryInfo", async () => {
     setResolvedEntities([
       {

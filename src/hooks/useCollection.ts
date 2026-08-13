@@ -518,13 +518,17 @@ async function loadFreshCollection(
                   : typeof platform.title === "number"
                     ? String(platform.title)
                     : "";
+              // Cap the untrusted platform detail links at the same choke
+              // point as the card's own, so the platform overlay (one anchor +
+              // several URL parses per link) cannot be flooded via
+              // `platform.detailUrls` instead of the card's `videos`.
               let platformDetailUrls = normaliseDetailUrls(
                 platform.detailUrls as
                   | string
                   | { url: string }
                   | { url: string }[]
                   | undefined
-              );
+              ).slice(0, MAX_DETAIL_LINKS_PER_CARD);
 
               // Auto-generate Wikipedia URL if no detailUrls specified
               if (platformDetailUrls.length === 0 && platformTitle) {

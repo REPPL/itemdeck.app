@@ -19,7 +19,11 @@ import type {
 } from "./types";
 import { DEFAULT_SETTINGS } from "./types";
 import { getCardValue, compareValues } from "./utils";
-import { getAIStrategy, resetPatternTracker, recordPlayerSelection } from "./ai";
+import {
+  getAIStrategy,
+  resetPatternTracker,
+  recordPlayerSelection,
+} from "./ai";
 
 /**
  * Timeout IDs for cleanup - stored outside store to avoid serialisation issues.
@@ -121,7 +125,14 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
 
   resetGame: () => {
     clearPendingTimeouts();
-    const { numericFields, cardData, difficulty, roundLimit, showCpuThinking, autoAdvance } = get();
+    const {
+      numericFields,
+      cardData,
+      difficulty,
+      roundLimit,
+      showCpuThinking,
+      autoAdvance,
+    } = get();
 
     // Reset pattern tracker for new game
     resetPatternTracker();
@@ -195,8 +206,17 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
       return;
     }
 
-    // Build card data map, filtering out cards with missing values
-    const cardData: Record<string, CardData> = {};
+    // Build card data map, filtering out cards with missing values.
+    //
+    // Card ids come from untrusted collection data, so a null-prototype object
+    // is used: assigning a card object to "__proto__" on a plain object literal
+    // re-points the map's prototype instead of creating an own key, silently
+    // dropping that card from the deck (and skewing validCardCount below).
+    // Mirrors snap-ranking/store.ts.
+    const cardData: Record<string, CardData> = Object.create(null) as Record<
+      string,
+      CardData
+    >;
     for (const card of config.cards) {
       const id = card[config.idField];
       if (typeof id !== "string") continue;
@@ -299,7 +319,11 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
     const gameContext = get().getGameContext();
 
     // CPU selects stat and waits for player confirmation
-    const selectedStat = ai.selectStat(cpuCardData, state.numericFields, gameContext);
+    const selectedStat = ai.selectStat(
+      cpuCardData,
+      state.numericFields,
+      gameContext
+    );
 
     set({
       selectedStat,
@@ -477,7 +501,8 @@ export const useCompetingStore = create<CompetingStore>((set, get) => ({
       currentTurn = currentTurn === "player" ? "cpu" : "player";
     }
 
-    const nextPhase: GamePhase = currentTurn === "player" ? "player_select" : "cpu_select";
+    const nextPhase: GamePhase =
+      currentTurn === "player" ? "player_select" : "cpu_select";
 
     set({
       playerDeck,

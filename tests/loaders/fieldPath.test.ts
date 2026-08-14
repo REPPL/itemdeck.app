@@ -294,4 +294,58 @@ describe("fieldPath", () => {
       expect(resolveFieldPathAsNumber(entity, "missing")).toBeNull();
     });
   });
+
+  describe("untrusted path length bound (DoS guard)", () => {
+    // parsePath is quadratic in path length for a bracket-free path (it re-scans
+    // for '[' every iteration). display.card.front.* and forced fieldMapping
+    // values are untrusted strings with no upstream length cap, resolved once
+    // per card at grid render, so a ~2MB dotted path froze the tab for tens of
+    // seconds. The resolver must reject an over-long path near-instantly and
+    // fall back, rather than parse it.
+    const hostileEntity: ResolvedEntity = {
+      id: "x",
+      title: "Real Title",
+      year: 1990,
+      _resolved: {},
+    };
+
+    it("resolves an oversized dotted path to the fallback in bounded time", () => {
+      // ~2MB bracket-free path — the pre-fix quadratic parse of this took ~14s.
+      const hostilePath = "a.".repeat(1_000_000);
+
+      const start = performance.now();
+      const result = resolveFieldPathAsString(
+        hostileEntity,
+        hostilePath,
+        "N/A"
+      );
+      const elapsed = performance.now() - start;
+
+      expect(result).toBe("N/A");
+      // Enormous margin: the fix returns immediately (<1ms); the pre-fix parse
+      // was ~14000ms. A 200ms ceiling fails loudly if the guard regresses.
+      expect(elapsed).toBeLessThan(200);
+    });
+
+    it("caps a pathological fallback chain by total expression length", () => {
+      const hostileExpression = "a??".repeat(1_000_000);
+
+      const start = performance.now();
+      const result = resolveFieldPath(hostileEntity, hostileExpression);
+      const elapsed = performance.now() - start;
+
+      expect(result).toBeUndefined();
+      expect(elapsed).toBeLessThan(200);
+    });
+
+    it("getFieldValue returns undefined for an over-long path", () => {
+      expect(getFieldValue(hostileEntity, "b.".repeat(500))).toBeUndefined();
+    });
+
+    it("still resolves ordinary paths of reasonable length", () => {
+      expect(resolveFieldPathAsString(hostileEntity, "title")).toBe(
+        "Real Title"
+      );
+    });
+  });
 });

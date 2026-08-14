@@ -7,6 +7,7 @@ import {
   imageSchema,
   entitySchema,
   uiLabelsSchema,
+  cardDisplayConfigSchema,
 } from "@/schemas/v2/collection.schema";
 import { getPrimaryImage, type Image } from "@/types/image";
 
@@ -77,6 +78,43 @@ describe("uiLabelsSchema", () => {
     const result = uiLabelsSchema.safeParse({ moreButton: "Show more" });
     expect(result.success).toBe(true);
     expect(result.data?.moreButton).toBe("Show more");
+  });
+});
+
+describe("cardDisplayConfigSchema verdictFields bound", () => {
+  it("truncates an unbounded verdictFields array (DoS guard)", () => {
+    // getDisplayableFields scans every spec against the entity's fields, on
+    // mount, once per card in the non-virtualised list/compact layouts, so an
+    // uncapped array froze the tab on collection load. Truncate rather than
+    // reject so an over-long list cannot deny the whole load.
+    const result = cardDisplayConfigSchema.safeParse({
+      verdictFields: Array.from(
+        { length: 200_000 },
+        (_, i) => `field-${String(i)}`
+      ),
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.verdictFields?.length).toBeLessThanOrEqual(100);
+  });
+
+  it("truncates an over-long individual verdictFields spec", () => {
+    const result = cardDisplayConfigSchema.safeParse({
+      verdictFields: ["Z".repeat(50_000)],
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.verdictFields?.[0]?.length).toBeLessThanOrEqual(120);
+  });
+
+  it("passes an ordinary verdictFields list through unchanged", () => {
+    const result = cardDisplayConfigSchema.safeParse({
+      verdictFields: ["rating", "verdict", "summary"],
+    });
+    expect(result.success).toBe(true);
+    expect(result.data?.verdictFields).toEqual([
+      "rating",
+      "verdict",
+      "summary",
+    ]);
   });
 });
 

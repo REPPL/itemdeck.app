@@ -4,7 +4,10 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useCompetingStore } from "@/mechanics/competing/store";
-import type { CompetingGameConfig, NumericFieldInfo } from "@/mechanics/competing/types";
+import type {
+  CompetingGameConfig,
+  NumericFieldInfo,
+} from "@/mechanics/competing/types";
 
 // Mock setTimeout for testing auto-advance
 vi.useFakeTimers();
@@ -12,7 +15,13 @@ vi.useFakeTimers();
 describe("useCompetingStore", () => {
   const sampleFields: NumericFieldInfo[] = [
     { key: "attack", label: "Attack", min: 50, max: 100, higherIsBetter: true },
-    { key: "defence", label: "Defence", min: 30, max: 90, higherIsBetter: true },
+    {
+      key: "defence",
+      label: "Defence",
+      min: 30,
+      max: 90,
+      higherIsBetter: true,
+    },
   ];
 
   const sampleCards = [
@@ -107,7 +116,10 @@ describe("useCompetingStore", () => {
     });
 
     it("should put odd card in tie pile", () => {
-      const oddCards = [...sampleCards, { id: "card5", title: "Hero E", attack: 75, defence: 70 }];
+      const oddCards = [
+        ...sampleCards,
+        { id: "card5", title: "Hero E", attack: 75, defence: 70 },
+      ];
       const store = useCompetingStore.getState();
       store.activate();
       store.initGame({
@@ -117,8 +129,12 @@ describe("useCompetingStore", () => {
       });
 
       const state = useCompetingStore.getState();
-      const totalCards = state.playerDeck.length + state.cpuDeck.length +
-        (state.playerCard ? 1 : 0) + (state.cpuCard ? 1 : 0) + state.tiePile.length;
+      const totalCards =
+        state.playerDeck.length +
+        state.cpuDeck.length +
+        (state.playerCard ? 1 : 0) +
+        (state.cpuCard ? 1 : 0) +
+        state.tiePile.length;
 
       expect(totalCards).toBe(5);
       expect(state.tiePile.length).toBe(1);
@@ -148,6 +164,37 @@ describe("useCompetingStore", () => {
 
       const state = useCompetingStore.getState();
       expect(state.errorMessage).toContain("numeric fields");
+    });
+
+    it("deals a card whose id is __proto__ instead of silently dropping it", () => {
+      // Card ids come from untrusted collection data. With a plain {} map,
+      // cardData["__proto__"] = card re-points the map's prototype rather than
+      // creating an own key, so Object.keys omits the card: it is counted in
+      // config.cards but never dealt, and can drop validCardCount below the
+      // minimum. A null-prototype map stores it as a normal own key.
+      const cards = [
+        { id: "__proto__", title: "Hero A", attack: 80, defence: 60 },
+        { id: "card2", title: "Hero B", attack: 70, defence: 75 },
+        { id: "card3", title: "Hero C", attack: 90, defence: 50 },
+        { id: "card4", title: "Hero D", attack: 65, defence: 85 },
+      ];
+      const store = useCompetingStore.getState();
+      store.activate();
+      store.initGame({ cards, idField: "id", numericFields: sampleFields });
+
+      const state = useCompetingStore.getState();
+      expect(state.errorMessage).toBeNull();
+      // The __proto__ card is a real own entry in the map...
+      expect(Object.hasOwn(state.cardData, "__proto__")).toBe(true);
+      expect(state.cardData["__proto__"]?.title).toBe("Hero A");
+      // ...and all four cards are dealt, none lost to the prototype.
+      const totalCards =
+        state.playerDeck.length +
+        state.cpuDeck.length +
+        (state.playerCard ? 1 : 0) +
+        (state.cpuCard ? 1 : 0) +
+        state.tiePile.length;
+      expect(totalCards).toBe(4);
     });
   });
 
@@ -211,7 +258,9 @@ describe("useCompetingStore", () => {
 
       const afterState = useCompetingStore.getState();
       expect(afterState.roundResult).not.toBeNull();
-      expect(["player", "cpu", "tie"]).toContain(afterState.roundResult?.winner);
+      expect(["player", "cpu", "tie"]).toContain(
+        afterState.roundResult?.winner
+      );
       expect(afterState.phase).toBe("collecting");
     });
   });

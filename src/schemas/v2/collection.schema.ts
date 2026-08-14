@@ -203,11 +203,30 @@ export const cardBackConfigSchema = z.object({
   text: z.string().optional(),
 });
 
+/**
+ * Bounds on the untrusted `verdictFields` ordering list. getDisplayableFields
+ * scans every entry against the entity's fields (O(specs × fields), two
+ * lowercase allocations per comparison), and CardExpanded runs that scan on
+ * mount — once per card in the non-virtualised list/compact layouts. An
+ * unbounded array therefore freezes the tab on collection load. The matched
+ * result is already capped at MAX_DISPLAYABLE_FIELDS (100), so more specs than
+ * that can never contribute an extra field; the per-string cap bounds each
+ * comparison. Truncate rather than reject, matching uiLabels, so one oversized
+ * value cannot deny the whole collection load.
+ */
+const MAX_VERDICT_FIELDS = 100;
+const MAX_VERDICT_FIELD_LENGTH = 120;
+
 export const cardDisplayConfigSchema = z.object({
   front: cardFrontConfigSchema.optional(),
   back: cardBackConfigSchema.optional(),
   /** Fields to display in the Verdict view, in order. If empty/undefined, shows all in alphabetical order. */
-  verdictFields: z.array(z.string()).optional(),
+  verdictFields: z
+    .array(
+      z.string().transform((value) => value.slice(0, MAX_VERDICT_FIELD_LENGTH))
+    )
+    .transform((specs) => specs.slice(0, MAX_VERDICT_FIELDS))
+    .optional(),
 });
 
 export const displayConfigSchema = z.object({

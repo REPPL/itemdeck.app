@@ -27,30 +27,44 @@ interface CardCompactItemProps {
 /**
  * Compact view thumbnail card.
  */
-export function CardCompactItem({ card, cardNumber, tabIndex = 0, width, height }: CardCompactItemProps) {
+export function CardCompactItem({
+  card,
+  cardNumber,
+  tabIndex = 0,
+  width,
+  height,
+}: CardCompactItemProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  // Mount CardExpanded lazily: each instance registers a window resize listener
+  // (via useViewportSize) and several store subscriptions, so collapsed items
+  // must not mount it — the compact layout is not virtualised, so one instance
+  // per card would multiply into thousands. Once opened it stays mounted so its
+  // AnimatePresence exit animation can play on close. Mirrors Card.tsx.
+  const [hasOpenedExpanded, setHasOpenedExpanded] = useState(false);
 
   const handleClick = useCallback((event: React.MouseEvent) => {
     const target = event.currentTarget as HTMLElement;
     setOriginRect(target.getBoundingClientRect());
+    setHasOpenedExpanded(true);
     setIsModalOpen(true);
   }, []);
 
   // Custom style for dynamic sizing (fit view)
-  const customStyle = width && height ? { width: `${String(width)}px`, height: `${String(height)}px` } : undefined;
+  const customStyle =
+    width && height
+      ? { width: `${String(width)}px`, height: `${String(height)}px` }
+      : undefined;
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        const target = event.currentTarget as HTMLElement;
-        setOriginRect(target.getBoundingClientRect());
-        setIsModalOpen(true);
-      }
-    },
-    []
-  );
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const target = event.currentTarget as HTMLElement;
+      setOriginRect(target.getBoundingClientRect());
+      setHasOpenedExpanded(true);
+      setIsModalOpen(true);
+    }
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -85,12 +99,14 @@ export function CardCompactItem({ card, cardNumber, tabIndex = 0, width, height 
         </div>
       </motion.article>
 
-      <CardExpanded
-        card={card}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        originRect={originRect}
-      />
+      {hasOpenedExpanded && (
+        <CardExpanded
+          card={card}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          originRect={originRect}
+        />
+      )}
     </>
   );
 }

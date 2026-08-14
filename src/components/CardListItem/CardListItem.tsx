@@ -23,27 +23,36 @@ interface CardListItemProps {
 /**
  * List view card row.
  */
-export function CardListItem({ card, cardNumber, tabIndex = 0 }: CardListItemProps) {
+export function CardListItem({
+  card,
+  cardNumber,
+  tabIndex = 0,
+}: CardListItemProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [originRect, setOriginRect] = useState<DOMRect | null>(null);
+  // Mount CardExpanded lazily: each instance registers a window resize listener
+  // (via useViewportSize) and several store subscriptions, so collapsed rows
+  // must not mount it — the list layout is not virtualised, so one instance per
+  // card would multiply into thousands. Once opened it stays mounted so its
+  // AnimatePresence exit animation can play on close. Mirrors Card.tsx.
+  const [hasOpenedExpanded, setHasOpenedExpanded] = useState(false);
 
   const handleClick = useCallback((event: React.MouseEvent) => {
     const target = event.currentTarget as HTMLElement;
     setOriginRect(target.getBoundingClientRect());
+    setHasOpenedExpanded(true);
     setIsModalOpen(true);
   }, []);
 
-  const handleKeyDown = useCallback(
-    (event: React.KeyboardEvent) => {
-      if (event.key === "Enter" || event.key === " ") {
-        event.preventDefault();
-        const target = event.currentTarget as HTMLElement;
-        setOriginRect(target.getBoundingClientRect());
-        setIsModalOpen(true);
-      }
-    },
-    []
-  );
+  const handleKeyDown = useCallback((event: React.KeyboardEvent) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      const target = event.currentTarget as HTMLElement;
+      setOriginRect(target.getBoundingClientRect());
+      setHasOpenedExpanded(true);
+      setIsModalOpen(true);
+    }
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
@@ -92,18 +101,18 @@ export function CardListItem({ card, cardNumber, tabIndex = 0 }: CardListItemPro
             </div>
           </div>
 
-          {summary && (
-            <p className={styles.summary}>{summary}</p>
-          )}
+          {summary && <p className={styles.summary}>{summary}</p>}
         </div>
       </motion.article>
 
-      <CardExpanded
-        card={card}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        originRect={originRect}
-      />
+      {hasOpenedExpanded && (
+        <CardExpanded
+          card={card}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          originRect={originRect}
+        />
+      )}
     </>
   );
 }

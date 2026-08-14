@@ -60,11 +60,15 @@ function makeLocalStorage(seed: Record<string, string>): Storage {
 }
 
 let deletedDatabases: string[];
+let deletedCaches: string[];
+let unregisteredWorkers: number;
 
 beforeEach(() => {
   deleteDBMock.mockClear();
   clearAllCollectionCachesMock.mockClear();
   deletedDatabases = [];
+  deletedCaches = [];
+  unregisteredWorkers = 0;
 
   vi.stubGlobal("indexedDB", {
     deleteDatabase: vi.fn((name: string) => {
@@ -77,6 +81,33 @@ beforeEach(() => {
       queueMicrotask(() => request.onsuccess?.());
       return request;
     }),
+  });
+
+  // Cache Storage populated by the service worker.
+  vi.stubGlobal("caches", {
+    keys: vi.fn(() =>
+      Promise.resolve(["jsdelivr-cache", "github-raw-cache", "image-cache"])
+    ),
+    delete: vi.fn((name: string) => {
+      deletedCaches.push(name);
+      return Promise.resolve(true);
+    }),
+  });
+
+  // A registered service worker.
+  vi.stubGlobal("navigator", {
+    serviceWorker: {
+      getRegistrations: vi.fn(() =>
+        Promise.resolve([
+          {
+            unregister: vi.fn(() => {
+              unregisteredWorkers += 1;
+              return Promise.resolve(true);
+            }),
+          },
+        ])
+      ),
+    },
   });
 });
 
@@ -114,6 +145,31 @@ describe("clearAllPersistedData", () => {
     expect(deleteDBMock).toHaveBeenCalledTimes(1);
     expect(clearAllCollectionCachesMock).toHaveBeenCalledTimes(1);
     expect(deletedDatabases).toContain("itemdeck-plugins");
+  });
+
+  it("deletes every Cache Storage bucket and unregisters the service worker", async () => {
+    vi.stubGlobal("localStorage", makeLocalStorage({}));
+
+    await clearAllPersistedData();
+
+    // All SW-populated Cache Storage buckets are cleared — without this the
+    // viewed collection JSON and images survive the "delete everything" reset.
+    expect(deletedCaches).toEqual([
+      "jsdelivr-cache",
+      "github-raw-cache",
+      "image-cache",
+    ]);
+    // The service worker is unregistered so it cannot re-populate them.
+    expect(unregisteredWorkers).toBe(1);
+  });
+
+  it("resolves when Cache Storage / service worker APIs are unavailable", async () => {
+    vi.stubGlobal("localStorage", makeLocalStorage({}));
+    vi.stubGlobal("caches", undefined);
+    vi.stubGlobal("navigator", {});
+
+    await expect(clearAllPersistedData()).resolves.toBeUndefined();
+    expect(deleteDBMock).toHaveBeenCalledTimes(1);
   });
 
   it("resolves even when deleting a satellite database throws", async () => {

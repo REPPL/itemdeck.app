@@ -417,11 +417,13 @@ export function getDisplayableFields(
     const orderedFields: DisplayableField[] = [];
 
     for (const fieldSpec of options.verdictFields) {
-      // Find field by key or label (case-insensitive)
+      // Find field by key or label (case-insensitive). Lower-case the spec once
+      // per iteration rather than twice per candidate inside `find`.
+      const specLower = fieldSpec.toLowerCase();
       const field = fields.find(
         (f) =>
-          f.key.toLowerCase() === fieldSpec.toLowerCase() ||
-          f.label.toLowerCase() === fieldSpec.toLowerCase()
+          f.key.toLowerCase() === specLower ||
+          f.label.toLowerCase() === specLower
       );
       if (field) {
         orderedFields.push(field);

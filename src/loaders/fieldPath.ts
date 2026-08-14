@@ -24,6 +24,20 @@ interface PathSegment {
 }
 
 /**
+ * Upper bound on a field-path expression.
+ *
+ * Paths come from untrusted collection.json display config
+ * (`display.card.front.title` etc.) and from persisted forced `fieldMapping`
+ * values in settings.json — both `z.string()` with no length cap. parsePath is
+ * quadratic in the path length for a bracket-free path (it re-scans the
+ * remaining string for `[` every iteration), so a multi-megabyte dotted path
+ * freezes the main thread for tens of seconds, once per card at grid render.
+ * Real paths are a handful of characters ("images[type=cover][0].url"); an
+ * expression longer than this is malformed, so it resolves to the fallback.
+ */
+const MAX_FIELD_PATH_LENGTH = 512;
+
+/**
  * Parse a field path into segments.
  *
  * @param path - Dot-notation path (e.g., "platform.title" or "images[0].url")
@@ -135,6 +149,13 @@ export function getFieldValue(
   entity: Entity | ResolvedEntity,
   path: string
 ): unknown {
+  // Guard the quadratic parser against an unbounded untrusted path. This is the
+  // single chokepoint every resolver (getStringValue/getNumberValue/
+  // getImagesValue and resolveFieldPath's fallback loop) funnels through.
+  if (typeof path !== "string" || path.length > MAX_FIELD_PATH_LENGTH) {
+    return undefined;
+  }
+
   const segments = parsePath(path);
   let current: unknown = entity;
 
@@ -310,7 +331,12 @@ export function resolveFieldPath(
 ): unknown {
   // Defence in depth: a non-string expression (e.g. from a malformed forced
   // fieldMapping) would throw in the split below, crashing every card render.
-  if (typeof expression !== "string") {
+  // The length bound also caps the whole fallback chain ("a ?? b ?? …") so a
+  // pathological expression cannot amplify the per-path work by its split count.
+  if (
+    typeof expression !== "string" ||
+    expression.length > MAX_FIELD_PATH_LENGTH
+  ) {
     return undefined;
   }
 

@@ -1,9 +1,11 @@
 /**
  * Clear every piece of persisted itemdeck state (the "hard reset").
  *
- * State is spread across localStorage and three separate IndexedDB databases
- * created by different subsystems, so a naive reset leaves data behind. This
- * clears all of it to honour the "delete everything" promise.
+ * State is spread across localStorage, three separate IndexedDB databases
+ * created by different subsystems, and the service worker's Cache Storage
+ * buckets, so a naive reset leaves data behind. This clears all of it — and
+ * unregisters the service worker so it does not re-populate its caches after
+ * the reload — to honour the "delete everything" promise.
  */
 
 import { deleteDB } from "@/db";
@@ -43,6 +45,33 @@ function deleteIndexedDb(name: string): Promise<void> {
 }
 
 /**
+ * Delete every Cache Storage bucket. The service worker (vite-plugin-pwa)
+ * caches remote collection JSON, settings.json, entity files and images into
+ * Cache Storage — a layer entirely separate from the IndexedDB caches above.
+ * Without this, a hard reset leaves the viewed collection and its imagery on
+ * disk, contradicting the dialog's "delete all your ... cached data" promise.
+ */
+async function clearCacheStorage(): Promise<void> {
+  if (typeof caches === "undefined") return;
+  const names = await caches.keys();
+  await Promise.all(names.map((name) => caches.delete(name)));
+}
+
+/**
+ * Unregister every service worker so it stops intercepting and re-populating
+ * Cache Storage after the reset reload.
+ */
+async function unregisterServiceWorkers(): Promise<void> {
+  if (typeof navigator === "undefined" || !("serviceWorker" in navigator)) {
+    return;
+  }
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(
+    registrations.map((registration) => registration.unregister())
+  );
+}
+
+/**
  * Remove all persisted itemdeck data: every `itemdeck-` localStorage key,
  * the app IndexedDB database, the cached-collection store, and the plugin
  * cache database.
@@ -63,5 +92,7 @@ export async function clearAllPersistedData(): Promise<void> {
     deleteDB(), // the app database ("itemdeck")
     clearAllCollectionCaches(), // cached collections (idb-keyval store)
     ...SATELLITE_DATABASES.map((name) => deleteIndexedDb(name)),
+    clearCacheStorage(), // service-worker Cache Storage buckets
+    unregisterServiceWorkers(), // stop the SW re-populating them after reload
   ]);
 }

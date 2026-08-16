@@ -8,7 +8,7 @@
  * @see F-087: Collection Discovery & Startup Picker
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { isCollectionCached } from "@/lib/cardCache";
 import { useSourceStore } from "@/stores/sourceStore";
 
@@ -16,6 +16,15 @@ import { useSourceStore } from "@/stores/sourceStore";
  * Collection entry discovered from repository.
  */
 export interface CollectionEntry {
+  /**
+   * GitHub username this collection was scanned from.
+   *
+   * Carried on the entry rather than read from the caller's current username
+   * state: a scan is asynchronous, so the entry on screen may belong to an
+   * earlier username. Pairing that folder with the newer username would build
+   * (and persist) a source that can never resolve.
+   */
+  username: string;
   /** Collection folder name */
   folder: string;
   /** Display name (from collection.json or folder name) */
@@ -176,10 +185,25 @@ export function useMyPlausibleMeDiscovery(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Generation counter identifying the newest discovery run.
+   *
+   * A scan is one tree fetch plus up to MAX_DISCOVERED_COLLECTIONS metadata
+   * fetches, so it can take seconds. Without a generation guard a superseded
+   * run finishing late would overwrite the newer run's collections (or wipe
+   * them with a stale error), leaving entries on screen that belong to a
+   * different username.
+   */
+  const runIdRef = useRef(0);
+
   const discover = useCallback(async () => {
+    const runId = ++runIdRef.current;
+    const isStale = () => runIdRef.current !== runId;
+
     if (!username.trim()) {
       setCollections([]);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
@@ -198,6 +222,8 @@ export function useMyPlausibleMeDiscovery(
         },
       });
 
+      if (isStale()) return;
+
       if (!response.ok) {
         if (response.status === 404) {
           setError("Repository not found. Check the username.");
@@ -214,6 +240,8 @@ export function useMyPlausibleMeDiscovery(
       }
 
       const treeData: unknown = await response.json();
+
+      if (isStale()) return;
 
       if (!treeData || typeof treeData !== "object" || !("tree" in treeData)) {
         setError("Invalid repository structure");
@@ -261,6 +289,8 @@ export function useMyPlausibleMeDiscovery(
       let fileCursor = 0;
       const metadataWorker = async (): Promise<void> => {
         while (fileCursor < collectionJsonFiles.length) {
+          // A superseded run keeps no results, so stop spending fetches on it.
+          if (isStale()) return;
           const index = fileCursor;
           fileCursor += 1;
           const file = collectionJsonFiles[index];
@@ -306,6 +336,7 @@ export function useMyPlausibleMeDiscovery(
               pathSegments[pathSegments.length - 1] ?? collectionPath;
 
             validCollections.push({
+              username: trimmedUsername,
               folder: collectionPath,
               name: metadata.name ?? folderName,
               description: metadata.description,
@@ -323,6 +354,8 @@ export function useMyPlausibleMeDiscovery(
       await Promise.all(
         Array.from({ length: metadataWorkerCount }, () => metadataWorker())
       );
+
+      if (isStale()) return;
 
       // Sort: cached collections first, then alphabetically by name
       validCollections.sort((a, b) => {
@@ -342,6 +375,7 @@ export function useMyPlausibleMeDiscovery(
 
       setIsLoading(false);
     } catch (err) {
+      if (isStale()) return;
       setError(err instanceof Error ? err.message : "Discovery failed");
       setCollections([]);
       setIsLoading(false);
@@ -353,6 +387,7 @@ export function useMyPlausibleMeDiscovery(
     if (!enabled) {
       setCollections([]);
       setError(null);
+      setIsLoading(false);
       return;
     }
 
@@ -363,6 +398,11 @@ export function useMyPlausibleMeDiscovery(
 
     return () => {
       clearTimeout(timeoutId);
+      // Invalidate any run already in flight for the previous username. The
+      // next run only starts after the debounce, so without this bump a scan
+      // resolving inside that window would still be the newest generation and
+      // would publish results for a username the caller has moved on from.
+      runIdRef.current += 1;
     };
   }, [username, enabled, discover]);
 

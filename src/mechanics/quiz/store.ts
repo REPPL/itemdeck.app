@@ -5,6 +5,7 @@
  */
 
 import { create } from "zustand";
+import { shuffleWithSeed } from "@/utils/shuffle";
 import { generateQuestions, canGenerateQuiz } from "./generators";
 import type { GeneratorCardData } from "./generators";
 import type {
@@ -49,6 +50,21 @@ interface QuizStore extends QuizState, QuizSettings {
   isQuizComplete: () => boolean;
   getResults: () => QuizResults;
   getShuffledAnswers: () => Answer[];
+}
+
+/**
+ * Hash a string to a 32-bit seed (djb2).
+ *
+ * Question IDs share a long common prefix and differ only in a short suffix,
+ * so summing character codes collapses them onto a handful of seeds and biases
+ * the answer order. Mixing every character keeps the seeds spread out.
+ */
+function hashString(value: string): number {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i++) {
+    hash = ((hash << 5) + hash + value.charCodeAt(i)) | 0;
+  }
+  return hash >>> 0;
 }
 
 /**
@@ -344,9 +360,19 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
     const { answers, maxStreak, quizStartedAt, quizEndedAt, questions, timerMode } = get();
 
     const totalScore = answers.reduce((sum, a) => sum + a.pointsEarned, 0);
-    // Max score includes timer bonus if timer mode is enabled
+    // Max score includes timer bonus if timer mode is enabled.
+    // The streak bonus is scored from the streak held *before* the answer, so
+    // question i can earn at most i streak levels: the full streak bonus is
+    // unreachable on the opening questions and must not inflate the maximum.
     const maxTimerBonus = timerMode ? SCORING.timerBonus.fast.points : 0;
-    const maxScore = questions.length * (SCORING.basePoints + SCORING.maxStreakBonus + maxTimerBonus);
+    const maxScore = questions.reduce(
+      (sum, _question, i) =>
+        sum +
+        SCORING.basePoints +
+        Math.min(i * SCORING.streakBonus, SCORING.maxStreakBonus) +
+        maxTimerBonus,
+      0
+    );
     const correctCount = answers.filter((a) => a.isCorrect).length;
     const incorrectCount = answers.filter((a) => !a.isCorrect && a.selectedAnswerId !== null).length;
     const skippedCount = answers.filter((a) => a.selectedAnswerId === null).length;
@@ -377,20 +403,6 @@ export const useQuizStore = create<QuizStore>((set, get) => ({
 
     // Use a seeded shuffle based on question ID for consistency
     // during re-renders (answers stay in same position)
-    const seed = question.id.split("").reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const shuffled = [...allAnswers];
-
-    // Simple seeded shuffle
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(((seed * (i + 1)) % 1000) / 1000 * (i + 1));
-      const temp = shuffled[i];
-      const swapItem = shuffled[j];
-      if (temp !== undefined && swapItem !== undefined) {
-        shuffled[i] = swapItem;
-        shuffled[j] = temp;
-      }
-    }
-
-    return shuffled;
+    return shuffleWithSeed(allAnswers, hashString(question.id));
   },
 }));

@@ -201,14 +201,14 @@ function applySettings(settings: ExportableSettings, mode: ImportMode): void {
   // CollectionDataContext effects re-fire and re-apply the active collection's
   // defaults over the values being imported (silently discarding the user's
   // backup for those fields). `hasAppliedCollectionDefaults` gates the config
-  // defaults; `appliedCollectionDefaultsSourceId` (compared against the active
+  // defaults; `appliedCollectionDefaultsSourceIds` (checked for the active
   // source in applyCollectionSettings) gates the settings.json defaults —
   // restoring only the former still let the active collection's settings.json
   // clobber the import on the next load. Both are internal state, not
   // user-facing settings, so importing settings must not disturb them.
   const hadAppliedCollectionDefaults = store.hasAppliedCollectionDefaults;
-  const hadAppliedCollectionDefaultsSourceId =
-    store.appliedCollectionDefaultsSourceId;
+  const hadAppliedCollectionDefaultsSourceIds =
+    store.appliedCollectionDefaultsSourceIds;
 
   // Reset to defaults first if replace mode
   if (mode === "replace") {
@@ -301,8 +301,8 @@ function applySettings(settings: ExportableSettings, mode: ImportMode): void {
   // via its config defaults or its settings.json defaults).
   if (mode === "replace") {
     store.setHasAppliedCollectionDefaults(hadAppliedCollectionDefaults);
-    store.setAppliedCollectionDefaultsSourceId(
-      hadAppliedCollectionDefaultsSourceId
+    store.setAppliedCollectionDefaultsSourceIds(
+      hadAppliedCollectionDefaultsSourceIds
     );
   }
 }

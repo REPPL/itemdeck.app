@@ -542,8 +542,15 @@ interface SettingsState {
   /** Source ID whose forced settings are currently applied (null = none) */
   collectionForcedSourceId: string | null;
 
-  /** Source ID of the collection whose defaults were applied (prevents re-applying) */
-  appliedCollectionDefaultsSourceId: string | null;
+  /**
+   * Source IDs whose settings.json `defaults` have already been applied.
+   * A collection seeds its defaults the first time it is seen and never again,
+   * so this has to remember every source, not just the most recent one:
+   * alternating between two collections that both ship defaults would
+   * otherwise let each re-apply its defaults over the user's later choices.
+   * Capped at MAX_APPLIED_COLLECTION_DEFAULTS_SOURCES (oldest evicted first).
+   */
+  appliedCollectionDefaultsSourceIds: string[];
 
   // ============================================================================
   // v0.14.0: Draft State Management (F-090)
@@ -595,7 +602,7 @@ interface SettingsState {
   setShowDragIcon: (show: boolean) => void;
   setCustomThemeUrl: (url: string | null) => void;
   setHasAppliedCollectionDefaults: (applied: boolean) => void;
-  setAppliedCollectionDefaultsSourceId: (sourceId: string | null) => void;
+  setAppliedCollectionDefaultsSourceIds: (sourceIds: string[]) => void;
   applyCollectionDefaults: (config: CollectionConfigForDefaults) => void;
   setRandomSelectionEnabled: (enabled: boolean) => void;
   setRandomSelectionCount: (count: number) => void;
@@ -685,6 +692,13 @@ interface SettingsState {
 }
 
 /**
+ * Maximum number of source IDs remembered as having had their collection
+ * `defaults` applied. Bounded so a long browsing history cannot grow the
+ * persisted state without limit; the oldest entry is evicted first.
+ */
+const MAX_APPLIED_COLLECTION_DEFAULTS_SOURCES = 50;
+
+/**
  * Default settings values.
  */
 const DEFAULT_SETTINGS = {
@@ -753,7 +767,7 @@ const DEFAULT_SETTINGS = {
   collectionForcedSettings: null as ForcedSettings | null,
   _collectionForcedBackup: null as CollectionForcedBackup | null,
   collectionForcedSourceId: null as string | null,
-  appliedCollectionDefaultsSourceId: null as string | null,
+  appliedCollectionDefaultsSourceIds: [] as string[],
   // v0.14.0: Draft State defaults (F-090)
   _draft: null as DraftSettings | null,
   isDirty: false,
@@ -886,8 +900,10 @@ export const useSettingsStore = create<SettingsState>()(
         set({ hasAppliedCollectionDefaults });
       },
 
-      setAppliedCollectionDefaultsSourceId: (appliedCollectionDefaultsSourceId) => {
-        set({ appliedCollectionDefaultsSourceId });
+      setAppliedCollectionDefaultsSourceIds: (
+        appliedCollectionDefaultsSourceIds
+      ) => {
+        set({ appliedCollectionDefaultsSourceIds });
       },
 
       setRandomSelectionEnabled: (randomSelectionEnabled) => {
@@ -1203,9 +1219,18 @@ export const useSettingsStore = create<SettingsState>()(
             }
           }
 
-          // Only apply defaults if not already applied for this source
-          if (settings.defaults && state.appliedCollectionDefaultsSourceId !== sourceId) {
-            updates.appliedCollectionDefaultsSourceId = sourceId;
+          // Only apply defaults if they have never been applied for this
+          // source. Tracking every source (not just the most recent) is what
+          // makes this one-shot: alternating between two collections that both
+          // ship defaults must not let either re-seed over the user's choices.
+          if (
+            settings.defaults &&
+            !state.appliedCollectionDefaultsSourceIds.includes(sourceId)
+          ) {
+            updates.appliedCollectionDefaultsSourceIds = [
+              ...state.appliedCollectionDefaultsSourceIds,
+              sourceId,
+            ].slice(-MAX_APPLIED_COLLECTION_DEFAULTS_SOURCES);
 
             // Apply default visual settings
             if (settings.defaults.visualTheme !== undefined) {
@@ -1263,7 +1288,7 @@ export const useSettingsStore = create<SettingsState>()(
             collectionForcedSettings: null,
             _collectionForcedBackup: null,
             collectionForcedSourceId: null,
-            // appliedCollectionDefaultsSourceId is intentionally untouched:
+            // appliedCollectionDefaultsSourceIds is intentionally untouched:
             // clearing it would let the same source re-apply its one-shot
             // `defaults` over the user's later choices.
           };
@@ -1467,12 +1492,18 @@ export const useSettingsStore = create<SettingsState>()(
     }),
     {
       name: "itemdeck-settings",
-      version: 27,
+      version: 28,
       storage: createJSONStorage(() => localStorage),
       // Force-clear activeMechanicId after rehydration - games should never auto-start
       onRehydrateStorage: () => (state) => {
         if (state?.activeMechanicId) {
           state.activeMechanicId = null;
+        }
+        // localStorage is attacker-adjacent and migrate only runs on a version
+        // change, so a same-version payload can still carry a non-array here.
+        // The applied-defaults gate calls .includes() on every collection load.
+        if (state && !Array.isArray(state.appliedCollectionDefaultsSourceIds)) {
+          state.appliedCollectionDefaultsSourceIds = [];
         }
         // Restore settings from a mechanic override backup that survived a
         // crash or tab-kill. No mechanic session is ever active after
@@ -1559,7 +1590,8 @@ export const useSettingsStore = create<SettingsState>()(
         // rolls them back from the backup.
         _collectionForcedBackup: state._collectionForcedBackup,
         collectionForcedSourceId: state.collectionForcedSourceId,
-        appliedCollectionDefaultsSourceId: state.appliedCollectionDefaultsSourceId,
+        appliedCollectionDefaultsSourceIds:
+          state.appliedCollectionDefaultsSourceIds,
         // v0.14.0: Draft state is intentionally NOT persisted
         // _draft and isDirty are excluded - editing session is transient
         // v0.15.5: Mechanic override backup IS persisted so that a crash or
@@ -1845,6 +1877,20 @@ export const useSettingsStore = create<SettingsState>()(
           state = {
             ...state,
             hasUserSetRandomSelectionCount: true,
+          };
+        }
+
+        // Handle migration from version 27 to 28 (track EVERY source whose
+        // collection defaults were applied, not just the most recent one).
+        // Carry the single remembered source forward; anything else (including
+        // a tampered localStorage value) normalises to an empty list.
+        if (version < 28) {
+          const { appliedCollectionDefaultsSourceId: previous, ...rest } =
+            state;
+          state = {
+            ...rest,
+            appliedCollectionDefaultsSourceIds:
+              typeof previous === "string" ? [previous] : [],
           };
         }
 

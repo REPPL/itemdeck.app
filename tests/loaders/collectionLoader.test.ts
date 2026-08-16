@@ -344,6 +344,22 @@ describe("loadEntities duplicate id handling", () => {
     expect(entityFetches).toHaveLength(1);
   });
 
+  it("keeps one entity per id when two index files declare the same id", async () => {
+    // Deduping the index's file names is not enough: distinct file names can
+    // each declare the same id inside, so the collision survives to render.
+    const base = "/data/collections/demo";
+    stubFetch({
+      [`${base}/adverts/index.json`]: ["a", "b"],
+      [`${base}/adverts/a.json`]: { id: "dup", title: "First" },
+      [`${base}/adverts/b.json`]: { id: "dup", title: "Impostor" },
+    });
+
+    const entities = await loadEntities(base, "advert");
+
+    expect(entities.map((e) => e.id)).toEqual(["dup"]);
+    expect(entities[0]?.title).toBe("First");
+  });
+
   it("keeps one entity per id when a single array file repeats one", async () => {
     const base = "/data/collections/demo";
     stubFetch({

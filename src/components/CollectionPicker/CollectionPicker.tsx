@@ -67,15 +67,18 @@ export function CollectionPicker({ onSelect, initialUsername, notice }: Collecti
   }, [inputValue, username]);
 
   const handleCollectionSelect = useCallback((collection: CollectionEntry) => {
-    // Add the source and set it as active
+    // Pair the folder with the username the entry was scanned from, not the
+    // current input state: a scan is asynchronous, so the entry on screen may
+    // predate a username change. Using the current username would persist and
+    // activate a source that can never resolve.
     const sourceId = addMyPlausibleMeSource(
-      username,
+      collection.username,
       collection.folder,
       collection.name
     );
     setActiveSource(sourceId);
     onSelect(sourceId);
-  }, [username, addMyPlausibleMeSource, setActiveSource, onSelect]);
+  }, [addMyPlausibleMeSource, setActiveSource, onSelect]);
 
   // Handle example collection selection (F-112)
   const handleExampleSelect = useCallback((example: ExampleCollection) => {

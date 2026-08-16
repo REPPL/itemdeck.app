@@ -150,7 +150,7 @@ describe("settingsExport", () => {
       // already been applied for the active source.
       const store = useSettingsStore.getState();
       store.setHasAppliedCollectionDefaults(true);
-      store.setAppliedCollectionDefaultsSourceId("src_active");
+      store.setAppliedCollectionDefaultsSourceIds(["src_active"]);
 
       const importData = {
         version: SETTINGS_EXPORT_VERSION,
@@ -166,7 +166,7 @@ describe("settingsExport", () => {
       // marker to null would re-arm the active collection's settings.json
       // defaults to clobber the just-imported values on the next load.
       expect(state.hasAppliedCollectionDefaults).toBe(true);
-      expect(state.appliedCollectionDefaultsSourceId).toBe("src_active");
+      expect(state.appliedCollectionDefaultsSourceIds).toEqual(["src_active"]);
     });
 
     it("preserves unspecified settings in merge mode", async () => {

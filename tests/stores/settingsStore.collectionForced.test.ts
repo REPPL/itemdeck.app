@@ -137,7 +137,7 @@ describe("settingsStore - collection forced-settings backup/restore", () => {
   it("restores the user's own values and clears backup state on restore", () => {
     useSettingsStore.setState({
       cardBackDisplay: "logo",
-      appliedCollectionDefaultsSourceId: SOURCE_A,
+      appliedCollectionDefaultsSourceIds: [SOURCE_A],
     });
     useSettingsStore.getState().applyCollectionSettings(SOURCE_A, {
       forced: { cardBackDisplay: "none" },
@@ -150,8 +150,8 @@ describe("settingsStore - collection forced-settings backup/restore", () => {
     expect(state.collectionForcedSettings).toBeNull();
     expect(state._collectionForcedBackup).toBeNull();
     expect(state.collectionForcedSourceId).toBeNull();
-    // appliedCollectionDefaultsSourceId must NOT be cleared by a forced restore.
-    expect(state.appliedCollectionDefaultsSourceId).toBe(SOURCE_A);
+    // appliedCollectionDefaultsSourceIds must NOT be cleared by a forced restore.
+    expect(state.appliedCollectionDefaultsSourceIds).toEqual([SOURCE_A]);
   });
 
   it("captures the user's originals (not source A's forced values) when chaining A → B", () => {

@@ -16,8 +16,15 @@ globalThis.fetch = mockFetch;
 // Note: We don't mock performance.now as it complicates async tests
 // Instead we'll just check that latency is a reasonable number
 
-// Valid collection data that matches the collection schema
-const validCollection = {
+// The canonical collection definition shipped as the reference example.
+// Imported rather than hand-written so the fixture always matches the shape
+// real collections publish at collection.json, and cannot drift into a
+// synthetic shape that no source actually serves.
+import validCollection from "../../docs/reference/schemas/examples/retro-games/collection.json";
+
+// The legacy v1 payload shape (items/categories), which no real collection
+// serves — it is mutually exclusive with the entity-type format above.
+const legacyItemsCollection = {
   meta: {
     name: "Test Collection",
     schemaVersion: "2.0",
@@ -27,7 +34,7 @@ const validCollection = {
     { id: "2", title: "Item 2" },
     { id: "3", title: "Item 3" },
   ],
-  categories: [], // Required by schema
+  categories: [],
 };
 
 describe("checkSourceHealth", () => {
@@ -40,7 +47,7 @@ describe("checkSourceHealth", () => {
   });
 
   describe("healthy status", () => {
-    it("should return healthy for valid source", async () => {
+    it("should return healthy for the canonical collection definition", async () => {
       mockFetch
         .mockResolvedValueOnce({ ok: true }) // HEAD request
         .mockResolvedValueOnce({
@@ -51,11 +58,22 @@ describe("checkSourceHealth", () => {
       const result = await checkSourceHealth("https://example.com/data");
 
       expect(result.status).toBe("healthy");
-      expect(result.collectionName).toBe("Test Collection");
-      expect(result.itemCount).toBe(3);
-      expect(result.schemaVersion).toBe("2.0");
+      expect(result.collectionName).toBe("My Top Computer & Video Games");
       expect(result.schemaCompatible).toBe(true);
       expect(result.issues).toHaveLength(0);
+    });
+
+    it("should leave itemCount undefined (counts live in entity indexes)", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(validCollection),
+        });
+
+      const result = await checkSourceHealth("https://example.com/data");
+
+      expect(result.itemCount).toBeUndefined();
     });
 
     it("should normalise URL without trailing slash", async () => {
@@ -199,7 +217,22 @@ describe("checkSourceHealth", () => {
       expect(result.error).toBe("Schema validation failed");
     });
 
-    it("should detect supported schema version 2.0", async () => {
+    it("should return invalid for a legacy items/categories payload", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () => Promise.resolve(legacyItemsCollection),
+        });
+
+      const result = await checkSourceHealth("https://example.com/data");
+
+      expect(result.status).toBe("invalid");
+      expect(result.issues.some((i) => i.code === "SCHEMA_INCOMPATIBLE")).toBe(true);
+      expect(result.error).toBe("Schema validation failed");
+    });
+
+    it("should infer the schema version when the collection omits it", async () => {
       mockFetch
         .mockResolvedValueOnce({ ok: true })
         .mockResolvedValueOnce({
@@ -209,7 +242,26 @@ describe("checkSourceHealth", () => {
 
       const result = await checkSourceHealth("https://example.com/data");
 
-      expect(result.schemaVersion).toBe("2.0");
+      // The canonical example declares no schemaVersion and uses no v2-only
+      // field types, so it is detected as v1 — and v1 is supported.
+      expect(validCollection).not.toHaveProperty("schemaVersion");
+      expect(result.schemaVersion).toBe("v1");
+      expect(result.schemaCompatible).toBe(true);
+    });
+
+    it("should detect an explicit v2 schema version", async () => {
+      mockFetch
+        .mockResolvedValueOnce({ ok: true })
+        .mockResolvedValueOnce({
+          ok: true,
+          json: () =>
+            Promise.resolve({ ...validCollection, schemaVersion: "v2" }),
+        });
+
+      const result = await checkSourceHealth("https://example.com/data");
+
+      expect(result.status).toBe("healthy");
+      expect(result.schemaVersion).toBe("v2");
       expect(result.schemaCompatible).toBe(true);
     });
   });

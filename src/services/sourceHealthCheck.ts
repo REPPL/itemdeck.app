@@ -5,7 +5,8 @@
  * Performs accessibility checks, schema validation, and latency measurement.
  */
 
-import { collectionSchema } from "@/schemas/collection.schema";
+import { collectionDefinitionSchema } from "@/schemas/v2/collection.schema";
+import { detectSchemaVersion, type CollectionDefinition } from "@/types/schema";
 
 /**
  * Health check result status.
@@ -50,7 +51,13 @@ export interface HealthCheckResult {
   latency: number;
   /** Collection name if discovered */
   collectionName?: string;
-  /** Number of items in collection */
+  /**
+   * Number of items in collection.
+   *
+   * Not derivable from collection.json: the definition describes entity types,
+   * while entity counts live in the per-entity index files. Left undefined
+   * unless a future check fetches those indexes.
+   */
   itemCount?: number;
   /** Schema version detected */
   schemaVersion?: string;
@@ -72,8 +79,11 @@ const HIGH_LATENCY_THRESHOLD_MS = 2000;
 
 /**
  * Supported schema versions.
+ *
+ * Values match those returned by {@link detectSchemaVersion}; collections may
+ * omit `schemaVersion` entirely, in which case the version is inferred.
  */
-const SUPPORTED_SCHEMA_VERSIONS = ["2.0", "2"];
+const SUPPORTED_SCHEMA_VERSIONS = ["v1", "v2"];
 
 /**
  * Check health of a remote source.
@@ -90,7 +100,6 @@ export async function checkSourceHealth(url: string): Promise<HealthCheckResult>
   const startTime = performance.now();
   const issues: HealthIssue[] = [];
   let collectionName: string | undefined;
-  let itemCount: number | undefined;
   let schemaVersion: string | undefined;
   let schemaCompatible: boolean | undefined;
 
@@ -172,13 +181,16 @@ export async function checkSourceHealth(url: string): Promise<HealthCheckResult>
     }
 
     // Phase 3: Schema validation
-    const parseResult = collectionSchema.safeParse(data);
+    const parseResult = collectionDefinitionSchema.safeParse(data);
 
     if (parseResult.success) {
-      const collection = parseResult.data;
-      collectionName = collection.meta?.name;
-      itemCount = collection.items.length;
-      const version = collection.meta?.schemaVersion ?? "2.0";
+      // Cast as in the collection loader: the inferred schema type is a looser
+      // structural match for the hand-written definition type.
+      const collection = parseResult.data as CollectionDefinition;
+      collectionName = collection.name;
+      // Collections may omit schemaVersion, so infer it from the definition
+      // rather than assuming a default.
+      const version = detectSchemaVersion(collection);
       schemaVersion = version;
       schemaCompatible = SUPPORTED_SCHEMA_VERSIONS.includes(version);
 
@@ -221,7 +233,6 @@ export async function checkSourceHealth(url: string): Promise<HealthCheckResult>
       status,
       latency,
       collectionName,
-      itemCount,
       schemaVersion,
       schemaCompatible,
       lastChecked: new Date(),

@@ -56,7 +56,9 @@ describe("selectWrongAnswerCards with untrusted card data", () => {
   });
 
   it("still prefers similar cards for a normal collection", () => {
-    // Twelve cards: three share the correct card's category, the rest do not.
+    // Fifteen cards: six share the correct card's category, the rest do not.
+    // Six similar cards fill the entire six-strong candidate pool, so the
+    // pick is deterministic regardless of the final unseeded shuffle.
     const correct: GeneratorCardData = {
       id: "target",
       title: "Target",
@@ -64,7 +66,7 @@ describe("selectWrongAnswerCards with untrusted card data", () => {
       year: "1990",
       categoryShort: "ARC",
     };
-    const similar = Array.from({ length: 3 }, (_, i) => ({
+    const similar = Array.from({ length: 6 }, (_, i) => ({
       id: `sim${String(i)}`,
       title: `Similar ${String(i)}`,
       imageUrl: `https://example.com/sim${String(i)}.png`,
@@ -87,9 +89,9 @@ describe("selectWrongAnswerCards with untrusted card data", () => {
     );
 
     expect(selected).toHaveLength(3);
-    // The pool of the six most similar cards is all three similar cards plus
-    // three others, so at least one similar card must survive the pick.
-    expect(selected.some((c) => c.id.startsWith("sim"))).toBe(true);
+    // The six-card candidate pool is exactly the six similar cards, so every
+    // selected card must be one of them.
+    expect(selected.every((c) => c.id.startsWith("sim"))).toBe(true);
     expect(selected.every((c) => c.id !== "target")).toBe(true);
   });
 

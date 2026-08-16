@@ -106,8 +106,10 @@ function dedupeIds(ids: string[]): string[] {
 /**
  * Remove entities repeating an id already seen, keeping the first.
  *
- * The single-file array formats bypass the index path, so they need the same
- * uniqueness guarantee as dedupeIds gives the index.
+ * dedupeIds only removes repeated fetch paths, so it cannot stop two distinct
+ * index entries (or single-file array rows) from declaring the same id inside.
+ * Every path that produces entities needs this final check to hold the
+ * uniqueness the render layer depends on.
  */
 function dedupeEntitiesById(entities: Entity[]): Entity[] {
   if (entities.length < 2) {
@@ -432,7 +434,9 @@ async function loadEntitiesFromDirectory(
   const workerCount = Math.min(ENTITY_FETCH_CONCURRENCY, ids.length);
   await Promise.all(Array.from({ length: workerCount }, () => worker()));
 
-  return results.filter((entity): entity is Entity => entity !== null);
+  return dedupeEntitiesById(
+    results.filter((entity): entity is Entity => entity !== null)
+  );
 }
 
 /**

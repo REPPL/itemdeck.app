@@ -56,6 +56,21 @@ function getContextEditId(contextId: string): string {
 }
 
 /**
+ * Coerce an untrusted entity field to an editable string.
+ *
+ * The v2 entity schema is `.loose()`, so text fields may hold arbitrary JSON.
+ * An object left as-is renders as "[object Object]" in the textarea and then
+ * fails `cardFieldsSchema` on Save, leaving the modal open with no explanation.
+ * Mirror the collection display coercion: keep strings, stringify numbers,
+ * drop everything else.
+ */
+function toEditableString(value: unknown): string | undefined {
+  if (typeof value === "string") return value;
+  if (typeof value === "number") return String(value);
+  return undefined;
+}
+
+/**
  * Edit form modal for modifying entity fields.
  */
 export function EditForm({ card, onClose }: EditFormProps) {
@@ -82,7 +97,7 @@ export function EditForm({ card, onClose }: EditFormProps) {
     const editSummary = existingCardEdit?.fields.summary as string | undefined;
     const editVerdict = existingCardEdit?.fields.myVerdict as string | undefined;
     const cardSummary = card.summary;
-    const cardVerdict = card.myVerdict as string | undefined;
+    const cardVerdict = toEditableString(card.myVerdict);
 
     return {
       title: editTitle ?? card.title,
@@ -331,7 +346,14 @@ export function EditForm({ card, onClose }: EditFormProps) {
                     }}
                     placeholder="Brief description..."
                     rows={3}
+                    aria-invalid={!!cardErrors.summary}
+                    aria-describedby={cardErrors.summary ? "edit-card-summary-error" : undefined}
                   />
+                  {cardErrors.summary && (
+                    <span id="edit-card-summary-error" className={styles.error}>
+                      {cardErrors.summary}
+                    </span>
+                  )}
                 </div>
 
                 {/* My Verdict */}
@@ -348,7 +370,14 @@ export function EditForm({ card, onClose }: EditFormProps) {
                     }}
                     placeholder="Your personal opinion..."
                     rows={3}
+                    aria-invalid={!!cardErrors.myVerdict}
+                    aria-describedby={cardErrors.myVerdict ? "edit-card-verdict-error" : undefined}
                   />
+                  {cardErrors.myVerdict && (
+                    <span id="edit-card-verdict-error" className={styles.error}>
+                      {cardErrors.myVerdict}
+                    </span>
+                  )}
                 </div>
               </>
             ) : (

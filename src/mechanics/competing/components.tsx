@@ -292,6 +292,7 @@ function RoundResultOverlay() {
   const phase = useCompetingStore((s) => s.phase);
   const numericFields = useCompetingStore((s) => s.numericFields);
   const nextRound = useCompetingStore((s) => s.nextRound);
+  const autoAdvance = useCompetingStore((s) => s.autoAdvance);
 
   const handleDismiss = useCallback(() => {
     if (phase === "round_end") {
@@ -299,11 +300,13 @@ function RoundResultOverlay() {
     }
   }, [phase, nextRound]);
 
+  // Only the timer is gated by the setting; manual dismissal (click or key
+  // press) always works, so the overlay can never soft-lock the game.
   useEffect(() => {
-    if (phase !== "round_end") return;
+    if (phase !== "round_end" || !autoAdvance) return;
     const timer = setTimeout(() => { handleDismiss(); }, 2000);
     return () => { clearTimeout(timer); };
-  }, [phase, handleDismiss]);
+  }, [phase, handleDismiss, autoAdvance]);
 
   useEffect(() => {
     if (phase !== "round_end") return;

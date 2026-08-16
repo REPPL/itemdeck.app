@@ -17,6 +17,21 @@ export const MIN_CARDS_FOR_QUIZ = 4;
 export const WRONG_ANSWER_COUNT = 3;
 
 /**
+ * Maximum cards scored for similarity when picking distractors.
+ *
+ * Similarity scoring is O(cards x fields) and both come from the loaded
+ * collection, so larger collections are sampled down to this many candidates.
+ */
+export const MAX_SIMILARITY_CANDIDATES = 200;
+
+/**
+ * Maximum entity fields compared by a single similarity score.
+ *
+ * Mirrors the MAX_DISPLAYABLE_FIELDS cap used for card details.
+ */
+export const MAX_SIMILARITY_KEYS = 100;
+
+/**
  * Generate a unique question ID.
  */
 export function generateQuestionId(): string {
@@ -73,7 +88,11 @@ export function calculateSimilarity(
 
   // Check other shared string fields (excluding standard fields)
   const excludeFields = new Set(["id", "title", "imageUrl", "year", "categoryShort", "categoryTitle"]);
-  for (const key of Object.keys(card1)) {
+  let keysVisited = 0;
+  for (const key in card1) {
+    if (!Object.hasOwn(card1, key)) continue;
+    if (keysVisited >= MAX_SIMILARITY_KEYS) break;
+    keysVisited++;
     if (excludeFields.has(key)) continue;
     const val1 = card1[key];
     const val2 = card2[key];
@@ -111,8 +130,14 @@ export function selectWrongAnswerCards(
     return shuffled.slice(0, count);
   }
 
-  // Calculate similarity for each available card
-  const withSimilarity = available.map((card) => ({
+  // Score a bounded pool: large collections are sampled first so the scan
+  // stays cheap regardless of how many cards the collection holds
+  const scorable = available.length > MAX_SIMILARITY_CANDIDATES
+    ? shuffle(available).slice(0, MAX_SIMILARITY_CANDIDATES)
+    : available;
+
+  // Calculate similarity for each scorable card
+  const withSimilarity = scorable.map((card) => ({
     card,
     similarity: calculateSimilarity(correctCard, card),
   }));
@@ -122,7 +147,7 @@ export function selectWrongAnswerCards(
 
   // Take the most similar cards, but add some randomness
   // Take top 2*count similar cards, then shuffle and pick count
-  const candidatePool = withSimilarity.slice(0, Math.min(count * 2, available.length));
+  const candidatePool = withSimilarity.slice(0, Math.min(count * 2, withSimilarity.length));
   const shuffledCandidates = shuffle(candidatePool);
   return shuffledCandidates.slice(0, count).map((c) => c.card);
 }
